@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Barlow+Condensed:wght@600;700&display=swap');
+@import "tailwindcss";
 
 :root {
   --bg: #f7f6f4;

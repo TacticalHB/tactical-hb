@@ -18,8 +18,11 @@ export default function WholesaleForm() {
 
   if (submitted) {
     return (
-      <div className="flex items-center justify-center h-64 border border-[#c9a84c]/20 bg-[#0d0d0d]">
-        <p className="text-[#c9a84c] tracking-wider text-sm">{t("form_success")}</p>
+      <div
+        className="flex items-center justify-center h-64 border"
+        style={{ borderColor: "var(--gold)", background: "var(--bg-subtle)" }}
+      >
+        <p className="text-sm tracking-wider" style={{ color: "var(--gold)" }}>{t("form_success")}</p>
       </div>
     );
   }
@@ -33,32 +36,49 @@ export default function WholesaleForm() {
         { name: "country", label: t("form_country"), type: "text" },
       ].map((field) => (
         <div key={field.name}>
-          <label className="block text-xs tracking-wider text-[#555] uppercase mb-2">
+          <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
             {field.label}
           </label>
           <input
             type={field.type}
             name={field.name}
             required
-            className="w-full bg-[#0d0d0d] border border-[#1a1a1a] text-[#f5f5f5] px-4 py-3 text-sm focus:outline-none focus:border-[#c9a84c] transition-colors"
+            className="w-full px-4 py-3 text-sm outline-none border transition-colors"
+            style={{
+              background: "var(--bg-subtle)",
+              color: "var(--text)",
+              borderColor: "var(--border-light)",
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = "var(--gold)")}
+            onBlur={e => (e.currentTarget.style.borderColor = "var(--border-light)")}
           />
         </div>
       ))}
       <div>
-        <label className="block text-xs tracking-wider text-[#555] uppercase mb-2">
+        <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
           {t("form_message")}
         </label>
         <textarea
           name="message"
           rows={5}
           required
-          className="w-full bg-[#0d0d0d] border border-[#1a1a1a] text-[#f5f5f5] px-4 py-3 text-sm focus:outline-none focus:border-[#c9a84c] transition-colors resize-none"
+          className="w-full px-4 py-3 text-sm outline-none border transition-colors resize-none"
+          style={{
+            background: "var(--bg-subtle)",
+            color: "var(--text)",
+            borderColor: "var(--border-light)",
+          }}
+          onFocus={e => (e.currentTarget.style.borderColor = "var(--gold)")}
+          onBlur={e => (e.currentTarget.style.borderColor = "var(--border-light)")}
         />
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="bg-[#c9a84c] text-black font-semibold px-8 py-4 text-sm tracking-widest uppercase hover:bg-[#e8c97a] transition-colors disabled:opacity-50"
+        className="font-display text-base tracking-widest py-4 transition-colors"
+        style={{ background: "var(--bg-dark)", color: "#fff" }}
+        onMouseEnter={e => (e.currentTarget.style.background = "var(--gold)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-dark)")}
       >
         {loading ? "..." : t("form_submit")}
       </button>

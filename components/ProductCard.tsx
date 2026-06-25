@@ -1,26 +1,46 @@
+"use client";
+
 import Link from "next/link";
 import { Product } from "@/lib/products";
+import { useState } from "react";
 
 export default function ProductCard({ product, locale }: { product: Product; locale: string }) {
   const name = locale === "uk" ? product.nameUk : product.nameEn;
   const description = locale === "uk" ? product.descriptionUk : product.descriptionEn;
+  const [hovered, setHovered] = useState(false);
 
   return (
     <Link
       href={`/${locale}/products/${product.slug}`}
-      className="group block border border-[#1a1a1a] hover:border-[#c9a84c]/40 transition-colors bg-[#0d0d0d]"
+      className="block group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <div className="aspect-square bg-[#111] flex items-center justify-center overflow-hidden">
-        <span className="text-[#1e1e1e] text-4xl font-bold tracking-widest group-hover:text-[#252525] transition-colors">
+      {/* Image area */}
+      <div
+        className="aspect-square flex items-center justify-center overflow-hidden mb-4 transition-colors"
+        style={{ background: hovered ? "var(--bg-dark)" : "var(--bg-subtle)" }}
+      >
+        <span
+          className="font-display text-5xl tracking-widest transition-colors select-none"
+          style={{ color: hovered ? "#ffffff15" : "var(--border-light)" }}
+        >
           TCT
         </span>
       </div>
-      <div className="p-5">
-        <h3 className="font-semibold text-sm tracking-wide mb-1 group-hover:text-[#c9a84c] transition-colors">
+
+      {/* Info */}
+      <div>
+        <h3
+          className="text-sm font-medium tracking-wide mb-1 transition-colors"
+          style={{ color: hovered ? "var(--gold)" : "var(--text)" }}
+        >
           {name}
         </h3>
-        <p className="text-xs text-[#555] leading-relaxed line-clamp-2 mb-3">{description}</p>
-        <span className="text-[#c9a84c] font-bold text-sm">
+        <p className="text-xs leading-relaxed line-clamp-2 mb-2" style={{ color: "var(--text-muted)" }}>
+          {description}
+        </p>
+        <span className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
           €{product.price.toFixed(2)}
         </span>
       </div>

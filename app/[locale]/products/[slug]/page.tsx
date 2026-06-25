@@ -11,42 +11,76 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const locale = await getLocale();
   const product = products.find((p) => p.slug === slug);
-
   if (!product) notFound();
 
   const name = locale === "uk" ? product.nameUk : product.nameEn;
   const description = locale === "uk" ? product.descriptionUk : product.descriptionEn;
-  const backLabel = locale === "uk" ? "← Назад до продуктів" : "← Back to Products";
+  const backLabel = locale === "uk" ? "← Назад" : "← Back";
   const enquireLabel = locale === "uk" ? "Зробити запит" : "Make an Enquiry";
-  const tagsLabel = locale === "uk" ? "Теги" : "Tags";
 
   return (
-    <div className="pt-16">
-      <div className="max-w-7xl mx-auto px-6 py-20">
+    <div className="pt-16" style={{ background: "var(--bg)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <Link
           href={`/${locale}/products`}
-          className="text-xs text-[#555] hover:text-[#c9a84c] tracking-wider uppercase mb-10 inline-block transition-colors"
+          className="inline-block text-xs tracking-widest uppercase mb-12 transition-colors"
+          style={{ color: "var(--text-muted)" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
         >
           {backLabel}
         </Link>
-        <div className="grid md:grid-cols-2 gap-16">
-          <div className="aspect-square bg-[#0d0d0d] border border-[#1a1a1a] flex items-center justify-center">
-            <span className="text-[#1e1e1e] text-7xl font-bold tracking-widest">TCT</span>
+
+        <div className="grid md:grid-cols-2 gap-16 items-start">
+          {/* Product image placeholder */}
+          <div
+            className="aspect-square relative overflow-hidden flex items-center justify-center"
+            style={{ background: "var(--bg-dark)" }}
+          >
+            <span className="font-display text-[10rem] leading-none select-none" style={{ color: "#ffffff06" }}>
+              TCT
+            </span>
+            <div className="absolute top-4 left-4">
+              <span
+                className="text-xs tracking-widest uppercase px-2 py-1"
+                style={{ background: "var(--gold)", color: "#fff" }}
+              >
+                {product.category.toUpperCase()}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col justify-center">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{name}</h1>
-            <p className="text-[#888] leading-relaxed mb-8">{description}</p>
-            <div className="text-3xl font-bold text-[#c9a84c] mb-8">€{product.price.toFixed(2)}</div>
-            <div className="flex flex-wrap gap-2 mb-8">
+
+          {/* Product info */}
+          <div className="pt-4">
+            <h1 className="font-display text-4xl md:text-5xl mb-4" style={{ color: "var(--text)" }}>
+              {name}
+            </h1>
+            <div className="font-display text-4xl mb-6" style={{ color: "var(--gold)" }}>
+              €{product.price.toFixed(2)}
+            </div>
+            <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--text-muted)" }}>
+              {description}
+            </p>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-10">
               {product.tags.map((tag) => (
-                <span key={tag} className="text-xs text-[#555] border border-[#1a1a1a] px-3 py-1 tracking-wider">
+                <span
+                  key={tag}
+                  className="text-xs tracking-widest uppercase px-3 py-1.5 border"
+                  style={{ color: "var(--text-muted)", borderColor: "var(--border-light)" }}
+                >
                   {tag}
                 </span>
               ))}
             </div>
+
             <Link
               href={`/${locale}/wholesale`}
-              className="inline-block bg-[#c9a84c] text-black font-semibold px-8 py-4 text-sm tracking-widest uppercase hover:bg-[#e8c97a] transition-colors text-center"
+              className="inline-block font-display text-base tracking-widest px-10 py-4 transition-colors"
+              style={{ background: "var(--bg-dark)", color: "#fff" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--gold)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-dark)")}
             >
               {enquireLabel}
             </Link>

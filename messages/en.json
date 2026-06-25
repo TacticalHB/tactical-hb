@@ -1,0 +1,81 @@
+{
+  "nav": {
+    "products": "Products",
+    "wholesale": "Wholesale",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero_tag": "Premium Hookah Accessories",
+    "hero_title": "Tactical Precision.\nEvery Draw.",
+    "hero_subtitle": "Ukrainian premium hookah accessories inspired by the aesthetics of weaponry. For those who demand the experience.",
+    "cta_products": "View Products",
+    "cta_wholesale": "Wholesale Enquiry",
+    "featured_title": "Flagship Products",
+    "about_tag": "Our Mission",
+    "about_title": "Quality That Speaks for Itself",
+    "about_text": "Tactical HB is a Ukrainian premium hookah accessories brand. We combine innovative design inspired by weaponry aesthetics with flawless material quality and craftsmanship.",
+    "about_cta": "Learn More",
+    "stats_clients": "active clients",
+    "stats_countries": "countries",
+    "stats_margin": "net margin"
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Every piece is the result of precise engineering and premium materials.",
+    "price_from": "from",
+    "enquire": "Enquire"
+  },
+  "wholesale": {
+    "title": "Wholesale",
+    "subtitle": "We work with shops, lounges, and distributors worldwide.",
+    "form_name": "Full Name",
+    "form_company": "Company Name",
+    "form_email": "Email",
+    "form_country": "Country",
+    "form_message": "Tell us about your business and what you're interested in",
+    "form_submit": "Submit Enquiry",
+    "form_success": "Thank you! We'll be in touch shortly.",
+    "why_title": "Why Tactical HB",
+    "why_1_title": "Premium Quality",
+    "why_1_text": "Aviation-grade aluminium, hand-finished surfaces, zero defect rate.",
+    "why_2_title": "Unique Design",
+    "why_2_text": "Military-tactical aesthetic found nowhere else in the hookah industry.",
+    "why_3_title": "Flexible Terms",
+    "why_3_text": "Low minimums, shipping across Europe and the Middle East."
+  },
+  "about": {
+    "title": "About Us",
+    "story_tag": "Our Story",
+    "story_title": "Born from a Passion for Hookah",
+    "story_text_1": "Tactical HB began with a simple desire — to elevate the hookah smoking experience to a new level. Our founder, a passionate shisha enthusiast, realised that the accessories available on the market often lacked the quality and uniqueness he was looking for.",
+    "story_text_2": "Drawing inspiration from the striking materials and colours of weaponry, he set out to design, manufacture, and rigorously test products that not only looked special but delivered an unmatched smoking experience.",
+    "story_text_3": "We take immense pride in being a Ukrainian brand. Our products reflect the craftsmanship and dedication that our country is known for.",
+    "values_tag": "Our Values",
+    "values_title": "What Sets Us Apart",
+    "value_1_title": "Ukrainian Production",
+    "value_1_text": "Every product is made in Ukraine from the highest quality materials.",
+    "value_2_title": "Tactical Design",
+    "value_2_text": "Weaponry-inspired aesthetics — unique in the hookah industry worldwide.",
+    "value_3_title": "Premium, No Compromises",
+    "value_3_text": "Aviation aluminium, specialist surface treatment, zero defect rate.",
+    "value_4_title": "Global Reach",
+    "value_4_text": "33 active wholesale clients across Europe, USA, and the Middle East."
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Questions? We're always available.",
+    "form_name": "Name",
+    "form_email": "Email",
+    "form_message": "Message",
+    "form_submit": "Send",
+    "form_success": "Thank you! We'll reply shortly.",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp"
+  },
+  "footer": {
+    "tagline": "Premium hookah accessories from Ukraine.",
+    "rights": "All rights reserved."
+  }
+}

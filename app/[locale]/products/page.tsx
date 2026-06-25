@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { products } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import Reveal from "@/components/Reveal";
 
 export default async function ProductsPage() {
   const locale = await getLocale();
@@ -18,46 +19,55 @@ function ProductsContent({ locale }: { locale: string }) {
   ] as const;
 
   return (
-    <div className="pt-16" style={{ background: "var(--bg)" }}>
-      {/* Page header — dark */}
-      <div className="relative overflow-hidden py-16 px-6" style={{ background: "var(--bg-dark)" }}>
-        <div className="absolute inset-0 flex items-center justify-end pr-12 pointer-events-none overflow-hidden">
-          <span className="font-display text-[15vw] leading-none select-none" style={{ color: "#ffffff04" }}>
-            PRODUCTS
-          </span>
-        </div>
-        <div className="max-w-7xl mx-auto relative">
-          <h1 className="font-display text-5xl md:text-7xl" style={{ color: "#fff" }}>{t("title")}</h1>
-          <p className="mt-3 text-sm max-w-md" style={{ color: "#777" }}>{t("subtitle")}</p>
-        </div>
-      </div>
+    <div style={{ background: "var(--bg)" }}>
+      {/* Header */}
+      <PageHeader title={t("title")} subtitle={t("subtitle")} watermark="PRODUCTS" />
 
-      {/* Product grid — light */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      {/* Grid */}
+      <div className="max-w-7xl mx-auto px-6 py-20">
         {categories.map((cat) => {
           const categoryProducts = products.filter((p) => p.category === cat.key);
           if (categoryProducts.length === 0) return null;
           const catLabel = locale === "uk" ? cat.labelUk : cat.labelEn;
 
           return (
-            <div key={cat.key} className="mb-16">
-              <div className="flex items-center gap-4 mb-8">
-                <span
-                  className="text-xs tracking-[0.3em] uppercase font-medium"
-                  style={{ color: "var(--gold)" }}
-                >
-                  {catLabel}
-                </span>
-                <div className="flex-1 h-px" style={{ background: "var(--border-light)" }} />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-                {categoryProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} locale={locale} />
+            <div key={cat.key} className="mb-20">
+              <Reveal>
+                <div className="flex items-center gap-5 mb-10">
+                  <span className="text-xs tracking-[0.35em] uppercase font-medium" style={{ color: "var(--gold)" }}>
+                    {catLabel}
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                </div>
+              </Reveal>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
+                {categoryProducts.map((product, i) => (
+                  <Reveal key={product.id} delay={i * 80}>
+                    <ProductCard product={product} locale={locale} />
+                  </Reveal>
                 ))}
               </div>
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function PageHeader({ title, subtitle, watermark }: { title: string; subtitle: string; watermark: string }) {
+  return (
+    <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-2)" }}>
+      <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
+        <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(255,255,255,0.02)" }}>
+          {watermark}
+        </span>
+      </div>
+      <div className="max-w-7xl mx-auto relative">
+        <Reveal>
+          <h1 className="font-display text-6xl md:text-8xl" style={{ color: "var(--text)" }}>{title}</h1>
+          <p className="mt-4 text-sm max-w-md" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
+        </Reveal>
       </div>
     </div>
   );

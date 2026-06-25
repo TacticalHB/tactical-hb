@@ -19,7 +19,7 @@ export default function ContactForm() {
   if (submitted) {
     return (
       <div className="flex items-center justify-center h-48 border"
-        style={{ borderColor: "var(--gold)", background: "var(--bg-subtle)" }}>
+        style={{ borderColor: "var(--gold)", background: "var(--bg-2)" }}>
         <p className="text-sm tracking-wider" style={{ color: "var(--gold)" }}>{t("form_success")}</p>
       </div>
     );
@@ -32,27 +32,19 @@ export default function ContactForm() {
         { name: "email", label: t("form_email"), type: "email" },
       ].map((field) => (
         <div key={field.name}>
-          <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+          <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: "var(--text-faint)" }}>
             {field.label}
           </label>
-          <input type={field.type} name={field.name} required
-            className="w-full px-4 py-3 text-sm outline-none border transition-colors"
-            style={{ background: "var(--bg-subtle)", color: "var(--text)", borderColor: "var(--border-light)" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "var(--gold)")}
-            onBlur={e => (e.currentTarget.style.borderColor = "var(--border-light)")} />
+          <input type={field.type} name={field.name} required className="field" />
         </div>
       ))}
       <div>
-        <label className="block text-xs tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+        <label className="block text-xs tracking-[0.2em] uppercase mb-2" style={{ color: "var(--text-faint)" }}>
           {t("form_message")}
         </label>
-        <textarea name="message" rows={6} required
-          className="w-full px-4 py-3 text-sm outline-none border transition-colors resize-none"
-          style={{ background: "var(--bg-subtle)", color: "var(--text)", borderColor: "var(--border-light)" }}
-          onFocus={e => (e.currentTarget.style.borderColor = "var(--gold)")}
-          onBlur={e => (e.currentTarget.style.borderColor = "var(--border-light)")} />
+        <textarea name="message" rows={6} required className="field resize-none" />
       </div>
-      <button type="submit" disabled={loading} className="btn-dark font-display text-base tracking-widest py-4">
+      <button type="submit" disabled={loading} className="btn-gold font-display text-lg tracking-widest py-4 disabled:opacity-60">
         {loading ? "..." : t("form_submit")}
       </button>
     </form>

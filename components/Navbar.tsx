@@ -3,12 +3,20 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Navbar({ locale }: { locale: string }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const otherLocale = locale === "uk" ? "en" : "uk";
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
@@ -21,9 +29,16 @@ export default function Navbar({ locale }: { locale: string }) {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50" style={{ background: "var(--bg-dark)" }}>
+    <header
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+      style={{
+        background: scrolled ? "rgba(10,10,11,0.82)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: `1px solid ${scrolled ? "var(--border)" : "transparent"}`,
+      }}
+    >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href={`/${locale}`} className="font-display text-2xl tracking-widest" style={{ color: "#fff" }}>
+        <Link href={`/${locale}`} className="font-display text-2xl tracking-widest" style={{ color: "var(--text)" }}>
           TACTICAL <span style={{ color: "var(--gold)" }}>HB</span>
         </Link>
 
@@ -46,8 +61,10 @@ export default function Navbar({ locale }: { locale: string }) {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden border-t px-6 py-6 flex flex-col gap-5"
-          style={{ background: "var(--bg-dark-2)", borderColor: "var(--border-dark)" }}>
+        <div
+          className="md:hidden border-t px-6 py-6 flex flex-col gap-5"
+          style={{ background: "var(--bg-2)", borderColor: "var(--border)" }}
+        >
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
               className="nav-link text-xs tracking-[0.2em] uppercase">

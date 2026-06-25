@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f7f6f4;
-  --bg-subtle: #edecea;
-  --bg-dark: #111110;
-  --bg-dark-2: #1c1c1a;
-  --gold: #b8943a;
-  --gold-light: #d4aa4e;
-  --text: #1a1918;
-  --text-muted: #7a7670;
-  --border-light: #e0deda;
-  --border-dark: #2a2926;
+  --bg: #0a0a0b;
+  --bg-2: #111114;
+  --bg-3: #17171b;
+  --gold: #c5a35a;
+  --gold-light: #ddc081;
+  --gunmetal: #34373d;
+  --text: #f3f2ef;
+  --text-muted: #8c8c92;
+  --text-faint: #5a5a60;
+  --border: #1f1f24;
+  --border-strong: #2c2c32;
 }
 
 * { box-sizing: border-box; }
@@ -21,69 +22,96 @@ body {
   color: var(--text);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .font-display {
-  font-family: var(--font-bebas), var(--font-barlow), sans-serif;
-  letter-spacing: 0.04em;
+  font-family: var(--font-bebas), "Arial Narrow", sans-serif;
+  letter-spacing: 0.03em;
 }
 
-::selection {
+::selection { background: var(--gold); color: #0a0a0b; }
+
+/* ---- Scroll-reveal animation ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 760ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal-visible { opacity: 1; transform: none; }
+
+/* ---- Ambient hero glow ---- */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%      { opacity: 0.75; transform: scale(1.06); }
+}
+.hero-glow { animation: glowPulse 9s ease-in-out infinite; }
+
+/* ---- Scroll cue ---- */
+@keyframes scrollCue {
+  0%   { opacity: 0; transform: translateY(-3px); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(9px); }
+}
+.scroll-cue-dot { animation: scrollCue 2.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .hero-glow, .scroll-cue-dot { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---- Buttons ---- */
+.btn-gold {
   background: var(--gold);
-  color: #fff;
+  color: #0a0a0b;
+  transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
+.btn-gold:hover { background: var(--gold-light); letter-spacing: 0.12em; }
 
-/* Reusable interactive classes */
-.btn-dark {
-  background: var(--bg-dark);
-  color: #fff;
-  transition: background 0.2s;
+.btn-ghost {
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  transition: border-color 0.25s ease, color 0.25s ease;
 }
-.btn-dark:hover { background: var(--gold); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 
-.btn-gold-outline {
-  color: var(--gold);
-  border-color: var(--gold);
-  transition: background 0.2s, color 0.2s;
-}
-.btn-gold-outline:hover { background: var(--gold); color: #fff; }
-
-.btn-hero-outline {
-  color: #aaa;
-  border-color: #333;
-  transition: color 0.2s, border-color 0.2s;
-}
-.btn-hero-outline:hover { color: #fff; border-color: #666; }
-
-.nav-link {
-  color: #aaa;
-  transition: color 0.2s;
-}
+/* ---- Nav ---- */
+.nav-link { color: var(--text-muted); transition: color 0.22s ease; }
 .nav-link:hover { color: var(--gold); }
-
-.nav-lang {
-  color: #aaa;
-  border-color: #333;
-  transition: color 0.2s, border-color 0.2s;
-}
+.nav-lang { color: var(--text-muted); border-color: var(--border-strong); transition: color 0.22s ease, border-color 0.22s ease; }
 .nav-lang:hover { color: var(--gold); border-color: var(--gold); }
 
-.card-link {
-  border-color: var(--border-light);
-  background: var(--bg-subtle);
-  transition: border-color 0.2s, background 0.2s;
+/* ---- Form fields ---- */
+.field {
+  width: 100%;
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.22s ease, background 0.22s ease;
 }
-.card-link:hover { border-color: var(--gold); background: var(--bg); }
+.field:focus { border-color: var(--gold); background: var(--bg-3); }
+.field::placeholder { color: var(--text-faint); }
 
-.back-link {
-  color: var(--text-muted);
-  transition: color 0.2s;
-}
-.back-link:hover { color: var(--gold); }
+/* ---- Links ---- */
+.link-gold { color: var(--gold); border-color: var(--gold); transition: opacity 0.22s ease; }
+.link-gold:hover { opacity: 0.65; }
 
-.text-link-gold {
-  color: var(--gold);
-  border-color: var(--gold);
-  transition: opacity 0.2s;
+/* ---- Card link (contact) ---- */
+.card-link { transition: border-color 0.25s ease, background 0.25s ease; }
+.card-link:hover { border-color: var(--gold) !important; background: var(--bg-3) !important; }
+
+/* ---- Product card ---- */
+.product-card-img {
+  transition: border-color 0.35s ease, background 0.35s ease;
 }
-.text-link-gold:hover { opacity: 0.7; }
+.product-card:hover .product-card-img { border-color: var(--gold); }
+.product-card:hover .product-card-name { color: var(--gold); }
+.product-card-name { transition: color 0.3s ease; }
+.product-card-accent { transition: width 0.4s ease; }
+.product-card:hover .product-card-accent { width: 3.5rem; }

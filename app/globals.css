@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Barlow+Condensed:wght@600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -20,12 +19,12 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .font-display {
-  font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+  font-family: var(--font-bebas), var(--font-barlow), sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -33,3 +32,58 @@ body {
   background: var(--gold);
   color: #fff;
 }
+
+/* Reusable interactive classes */
+.btn-dark {
+  background: var(--bg-dark);
+  color: #fff;
+  transition: background 0.2s;
+}
+.btn-dark:hover { background: var(--gold); }
+
+.btn-gold-outline {
+  color: var(--gold);
+  border-color: var(--gold);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-gold-outline:hover { background: var(--gold); color: #fff; }
+
+.btn-hero-outline {
+  color: #aaa;
+  border-color: #333;
+  transition: color 0.2s, border-color 0.2s;
+}
+.btn-hero-outline:hover { color: #fff; border-color: #666; }
+
+.nav-link {
+  color: #aaa;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--gold); }
+
+.nav-lang {
+  color: #aaa;
+  border-color: #333;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-lang:hover { color: var(--gold); border-color: var(--gold); }
+
+.card-link {
+  border-color: var(--border-light);
+  background: var(--bg-subtle);
+  transition: border-color 0.2s, background 0.2s;
+}
+.card-link:hover { border-color: var(--gold); background: var(--bg); }
+
+.back-link {
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--gold); }
+
+.text-link-gold {
+  color: var(--gold);
+  border-color: var(--gold);
+  transition: opacity 0.2s;
+}
+.text-link-gold:hover { opacity: 0.7; }

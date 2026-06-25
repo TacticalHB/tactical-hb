@@ -14,21 +14,17 @@ function HomeContent({ locale }: { locale: string }) {
 
   return (
     <div className="pt-16">
-      {/* Hero — dark section */}
+      {/* Hero */}
       <section className="relative overflow-hidden min-h-[90vh] flex items-center" style={{ background: "var(--bg-dark)" }}>
-        {/* Ghost watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
           <span className="font-display text-[20vw] leading-none whitespace-nowrap" style={{ color: "#ffffff06" }}>
             TACTICAL
           </span>
         </div>
-
         <div className="relative max-w-7xl mx-auto px-6 py-24 w-full">
           <div className="max-w-2xl">
-            <span
-              className="inline-block text-xs tracking-[0.35em] uppercase mb-6 px-3 py-1.5 border"
-              style={{ color: "var(--gold)", borderColor: "var(--gold)", opacity: 0.8 }}
-            >
+            <span className="inline-block text-xs tracking-[0.35em] uppercase mb-6 px-3 py-1.5 border"
+              style={{ color: "var(--gold)", borderColor: "var(--gold)", opacity: 0.8 }}>
               {t("hero_tag")}
             </span>
             <h1 className="font-display text-[clamp(3.5rem,9vw,8rem)] leading-none mb-6 whitespace-pre-line" style={{ color: "#fff" }}>
@@ -38,28 +34,10 @@ function HomeContent({ locale }: { locale: string }) {
               {t("hero_subtitle")}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href={`/${locale}/products`}
-                className="font-display text-base tracking-widest px-8 py-4 transition-colors"
-                style={{ background: "var(--gold)", color: "#fff" }}
-                onMouseEnter={e => (e.currentTarget.style.background = "var(--gold-light)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "var(--gold)")}
-              >
+              <Link href={`/${locale}/products`} className="btn-dark font-display text-base tracking-widest px-8 py-4">
                 {t("cta_products")}
               </Link>
-              <Link
-                href={`/${locale}/wholesale`}
-                className="font-display text-base tracking-widest px-8 py-4 border transition-colors"
-                style={{ color: "#aaa", borderColor: "#333" }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = "#fff";
-                  e.currentTarget.style.borderColor = "#666";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = "#aaa";
-                  e.currentTarget.style.borderColor = "#333";
-                }}
-              >
+              <Link href={`/${locale}/wholesale`} className="btn-hero-outline font-display text-base tracking-widest px-8 py-4 border">
                 {t("cta_wholesale")}
               </Link>
             </div>
@@ -67,7 +45,7 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* Stats bar — gold on dark */}
+      {/* Stats */}
       <section style={{ background: "var(--bg-dark-2)", borderBottom: "1px solid var(--border-dark)" }}>
         <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-3 gap-8 text-center">
           {[
@@ -83,18 +61,14 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* Featured products — light section */}
+      {/* Featured products */}
       <section className="py-20 px-6" style={{ background: "var(--bg)" }}>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-10">
             <h2 className="font-display text-4xl md:text-5xl" style={{ color: "var(--text)" }}>
               {t("featured_title")}
             </h2>
-            <Link
-              href={`/${locale}/products`}
-              className="text-xs tracking-widest uppercase border-b pb-0.5 transition-colors hidden md:block"
-              style={{ color: "var(--gold)", borderColor: "var(--gold)" }}
-            >
+            <Link href={`/${locale}/products`} className="text-link-gold text-xs tracking-widest uppercase border-b pb-0.5 hidden md:block">
               {t("cta_products")} →
             </Link>
           </div>
@@ -106,7 +80,7 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* About strip — light with dark accent */}
+      {/* About strip */}
       <section className="py-20 px-6" style={{ background: "var(--bg-subtle)", borderTop: "1px solid var(--border-light)" }}>
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
@@ -119,19 +93,12 @@ function HomeContent({ locale }: { locale: string }) {
             <p className="leading-relaxed mb-8 text-sm" style={{ color: "var(--text-muted)" }}>
               {t("about_text")}
             </p>
-            <Link
-              href={`/${locale}/about`}
-              className="text-xs tracking-widest uppercase border-b pb-0.5 transition-colors"
-              style={{ color: "var(--gold)", borderColor: "var(--gold)" }}
-            >
+            <Link href={`/${locale}/about`} className="text-link-gold text-xs tracking-widest uppercase border-b pb-0.5">
               {t("about_cta")} →
             </Link>
           </div>
-          {/* Dark accent block with watermark */}
-          <div
-            className="aspect-square relative overflow-hidden flex items-center justify-center"
-            style={{ background: "var(--bg-dark)" }}
-          >
+          <div className="aspect-square relative overflow-hidden flex items-center justify-center"
+            style={{ background: "var(--bg-dark)" }}>
             <span className="font-display text-[8rem] leading-none select-none" style={{ color: "#ffffff06" }}>TCT</span>
             <div className="absolute bottom-8 left-8">
               <div className="text-xs tracking-widest uppercase mb-1" style={{ color: "var(--gold)" }}>Ukraine</div>
@@ -147,19 +114,7 @@ function HomeContent({ locale }: { locale: string }) {
           <h2 className="font-display text-3xl md:text-4xl" style={{ color: "#fff" }}>
             {t("cta_wholesale")}
           </h2>
-          <Link
-            href={`/${locale}/wholesale`}
-            className="font-display text-base tracking-widest px-8 py-4 border transition-colors whitespace-nowrap"
-            style={{ color: "var(--gold)", borderColor: "var(--gold)" }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "var(--gold)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "var(--gold)";
-            }}
-          >
+          <Link href={`/${locale}/wholesale`} className="btn-gold-outline font-display text-base tracking-widest px-8 py-4 border whitespace-nowrap">
             {t("cta_wholesale")} →
           </Link>
         </div>

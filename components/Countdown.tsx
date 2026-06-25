@@ -44,13 +44,13 @@ export default function Countdown({ locale }: { locale: string }) {
           <div className="text-center min-w-[3.5rem]">
             <div
               className="font-display text-4xl sm:text-6xl leading-none tabular-nums"
-              style={{ color: "var(--gold)" }}
+              style={{ color: "var(--gold-bright)" }}
             >
               {time === null ? "--" : String(unit.value).padStart(2, "0")}
             </div>
             <div
               className="text-[0.65rem] tracking-[0.3em] uppercase mt-2"
-              style={{ color: "var(--text-faint)" }}
+              style={{ color: "#6a665e" }}
             >
               {unit.label}
             </div>
@@ -58,7 +58,7 @@ export default function Countdown({ locale }: { locale: string }) {
           {i < units.length - 1 && (
             <span
               className="font-display text-4xl sm:text-6xl leading-none"
-              style={{ color: "var(--border-strong)" }}
+              style={{ color: "var(--border-dark)" }}
             >
               :
             </span>

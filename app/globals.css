@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a0b;
-  --bg-2: #111114;
-  --bg-3: #17171b;
-  --gold: #c5a35a;
-  --gold-light: #ddc081;
-  --gunmetal: #34373d;
-  --text: #f3f2ef;
-  --text-muted: #8c8c92;
-  --text-faint: #5a5a60;
-  --border: #1f1f24;
-  --border-strong: #2c2c32;
+  /* Light base */
+  --bg: #f7f5f1;
+  --bg-soft: #efece5;
+  --bg-card: #f1eee8;
+  --field-bg: #ffffff;
+  /* Dark accents */
+  --ink: #111114;
+  --ink-2: #1a1a1d;
+  /* Gold */
+  --gold: #a87f2c;        /* accent on light surfaces */
+  --gold-bright: #d4b15e; /* accent on dark surfaces */
+  /* Text */
+  --text: #17160f;
+  --text-muted: #6c6860;
+  --text-faint: #a39d92;
+  /* Borders */
+  --border: #e4e0d8;
+  --border-strong: #d4cfc4;
+  --border-dark: #2a2a2e;
 }
 
 * { box-sizing: border-box; }
@@ -30,7 +38,7 @@ body {
   letter-spacing: 0.03em;
 }
 
-::selection { background: var(--gold); color: #0a0a0b; }
+::selection { background: var(--gold); color: #fff; }
 
 /* ---- Scroll-reveal animation ---- */
 .reveal {
@@ -42,10 +50,10 @@ body {
 }
 .reveal-visible { opacity: 1; transform: none; }
 
-/* ---- Ambient hero glow ---- */
+/* ---- Ambient glow ---- */
 @keyframes glowPulse {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50%      { opacity: 0.75; transform: scale(1.06); }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.06); }
 }
 .hero-glow { animation: glowPulse 9s ease-in-out infinite; }
 
@@ -64,54 +72,74 @@ body {
 }
 
 /* ---- Buttons ---- */
-.btn-gold {
-  background: var(--gold);
-  color: #0a0a0b;
+.btn-dark {
+  background: var(--ink);
+  color: #f4f3f0;
   transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
-.btn-gold:hover { background: var(--gold-light); letter-spacing: 0.12em; }
+.btn-dark:hover { background: #000; letter-spacing: 0.12em; }
 
-.btn-ghost {
-  color: var(--text);
-  border: 1px solid var(--border-strong);
-  transition: border-color 0.25s ease, color 0.25s ease;
+.btn-gold {
+  background: var(--gold-bright);
+  color: var(--ink);
+  transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-gold:hover { background: #e3c477; letter-spacing: 0.12em; }
 
-/* ---- Nav ---- */
-.nav-link { color: var(--text-muted); transition: color 0.22s ease; }
-.nav-link:hover { color: var(--gold); }
-.nav-lang { color: var(--text-muted); border-color: var(--border-strong); transition: color 0.22s ease, border-color 0.22s ease; }
-.nav-lang:hover { color: var(--gold); border-color: var(--gold); }
+/* ---- Nav (dark) ---- */
+.nav-link { color: #9a978f; transition: color 0.22s ease; }
+.nav-link:hover { color: var(--gold-bright); }
+.nav-lang { color: #9a978f; border-color: var(--border-dark); transition: color 0.22s ease, border-color 0.22s ease; }
+.nav-lang:hover { color: var(--gold-bright); border-color: var(--gold-bright); }
 
-/* ---- Form fields ---- */
+/* ---- Form fields (light) ---- */
 .field {
   width: 100%;
-  background: var(--bg-2);
+  background: var(--field-bg);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   padding: 0.85rem 1rem;
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.22s ease, background 0.22s ease;
+  transition: border-color 0.22s ease;
 }
-.field:focus { border-color: var(--gold); background: var(--bg-3); }
+.field:focus { border-color: var(--gold); }
 .field::placeholder { color: var(--text-faint); }
+
+/* ---- Form field (on dark) ---- */
+.field-dark {
+  width: 100%;
+  background: var(--ink-2);
+  color: #f4f3f0;
+  border: 1px solid var(--border-dark);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.22s ease;
+}
+.field-dark:focus { border-color: var(--gold-bright); }
+.field-dark::placeholder { color: #6a665e; }
 
 /* ---- Links ---- */
 .link-gold { color: var(--gold); border-color: var(--gold); transition: opacity 0.22s ease; }
-.link-gold:hover { opacity: 0.65; }
+.link-gold:hover { opacity: 0.6; }
+.link-gold-bright { color: var(--gold-bright); border-color: var(--gold-bright); transition: opacity 0.22s ease; }
+.link-gold-bright:hover { opacity: 0.7; }
 
-/* ---- Card link (contact) ---- */
+/* ---- Contact card ---- */
 .card-link { transition: border-color 0.25s ease, background 0.25s ease; }
-.card-link:hover { border-color: var(--gold) !important; background: var(--bg-3) !important; }
+.card-link:hover { border-color: var(--gold) !important; background: var(--bg-soft) !important; }
 
-/* ---- Product card ---- */
+/* ---- Product card (light, dark-on-hover image) ---- */
 .product-card-img {
-  transition: border-color 0.35s ease, background 0.35s ease;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
-.product-card:hover .product-card-img { border-color: var(--gold); }
-.product-card:hover .product-card-name { color: var(--gold); }
-.product-card-name { transition: color 0.3s ease; }
-.product-card-accent { transition: width 0.4s ease; }
+.product-card:hover .product-card-img { background: var(--ink); border-color: var(--ink); }
+.product-card-watermark { color: rgba(23,22,15,0.05); transition: color 0.4s ease; }
+.product-card:hover .product-card-watermark { color: rgba(255,255,255,0.05); }
+.product-card-name { color: var(--text); transition: color 0.4s ease; }
+.product-card:hover .product-card-name { color: #f4f3f0; }
+.product-card-accent { width: 2rem; transition: width 0.4s ease; }
 .product-card:hover .product-card-accent { width: 3.5rem; }

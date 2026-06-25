@@ -17,9 +17,9 @@ function WholesaleContent() {
 
   return (
     <div style={{ background: "var(--bg)" }}>
-      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-2)" }}>
+      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
         <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
-          <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(255,255,255,0.02)" }}>WHOLESALE</span>
+          <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>WHOLESALE</span>
         </div>
         <div className="max-w-7xl mx-auto relative">
           <Reveal>
@@ -33,14 +33,13 @@ function WholesaleContent() {
         <Reveal>
           <WholesaleForm />
         </Reveal>
-
         <Reveal delay={140}>
           <div>
             <h2 className="font-display text-4xl mb-12" style={{ color: "var(--text)" }}>{t("why_title")}</h2>
             <div className="flex flex-col gap-10">
               {reasons.map((r, i) => (
                 <div key={r.title} className="flex gap-6">
-                  <div className="font-display text-4xl leading-none pt-1 shrink-0" style={{ color: "var(--gold)", opacity: 0.45 }}>
+                  <div className="font-display text-4xl leading-none pt-1 shrink-0" style={{ color: "var(--gold)", opacity: 0.5 }}>
                     0{i + 1}
                   </div>
                   <div>

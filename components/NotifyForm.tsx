@@ -18,7 +18,7 @@ export default function NotifyForm() {
 
   if (submitted) {
     return (
-      <p className="text-sm tracking-wide py-4" style={{ color: "var(--gold)" }}>
+      <p className="text-sm tracking-wide py-4" style={{ color: "var(--gold-bright)" }}>
         {t("notify_success")}
       </p>
     );
@@ -31,7 +31,7 @@ export default function NotifyForm() {
         name="email"
         required
         placeholder={t("notify_placeholder")}
-        className="field flex-1"
+        className="field-dark flex-1"
         aria-label={t("notify_placeholder")}
       />
       <button

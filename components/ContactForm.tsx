@@ -19,7 +19,7 @@ export default function ContactForm() {
   if (submitted) {
     return (
       <div className="flex items-center justify-center h-48 border"
-        style={{ borderColor: "var(--gold)", background: "var(--bg-2)" }}>
+        style={{ borderColor: "var(--gold)", background: "var(--bg-soft)" }}>
         <p className="text-sm tracking-wider" style={{ color: "var(--gold)" }}>{t("form_success")}</p>
       </div>
     );

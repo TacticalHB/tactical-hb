@@ -20,10 +20,8 @@ function ProductsContent({ locale }: { locale: string }) {
 
   return (
     <div style={{ background: "var(--bg)" }}>
-      {/* Header */}
       <PageHeader title={t("title")} subtitle={t("subtitle")} watermark="PRODUCTS" />
 
-      {/* Grid */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         {categories.map((cat) => {
           const categoryProducts = products.filter((p) => p.category === cat.key);
@@ -57,9 +55,9 @@ function ProductsContent({ locale }: { locale: string }) {
 
 function PageHeader({ title, subtitle, watermark }: { title: string; subtitle: string; watermark: string }) {
   return (
-    <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-2)" }}>
+    <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
       <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
-        <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(255,255,255,0.02)" }}>
+        <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>
           {watermark}
         </span>
       </div>

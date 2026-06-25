@@ -11,9 +11,9 @@ function ContactContent() {
 
   return (
     <div style={{ background: "var(--bg)" }}>
-      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-2)" }}>
+      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
         <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
-          <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(255,255,255,0.02)" }}>CONTACT</span>
+          <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>CONTACT</span>
         </div>
         <div className="max-w-7xl mx-auto relative">
           <Reveal>
@@ -35,8 +35,8 @@ function ContactContent() {
               { label: "WhatsApp", handle: t("whatsapp"), href: "https://wa.me/" },
             ].map((link) => (
               <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer"
-                className="card-link flex items-center justify-between border p-5 transition-colors"
-                style={{ borderColor: "var(--border)", background: "var(--bg-2)" }}>
+                className="card-link flex items-center justify-between border p-5"
+                style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
                 <div>
                   <div className="text-xs tracking-[0.25em] uppercase mb-1" style={{ color: "var(--text-faint)" }}>{link.label}</div>
                   <div className="text-sm font-medium" style={{ color: "var(--text)" }}>{link.handle}</div>

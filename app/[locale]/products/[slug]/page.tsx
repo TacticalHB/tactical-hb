@@ -18,18 +18,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   return (
     <div style={{ background: "var(--bg)" }}>
       <div className="max-w-7xl mx-auto px-6 pt-32 pb-24">
-        <Link href={`/${locale}/products`} className="nav-link inline-block text-xs tracking-[0.2em] uppercase mb-14">
+        <Link href={`/${locale}/products`} className="link-gold inline-block text-xs tracking-[0.2em] uppercase mb-14 border-b pb-1">
           {backLabel}
         </Link>
 
         <div className="grid md:grid-cols-2 gap-16 items-start">
           <Reveal>
-            <div className="aspect-[4/5] relative overflow-hidden flex items-center justify-center border"
-              style={{ background: "var(--bg-2)", borderColor: "var(--border)" }}>
-              <span className="font-display text-[11rem] leading-none select-none" style={{ color: "rgba(255,255,255,0.03)" }}>TCT</span>
+            <div className="aspect-[4/5] relative overflow-hidden flex items-center justify-center"
+              style={{ background: "var(--ink)" }}>
+              <span className="font-display text-[11rem] leading-none select-none" style={{ color: "rgba(255,255,255,0.04)" }}>TCT</span>
               <div className="absolute top-5 left-5">
                 <span className="text-[0.65rem] tracking-[0.3em] uppercase px-3 py-1.5"
-                  style={{ background: "var(--gold)", color: "#0a0a0b" }}>
+                  style={{ background: "var(--gold-bright)", color: "var(--ink)" }}>
                   {product.category.toUpperCase()}
                 </span>
               </div>
@@ -44,12 +44,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <div className="flex flex-wrap gap-2 mb-12">
                 {product.tags.map((tag) => (
                   <span key={tag} className="text-xs tracking-[0.2em] uppercase px-3 py-1.5 border"
-                    style={{ color: "var(--text-faint)", borderColor: "var(--border)" }}>
+                    style={{ color: "var(--text-muted)", borderColor: "var(--border-strong)" }}>
                     {tag}
                   </span>
                 ))}
               </div>
-              <Link href={`/${locale}/wholesale`} className="btn-gold inline-block font-display text-lg tracking-widest px-12 py-4">
+              <Link href={`/${locale}/wholesale`} className="btn-dark inline-block font-display text-lg tracking-widest px-12 py-4">
                 {enquireLabel}
               </Link>
             </div>

@@ -2,12 +2,15 @@ import { useTranslations } from "next-intl";
 import Countdown from "./Countdown";
 import NotifyForm from "./NotifyForm";
 import Reveal from "./Reveal";
+import Embers from "./Embers";
 
 export default function FlagshipTeaser({ locale }: { locale: string }) {
   const t = useTranslations("flagship");
 
   return (
-    <section className="relative overflow-hidden py-28 md:py-40 px-6" style={{ background: "var(--ink)" }}>
+    <section className="smoke-bg relative overflow-hidden py-28 md:py-40 px-6">
+      {/* ash & embers */}
+      <Embers density={0.9} />
       {/* Ambient glow */}
       <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
         style={{ width: "120vw", height: "60vh", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.10) 0%, transparent 65%)" }} />

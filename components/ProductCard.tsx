@@ -9,8 +9,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
   return (
     <Link href={`/${locale}/products/${product.slug}`} className="product-card block group">
       {/* Charcoal image tile */}
-      <div className="aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center"
-        style={{ background: "var(--ink)" }}>
+      <div className="smoke-bg aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center">
         {/* soft spotlight glow */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.10) 0%, transparent 65%)" }} />

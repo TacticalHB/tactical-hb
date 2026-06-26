@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
 import { products } from "@/lib/products";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import ProductGallery from "@/components/ProductGallery";
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const locale = await getLocale();
+export default async function ProductDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  const { locale, slug } = await params;
   const product = products.find((p) => p.slug === slug);
   if (!product) notFound();
 
@@ -63,8 +61,4 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </div>
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
 }

@@ -8,15 +8,18 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
 
   return (
     <div>
-      {/* Main image */}
-      <div className="aspect-[4/5] relative overflow-hidden mb-4" style={{ background: "#ffffff", border: "1px solid var(--border)" }}>
+      {/* Main image — charcoal with spotlight */}
+      <div className="aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center"
+        style={{ background: "var(--ink)" }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.12) 0%, transparent 65%)" }} />
         <Image
           src={photos[selected]}
           alt={name}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
-          className="object-contain p-4"
+          className="object-contain p-8"
         />
       </div>
 
@@ -29,12 +32,12 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
               onClick={() => setSelected(i)}
               className="aspect-square relative overflow-hidden transition-colors"
               style={{
-                background: "#ffffff",
+                background: "var(--ink)",
                 border: `1px solid ${i === selected ? "var(--gold)" : "var(--border)"}`,
               }}
               aria-label={`View image ${i + 1}`}
             >
-              <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="120px" className="object-contain p-1" />
+              <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="120px" className="object-contain p-2" />
             </button>
           ))}
         </div>

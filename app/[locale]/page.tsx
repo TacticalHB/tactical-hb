@@ -62,8 +62,8 @@ function HomeContent({ locale }: { locale: string }) {
               {/* soft glow behind product */}
               <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
-              <div className="float relative w-[64%] aspect-[3/4]" style={{ background: "#ffffff" }}>
-                <Image src="/images/windcover-hero.jpg" alt="TCT Windcover Bomb Cap" fill sizes="40vw" priority className="object-cover" />
+              <div className="float relative w-[70%] aspect-[3/4]">
+                <Image src="/images/windcover-hero-cut.png" alt="TCT Windcover Bomb Cap" fill sizes="40vw" priority className="object-contain" />
               </div>
               <div className="absolute top-8 right-8 w-12 h-px" style={{ background: "var(--gold-bright)" }} />
               <div className="absolute bottom-10 left-10">

@@ -54,8 +54,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "hmd",
     featured: true,
-    image: "/images/hmd-op-1.jpg",
-    photos: ["/images/hmd-op-1.jpg", "/images/hmd-op-2.jpg", "/images/hmd-op-3.jpg"],
+    image: "/images/hmd-op-1-cut.png",
+    photos: ["/images/hmd-op-1-cut.png", "/images/hmd-op-2-cut.png", "/images/hmd-op-3-cut.png"],
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -83,8 +83,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "bowl",
     featured: false,
-    image: "/images/bowl-livanka-1.jpg",
-    photos: ["/images/bowl-livanka-1.jpg", "/images/bowl-livanka-2.jpg", "/images/bowl-livanka-3.jpg"],
+    image: "/images/bowl-livanka-1-cut.png",
+    photos: ["/images/bowl-livanka-1-cut.png", "/images/bowl-livanka-2-cut.png", "/images/bowl-livanka-3-cut.png"],
     tags: ["clay", "handmade", "solo"],
   },
   {
@@ -112,8 +112,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "accessory",
     featured: true,
-    image: "/images/windcover-hero.jpg",
-    photos: ["/images/windcover-hero.jpg", "/images/windcover-timer.jpg", "/images/windcover-2.jpg", "/images/windcover-box.jpg"],
+    image: "/images/windcover-hero-cut.png",
+    photos: ["/images/windcover-hero-cut.png", "/images/windcover-timer-cut.png", "/images/windcover-2-cut.png", "/images/windcover-box-cut.png"],
     tags: ["timer", "Type-C", "windcover"],
   },
 ];

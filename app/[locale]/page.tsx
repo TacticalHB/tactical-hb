@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { getLocale } from "next-intl/server";
 import { featuredProducts } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -54,15 +55,20 @@ function HomeContent({ locale }: { locale: string }) {
             </div>
           </div>
 
-          {/* Right — dark showcase panel */}
+          {/* Right — dark showcase panel with real product */}
           <Reveal delay={200} className="hidden md:block">
             <div className="relative h-full min-h-[60vh] overflow-hidden flex items-center justify-center"
               style={{ background: "var(--ink)" }}>
-              <span className="font-display text-[16rem] leading-none select-none" style={{ color: "rgba(255,255,255,0.04)" }}>TCT</span>
+              {/* soft glow behind product */}
+              <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
+              <div className="float relative w-[64%] aspect-[3/4]" style={{ background: "#ffffff" }}>
+                <Image src="/images/windcover-hero.jpg" alt="TCT Windcover Bomb Cap" fill sizes="40vw" priority className="object-cover" />
+              </div>
               <div className="absolute top-8 right-8 w-12 h-px" style={{ background: "var(--gold-bright)" }} />
               <div className="absolute bottom-10 left-10">
-                <div className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: "var(--gold-bright)" }}>Flagship · 2026</div>
-                <div className="font-display text-4xl" style={{ color: "#f4f3f0" }}>Tactical Hookah</div>
+                <div className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: "var(--gold-bright)" }}>Signature · Bomb Cap</div>
+                <div className="font-display text-4xl" style={{ color: "#f4f3f0" }}>Tactical Timer</div>
               </div>
             </div>
           </Reveal>

@@ -65,11 +65,31 @@ body {
 }
 .scroll-cue-dot { animation: scrollCue 2.2s ease-in-out infinite; }
 
+/* ---- Floating product ---- */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+.float { animation: float 5.5s ease-in-out infinite; }
+
+/* ---- LED display digits ---- */
+.led-digit {
+  color: var(--gold-bright);
+  text-shadow: 0 0 14px rgba(212, 177, 94, 0.55), 0 0 3px rgba(212, 177, 94, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  .hero-glow, .scroll-cue-dot { animation: none; }
+  .hero-glow, .scroll-cue-dot, .float { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* ---- Product image zoom on hover ---- */
+.product-photo {
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.product-card:hover .product-photo { transform: scale(1.06); }
 
 /* ---- Buttons ---- */
 .btn-dark {

@@ -10,6 +10,7 @@ export type Product = {
   category: "hmd" | "bowl" | "accessory";
   featured: boolean;
   image: string;
+  photos?: string[];
   tags: string[];
 };
 
@@ -53,7 +54,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "hmd",
     featured: true,
-    image: "/images/hmd-op.jpg",
+    image: "/images/hmd-op-1.jpg",
+    photos: ["/images/hmd-op-1.jpg", "/images/hmd-op-2.jpg", "/images/hmd-op-3.jpg"],
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -81,7 +83,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "bowl",
     featured: false,
-    image: "/images/bowl-livanka.jpg",
+    image: "/images/bowl-livanka-1.jpg",
+    photos: ["/images/bowl-livanka-1.jpg", "/images/bowl-livanka-2.jpg", "/images/bowl-livanka-3.jpg"],
     tags: ["clay", "handmade", "solo"],
   },
   {
@@ -109,7 +112,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "accessory",
     featured: true,
-    image: "/images/windcover-bomb-cap.jpg",
+    image: "/images/windcover-hero.jpg",
+    photos: ["/images/windcover-hero.jpg", "/images/windcover-timer.jpg", "/images/windcover-2.jpg", "/images/windcover-box.jpg"],
     tags: ["timer", "Type-C", "windcover"],
   },
 ];

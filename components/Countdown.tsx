@@ -42,10 +42,7 @@ export default function Countdown({ locale }: { locale: string }) {
       {units.map((unit, i) => (
         <div key={unit.label} className="flex items-start gap-4 sm:gap-8">
           <div className="text-center min-w-[3.5rem]">
-            <div
-              className="font-display text-4xl sm:text-6xl leading-none tabular-nums"
-              style={{ color: "var(--gold-bright)" }}
-            >
+            <div className="led-digit font-display text-4xl sm:text-6xl leading-none">
               {time === null ? "--" : String(unit.value).padStart(2, "0")}
             </div>
             <div

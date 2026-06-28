@@ -2,26 +2,25 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import Embers from "./Embers";
 
 export default function ProductGallery({ photos, name }: { photos: string[]; name: string }) {
   const [selected, setSelected] = useState(0);
 
   return (
     <div>
-      {/* Main image — charcoal with spotlight */}
-      <div className="smoke-bg aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center">
-        <Embers density={0.7} />
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.12) 0%, transparent 65%)" }} />
-        <Image
-          src={photos[selected]}
-          alt={name}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          priority
-          className="object-contain p-8"
-        />
+      {/* Main image — Sea Salt White tile, lifted */}
+      <div className="product-tile aspect-[4/5] relative overflow-hidden mb-4 flex flex-col items-center justify-center">
+        <div className="relative w-full flex-1">
+          <Image
+            src={photos[selected]}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
+            className="object-contain p-8"
+          />
+        </div>
+        <span className="tile-brand text-xs pb-5 select-none">TCT</span>
       </div>
 
       {/* Thumbnails */}
@@ -31,10 +30,11 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
             <button
               key={photo}
               onClick={() => setSelected(i)}
-              className="aspect-square relative overflow-hidden transition-colors"
+              className="aspect-square relative overflow-hidden transition-all"
               style={{
-                background: "var(--ink)",
-                border: `1px solid ${i === selected ? "var(--gold)" : "var(--border)"}`,
+                background: "var(--sea-salt)",
+                outline: i === selected ? "2px solid var(--gold)" : "2px solid transparent",
+                outlineOffset: "-2px",
               }}
               aria-label={`View image ${i + 1}`}
             >

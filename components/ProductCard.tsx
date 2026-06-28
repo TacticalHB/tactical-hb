@@ -8,26 +8,25 @@ export default function ProductCard({ product, locale }: { product: Product; loc
 
   return (
     <Link href={`/${locale}/products/${product.slug}`} className="product-card block group">
-      {/* Charcoal image tile */}
-      <div className="smoke-bg aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center">
-        {/* soft spotlight glow */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.10) 0%, transparent 65%)" }} />
-
+      {/* Sea Salt White tile, lifted with soft shadow */}
+      <div className="product-tile aspect-[4/5] relative overflow-hidden mb-4 flex flex-col items-center justify-center">
         {hasPhoto ? (
-          <Image
-            src={product.photos![0]}
-            alt={name}
-            fill
-            sizes="(max-width: 1024px) 50vw, 25vw"
-            className="product-photo object-contain p-6"
-          />
-        ) : (
           <>
-            <span className="product-card-watermark font-display text-6xl tracking-widest select-none"
-              style={{ color: "rgba(255,255,255,0.05)" }}>TCT</span>
-            <div className="product-card-accent h-px absolute bottom-6" style={{ background: "var(--gold-bright)" }} />
+            <div className="relative w-full flex-1">
+              <Image
+                src={product.photos![0]}
+                alt={name}
+                fill
+                sizes="(max-width: 1024px) 50vw, 25vw"
+                className="product-photo object-contain p-6"
+              />
+            </div>
+            <span className="tile-brand text-[0.6rem] pb-4 select-none">TCT</span>
           </>
+        ) : (
+          <span className="font-display text-6xl tracking-widest select-none" style={{ color: "rgba(23,22,15,0.07)" }}>
+            TCT
+          </span>
         )}
       </div>
 

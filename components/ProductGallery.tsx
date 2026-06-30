@@ -8,19 +8,16 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
 
   return (
     <div>
-      {/* Main image — Sea Salt White tile, lifted */}
-      <div className="product-tile aspect-[4/5] relative overflow-hidden mb-4 flex flex-col items-center justify-center">
-        <div className="relative w-full flex-1">
-          <Image
-            src={photos[selected]}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
-            className="object-contain p-8"
-          />
-        </div>
-        <span className="tile-brand text-xs pb-5 select-none">TCT</span>
+      {/* Main image — white rounded tile, lifted on dark */}
+      <div className="photo-tile-light aspect-square relative overflow-hidden mb-4 flex items-center justify-center">
+        <Image
+          src={photos[selected]}
+          alt={name}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
+          className="object-contain p-6"
+        />
       </div>
 
       {/* Thumbnails */}
@@ -30,11 +27,10 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
             <button
               key={photo}
               onClick={() => setSelected(i)}
-              className="aspect-square relative overflow-hidden transition-all"
+              className="photo-thumb-light aspect-square relative overflow-hidden transition-all"
               style={{
-                background: "var(--sea-salt)",
-                outline: i === selected ? "2px solid var(--gold)" : "2px solid transparent",
-                outlineOffset: "-2px",
+                outline: i === selected ? "2px solid var(--gold-bright)" : "2px solid transparent",
+                outlineOffset: "2px",
               }}
               aria-label={`View image ${i + 1}`}
             >

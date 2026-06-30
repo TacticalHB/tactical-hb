@@ -19,7 +19,7 @@ function ProductsContent({ locale }: { locale: string }) {
   ] as const;
 
   return (
-    <div style={{ background: "var(--bg)" }}>
+    <div style={{ background: "var(--ink)" }}>
       <PageHeader title={t("title")} subtitle={t("subtitle")} watermark="PRODUCTS" />
 
       <div className="max-w-7xl mx-auto px-6 py-20">
@@ -31,14 +31,14 @@ function ProductsContent({ locale }: { locale: string }) {
           return (
             <div key={cat.key} className="mb-20">
               <Reveal>
-                <div className="flex items-center gap-5 mb-10">
-                  <span className="text-xs tracking-[0.35em] uppercase font-medium" style={{ color: "var(--gold)" }}>
+                <div className="flex items-center gap-5 mb-12">
+                  <span className="text-xs tracking-[0.35em] uppercase font-medium" style={{ color: "var(--gold-bright)" }}>
                     {catLabel}
                   </span>
-                  <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                  <div className="flex-1 h-px" style={{ background: "var(--border-dark)" }} />
                 </div>
               </Reveal>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                 {categoryProducts.map((product, i) => (
                   <Reveal key={product.id} delay={i * 80}>
                     <ProductCard product={product} locale={locale} />
@@ -55,16 +55,16 @@ function ProductsContent({ locale }: { locale: string }) {
 
 function PageHeader({ title, subtitle, watermark }: { title: string; subtitle: string; watermark: string }) {
   return (
-    <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
+    <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--ink-2)", borderBottom: "1px solid var(--border-dark)" }}>
       <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
-        <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>
+        <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(255,255,255,0.03)" }}>
           {watermark}
         </span>
       </div>
       <div className="max-w-7xl mx-auto relative">
         <Reveal>
-          <h1 className="font-display text-6xl md:text-8xl" style={{ color: "var(--text)" }}>{title}</h1>
-          <p className="mt-4 text-sm max-w-md" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
+          <h1 className="font-display text-6xl md:text-8xl" style={{ color: "#f4f3f0" }}>{title}</h1>
+          <p className="mt-4 text-sm max-w-md" style={{ color: "#9a978f" }}>{subtitle}</p>
         </Reveal>
       </div>
     </div>

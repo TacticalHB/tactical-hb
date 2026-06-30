@@ -95,11 +95,16 @@ body {
   transition: box-shadow 0.4s ease;
 }
 
-/* ---- White product tile on dark (detail page) ---- */
+/* ---- White product tile on dark (cards + detail) ---- */
 .photo-tile-light {
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 36px 70px -34px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.product-card:hover .photo-tile-light {
+  transform: translateY(-6px);
+  box-shadow: 0 46px 80px -34px rgba(0, 0, 0, 0.75), 0 10px 28px rgba(0, 0, 0, 0.3);
 }
 .photo-thumb-light {
   background: #ffffff;

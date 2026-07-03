@@ -77,25 +77,25 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* ---- Featured products (dark) ---- */}
-      <section className="py-28 px-6" style={{ background: "var(--ink)" }}>
+      {/* ---- Featured products (light) ---- */}
+      <section className="py-28 px-6" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="flex items-end justify-between mb-14">
               <div>
-                <span className="text-xs tracking-[0.35em] uppercase block mb-3" style={{ color: "var(--gold-bright)" }}>
+                <span className="text-xs tracking-[0.35em] uppercase block mb-3" style={{ color: "var(--gold)" }}>
                   {t("featured_tag")}
                 </span>
-                <h2 className="font-display text-5xl md:text-6xl" style={{ color: "#f4f3f0" }}>
+                <h2 className="font-display text-5xl md:text-6xl" style={{ color: "var(--text)" }}>
                   {t("featured_title")}
                 </h2>
               </div>
-              <Link href={`/${locale}/products`} className="link-gold-bright text-xs tracking-[0.2em] uppercase border-b pb-1 hidden md:block">
+              <Link href={`/${locale}/products`} className="link-gold text-xs tracking-[0.2em] uppercase border-b pb-1 hidden md:block">
                 {t("cta_products")} →
               </Link>
             </div>
           </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
             {featuredProducts.map((product, i) => (
               <Reveal key={product.id} delay={i * 90}>
                 <ProductCard product={product} locale={locale} />

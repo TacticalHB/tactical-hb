@@ -64,15 +64,10 @@ function HomeContent({ locale }: { locale: string }) {
               <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
               <div className="relative w-[70%] aspect-[3/4] z-10 flex items-center justify-center">
-                <span className="font-display leading-none select-none" style={{ fontSize: "9rem", color: "rgba(255,255,255,0.06)" }}>
-                  TCT
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-[78%] max-w-[340px]" style={{ opacity: 0.15 }} />
               </div>
               <div className="absolute top-8 right-8 w-12 h-px" style={{ background: "var(--gold-bright)" }} />
-              <div className="absolute bottom-10 left-10">
-                <div className="text-xs tracking-[0.35em] uppercase mb-2" style={{ color: "var(--gold-bright)" }}>Signature · Bomb Cap</div>
-                <div className="font-display text-4xl" style={{ color: "#f4f3f0" }}>Tactical Timer</div>
-              </div>
             </div>
           </Reveal>
         </div>

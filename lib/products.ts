@@ -55,7 +55,6 @@ export const products: Product[] = [
     category: "hmd",
     featured: true,
     image: "/images/hmd-op-1-cut.png",
-    photos: ["/images/hmd-op-1-cut.png", "/images/hmd-op-2-cut.png", "/images/hmd-op-3-cut.png"],
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -84,7 +83,6 @@ export const products: Product[] = [
     category: "bowl",
     featured: false,
     image: "/images/bowl-livanka-1-cut.png",
-    photos: ["/images/bowl-livanka-1-cut.png", "/images/bowl-livanka-2-cut.png", "/images/bowl-livanka-3-cut.png"],
     tags: ["clay", "handmade", "solo"],
   },
   {
@@ -113,7 +111,6 @@ export const products: Product[] = [
     category: "accessory",
     featured: true,
     image: "/images/windcover-hero-cut.png",
-    photos: ["/images/windcover-hero-cut.png", "/images/windcover-timer-cut.png", "/images/windcover-2-cut.png", "/images/windcover-box-cut.png"],
     tags: ["timer", "Type-C", "windcover"],
   },
 ];

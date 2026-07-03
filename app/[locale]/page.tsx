@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import Image from "next/image";
 import { getLocale } from "next-intl/server";
 import { featuredProducts } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -64,8 +63,10 @@ function HomeContent({ locale }: { locale: string }) {
               {/* soft glow behind product */}
               <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
-              <div className="float relative w-[70%] aspect-[3/4] z-10">
-                <Image src="/images/windcover-hero-cut.png" alt="TCT Windcover Bomb Cap" fill sizes="40vw" priority className="object-contain" />
+              <div className="relative w-[70%] aspect-[3/4] z-10 flex items-center justify-center">
+                <span className="font-display leading-none select-none" style={{ fontSize: "9rem", color: "rgba(255,255,255,0.06)" }}>
+                  TCT
+                </span>
               </div>
               <div className="absolute top-8 right-8 w-12 h-px" style={{ background: "var(--gold-bright)" }} />
               <div className="absolute bottom-10 left-10">

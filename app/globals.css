@@ -20,6 +20,8 @@
   --border: #e4e0d8;
   --border-strong: #d4cfc4;
   --border-dark: #2a2a2e;
+  /* Sea Salt White — light tile fill */
+  --sea-salt: #edefe4;
 }
 
 * { box-sizing: border-box; }

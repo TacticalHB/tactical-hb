@@ -63,10 +63,14 @@ function HomeContent({ locale }: { locale: string }) {
               {/* soft glow behind product */}
               <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
-              <div className="relative w-[70%] aspect-[3/4] z-10 flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-[78%] max-w-[340px]" style={{ opacity: 0.15 }} />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/tct-logo.svg"
+                alt=""
+                aria-hidden="true"
+                className="relative z-10 w-[80%] max-w-[500px]"
+                style={{ opacity: 0.15, transform: "translateY(-66px)" }}
+              />
               <div className="absolute top-8 right-8 w-12 h-px" style={{ background: "var(--gold-bright)" }} />
             </div>
           </Reveal>

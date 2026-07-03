@@ -6,7 +6,7 @@ export default function Footer() {
   const t = useTranslations("footer");
 
   return (
-    <footer style={{ background: "var(--ink)" }}>
+    <footer style={{ background: "var(--ink)", borderTop: "10px solid #ffffff" }}>
       <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col items-center text-center gap-8">
         <div className="font-display text-3xl tracking-widest" style={{ color: "#f4f3f0" }}>
           TACTICAL <span style={{ color: "var(--gold-bright)" }}>HB</span>

@@ -57,7 +57,8 @@ function HomeContent({ locale }: { locale: string }) {
 
           {/* Right — dark showcase panel with real product */}
           <Reveal delay={200} className="hidden md:block">
-            <div className="smoke-bg relative h-full min-h-[60vh] overflow-hidden flex items-center justify-center">
+            <div className="smoke-bg relative h-full min-h-[60vh] overflow-hidden flex items-center justify-center"
+              style={{ borderLeft: "10px solid #ffffff" }}>
               {/* ash & embers */}
               <Embers density={1.1} />
               {/* soft glow behind product */}
@@ -78,7 +79,7 @@ function HomeContent({ locale }: { locale: string }) {
       </section>
 
       {/* ---- Featured products (light) ---- */}
-      <section className="py-28 px-6" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+      <section className="py-28 px-6" style={{ background: "var(--bg)", borderTop: "10px solid #ffffff" }}>
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="flex items-end justify-between mb-14">
@@ -109,7 +110,7 @@ function HomeContent({ locale }: { locale: string }) {
       <FlagshipTeaser locale={locale} />
 
       {/* ---- About strip (light) ---- */}
-      <section className="py-28 px-6" style={{ background: "var(--bg)" }}>
+      <section className="py-28 px-6" style={{ background: "var(--bg)", borderTop: "10px solid #ffffff" }}>
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <Reveal>
             <div>

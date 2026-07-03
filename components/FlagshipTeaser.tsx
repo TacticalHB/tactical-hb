@@ -8,7 +8,7 @@ export default function FlagshipTeaser({ locale }: { locale: string }) {
   const t = useTranslations("flagship");
 
   return (
-    <section className="smoke-bg relative overflow-hidden py-28 md:py-40 px-6">
+    <section className="smoke-bg relative overflow-hidden py-28 md:py-40 px-6" style={{ borderTop: "10px solid #ffffff" }}>
       {/* ash & embers */}
       <Embers density={0.9} />
       {/* Ambient glow */}

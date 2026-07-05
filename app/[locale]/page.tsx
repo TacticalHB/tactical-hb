@@ -78,6 +78,22 @@ function HomeContent({ locale }: { locale: string }) {
         </div>
       </section>
 
+      {/* ---- Promo video band (full grid width, 16:9, silent ambient loop) ---- */}
+      <section style={{ background: "#ffffff", borderTop: "10px solid #ffffff" }}>
+        <div className="relative overflow-hidden aspect-video" style={{ background: "#000000" }}>
+          <video
+            className="absolute inset-0 w-full h-full object-contain"
+            src="/videos/promo.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-label="Tactical HB promo video"
+          />
+        </div>
+      </section>
+
       {/* ---- Flagship products — Apple-style tile grid ---- */}
       <section style={{ background: "#ffffff", borderTop: "10px solid #ffffff" }}>
         <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "10px" }}>

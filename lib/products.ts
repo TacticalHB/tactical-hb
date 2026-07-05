@@ -13,6 +13,9 @@ export type Product = {
   featured: boolean;
   image: string;
   photos?: string[];
+  /* Apple-style flagship tile: hero cut-out + flat background fill */
+  tileImage?: string;
+  tileBg?: string;
   tags: string[];
 };
 
@@ -63,6 +66,8 @@ export const products: Product[] = [
     category: "hmd",
     featured: true,
     image: "/images/hmd-op-1-cut.png",
+    tileImage: "/images/hmd-op-2-cut.png",
+    tileBg: "#d5d8d9",
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {

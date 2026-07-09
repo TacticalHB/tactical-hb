@@ -58,7 +58,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, 0);
 
   const addToCart = useCallback((product: Product, sourceEl?: HTMLElement | null) => {
-    const target = cartIconRef.current;
+    // Pick the currently VISIBLE cart icon (nav renders both a desktop and a
+    // mobile bag; the hidden one reports a zero-size rect at 0,0).
+    const icons =
+      typeof document !== "undefined"
+        ? (Array.from(document.querySelectorAll("[data-cart-icon]")) as HTMLElement[])
+        : [];
+    const target =
+      icons.find((el) => el.getBoundingClientRect().width > 0) || cartIconRef.current;
     const reduce =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -66,6 +73,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (sourceEl && target && !reduce) {
       const s = sourceEl.getBoundingClientRect();
       const t = target.getBoundingClientRect();
+      const tx = t.left + t.width / 2 - (s.left + s.width / 2);
+      const ty = t.top + t.height / 2 - (s.top + s.height / 2);
       const fly = document.createElement("img");
       fly.src = product.tileImage || product.image || "/tct-logo.svg";
       fly.style.cssText = [
@@ -78,17 +87,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         "z-index:200",
         "pointer-events:none",
         "margin:0",
-        "transition:transform .8s cubic-bezier(.5,-.25,.25,1),opacity .8s ease-in",
+        "transform:translate(0,0) scale(1)",
+        "opacity:1",
+        "transition:transform .85s cubic-bezier(.5,-.2,.3,1),opacity .7s ease-in",
         "will-change:transform,opacity",
       ].join(";");
       document.body.appendChild(fly);
-      const tx = t.left + t.width / 2 - (s.left + s.width / 2);
-      const ty = t.top + t.height / 2 - (s.top + s.height / 2);
-      requestAnimationFrame(() => {
-        fly.style.transform = `translate(${tx}px, ${ty}px) scale(0.06)`;
-        fly.style.opacity = "0.25";
-      });
-      setTimeout(() => fly.remove(), 820);
+      // Force the browser to commit the initial state so the transition runs
+      // (without this, the element jumps straight to the end).
+      void fly.getBoundingClientRect();
+      fly.style.transform = `translate(${tx}px, ${ty}px) scale(0.08)`;
+      fly.style.opacity = "0.2";
+      setTimeout(() => fly.remove(), 880);
     }
 
     setLines((prev) => {

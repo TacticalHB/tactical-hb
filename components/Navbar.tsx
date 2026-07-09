@@ -48,6 +48,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const bag = (
     <button
       ref={registerCartIcon}
+      data-cart-icon=""
       onClick={() => setCartOpen(true)}
       className={iconBtn}
       aria-label="Cart"

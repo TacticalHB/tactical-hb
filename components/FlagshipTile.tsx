@@ -23,15 +23,17 @@ export default function FlagshipTile({
   const subColor = isDark ? "#9a978f" : "var(--text-muted)";
   const scale = product.tileScale ?? 1.3;
 
+  const bleed = Boolean(product.tileBleed);
+
   return (
     <div
-      className="flagship-tile group relative flex flex-col items-center text-center px-6 pt-16 pb-10 min-h-[520px] overflow-hidden"
+      className={`flagship-tile group relative flex flex-col items-center text-center px-6 pt-12 min-h-[520px] overflow-hidden ${bleed ? "pb-0" : "pb-8"}`}
       style={{ background: hasHero ? product.tileBg : isDark ? "var(--ink)" : "var(--sea-salt)" }}
     >
-      <h3 className="font-display text-4xl md:text-5xl mb-3" style={{ color: textColor }}>
+      <h3 className="font-display text-3xl md:text-4xl mb-1.5" style={{ color: textColor }}>
         {name}
       </h3>
-      <p className="text-sm md:text-base mb-7 max-w-xs" style={{ color: subColor }}>
+      <p className="text-sm mb-4 max-w-xs" style={{ color: subColor }}>
         {tagline}
       </p>
       <div className="flex items-center gap-3 relative z-10">
@@ -52,14 +54,16 @@ export default function FlagshipTile({
       </div>
 
       {hasHero ? (
-        /* Enlarged product hero — Apple style, gentle zoom on hover */
-        <div className="relative flex-1 w-full mt-2">
+        /* Enlarged product hero — Apple style, gentle zoom on hover.
+           Bleed tiles anchor the product to the top of the free area and
+           let it run off the tile's bottom edge (Apple iPad-tile look). */
+        <div className="relative flex-1 w-full mt-3">
           <Image
             src={product.tileImage!}
             alt={name}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="flagship-hero object-contain origin-center"
+            className={`flagship-hero object-contain ${bleed ? "object-top origin-top" : "origin-center"}`}
             style={{ ["--tile-scale" as string]: String(scale) }}
           />
         </div>

@@ -18,6 +18,7 @@ export type Product = {
   tileBg?: string;
   tileTitle?: string;
   tileScale?: number;
+  tileBleed?: boolean;
   tags: string[];
 };
 
@@ -69,8 +70,8 @@ export const products: Product[] = [
     featured: true,
     image: "/images/hmd-op-1-cut.png",
     tileImage: "/images/hmd-op-2-cut.png",
-    tileBg: "#d5d8d9",
-    tileScale: 1.38,
+    tileBg: "#f5f5f7",
+    tileScale: 1.5,
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -88,9 +89,9 @@ export const products: Product[] = [
     featured: true,
     image: "/images/killer-bowl-cut.png",
     tileImage: "/images/killer-bowl-tile.png",
-    tileBg: "#d5d8d9",
+    tileBg: "#f5f5f7",
     tileTitle: "KILLER BOWL",
-    tileScale: 0.92,
+    tileScale: 1.0,
     tags: ["clay", "handmade", "classic"],
   },
   {
@@ -126,7 +127,7 @@ export const products: Product[] = [
     tileImage: "/images/ftp-bowl-tile.png",
     tileBg: "#DAF5FF",
     tileTitle: "FTP BOWL",
-    tileScale: 0.92,
+    tileScale: 1.0,
     tags: ["phunnel", "handmade"],
   },
   {
@@ -145,7 +146,8 @@ export const products: Product[] = [
     image: "/images/windcover-hero-cut.png",
     tileImage: "/images/windcover-tile.png",
     tileBg: "#DAF5FF",
-    tileScale: 0.92,
+    tileScale: 1.18,
+    tileBleed: true,
     tags: ["timer", "Type-C", "windcover"],
   },
 ];

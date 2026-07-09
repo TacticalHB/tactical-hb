@@ -11,22 +11,21 @@ export default function FlagshipTile({
   locale: string;
   dark: boolean;
 }) {
-  const name = locale === "uk" ? product.nameUk : product.nameEn;
+  const name = product.tileTitle ?? (locale === "uk" ? product.nameUk : product.nameEn);
   const tagline = locale === "uk" ? product.taglineUk : product.taglineEn;
   const viewLabel = locale === "uk" ? "Переглянути" : "View";
   const buyLabel = locale === "uk" ? "Купити" : "Buy";
 
-  // A tile with its own photo background is always treated as light
   const hasHero = Boolean(product.tileImage);
   const isDark = hasHero ? false : dark;
 
   const textColor = isDark ? "#f4f3f0" : "var(--text)";
   const subColor = isDark ? "#9a978f" : "var(--text-muted)";
-  const gold = isDark ? "var(--gold-bright)" : "var(--gold)";
+  const scale = product.tileScale ?? 1.3;
 
   return (
     <div
-      className="relative flex flex-col items-center text-center px-6 pt-16 pb-10 min-h-[520px] overflow-hidden"
+      className="flagship-tile group relative flex flex-col items-center text-center px-6 pt-16 pb-10 min-h-[520px] overflow-hidden"
       style={{ background: hasHero ? product.tileBg : isDark ? "var(--ink)" : "var(--sea-salt)" }}
     >
       <h3 className="font-display text-4xl md:text-5xl mb-3" style={{ color: textColor }}>
@@ -39,32 +38,33 @@ export default function FlagshipTile({
         <Link
           href={`/${locale}/products/${product.slug}`}
           className="rounded-full px-6 py-2 text-sm font-medium transition-opacity hover:opacity-85"
-          style={{ background: gold, color: isDark ? "var(--ink)" : "#ffffff" }}
+          style={{ background: "var(--gold-bright)", color: "var(--ink)" }}
         >
           {viewLabel}
         </Link>
         <Link
           href={`/${locale}/wholesale`}
           className="rounded-full px-6 py-2 text-sm font-medium border transition-colors hover:opacity-70"
-          style={{ borderColor: gold, color: gold }}
+          style={{ borderColor: "var(--gold-bright)", color: isDark ? "var(--gold-bright)" : "var(--text)" }}
         >
           {buyLabel}
         </Link>
       </div>
 
       {hasHero ? (
-        /* Enlarged product hero — Apple style */
+        /* Enlarged product hero — Apple style, gentle zoom on hover */
         <div className="relative flex-1 w-full mt-2">
           <Image
             src={product.tileImage!}
             alt={name}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain scale-[1.38] origin-center"
+            className="flagship-hero object-contain origin-center"
+            style={{ ["--tile-scale" as string]: String(scale) }}
           />
         </div>
       ) : (
-        /* Blank image area — faint logo placeholder for a future product photo */
+        /* Blank image area — faint logo placeholder */
         <div className="flex-1 w-full flex items-center justify-center mt-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

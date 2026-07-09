@@ -16,6 +16,8 @@ export type Product = {
   /* Apple-style flagship tile: hero cut-out + flat background fill */
   tileImage?: string;
   tileBg?: string;
+  tileTitle?: string;
+  tileScale?: number;
   tags: string[];
 };
 
@@ -68,6 +70,7 @@ export const products: Product[] = [
     image: "/images/hmd-op-1-cut.png",
     tileImage: "/images/hmd-op-2-cut.png",
     tileBg: "#d5d8d9",
+    tileScale: 1.38,
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -75,15 +78,19 @@ export const products: Product[] = [
     slug: "bowl-killer",
     nameUk: "Tactical Killer",
     nameEn: "Tactical Killer",
-    taglineUk: "Ручна глина. Сильний, насичений дим.",
-    taglineEn: "Handmade clay. Strong, rich smoke.",
+    taglineUk: "Ручна натуральна глина.",
+    taglineEn: "Handmade natural clay.",
     descriptionUk: "Класична форма ручної роботи з натуральної глини. Сильний та насичений дим. Оптимальна товщина стінок для стабільного утримання тепла.",
     descriptionEn: "Classic handmade bowl from natural clay. Strong and rich smoke. Optimal wall thickness for steady heat retention.",
     price: 6.2,
     currency: "EUR",
     category: "bowl",
-    featured: false,
-    image: "/images/bowl-killer.jpg",
+    featured: true,
+    image: "/images/killer-bowl-cut.png",
+    tileImage: "/images/killer-bowl-cut.png",
+    tileBg: "#d5d8d9",
+    tileTitle: "KILLER BOWL",
+    tileScale: 1.28,
     tags: ["clay", "handmade", "classic"],
   },
   {
@@ -107,15 +114,19 @@ export const products: Product[] = [
     slug: "bowl-phunnel",
     nameUk: "Tactical 0.66 F.CK THE PHUNNEL",
     nameEn: "Tactical 0.66 F.CK THE PHUNNEL",
-    taglineUk: "Насиченість фанелю, вишукана.",
-    taglineEn: "Phunnel richness, refined.",
+    taglineUk: "Ручна натуральна глина.",
+    taglineEn: "Handmade natural clay.",
     descriptionUk: "Класичний фанель з унікальною вставкою. Неймовірна насиченість та м'якість диму. Для тих, хто цінує процес.",
     descriptionEn: "Classic phunnel with unique insert. Incredible richness and mildness of smoke. For those who value the process.",
     price: 7.3,
     currency: "EUR",
     category: "bowl",
-    featured: false,
-    image: "/images/bowl-phunnel.jpg",
+    featured: true,
+    image: "/images/ftp-bowl-cut.png",
+    tileImage: "/images/ftp-bowl-cut.png",
+    tileBg: "#DAF5FF",
+    tileTitle: "FTP BOWL",
+    tileScale: 1.28,
     tags: ["phunnel", "handmade"],
   },
   {
@@ -132,8 +143,19 @@ export const products: Product[] = [
     category: "accessory",
     featured: true,
     image: "/images/windcover-hero-cut.png",
+    tileImage: "/images/windcover-timer-cut.png",
+    tileBg: "#DAF5FF",
+    tileScale: 1.0,
     tags: ["timer", "Type-C", "windcover"],
   },
 ];
 
-export const featuredProducts = products.filter((p) => p.featured);
+const bySlug = (slug: string) => products.find((p) => p.slug === slug)!;
+
+// Flagship 2x2 grid — explicit order: top-left, top-right, bottom-left, bottom-right
+export const featuredProducts = [
+  bySlug("bowl-phunnel"),        // FTP BOWL — sky blue
+  bySlug("bowl-killer"),         // KILLER BOWL — grey
+  bySlug("hmd-tct-op"),          // HMD TCT OP — grey
+  bySlug("windcover-bomb-cap"),  // Windcover — sky blue
+];

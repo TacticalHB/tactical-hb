@@ -30,7 +30,7 @@ export default function FlagshipTile({
       className={`flagship-tile group relative flex flex-col items-center text-center px-6 pt-12 min-h-[520px] overflow-hidden ${bleed ? "pb-0" : "pb-8"}`}
       style={{ background: hasHero ? product.tileBg : isDark ? "var(--ink)" : "var(--sea-salt)" }}
     >
-      <h3 className="font-display text-3xl md:text-4xl mb-1.5" style={{ color: textColor }}>
+      <h3 className="font-display text-3xl md:text-4xl mb-0.5" style={{ color: textColor }}>
         {name}
       </h3>
       <p className="text-sm mb-4 max-w-xs" style={{ color: subColor }}>

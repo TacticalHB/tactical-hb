@@ -93,6 +93,14 @@ body {
 }
 .product-card:hover .product-photo { transform: scale(1.06); }
 
+/* ---- Cart badge pop ---- */
+@keyframes badgePop {
+  0%   { transform: scale(0.2); opacity: 0; }
+  55%  { transform: scale(1.35); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.cart-badge { animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
 /* ---- Flagship tile hero (base scale + gentle hover zoom) ---- */
 .flagship-hero {
   transform: scale(var(--tile-scale, 1.3));

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { CartProvider } from "@/components/CartContext";
 
 export default async function LocaleLayout({
   children,
@@ -22,15 +23,17 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      {/* White frame around the whole page (Apple-style grid frame) */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[100]"
-        style={{ border: "10px solid #ffffff" }}
-      />
-      <Navbar locale={locale} />
-      <main className="flex-1">{children}</main>
-      <Footer />
+      <CartProvider>
+        {/* White frame around the whole page (Apple-style grid frame) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-[100]"
+          style={{ border: "10px solid #ffffff" }}
+        />
+        <Navbar locale={locale} />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </CartProvider>
     </NextIntlClientProvider>
   );
 }

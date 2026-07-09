@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRef } from "react";
 import { Product } from "@/lib/products";
+import { useCart } from "./CartContext";
 
 export default function FlagshipTile({
   product,
@@ -11,6 +15,9 @@ export default function FlagshipTile({
   locale: string;
   dark: boolean;
 }) {
+  const { addToCart } = useCart();
+  const mediaRef = useRef<HTMLDivElement>(null);
+
   const name = product.tileTitle ?? (locale === "uk" ? product.nameUk : product.nameEn);
   const tagline = locale === "uk" ? product.taglineUk : product.taglineEn;
   const viewLabel = locale === "uk" ? "Переглянути" : "View";
@@ -44,20 +51,17 @@ export default function FlagshipTile({
         >
           {viewLabel}
         </Link>
-        <Link
-          href={`/${locale}/wholesale`}
+        <button
+          onClick={() => addToCart(product, mediaRef.current)}
           className="rounded-full px-6 py-2 text-sm font-medium border transition-colors hover:opacity-70"
           style={{ borderColor: "var(--gold-bright)", color: isDark ? "var(--gold-bright)" : "var(--text)" }}
         >
           {buyLabel}
-        </Link>
+        </button>
       </div>
 
       {hasHero ? (
-        /* Enlarged product hero — Apple style, gentle zoom on hover.
-           Bleed tiles anchor the product to the top of the free area and
-           let it run off the tile's bottom edge (Apple iPad-tile look). */
-        <div className="relative flex-1 w-full mt-3">
+        <div ref={mediaRef} className="relative flex-1 w-full mt-3">
           <Image
             src={product.tileImage!}
             alt={name}
@@ -68,8 +72,7 @@ export default function FlagshipTile({
           />
         </div>
       ) : (
-        /* Blank image area — faint logo placeholder */
-        <div className="flex-1 w-full flex items-center justify-center mt-4">
+        <div ref={mediaRef} className="flex-1 w-full flex items-center justify-center mt-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/tct-logo.svg"

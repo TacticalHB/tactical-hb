@@ -1,3 +1,5 @@
+export type Variant = { name: string; swatch: string; image: string; price?: number };
+
 export type Product = {
   id: string;
   slug: string;
@@ -19,6 +21,9 @@ export type Product = {
   tileTitle?: string;
   tileScale?: number;
   tileBleed?: boolean;
+  /* Nike-style products grid */
+  gridImage?: string;
+  variants?: Variant[];
   tags: string[];
 };
 
@@ -72,6 +77,11 @@ export const products: Product[] = [
     tileImage: "/images/hmd-op-2-cut.png",
     tileBg: "#f5f5f7",
     tileScale: 1.5,
+    gridImage: "/images/hmd-op-2-cut.png",
+    variants: [
+      { name: "Black", swatch: "#1c1c1e", image: "/images/hmd-op-2-cut.png", price: 21 },
+      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-1-cut.png", price: 24 },
+    ],
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -92,6 +102,7 @@ export const products: Product[] = [
     tileBg: "#f5f5f7",
     tileTitle: "KILLER BOWL",
     tileScale: 1.0,
+    gridImage: "/images/killer-bowl-tile.png",
     tags: ["clay", "handmade", "classic"],
   },
   {
@@ -108,6 +119,7 @@ export const products: Product[] = [
     category: "bowl",
     featured: false,
     image: "/images/bowl-livanka-1-cut.png",
+    gridImage: "/images/bowl-livanka-1-cut.png",
     tags: ["clay", "handmade", "solo"],
   },
   {
@@ -128,6 +140,7 @@ export const products: Product[] = [
     tileBg: "linear-gradient(180deg, #c9e6f6 0%, #e9f5fb 55%, #ffffff 100%)",
     tileTitle: "FTP BOWL",
     tileScale: 1.0,
+    gridImage: "/images/ftp-bowl-tile.png",
     tags: ["phunnel", "handmade"],
   },
   {
@@ -148,6 +161,7 @@ export const products: Product[] = [
     tileBg: "linear-gradient(180deg, #c9e6f6 0%, #e9f5fb 55%, #ffffff 100%)",
     tileScale: 1.18,
     tileBleed: true,
+    gridImage: "/images/windcover-tile.png",
     tags: ["timer", "Type-C", "windcover"],
   },
 ];

@@ -57,7 +57,8 @@ export const products: Product[] = [
     currency: "EUR",
     category: "hmd",
     featured: true,
-    image: "/images/hmd-acraft.jpg",
+    image: "/images/hmd-acraft-cut.png",
+    gridImage: "/images/hmd-acraft-cut.png",
     tags: ["aluminium", "surface treatment"],
   },
   {

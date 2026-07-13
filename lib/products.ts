@@ -24,6 +24,23 @@ export type Product = {
   /* Nike-style products grid */
   gridImage?: string;
   variants?: Variant[];
+  /* Nike-style product detail page */
+  pdp?: {
+    photos: string[];
+    styleCode?: string;
+    colourShownEn?: string;
+    colourShownUk?: string;
+    shortEn: string;
+    shortUk: string;
+    benefitsEn?: string[];
+    benefitsUk?: string[];
+    tipsEn?: string[];
+    tipsUk?: string[];
+    specs?: { labelEn: string; labelUk: string; value: string }[];
+    statementEn?: string;
+    statementUk?: string;
+    features?: { icon: "flame" | "clock" | "hands" | "wave"; titleEn: string; titleUk: string; textEn: string; textUk: string }[];
+  };
   tags: string[];
 };
 
@@ -59,6 +76,59 @@ export const products: Product[] = [
     featured: true,
     image: "/images/hmd-acraft-cut.png",
     gridImage: "/images/hmd-acraft-cut.png",
+    pdp: {
+      photos: [
+        "/images/hmd-acraft-cut.png",
+        "/images/hmd-acraft-1.png",
+        "/images/hmd-acraft-2.png",
+        "/images/hmd-acraft-3.png",
+      ],
+      styleCode: "9E418",
+      colourShownEn: "Tactical Grey",
+      colourShownUk: "Тактичний сірий",
+      shortEn:
+        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this high-quality, non-toxic aluminium device delivers mild, consistent smoking with extended session duration. Set it and forget it — no constant coal manipulation required.",
+      shortUk:
+        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей високоякісний нетоксичний алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+      benefitsEn: [
+        "Mildness of smoking with rich, consistent flavour",
+        "Extended session duration (90+ minutes with proper use)",
+        "Effortless experience — no constant coal rotation or adjustments",
+        "Heating time of approximately 6 minutes under wind cover",
+      ],
+      benefitsUk: [
+        "М'якість куріння з насиченим, стабільним смаком",
+        "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
+        "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
+        "Час нагріву — близько 6 хвилин під вітрозахистом",
+      ],
+      tipsEn: [
+        "Never cool the device with water",
+        "Use only soft, non-abrasive cloths for cleaning",
+        "Do not preheat the HMD using a charcoal lighter",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте пристрій водою",
+        "Для чищення використовуйте лише м'які неабразивні серветки",
+        "Не розігрівайте HMD на плитці для вугілля",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", value: "Non-toxic aluminium" },
+        { labelEn: "Surface", labelUk: "Поверхня", value: "A.Craft surface treatment" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", value: "≈ 6 min under wind cover" },
+        { labelEn: "Session duration", labelUk: "Тривалість сесії", value: "90+ min with proper use" },
+        { labelEn: "Weight", labelUk: "Вага", value: "—" },
+        { labelEn: "Dimensions", labelUk: "Розміри", value: "—" },
+      ],
+      statementEn: "Set it. Forget it. Smoke longer.",
+      statementUk: "Встановив. Забув. Куриш довше.",
+      features: [
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "90+ minutes", textUk: "90+ хвилин" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", textEn: "Zero coal fuss", textUk: "Жодної метушні" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+      ],
+    },
     tags: ["aluminium", "surface treatment"],
   },
   {

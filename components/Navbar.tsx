@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useCart } from "./CartContext";
 import CartDrawer from "./CartDrawer";
 import SearchOverlay from "./SearchOverlay";
+import FavouritesMenu from "./FavouritesMenu";
 
 function SearchIcon() {
   return (
@@ -86,6 +87,7 @@ export default function Navbar({ locale }: { locale: string }) {
             <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
               <SearchIcon />
             </button>
+            <FavouritesMenu locale={locale} />
             {bag}
             <Link href={otherLocalePath} className="nav-lang text-xs tracking-[0.2em] uppercase px-3 py-1.5 border">
               {otherLocale === "uk" ? "УКР" : "ENG"}
@@ -97,6 +99,7 @@ export default function Navbar({ locale }: { locale: string }) {
             <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
               <SearchIcon />
             </button>
+            <FavouritesMenu locale={locale} />
             {bag}
             <button className="nav-link" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
               <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5">

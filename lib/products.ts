@@ -74,11 +74,11 @@ export const products: Product[] = [
     currency: "EUR",
     category: "hmd",
     featured: true,
-    image: "/images/hmd-acraft-cut.png",
-    gridImage: "/images/hmd-acraft-cut.png",
+    image: "/images/hmd-acraft-hero.png",
+    gridImage: "/images/hmd-acraft-hero.png",
     pdp: {
       photos: [
-        "/images/hmd-acraft-cut.png",
+        "/images/hmd-acraft-hero.png",
         "/images/hmd-acraft-1.png",
         "/images/hmd-acraft-2.png",
         "/images/hmd-acraft-3.png",

@@ -24,7 +24,7 @@ function HomeContent({ locale }: { locale: string }) {
           <div className="relative flex flex-col justify-center px-6 py-20 md:py-0">
             {/* warm glow */}
             <div className="hero-glow absolute top-1/2 left-0 -translate-y-1/2 pointer-events-none -z-0"
-              style={{ width: "60vw", height: "50vh", background: "radial-gradient(ellipse at center, rgba(168,127,44,0.10) 0%, transparent 65%)" }} />
+              style={{ width: "60vw", height: "50vh", background: "radial-gradient(ellipse at center, rgba(248,248,128,0.14) 0%, transparent 65%)" }} />
             <div className="relative">
               <Reveal>
                 <span className="inline-block text-xs tracking-[0.4em] uppercase mb-8 px-4 py-2 border"
@@ -63,7 +63,7 @@ function HomeContent({ locale }: { locale: string }) {
               <Embers density={1.1} />
               {/* soft glow behind product */}
               <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(212,177,94,0.16) 0%, transparent 70%)" }} />
+                style={{ width: "70%", height: "60%", background: "radial-gradient(ellipse at center, rgba(248,248,128,0.18) 0%, transparent 70%)" }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/tct-logo.svg"

@@ -30,7 +30,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
     >
       {/* Image */}
       <Link href={href} className="block group">
-        <div className="relative aspect-square overflow-hidden" style={{ background: "#f5f5f5" }}>
+        <div className="relative aspect-square overflow-hidden rounded-[20px]" style={{ background: "#f5f5f5" }}>
           {image ? (
             <Image
               src={image}

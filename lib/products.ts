@@ -120,8 +120,6 @@ export const products: Product[] = [
         { labelEn: "Weight", labelUk: "Вага", value: "—" },
         { labelEn: "Dimensions", labelUk: "Розміри", value: "—" },
       ],
-      statementEn: "Set it. Forget it. Smoke longer.",
-      statementUk: "Встановив. Забув. Куриш довше.",
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
         { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "90+ minutes", textUk: "90+ хвилин" },

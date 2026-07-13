@@ -9,9 +9,11 @@
   /* Dark accents */
   --ink: #111114;
   --ink-2: #1a1a1d;
-  /* Gold */
-  --gold: #a87f2c;        /* accent on light surfaces */
-  --gold-bright: #d4b15e; /* accent on dark surfaces */
+  /* Brand accent — electric yellow (used on dark surfaces + as fills).
+     On light surfaces the pale yellow is illegible as text, so --gold maps
+     to dark ink; accents on light backgrounds render dark for legibility. */
+  --gold: #111114;        /* accent on light surfaces -> dark ink */
+  --gold-bright: #f8f880; /* brand yellow: on dark + button/badge fills */
   /* Text */
   --text: #17160f;
   --text-muted: #6c6860;
@@ -40,7 +42,7 @@ body {
   letter-spacing: 0.03em;
 }
 
-::selection { background: var(--gold); color: #fff; }
+::selection { background: var(--gold-bright); color: #111114; }
 
 /* ---- Scroll-reveal animation ---- */
 .reveal {
@@ -150,7 +152,7 @@ body {
   color: var(--ink);
   transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
-.btn-gold:hover { background: #e3c477; letter-spacing: 0.12em; }
+.btn-gold:hover { background: #eaea5c; letter-spacing: 0.12em; }
 
 /* ---- Nav (dark) ---- */
 .nav-link { color: #9a978f; transition: color 0.22s ease; }

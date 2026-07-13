@@ -6,6 +6,9 @@ import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { getFavs, toggleFav as toggleFavStore, FAVS_EVENT } from "@/lib/favourites";
 
+/* Brand slogan — shown as the statement band on every product page */
+const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
+
 /* ---------- Sliding announcement banner (Nike-style horizontal glide) ---------- */
 function Banner({ locale }: { locale: string }) {
   const messages =
@@ -171,7 +174,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     key={p}
                     onMouseEnter={() => setIdx(i)}
                     onClick={() => setIdx(i)}
-                    className="relative w-14 h-14 rounded-md overflow-hidden transition-opacity"
+                    className="relative w-14 h-14 rounded-xl overflow-hidden transition-opacity"
                     style={{ background: "#f5f5f5", outline: i === idx ? "1.5px solid #111" : "none", opacity: i === idx ? 1 : 0.75 }}
                     aria-label={`View image ${i + 1}`}
                   >
@@ -181,7 +184,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               </div>
             )}
             {/* Main image */}
-            <div ref={mainImgRef} className="relative flex-1 aspect-square rounded-lg overflow-hidden" style={{ background: "#f5f5f5" }}>
+            <div ref={mainImgRef} className="relative flex-1 aspect-square rounded-[20px] overflow-hidden" style={{ background: "#f5f5f5" }}>
               <Image
                 key={photos[idx]}
                 src={photos[idx]}
@@ -286,15 +289,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
         </div>
       </div>
 
-      {/* ---- Statement + features band ---- */}
-      {pdp?.features && pdp.features.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
-          {pdp.statementEn && (
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-10">
-              {uk ? pdp.statementUk : pdp.statementEn}
-            </h2>
-          )}
-          <div className="grid grid-cols-2 lg:grid-cols-4 rounded-lg overflow-hidden" style={{ background: "#f5f5f5" }}>
+      {/* ---- Brand slogan statement (every product) + optional features band ---- */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+        <h2 className="font-display text-4xl md:text-6xl tracking-wide leading-[0.95]" style={{ color: "#111" }}>
+          {SITE_SLOGAN}
+        </h2>
+        {pdp?.features && pdp.features.length > 0 && (
+          <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 rounded-[20px] overflow-hidden" style={{ background: "#f5f5f5" }}>
             {pdp.features.map((f, i) => (
               <div key={f.titleEn}
                 className="flex flex-col items-center text-center gap-3 py-12 px-4"
@@ -305,8 +306,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

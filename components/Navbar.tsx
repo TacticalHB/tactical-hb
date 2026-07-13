@@ -73,8 +73,18 @@ export default function Navbar({ locale }: { locale: string }) {
         className="fixed top-0 left-0 right-0 z-50"
         style={{ background: "var(--ink)", borderBottom: "1px solid var(--border-dark)" }}
       >
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href={`/${locale}`} className="font-display text-2xl tracking-widest" style={{ color: "#f4f3f0" }}>
+        {/* TCT logo — pinned to the very left edge of the page (Nike-style) */}
+        <Link
+          href={`/${locale}`}
+          aria-label="Tactical HB — home"
+          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 flex items-center transition-opacity hover:opacity-80"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/tct-logo.svg" alt="TCT" className="h-9 w-9 sm:h-10 sm:w-10" />
+        </Link>
+
+        <div className="max-w-7xl mx-auto pl-16 sm:pl-20 md:pl-24 pr-6 h-16 flex items-center justify-between">
+          <Link href={`/${locale}`} className="hidden md:block font-display text-2xl tracking-widest" style={{ color: "#f4f3f0" }}>
             TACTICAL <span style={{ color: "var(--gold-bright)" }}>HB</span>
           </Link>
 
@@ -95,7 +105,7 @@ export default function Navbar({ locale }: { locale: string }) {
           </nav>
 
           {/* Mobile right cluster */}
-          <div className="flex md:hidden items-center gap-5">
+          <div className="flex md:hidden items-center gap-5 ml-auto">
             <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
               <SearchIcon />
             </button>

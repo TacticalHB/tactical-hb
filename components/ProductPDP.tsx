@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { getFavs, toggleFav as toggleFavStore, FAVS_EVENT } from "@/lib/favourites";
@@ -114,8 +115,28 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const mainImgRef = useRef<HTMLDivElement>(null);
 
   const pdp = product.pdp;
-  const photos = pdp?.photos ?? (product.gridImage ? [product.gridImage] : []);
-  const [idx, setIdx] = useState(0);
+  const variants = product.variants;
+  const photos = pdp?.photos ?? (variants ? variants.map((v) => v.image) : product.gridImage ? [product.gridImage] : []);
+
+  /* If arriving with ?variant=<name>, open that colour (e.g. Purple), not the default */
+  const searchParams = useSearchParams();
+  const initialIdx = variants
+    ? Math.max(0, variants.findIndex((v) => v.name.toLowerCase() === (searchParams.get("variant") ?? "").toLowerCase()))
+    : 0;
+  const [idx, setIdx] = useState(initialIdx);
+
+  const price = variants ? variants[idx].price ?? product.price : product.price;
+
+  const selectVariant = (i: number) => {
+    setIdx(i);
+    if (typeof window !== "undefined" && variants) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("variant", variants[i].name);
+      window.history.replaceState(null, "", url.toString());
+    }
+  };
+  const variantLabel = (n: string) =>
+    uk ? (({ Black: "Чорний", Purple: "Фіолетовий" } as Record<string, string>)[n] ?? n) : n;
 
   const name = locale === "uk" ? product.nameUk : product.nameEn;
   const shortDesc = pdp ? (uk ? pdp.shortUk : pdp.shortEn) : (uk ? product.descriptionUk : product.descriptionEn);
@@ -167,7 +188,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           {/* Gallery: rail + main image */}
           <div className="flex-1 flex flex-col-reverse md:flex-row gap-3 lg:sticky lg:top-24 self-start w-full">
             {/* Thumbnail rail */}
-            {photos.length > 1 && (
+            {!variants && photos.length > 1 && (
               <div className="flex md:flex-col gap-2 md:max-h-[600px] md:overflow-y-auto shrink-0">
                 {photos.map((p, i) => (
                   <button
@@ -195,7 +216,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 className="object-contain pdp-fade"
               />
               {/* prev / next */}
-              {photos.length > 1 && (
+              {!variants && photos.length > 1 && (
                 <div className="absolute bottom-4 right-4 flex gap-2">
                   {[-1, 1].map((d) => (
                     <button
@@ -219,7 +240,30 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           <div className="w-full lg:w-[380px] shrink-0">
             <h1 className="text-2xl font-medium leading-tight">{name}</h1>
             <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
-            <p className="text-lg font-medium mt-4">€{product.price.toFixed(2)}</p>
+            <p className="text-lg font-medium mt-4">€{price.toFixed(2)}</p>
+
+            {/* Colour variants — swatch selector (Black / Purple …) */}
+            {variants && (
+              <div className="mt-6">
+                <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
+                  {uk ? "Колір" : "Colour"}: <span style={{ color: "#111" }}>{variantLabel(variants[idx].name)}</span>
+                </div>
+                <div className="flex gap-3">
+                  {variants.map((v, i) => (
+                    <button
+                      key={v.name}
+                      onClick={() => selectVariant(i)}
+                      aria-label={v.name}
+                      className="w-9 h-9 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        background: v.swatch,
+                        boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Buttons */}
             <div className="flex flex-col gap-3 mt-8">

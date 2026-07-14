@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { products } from "@/lib/products";
 import ProductPDP from "@/components/ProductPDP";
 
@@ -7,5 +8,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = products.find((p) => p.slug === slug);
   if (!product) notFound();
 
-  return <ProductPDP product={product} locale={locale} />;
+  return (
+    <Suspense>
+      <ProductPDP product={product} locale={locale} />
+    </Suspense>
+  );
 }

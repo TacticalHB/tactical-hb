@@ -14,20 +14,13 @@ export default function NikeProductCard({ product, locale }: { product: Product;
   const multi = !!variants && variants.length > 1;
 
   const [idx, setIdx] = useState(0);
-  const [hovered, setHovered] = useState(false);
 
   const image = variants ? variants[idx].image : product.gridImage;
   const price = variants ? variants[idx].price ?? product.price : product.price;
   const href = `/${locale}/products/${product.slug}`;
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false);
-        setIdx(0);
-      }}
-    >
+    <div onMouseLeave={() => setIdx(0)}>
       {/* Image */}
       <Link href={href} className="block group">
         <div className="relative aspect-square overflow-hidden rounded-[20px]" style={{ background: "#f5f5f5" }}>
@@ -49,42 +42,41 @@ export default function NikeProductCard({ product, locale }: { product: Product;
         </div>
       </Link>
 
-      {/* Colour swatches — fade in on hover */}
-      {multi && (
-        <div
-          className="flex gap-2 mt-3 h-5"
-          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.2s ease" }}
-        >
-          {variants!.map((v, i) => (
-            <button
-              key={v.name}
-              onMouseEnter={() => setIdx(i)}
-              onClick={() => router.push(href)}
-              aria-label={v.name}
-              className="w-5 h-5 rounded-full transition-transform hover:scale-110"
-              style={{
-                background: v.swatch,
-                boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
-              }}
-            />
-          ))}
+      {/* Text — name on the left (aligned across cards), swatches on the right */}
+      <div className="mt-2">
+        <div className="flex items-start justify-between gap-3">
+          <Link href={href} className="text-[15px] font-medium leading-snug" style={{ color: "#111111" }}>
+            {name}
+          </Link>
+          {multi && (
+            <div className="flex gap-2 shrink-0 pt-0.5">
+              {variants!.map((v, i) => (
+                <button
+                  key={v.name}
+                  onMouseEnter={() => setIdx(i)}
+                  onClick={() => router.push(`${href}?variant=${encodeURIComponent(v.name)}`)}
+                  aria-label={v.name}
+                  className="w-5 h-5 rounded-full transition-transform hover:scale-110"
+                  style={{
+                    background: v.swatch,
+                    boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Text */}
-      <Link href={href} className="block mt-2">
-        <div className="text-[15px] font-medium leading-snug" style={{ color: "#111111" }}>
-          {name}
-        </div>
-        {subtitle && (
-          <div className="text-[15px] leading-snug" style={{ color: "#707072" }}>
-            {subtitle}
+        <Link href={href} className="block">
+          {subtitle && (
+            <div className="text-[15px] leading-snug" style={{ color: "#707072" }}>
+              {subtitle}
+            </div>
+          )}
+          <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
+            €{price.toFixed(2)}
           </div>
-        )}
-        <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
-          €{price.toFixed(2)}
-        </div>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 }

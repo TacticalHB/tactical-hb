@@ -174,7 +174,7 @@ export const products: Product[] = [
     gridImage: "/images/killer-bowl-tile.png",
     pdp: {
       photos: [
-        "/images/killer-hero.png",
+        "/images/killer-hero-v2.png",
         "/images/killer-2.png",
         "/images/killer-3.png",
       ],

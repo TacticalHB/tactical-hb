@@ -39,7 +39,7 @@ export type Product = {
     specs?: { labelEn: string; labelUk: string; value: string }[];
     statementEn?: string;
     statementUk?: string;
-    features?: { icon: "flame" | "clock" | "hands" | "wave"; titleEn: string; titleUk: string; textEn: string; textUk: string }[];
+    features?: { icon: "flame" | "clock" | "hands" | "wave" | "cloud" | "user" | "droplet" | "mesh" | "layers" | "shield" | "sparkle"; titleEn: string; titleUk: string; textEn: string; textUk: string }[];
   };
   tags: string[];
 };
@@ -151,6 +151,49 @@ export const products: Product[] = [
       { name: "Black", swatch: "#1c1c1e", image: "/images/hmd-op-black.png", price: 21 },
       { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 24 },
     ],
+    pdp: {
+      photos: [],
+      shortEn:
+        "The HMD OP is a heat-management device engineered for overpack smoking. Its fully non-stick, 100% PFOA-free surface repels tobacco residue for clean, consistent heat distribution and effortless cleaning — even through intensive sessions. Precision-built and durable, it comes in black and purple finishes for a refined, tactical aesthetic.",
+      shortUk:
+        "HMD OP — це пристрій для нагріву, розроблений для куріння в стилі overpack. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки тютюну, забезпечуючи чистий, рівномірний розподіл тепла та легке очищення навіть під час інтенсивних сесій. Виготовлений з точністю та розрахований на довговічність, доступний у чорному та фіолетовому кольорах.",
+      benefitsEn: [
+        "Non-stick surface repels residue — bold overpacks without sticking or bitterness",
+        "Optimized for overpacking — even heat for massive clouds and rich flavour",
+        "Smooth, controlled sessions with a clean, effortless draw",
+        "Durable and easy to clean — residue wipes straight off",
+        "Doubles as a regular TCT HMD, but built for overpack style",
+      ],
+      benefitsUk: [
+        "Антипригарна поверхня відштовхує залишки — сміливі overpack-набивки без прилипання та гіркоти",
+        "Оптимізований для overpack — рівномірне тепло для великих хмар і насиченого смаку",
+        "М'які, контрольовані сесії з чистою, легкою тягою",
+        "Довговічний і легкий в очищенні — залишки легко витираються",
+        "Працює і як звичайний TCT HMD, але створений для overpack-стилю",
+      ],
+      tipsEn: [
+        "Never cool the device with water",
+        "Use only soft, non-abrasive cloths for cleaning",
+        "Do not preheat the HMD using a charcoal lighter",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте пристрій водою",
+        "Для чищення використовуйте лише м'які неабразивні серветки",
+        "Не розігрівайте HMD на плитці для вугілля",
+      ],
+      specs: [
+        { labelEn: "Surface", labelUk: "Поверхня", value: "Fully non-stick" },
+        { labelEn: "Coating", labelUk: "Покриття", value: "100% PFOA FREE" },
+        { labelEn: "Finishes", labelUk: "Кольори", value: "Black & purple" },
+        { labelEn: "Material", labelUk: "Матеріал", value: "Tactical-grade inspired" },
+      ],
+      features: [
+        { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", textEn: "100% PFOA-free", textUk: "100% без PFOA" },
+        { icon: "flame", titleEn: "Overpack", titleUk: "Overpack", textEn: "Even heat", textUk: "Рівномірне тепло" },
+        { icon: "wave", titleEn: "Draw", titleUk: "Тяга", textEn: "Smooth & clean", textUk: "М'яка і чиста" },
+        { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", textEn: "Wipes clean", textUk: "Легко витерти" },
+      ],
+    },
     tags: ["non-stick", "PFOA free", "premium"],
   },
   {
@@ -230,6 +273,49 @@ export const products: Product[] = [
     featured: false,
     image: "/images/bowl-livanka-1-cut.png",
     gridImage: "/images/bowl-livanka-1-cut.png",
+    pdp: {
+      photos: ["/images/livanka-hero.png", "/images/livanka-2.png", "/images/livanka-3.png"],
+      colourShownEn: "Matte Black",
+      colourShownUk: "Матовий чорний",
+      shortEn:
+        "A hand-made bowl in natural clay, shaped for a bright, soft smoke that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
+      shortUk:
+        "Чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який дим протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
+      benefitsEn: [
+        "Bright and soft smoke for 35–40 minutes",
+        "Small internal rim that delays molasses",
+        "Optimal wall thickness prevents overheating",
+        "Designed for solo use",
+        "Heating time of approximately 5 minutes under wind cover (2–3 cubes)",
+      ],
+      benefitsUk: [
+        "Яскравий і м'який дим протягом 35–40 хвилин",
+        "Невеликий внутрішній бортик, що затримує патоку",
+        "Оптимальна товщина стінок запобігає перегріву",
+        "Створена для індивідуального використання",
+        "Час нагріву — близько 5 хвилин під вітрозахистом (2–3 кубики)",
+      ],
+      tipsEn: [
+        "Never cool the device with water",
+        "Handle with care — natural clay is fragile",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте виріб водою",
+        "Поводьтеся обережно — натуральна глина крихка",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
+        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", value: "10–12 g" },
+        { labelEn: "Weight", labelUk: "Вага", value: "—" },
+        { labelEn: "Measurements", labelUk: "Розміри", value: "—" },
+      ],
+      features: [
+        { icon: "cloud", titleEn: "Smoke", titleUk: "Дим", textEn: "Bright & soft", textUk: "Яскравий і м'який" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "35–40 minutes", textUk: "35–40 хвилин" },
+        { icon: "user", titleEn: "Made for", titleUk: "Формат", textEn: "Solo use", textUk: "Соло-сесії" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин" },
+      ],
+    },
     tags: ["clay", "handmade", "solo"],
   },
   {
@@ -251,6 +337,49 @@ export const products: Product[] = [
     tileTitle: "FTP BOWL",
     tileScale: 1.0,
     gridImage: "/images/ftp-bowl-tile.png",
+    pdp: {
+      photos: ["/images/ftp-hero.png", "/images/ftp-2.png", "/images/ftp-3.png"],
+      colourShownEn: "Matte Black",
+      colourShownUk: "Матовий чорний",
+      shortEn:
+        "The FTP is a hand-made clay phunnel with a clever 2-in-1 design and two interchangeable inserts. Drop in the aluminium sleeve for a true phunnel — no molasses down the stem, just clean, even airflow — or the stainless-steel mesh screen for the open, powerful draw of a killer bowl. Deep, rich flavour with an effortless, mild pull, whether you're chasing clouds or settling in for a long session.",
+      shortUk:
+        "FTP — це фанель ручної роботи з глини з розумним дизайном 2-в-1 та двома змінними вставками. Встановіть алюмінієву гільзу для справжнього фанеля — жодної патоки в шахті, лише чистий рівномірний потік повітря — або вставку зі сталевою сіткою для відкритої, потужної тяги killer-чаші. Глибокий насичений смак і легка м'яка тяга — чи то ви ганяєтеся за хмарами, чи налаштувалися на довгу сесію.",
+      benefitsEn: [
+        "2-in-1 design with interchangeable inserts",
+        "Classic Phunnel Mode — no molasses dripping down the stem",
+        "Tactical Mode with mesh screen — open draw and strong pull",
+        "Deep, rich flavour with effortless, mild draws",
+        "Suited to both big-cloud and long, chill sessions",
+      ],
+      benefitsUk: [
+        "Дизайн 2-в-1 зі змінними вставками",
+        "Класичний режим фанеля — патока не стікає в шахту",
+        "Тактичний режим із сіткою — відкрита тяга та потужний потік",
+        "Глибокий насичений смак і легка м'яка тяга",
+        "Підходить і для хмар, і для довгих спокійних сесій",
+      ],
+      tipsEn: [
+        "Never cool the device with water",
+        "Handle with care — natural clay is fragile",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте виріб водою",
+        "Поводьтеся обережно — натуральна глина крихка",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
+        { labelEn: "Design", labelUk: "Дизайн", value: "2-in-1 (interchangeable inserts)" },
+        { labelEn: "Insert 1", labelUk: "Вставка 1", value: "Aluminium phunnel sleeve" },
+        { labelEn: "Insert 2", labelUk: "Вставка 2", value: "Stainless steel mesh screen" },
+      ],
+      features: [
+        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", textEn: "2-in-1 inserts", textUk: "2-в-1 вставки" },
+        { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанель", textEn: "No molasses drip", textUk: "Без патоки в шахті" },
+        { icon: "mesh", titleEn: "Tactical", titleUk: "Тактичний", textEn: "Mesh screen", textUk: "Сталева сітка" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
+      ],
+    },
     tags: ["phunnel", "handmade"],
   },
   {

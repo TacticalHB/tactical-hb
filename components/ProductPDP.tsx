@@ -103,6 +103,20 @@ function FeatureIcon({ name }: { name: string }) {
       return <svg {...common}><circle cx="22" cy="22" r="13" /><path d="M16 22l4 4 8-9" /></svg>;
     case "wave":
       return <svg {...common}><path d="M8 26c4-8 8-8 12 0s8 8 12 0" /><path d="M8 18c4-8 8-8 12 0s8 8 12 0" opacity="0.4" /></svg>;
+    case "cloud":
+      return <svg {...common}><path d="M15 31a6 6 0 0 1 .5-12 8.5 8.5 0 0 1 16 1 5.5 5.5 0 0 1-1.5 11H15Z" /></svg>;
+    case "user":
+      return <svg {...common}><circle cx="22" cy="16" r="6" /><path d="M11 34c0-6.1 4.9-10 11-10s11 3.9 11 10" /></svg>;
+    case "droplet":
+      return <svg {...common}><path d="M22 9c4.5 6 7.5 9.5 7.5 14a7.5 7.5 0 0 1-15 0c0-4.5 3-8 7.5-14Z" /><path d="M18.5 24.5a3.5 3.5 0 0 0 3.5 3.5" opacity="0.45" /></svg>;
+    case "mesh":
+      return <svg {...common}><circle cx="22" cy="22" r="13" /><circle cx="22" cy="22" r="1.7" /><circle cx="16" cy="22" r="1.7" /><circle cx="28" cy="22" r="1.7" /><circle cx="22" cy="16" r="1.7" /><circle cx="22" cy="28" r="1.7" /></svg>;
+    case "layers":
+      return <svg {...common}><path d="M22 8l13 6.5-13 6.5-13-6.5Z" /><path d="M9 22l13 6.5 13-6.5" /><path d="M9 28.5l13 6.5 13-6.5" opacity="0.45" /></svg>;
+    case "shield":
+      return <svg {...common}><path d="M22 8l12 4v8c0 8-5.5 13-12 16-6.5-3-12-8-12-16v-8Z" /><path d="M16.5 22l4 4L28 18" /></svg>;
+    case "sparkle":
+      return <svg {...common}><path d="M22 9l2.6 8.4L33 20l-8.4 2.6L22 31l-2.6-8.4L11 20l8.4-2.6Z" /><path d="M31.5 28l1 3 3 1-3 1-1 3-1-3-3-1 3-1Z" opacity="0.6" /></svg>;
     default:
       return null;
   }
@@ -117,18 +131,24 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const pdp = product.pdp;
   const variants = product.variants;
   const photos = pdp?.photos ?? (variants ? variants.map((v) => v.image) : product.gridImage ? [product.gridImage] : []);
+  /* When there are no explicit pdp.photos, the variant images ARE the gallery,
+     so the photo index and variant index move together. When pdp.photos is set
+     (incl. an empty/blank gallery), the variant selector is price/finish-only. */
+  const galleryIsVariants = !!variants && !pdp?.photos;
 
   /* If arriving with ?variant=<name>, open that colour (e.g. Purple), not the default */
   const searchParams = useSearchParams();
-  const initialIdx = variants
+  const initialVariant = variants
     ? Math.max(0, variants.findIndex((v) => v.name.toLowerCase() === (searchParams.get("variant") ?? "").toLowerCase()))
     : 0;
-  const [idx, setIdx] = useState(initialIdx);
+  const [variantIdx, setVariantIdx] = useState(initialVariant);
+  const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
-  const price = variants ? variants[idx].price ?? product.price : product.price;
+  const price = variants ? variants[variantIdx].price ?? product.price : product.price;
 
   const selectVariant = (i: number) => {
-    setIdx(i);
+    setVariantIdx(i);
+    if (galleryIsVariants) setIdx(i);
     if (typeof window !== "undefined" && variants) {
       const url = new URL(window.location.href);
       url.searchParams.set("variant", variants[i].name);
@@ -188,7 +208,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           {/* Gallery: rail + main image */}
           <div className="flex-1 flex flex-col-reverse md:flex-row gap-3 lg:sticky lg:top-24 self-start w-full">
             {/* Thumbnail rail */}
-            {!variants && photos.length > 1 && (
+            {photos.length > 1 && (
               <div className="flex md:flex-col gap-2 md:max-h-[600px] md:overflow-y-auto shrink-0">
                 {photos.map((p, i) => (
                   <button
@@ -206,17 +226,26 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             )}
             {/* Main image */}
             <div ref={mainImgRef} className="relative flex-1 aspect-square rounded-[20px] overflow-hidden" style={{ background: "#f5f5f5" }}>
-              <Image
-                key={photos[idx]}
-                src={photos[idx]}
-                alt={name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                className="object-contain pdp-fade"
-              />
+              {photos.length > 0 ? (
+                <Image
+                  key={photos[idx]}
+                  src={photos[idx]}
+                  alt={name}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  className="object-contain pdp-fade"
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ color: "#c2c2c2" }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="15" rx="2" /><circle cx="8.5" cy="9.5" r="1.6" /><path d="M21 16l-5-5-9 8" />
+                  </svg>
+                  <span className="text-sm tracking-wide">{uk ? "Фото незабаром" : "Photos coming soon"}</span>
+                </div>
+              )}
               {/* prev / next */}
-              {!variants && photos.length > 1 && (
+              {photos.length > 1 && (
                 <div className="absolute bottom-4 right-4 flex gap-2">
                   {[-1, 1].map((d) => (
                     <button
@@ -246,7 +275,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             {variants && (
               <div className="mt-6">
                 <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
-                  {uk ? "Колір" : "Colour"}: <span style={{ color: "#111" }}>{variantLabel(variants[idx].name)}</span>
+                  {uk ? "Колір" : "Colour"}: <span style={{ color: "#111" }}>{variantLabel(variants[variantIdx].name)}</span>
                 </div>
                 <div className="flex gap-3">
                   {variants.map((v, i) => (
@@ -257,7 +286,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                       className="w-9 h-9 rounded-full transition-transform hover:scale-110"
                       style={{
                         background: v.swatch,
-                        boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
+                        boxShadow: i === variantIdx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
                       }}
                     />
                   ))}

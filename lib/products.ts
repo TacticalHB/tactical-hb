@@ -172,6 +172,47 @@ export const products: Product[] = [
     tileTitle: "KILLER BOWL",
     tileScale: 1.0,
     gridImage: "/images/killer-bowl-tile.png",
+    pdp: {
+      photos: [
+        "/images/killer-hero.png",
+        "/images/killer-2.png",
+        "/images/killer-3.png",
+      ],
+      colourShownEn: "Matte Black",
+      colourShownUk: "Матовий чорний",
+      shortEn:
+        "The classic shape of a hand-made Killer bowl in natural clay. A well-deserved name — your smoke is strong and rich, while the optimal wall thickness holds heat steadily without overheating your flavour, guaranteeing long sessions free of bitterness.",
+      shortUk:
+        "Класична форма killer-чаші ручної роботи з натуральної глини. Заслужена назва — дим міцний і насичений, а оптимальна товщина стінок стабільно утримує тепло, не перепалюючи смак, гарантуючи довгі сесії без гіркоти.",
+      benefitsEn: [
+        "Mildness of smoking with rich, consistent flavour",
+        "Extended session duration (70+ minutes with proper use)",
+        "Heating time of approximately 6 minutes under wind cover",
+      ],
+      benefitsUk: [
+        "М'якість куріння з насиченим, стабільним смаком",
+        "Подовжена тривалість сесії (70+ хвилин за правильного використання)",
+        "Час нагріву — близько 6 хвилин під вітрозахистом",
+      ],
+      tipsEn: [
+        "Never cool the device with water",
+        "Handle with care — natural clay is fragile",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте виріб водою",
+        "Поводьтеся обережно — натуральна глина крихка",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
+        { labelEn: "Surface", labelUk: "Поверхня", value: "Glazed black matte" },
+      ],
+      features: [
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & rich", textUk: "М'який і насичений" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "70+ minutes", textUk: "70+ хвилин" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+        { icon: "hands", titleEn: "Craft", titleUk: "Крафт", textEn: "Handmade", textUk: "Ручна робота" },
+      ],
+    },
     tags: ["clay", "handmade", "classic"],
   },
   {

@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/components/CartContext";
+import { AuthProvider } from "@/components/AuthContext";
 
 export default async function LocaleLayout({
   children,
@@ -23,6 +24,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <AuthProvider>
       <CartProvider>
         {/* White frame around the whole page (Apple-style grid frame) */}
         <div
@@ -34,6 +36,7 @@ export default async function LocaleLayout({
         <main className="flex-1">{children}</main>
         <Footer />
       </CartProvider>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }

@@ -80,10 +80,16 @@ export default function RegisterForm({ locale }: { locale: string }) {
     if (!terms) return setError(L.needTerms);
 
     setLoading(true);
-    const { data, error: vErr } = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "email" });
+    // New-signup OTPs verify as type "signup"; login/existing OTPs as "email".
+    // Try "email" first, fall back to "signup" so both cases work.
+    let verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "email" });
+    if (verify.error) {
+      verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "signup" });
+    }
+    const { data, error: vErr } = verify;
     if (vErr || !data.user) {
       setLoading(false);
-      return setError(vErr?.message || "Invalid code.");
+      return setError(vErr?.message || (uk ? "Невірний код." : "Invalid or expired code."));
     }
     const date_of_birth = `${dob.y.padStart(4, "0")}-${dob.m.padStart(2, "0")}-${dob.d.padStart(2, "0")}`;
     const { error: uErr } = await supabase.auth.updateUser({

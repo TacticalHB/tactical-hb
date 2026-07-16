@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/components/CartContext";
 import { AuthProvider } from "@/components/AuthContext";
+import { FavouritesProvider } from "@/components/FavouritesProvider";
+import { Toaster } from "sonner";
 
 export default async function LocaleLayout({
   children,
@@ -25,6 +27,7 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       <AuthProvider>
+      <FavouritesProvider locale={locale}>
       <CartProvider>
         {/* White frame around the whole page (Apple-style grid frame) */}
         <div
@@ -35,7 +38,9 @@ export default async function LocaleLayout({
         <Navbar locale={locale} />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Toaster position="bottom-center" richColors closeButton />
       </CartProvider>
+      </FavouritesProvider>
       </AuthProvider>
     </NextIntlClientProvider>
   );

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Product } from "@/lib/products";
+import HeartButton from "./HeartButton";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
@@ -20,7 +21,13 @@ export default function NikeProductCard({ product, locale }: { product: Product;
   const href = `/${locale}/products/${product.slug}`;
 
   return (
-    <div onMouseLeave={() => setIdx(0)}>
+    <div onMouseLeave={() => setIdx(0)} className="relative">
+      {/* Heart — sits above the image link so it toggles instead of navigating */}
+      <HeartButton
+        productId={product.slug}
+        className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full backdrop-blur-sm"
+        label={`Favourite ${name}`}
+      />
       {/* Image */}
       <Link href={href} className="block group">
         <div className="relative aspect-square overflow-hidden rounded-[20px]" style={{ background: "#f5f5f5" }}>

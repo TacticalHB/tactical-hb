@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
-import { getFavs, toggleFav as toggleFavStore, FAVS_EVENT } from "@/lib/favourites";
+import { useFavourites } from "@/hooks/useFavourites";
 
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
@@ -183,19 +183,10 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     benefits: uk ? "Ключові переваги" : "Key Benefits",
   };
 
-  /* favourites — shared store, kept in sync with the navbar menu */
-  const [fav, setFav] = useState(false);
-  useEffect(() => {
-    const sync = () => setFav(getFavs().includes(product.slug));
-    sync();
-    window.addEventListener(FAVS_EVENT, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(FAVS_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, [product.slug]);
-  const toggleFav = () => setFav(toggleFavStore(product.slug));
+  /* favourites — shared state: localStorage for guests, Supabase once signed in */
+  const { isFavourited, toggleFavourite } = useFavourites();
+  const fav = isFavourited(product.slug);
+  const toggleFav = () => toggleFavourite(product.slug);
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>

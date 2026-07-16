@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
-import { AUTH_COOKIE } from "./lib/site-auth";
+import { AUTH_COOKIE, SITE_GATE_ENABLED } from "./lib/site-auth";
 import { updateSession } from "./lib/supabase/middleware";
 
 const intlMiddleware = createMiddleware(routing);
@@ -17,14 +17,16 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Site-wide dev password gate (unchanged)
-  const authed = request.cookies.get(AUTH_COOKIE)?.value === "1";
-  if (!authed) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/unlock";
-    url.search = "";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+  // Site-wide dev password gate. Off unless SITE_GATE=on — see lib/site-auth.
+  if (SITE_GATE_ENABLED) {
+    const authed = request.cookies.get(AUTH_COOKIE)?.value === "1";
+    if (!authed) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/unlock";
+      url.search = "";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   // Locale routing, then refresh the Supabase auth session onto that response.

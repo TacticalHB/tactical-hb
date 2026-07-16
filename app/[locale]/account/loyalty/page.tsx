@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/supabase/require-user";
 import { DEFAULT_LOYALTY_CONFIG, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
+import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
 import LoyaltyDashboard from "@/components/account/LoyaltyDashboard";
 
 export default async function LoyaltyPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -11,7 +12,7 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
     supabase.from("loyalty_config").select("*").eq("id", 1).single(),
     supabase.from("orders").select("amount_eur").eq("user_id", uid),
     supabase.from("points_transactions").select("xp, reason, created_at, order_id").eq("user_id", uid).order("created_at", { ascending: false }),
-    supabase.from("vouchers").select("*").eq("user_id", uid).order("issued_at", { ascending: false }),
+    supabase.from("vouchers").select(VOUCHER_COLUMNS).eq("user_id", uid).order("issued_at", { ascending: false }),
   ]);
 
   const cfg: LoyaltyConfig = cfgRow
@@ -36,6 +37,21 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
   const lower = reached.length ? reached[reached.length - 1].spend_eur : 0;
   const progress = next ? Math.max(0, Math.min(1, (totalSpend - lower) / (next.spend_eur - lower))) : 1;
 
+  // Normalise numerics (Postgres numeric arrives as string) then split into the
+  // two account sections: unused (main) vs redeemed ("Used vouchers").
+  const allVouchers: Voucher[] = (vouchers ?? []).map((v) => ({
+    id: String(v.id),
+    code: String(v.code),
+    amount_eur: Number(v.amount_eur),
+    min_order_eur: Number(v.min_order_eur),
+    milestone_eur: Number(v.milestone_eur),
+    issued_at: String(v.issued_at),
+    expires_at: String(v.expires_at),
+    used_at: v.used_at ? String(v.used_at) : null,
+    used_order_id: v.used_order_id ? String(v.used_order_id) : null,
+  }));
+  const { activeVouchers, usedVouchers } = splitVouchers(allVouchers);
+
   return (
     <LoyaltyDashboard
       locale={locale}
@@ -47,13 +63,8 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
       next={next}
       progress={progress}
       points={(points ?? []).map((p) => ({ xp: Number(p.xp), reason: String(p.reason), created_at: String(p.created_at) }))}
-      vouchers={(vouchers ?? []).map((v) => ({
-        code: String(v.code),
-        amount_eur: Number(v.amount_eur),
-        min_order_eur: Number(v.min_order_eur),
-        status: String(v.status),
-        expires_at: String(v.expires_at),
-      }))}
+      activeVouchers={activeVouchers}
+      usedVouchers={usedVouchers}
     />
   );
 }

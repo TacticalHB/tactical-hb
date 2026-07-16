@@ -47,7 +47,9 @@ grant select on public.order_items to authenticated;
 --  EXAMPLE SEED DATA — put your email on the marked line, then run.
 --  Inserting orders also fires the loyalty trigger, so this awards XP and
 --  (crossing €100 total) issues a €10 voucher automatically.
-mariokiki109@gmail.com 
+select id into uid from auth.users
+where email = 'mariokiki109@gmail.com'     -- your real email here
+limit 1;
 do $$
 declare
   uid uuid;

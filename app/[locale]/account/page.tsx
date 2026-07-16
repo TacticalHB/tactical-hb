@@ -1,27 +1,23 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/require-user";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const uk = locale === "uk";
-  const supabase = await createClient();
-  // layout already guards auth; supabase is available here
-  const {
-    data: { user },
-  } = await supabase!.auth.getUser();
+  const { supabase, user } = await requireUser(locale);
 
-  const { data: profile } = await supabase!
+  const { data: profile } = await supabase
     .from("profiles")
     .select("first_name, surname, created_at")
-    .eq("id", user!.id)
+    .eq("id", user.id)
     .single();
 
   const name = profile?.first_name
     ? `${profile.first_name}${profile.surname ? " " + profile.surname : ""}`
-    : user!.email;
-  const initial = (profile?.first_name?.[0] || user!.email?.[0] || "?").toUpperCase();
+    : user.email;
+  const initial = (profile?.first_name?.[0] || user.email?.[0] || "?").toUpperCase();
 
-  const memberSince = new Date(profile?.created_at || user!.created_at).toLocaleDateString(
+  const memberSince = new Date(profile?.created_at || user.created_at).toLocaleDateString(
     uk ? "uk-UA" : "en-GB",
     { month: "long", year: "numeric" }
   );

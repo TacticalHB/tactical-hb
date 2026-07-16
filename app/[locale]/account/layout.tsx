@@ -1,7 +1,15 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "@/components/account/AccountNav";
 
+/**
+ * Account shell.
+ *
+ * No auth redirect here on purpose: /account/favourites is open to guests so
+ * they can see their locally-saved hearts and a sign-in CTA. Protected pages
+ * (Profile / Orders / Loyalty / Settings) call requireUser() themselves.
+ * The sidebar only renders for signed-in users — a guest on the favourites
+ * page gets a clean, full-width page instead of nav links they can't use.
+ */
 export default async function AccountLayout({
   children,
   params,
@@ -11,16 +19,12 @@ export default async function AccountLayout({
 }) {
   const { locale } = await params;
   const supabase = await createClient();
-  if (!supabase) redirect(`/${locale}/login`);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/login?redirect=/${locale}/account`);
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-6" style={{ background: "#ffffff" }}>
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12">
-        <AccountNav locale={locale} />
+        {user && <AccountNav locale={locale} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>

@@ -28,7 +28,9 @@ function Skeleton() {
 
 export default function FavouritesList({ locale }: { locale: string }) {
   const uk = locale === "uk";
-  const { favourites, isLoading, error, toggleFavourite } = useFavourites();
+  // isLoggedIn lets us show guests their local hearts + a sign-in CTA, instead
+  // of pretending they have nothing saved.
+  const { favourites, isLoading, error, isLoggedIn, toggleFavourite } = useFavourites();
   const { addToCart } = useCart();
 
   const items = favourites
@@ -45,7 +47,29 @@ export default function FavouritesList({ locale }: { locale: string }) {
     browse: uk ? "Переглянути товари" : "Browse products",
     remove: uk ? "Прибрати" : "Remove",
     add: uk ? "Додати в кошик" : "Add to bag",
+    guestTitle: uk ? "Збережено лише на цьому пристрої" : "Saved on this device only",
+    guestBody: uk
+      ? "Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях — те, що ви зберегли, перенесеться автоматично."
+      : "Create a free account to keep your favourites across devices — anything you've saved will move over automatically.",
+    createAccount: uk ? "Створити акаунт" : "Create account",
+    logIn: uk ? "Увійти" : "Log in",
   };
+
+  /* Guests aren't redirected away — they see their local hearts plus this nudge. */
+  const guestBanner = !isLoggedIn && !isLoading && (
+    <div className="rounded-2xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4" style={{ background: "var(--bg-soft)" }}>
+      <div className="flex-1">
+        <div className="text-sm font-semibold" style={{ color: "#111" }}>{L.guestTitle}</div>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{L.guestBody}</p>
+      </div>
+      <div className="flex gap-2 shrink-0">
+        <Link href={`/${locale}/register`} className="h-10 leading-[40px] px-5 rounded-full text-xs font-medium"
+          style={{ background: "#111", color: "#fff" }}>{L.createAccount}</Link>
+        <Link href={`/${locale}/login`} className="h-10 leading-[40px] px-5 rounded-full text-xs font-medium border"
+          style={{ borderColor: "var(--border-strong)", color: "#111" }}>{L.logIn}</Link>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -59,6 +83,8 @@ export default function FavouritesList({ locale }: { locale: string }) {
       {error && (
         <div className="mb-5 text-sm px-4 py-3 rounded-lg" style={{ background: "#fdecec", color: "#b42318" }}>{error}</div>
       )}
+
+      {guestBanner}
 
       {isLoading ? (
         <Skeleton />

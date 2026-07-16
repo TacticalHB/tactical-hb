@@ -1,20 +1,17 @@
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/require-user";
 import { DEFAULT_LOYALTY_CONFIG, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import LoyaltyDashboard from "@/components/account/LoyaltyDashboard";
 
 export default async function LoyaltyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase!.auth.getUser();
-  const uid = user!.id;
+  const { supabase, user } = await requireUser(locale);
+  const uid = user.id;
 
   const [{ data: cfgRow }, { data: orders }, { data: points }, { data: vouchers }] = await Promise.all([
-    supabase!.from("loyalty_config").select("*").eq("id", 1).single(),
-    supabase!.from("orders").select("amount_eur").eq("user_id", uid),
-    supabase!.from("points_transactions").select("xp, reason, created_at, order_id").eq("user_id", uid).order("created_at", { ascending: false }),
-    supabase!.from("vouchers").select("*").eq("user_id", uid).order("issued_at", { ascending: false }),
+    supabase.from("loyalty_config").select("*").eq("id", 1).single(),
+    supabase.from("orders").select("amount_eur").eq("user_id", uid),
+    supabase.from("points_transactions").select("xp, reason, created_at, order_id").eq("user_id", uid).order("created_at", { ascending: false }),
+    supabase.from("vouchers").select("*").eq("user_id", uid).order("issued_at", { ascending: false }),
   ]);
 
   const cfg: LoyaltyConfig = cfgRow

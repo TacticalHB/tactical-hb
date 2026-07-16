@@ -1,5 +1,8 @@
+import { requireUser } from "@/lib/supabase/require-user";
+
 export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  await requireUser(locale); // signed-in only
   const uk = locale === "uk";
   return (
     <div>

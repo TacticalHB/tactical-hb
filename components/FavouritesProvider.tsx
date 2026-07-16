@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { clearFavs, getFavs, setFavs, FAVS_EVENT } from "@/lib/favourites";
@@ -25,7 +26,8 @@ export type FavouritesCtx = {
   favourites: string[];
   isLoading: boolean;
   error: string | null;
-  isAuthed: boolean;
+  /** Components branch on this (e.g. the favourites page shows a guest CTA). */
+  isLoggedIn: boolean;
   isFavourited: (productId: string) => boolean;
   toggleFavourite: (productId: string) => Promise<void>;
 };
@@ -40,6 +42,7 @@ export function FavouritesProvider({
   locale: string;
 }) {
   const uk = locale === "uk";
+  const router = useRouter();
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
 
@@ -54,7 +57,48 @@ export function FavouritesProvider({
     failed: uk ? "Не вдалося зберегти. Спробуйте ще раз." : "Couldn't save. Please try again.",
     merged: (n: number) =>
       uk ? `${n} збережених товарів перенесено у ваш акаунт` : `${n} saved item${n === 1 ? "" : "s"} moved to your account`,
+    guestPush: uk
+      ? "Збережено локально. Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях."
+      : "Saved locally. Create a free account to keep your favourites across devices.",
+    createAccount: uk ? "Створити акаунт" : "Create account",
+    logIn: uk ? "Увійти" : "Log in",
   };
+
+  /**
+   * Guest "soft push": the heart still saved locally — this just nudges them to
+   * create an account so it syncs across devices. A fixed toast id means rapid
+   * hearting replaces the toast instead of stacking them up.
+   */
+  const softPush = useCallback(() => {
+    toast.custom(
+      (id) => (
+        <div
+          className="w-[340px] max-w-[calc(100vw-32px)] rounded-xl p-4"
+          style={{ background: "#fff", border: "1px solid var(--border)", boxShadow: "0 10px 34px rgba(0,0,0,0.18)" }}
+        >
+          <p className="text-[13px] leading-snug" style={{ color: "var(--ink)" }}>{T.guestPush}</p>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => { toast.dismiss(id); router.push(`/${locale}/register`); }}
+              className="h-9 px-4 rounded-full text-xs font-medium"
+              style={{ background: "var(--ink)", color: "#fff" }}
+            >
+              {T.createAccount}
+            </button>
+            <button
+              onClick={() => { toast.dismiss(id); router.push(`/${locale}/login`); }}
+              className="h-9 px-4 rounded-full text-xs font-medium border"
+              style={{ borderColor: "var(--border-strong)", color: "var(--ink)" }}
+            >
+              {T.logIn}
+            </button>
+          </div>
+        </div>
+      ),
+      { id: "guest-fav-push", duration: 6000 }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale, router]);
 
   /** Read the signed-in user's favourites from Supabase. */
   const fetchFromDb = useCallback(
@@ -178,9 +222,14 @@ export function FavouritesProvider({
 
       try {
         if (!userId || !supabase) {
-          // GUEST: persist to localStorage.
+          // GUEST: persist to localStorage only. Adding nudges them to sign up
+          // (their heart is already saved either way); removing just confirms.
           setFavs(next);
-        } else if (wasFav) {
+          if (wasFav) toast.success(T.removed);
+          else softPush();
+          return;
+        }
+        if (wasFav) {
           const { error } = await supabase.from("favourites").delete().eq("user_id", userId).eq("product_slug", productId);
           if (error) throw error;
         } else {
@@ -197,14 +246,14 @@ export function FavouritesProvider({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [favourites, userId, supabase]
+    [favourites, userId, supabase, softPush]
   );
 
   const value: FavouritesCtx = {
     favourites,
     isLoading,
     error,
-    isAuthed: !!userId,
+    isLoggedIn: !!userId,
     isFavourited,
     toggleFavourite,
   };

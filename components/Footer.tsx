@@ -1,9 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import CookieSettingsButton from "./CookieSettingsButton";
 
 export default function Footer() {
   const t = useTranslations("footer");
+  const locale = useLocale();
 
   return (
     <footer style={{ background: "var(--ink)", borderTop: "10px solid #ffffff" }}>
@@ -20,9 +22,17 @@ export default function Footer() {
         <div className="w-full pt-8 flex flex-col sm:flex-row items-center justify-between gap-3"
           style={{ borderTop: "1px solid var(--border-dark)" }}>
           <p className="text-xs tracking-wider" style={{ color: "#6a665e" }}>{t("tagline")}</p>
-          <p className="text-xs" style={{ color: "#6a665e" }}>
-            © {new Date().getFullYear()} Tactical HB. {t("rights")}
-          </p>
+          <div className="flex items-center gap-4">
+            {/* Reopen the granular cookie settings at any time */}
+            <CookieSettingsButton
+              locale={locale}
+              className="text-xs underline underline-offset-2 transition-opacity hover:opacity-70"
+              style={{ color: "#6a665e" }}
+            />
+            <p className="text-xs" style={{ color: "#6a665e" }}>
+              © {new Date().getFullYear()} Tactical HB. {t("rights")}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

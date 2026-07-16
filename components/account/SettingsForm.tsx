@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
+import { openCookieSettings } from "@/lib/cookie-consent";
 
 const pwOk = (pw: string) => pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw);
 
@@ -52,6 +53,11 @@ export default function SettingsForm({ locale }: { locale: string }) {
     updatePw: uk ? "Оновити пароль" : "Update password",
     comms: uk ? "Налаштування сповіщень" : "Communication Preferences",
     marketing: uk ? "Отримувати новини, пропозиції та переваги учасника" : "Emails about updates, offers and member benefits",
+    privacy: uk ? "Приватність" : "Privacy",
+    cookieBody: uk
+      ? "Керуйте тим, які файли cookie ми можемо використовувати. Необхідні cookie завжди увімкнені."
+      : "Manage which cookies we're allowed to use. Necessary cookies are always on.",
+    cookieBtn: uk ? "Налаштування cookie" : "Cookie settings",
     saved: uk ? "Збережено" : "Saved",
     pwUpdated: uk ? "Пароль оновлено" : "Password updated",
     pwWeak: uk ? "Пароль не відповідає вимогам." : "Password doesn't meet the requirements.",
@@ -156,6 +162,14 @@ export default function SettingsForm({ locale }: { locale: string }) {
           </button>
           {note("comms")}
         </div>
+      </Section>
+
+      <Section title={L.privacy}>
+        <p className="text-sm mb-4 max-w-md" style={{ color: "var(--text-muted)" }}>{L.cookieBody}</p>
+        {/* Reopens the same granular modal as the footer link */}
+        <button onClick={openCookieSettings} className={`${btn} border`} style={{ borderColor: "var(--border-strong)", color: "#111" }}>
+          {L.cookieBtn}
+        </button>
       </Section>
     </div>
   );

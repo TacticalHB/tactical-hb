@@ -8,6 +8,7 @@ import { CartProvider } from "@/components/CartContext";
 import { AuthProvider } from "@/components/AuthContext";
 import { FavouritesProvider } from "@/components/FavouritesProvider";
 import { Toaster } from "sonner";
+import CookieConsent from "@/components/CookieConsent";
 
 export default async function LocaleLayout({
   children,
@@ -39,6 +40,7 @@ export default async function LocaleLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <Toaster position="bottom-center" richColors closeButton />
+        <CookieConsent locale={locale} />
       </CartProvider>
       </FavouritesProvider>
       </AuthProvider>

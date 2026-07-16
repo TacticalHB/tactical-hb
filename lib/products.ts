@@ -414,3 +414,20 @@ export const featuredProducts = [
   bySlug("hmd-tct-op"),          // HMD TCT OP — grey
   bySlug("windcover-bomb-cap"),  // Windcover — sky blue
 ];
+
+/**
+ * Homepage "product moments" — one full-width band each, in scroll order.
+ *
+ * Deliberately three, not four: the homepage sells desire, /products sells
+ * range. Windcover is still featured on /products, just not given a band here.
+ *
+ * Every `image` below sits on a #f5f5f5 card (see ProductMoment): the bowls'
+ * photos are cut onto solid rgb(245,245,245), and hmd-op-purple is a
+ * transparent PNG. Both composite invisibly against that exact card colour —
+ * which is why the card colour is not negotiable without recutting photos.
+ */
+export const homeMoments = [
+  bySlug("bowl-killer"),   // killer-hero-v2.png  — baked #f5f5f5
+  bySlug("hmd-tct-op"),    // hmd-op-purple.png   — transparent
+  bySlug("bowl-phunnel"),  // ftp-hero.png        — baked #f5f5f5
+];

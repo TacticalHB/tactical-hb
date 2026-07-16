@@ -16,6 +16,18 @@ function getTimeLeft(): TimeLeft {
   };
 }
 
+/**
+ * Launch countdown, light treatment.
+ *
+ * Restraint is the design: ink numerals on the page's own background, hairline
+ * dividers instead of colons, no glow, no boxes, no accent colour. Seconds are
+ * deliberately muted — they're the part that manufactures urgency, and urgency
+ * reads as cheap. This should look like a stated fact, not a sales timer.
+ *
+ * Renders "––" until mounted: the server has no clock the client will agree
+ * with, so this sidesteps a hydration mismatch. tabular-nums stops the digits
+ * jittering the layout every second.
+ */
 export default function Countdown({ locale }: { locale: string }) {
   const [time, setTime] = useState<TimeLeft | null>(null);
 
@@ -27,39 +39,44 @@ export default function Countdown({ locale }: { locale: string }) {
 
   const labels =
     locale === "uk"
-      ? { days: "Дні", hours: "Год", minutes: "Хв", seconds: "Сек" }
-      : { days: "Days", hours: "Hrs", minutes: "Min", seconds: "Sec" };
+      ? { days: "Днів", hours: "Годин", minutes: "Хвилин", seconds: "Секунд" }
+      : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
   const units = [
-    { value: time?.days, label: labels.days },
-    { value: time?.hours, label: labels.hours },
-    { value: time?.minutes, label: labels.minutes },
-    { value: time?.seconds, label: labels.seconds },
+    { value: time?.days, label: labels.days, muted: false },
+    { value: time?.hours, label: labels.hours, muted: false },
+    { value: time?.minutes, label: labels.minutes, muted: false },
+    { value: time?.seconds, label: labels.seconds, muted: true },
   ];
 
   return (
-    <div className="flex gap-4 sm:gap-8">
+    <div className="flex items-stretch" role="timer">
       {units.map((unit, i) => (
-        <div key={unit.label} className="flex items-start gap-4 sm:gap-8">
-          <div className="text-center min-w-[3.5rem]">
-            <div className="led-digit font-display text-4xl sm:text-6xl leading-none">
-              {time === null ? "--" : String(unit.value).padStart(2, "0")}
+        <div key={unit.label} className="flex items-stretch">
+          {i > 0 && (
+            <div
+              className="w-px self-stretch mx-4 sm:mx-7"
+              style={{ background: "var(--border)" }}
+              aria-hidden="true"
+            />
+          )}
+          <div className="text-center min-w-[2.75rem] sm:min-w-[3.5rem]">
+            <div
+              className="font-display leading-none tabular-nums"
+              style={{
+                color: unit.muted ? "var(--text-faint)" : "var(--text)",
+                fontSize: "clamp(1.9rem, 4vw, 2.9rem)",
+              }}
+            >
+              {time === null ? "––" : String(unit.value).padStart(2, "0")}
             </div>
             <div
-              className="text-[0.65rem] tracking-[0.3em] uppercase mt-2"
-              style={{ color: "#6a665e" }}
+              className="text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
+              style={{ color: "var(--text-faint)" }}
             >
               {unit.label}
             </div>
           </div>
-          {i < units.length - 1 && (
-            <span
-              className="font-display text-4xl sm:text-6xl leading-none"
-              style={{ color: "var(--border-dark)" }}
-            >
-              :
-            </span>
-          )}
         </div>
       ))}
     </div>

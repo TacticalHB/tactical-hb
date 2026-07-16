@@ -130,7 +130,9 @@ begin
         (user_id, code, milestone_eur, amount_eur, min_order_eur, expires_at)
       values (
         new.user_id,
-        'TCT-' || upper(substr(encode(gen_random_bytes(5), 'hex'), 1, 8)),
+        -- core Postgres only: gen_random_bytes() is pgcrypto and lives in the
+        -- `extensions` schema, which this function's search_path can't see.
+        'TCT-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
         (m->>'spend_eur')::numeric,
         (m->>'voucher_eur')::numeric,
         cfg.min_order_eur,

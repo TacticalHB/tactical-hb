@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import Image from "next/image";
 import { getLocale } from "next-intl/server";
 import { homeMoments } from "@/lib/products";
 import ProductMoment from "@/components/ProductMoment";
@@ -80,37 +79,37 @@ function HomeContent({ locale }: { locale: string }) {
                 <Link href={`/${locale}/products`} className="pill-dark">
                   {t("cta_products")}
                 </Link>
-                <Link href={`/${locale}/wholesale`} className="moment-cta text-xs tracking-[0.18em] uppercase">
-                  {t("cta_wholesale")}
-                  <span className="moment-arrow" aria-hidden="true">
-                    →
-                  </span>
-                </Link>
               </div>
             </Reveal>
           </div>
 
-          {/* Product */}
+          {/* Vertical cinematic screen.
+              Same framing language as the promo band below (#000 + 20px
+              radius + overflow-hidden), turned portrait. The centre glow does
+              the job the pillarboxed video does down there: it stops a flat
+              black rectangle reading as a hole punched in the page. The mark
+              is /tct-logo.svg — already the white variant, so it needs no
+              filter, only a low opacity to sit back as a watermark. */}
           <Reveal delay={200}>
-            <div className="relative aspect-square max-w-[520px] mx-auto w-full">
-              {/* Grounding shadow — a cut-out with nothing beneath it reads as
-                  a sticker. This ellipse gives it a surface to sit on. */}
+            <div
+              className="hero-screen relative w-full max-w-[400px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden"
+              style={{ background: "#000000" }}
+            >
               <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-[26%] w-[58%] h-[7%] pointer-events-none"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(17,17,20,0.22) 0%, rgba(17,17,20,0.06) 45%, transparent 72%)",
-                  filter: "blur(7px)",
+                    "radial-gradient(ellipse 62% 42% at 50% 50%, rgba(255,255,255,0.055) 0%, transparent 72%)",
                 }}
                 aria-hidden="true"
               />
-              <Image
-                src="/images/hmd-op-black.png"
-                alt={uk ? "HMD TCT OP" : "HMD TCT OP"}
-                fill
-                sizes="(max-width: 768px) 90vw, 45vw"
-                priority
-                className="hero-product object-contain"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/tct-logo.svg"
+                alt=""
+                aria-hidden="true"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[54%] max-w-[220px]"
+                style={{ opacity: 0.09 }}
               />
             </div>
           </Reveal>

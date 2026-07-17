@@ -114,12 +114,14 @@ body {
    Homepage — light premium
    ============================================================ */
 
-/* ---- Hero product: barely-there drift, so the cut-out feels physical ---- */
-@keyframes heroDrift {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-9px); }
+/* ---- Hero screen: the vertical dark panel ----
+   Shadow only; no hover, no motion. It's a screen set into the page, not a
+   card you interact with. The tint is warm-neutral like the moment cards so
+   the two dark objects on the page cast the same light. */
+.hero-screen {
+  box-shadow: 0 32px 70px -28px rgba(17, 17, 20, 0.45),
+              0 2px 6px rgba(17, 17, 20, 0.06);
 }
-.hero-product { animation: heroDrift 7s ease-in-out infinite; }
 
 /* ---- Product moment card ----
    Long, soft eases: the lift should feel like the card is being noticed,
@@ -206,7 +208,6 @@ body {
 .notify-submit:hover:not(:disabled) { background: #000000; }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-product { animation: none; }
   .moment-card, .moment-photo, .moment-arrow, .pill-dark { transition: none; }
   .moment-card:hover { transform: none; }
   .moment-card:hover .moment-photo { transform: scale(var(--moment-scale, 1)); }

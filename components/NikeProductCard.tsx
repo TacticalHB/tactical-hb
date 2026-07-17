@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Product } from "@/lib/products";
 import HeartButton from "./HeartButton";
-import HmdMaterialSelector from "./HmdMaterialSelector";
+import HmdMaterialSelector, { materialUpcharge, type HmdMaterial } from "./HmdMaterialSelector";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
@@ -17,8 +17,13 @@ export default function NikeProductCard({ product, locale }: { product: Product;
 
   const [idx, setIdx] = useState(0);
 
+  // HMD material add-ons — additive, default nothing selected (base price).
+  const isHmd = product.category === "hmd";
+  const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
+
   const image = variants ? variants[idx].image : product.gridImage;
-  const price = variants ? variants[idx].price ?? product.price : product.price;
+  const basePrice = variants ? variants[idx].price ?? product.price : product.price;
+  const price = basePrice + (isHmd ? materialUpcharge(material) : 0);
   const href = `/${locale}/products/${product.slug}`;
 
   return (
@@ -85,8 +90,11 @@ export default function NikeProductCard({ product, locale }: { product: Product;
           </div>
         </Link>
 
-        {/* HMD-only material selector (Rimowa style). UI-only for now. */}
-        {product.category === "hmd" && <HmdMaterialSelector locale={locale} />}
+        {/* HMD-only material selector (Rimowa style). Additive add-ons that
+            fold into the live price above; not wired to cart/URL yet. */}
+        {isHmd && (
+          <HmdMaterialSelector value={material} onChange={setMaterial} locale={locale} />
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 /* ---------------------------------------------------------------------------
    Rimowa-style material selector for HMD product cards.
 
@@ -51,6 +53,7 @@ export default function HmdMaterialSelector({
   locale: string;
 }) {
   const uk = locale === "uk";
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
   const label = uk ? "Комплектація" : "Configuration";
   const names = OPTIONS.filter((o) => value[o.key]).map((o) => (uk ? o.uk : o.en));
   const summary = names.length ? names.join(" + ") : uk ? "Базова" : "Base";
@@ -73,11 +76,18 @@ export default function HmdMaterialSelector({
               aria-label={`${name} (+€${price.toFixed(2)})`}
               title={`${name} · +€${price.toFixed(2)}`}
               onClick={() => onChange({ ...value, [o.key]: !active })}
+              onMouseEnter={() => setHoverKey(o.key)}
+              onMouseLeave={() => setHoverKey(null)}
               className="grid place-items-center w-[30px] h-[30px] rounded-[5px] transition-colors"
               style={{
                 background: "#ffffff",
                 color: active ? "#111111" : "#9a9a9e",
-                border: active ? "1px solid #111111" : "1px solid #d9d9d9",
+                // Hover activates the ink frame on unselected swatches;
+                // the selected state (below) is unchanged. transition-colors
+                // smooths the border-colour change.
+                border: active
+                  ? "1px solid #111111"
+                  : `1px solid ${hoverKey === o.key ? "#111111" : "#d9d9d9"}`,
                 // Rimowa's selected swatch: a thin ink ring floating just
                 // outside the square (1px white gap, then 1px ink).
                 boxShadow: active ? "0 0 0 2px #ffffff, 0 0 0 3px #111111" : "none",

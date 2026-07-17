@@ -128,8 +128,10 @@ function HomeContent({ locale }: { locale: string }) {
           the page reads as a deliberate object rather than a slab. */}
       <section className="page-container py-10 md:py-16">
         <Reveal>
+          {/* Capped back to an inset panel with air around it — full-container
+              width made it read as a full-bleed slab rather than an object. */}
           <div
-            className="relative overflow-hidden rounded-[20px] aspect-video"
+            className="max-w-6xl mx-auto relative overflow-hidden rounded-[20px] aspect-video"
             style={{ background: "#000000" }}
           >
             {/* blurred ambient fill (same video, scaled + blurred behind) */}
@@ -164,8 +166,12 @@ function HomeContent({ locale }: { locale: string }) {
       <Bestsellers locale={locale} />
 
       {/* ================= ABOUT ================= */}
-      <section className="py-24 md:py-32" style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="page-container grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <section className="pb-24 md:pb-32">
+        <div className="page-container">
+          {/* Subtle inset divider — same 1px var(--border) as the one before the
+              countdown, contained rather than a full-bleed edge-to-edge line. */}
+          <div className="h-px w-full mb-24 md:mb-32" style={{ background: "var(--border)" }} />
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
           <Reveal>
             <div className="max-w-md">
               <div className="flex items-center gap-4 mb-6">
@@ -221,6 +227,7 @@ function HomeContent({ locale }: { locale: string }) {
               </div>
             </div>
           </Reveal>
+          </div>
         </div>
       </section>
     </div>

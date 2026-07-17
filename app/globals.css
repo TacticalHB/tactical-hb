@@ -143,6 +143,35 @@ body {
   transform: scale(calc(var(--moment-scale, 1) * 1.04));
 }
 
+/* ---- Bestsellers card (Bang & Olufsen: float, white-on-hover, name underline) ---- */
+.bestseller {
+  background: transparent;
+  transition: background 0.45s ease, box-shadow 0.45s ease, transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.bestseller:hover {
+  background: #ffffff;                 /* the white panel rises behind the product */
+  box-shadow: 0 26px 55px -26px rgba(17, 17, 20, 0.22);
+  transform: translateY(-5px);
+}
+.bestseller-photo {
+  transform: scale(var(--bs-scale, 1));
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.bestseller:hover .bestseller-photo {
+  transform: scale(calc(var(--bs-scale, 1) * 1.04));
+}
+/* Name underlines on hover; offset keeps it elegant, not heavy. */
+.bestseller-name {
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color 0.3s ease;
+}
+.bestseller:hover .bestseller-name { border-color: var(--text); }
+.bestseller-view { color: var(--text-muted); transition: color 0.3s ease; }
+.bestseller:hover .bestseller-view { color: var(--text); }
+.bestseller-arrow { transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.bestseller:hover .bestseller-arrow { transform: translateX(4px); }
+
 /* ---- Text CTA with a sliding arrow ---- */
 .moment-cta {
   color: var(--text);
@@ -208,6 +237,9 @@ body {
 .notify-submit:hover:not(:disabled) { background: #000000; }
 
 @media (prefers-reduced-motion: reduce) {
+  .bestseller, .bestseller-photo, .bestseller-arrow { transition: none; }
+  .bestseller:hover { transform: none; }
+  .bestseller:hover .bestseller-photo { transform: scale(var(--bs-scale, 1)); }
   .moment-card, .moment-photo, .moment-arrow, .pill-dark { transition: none; }
   .moment-card:hover { transform: none; }
   .moment-card:hover .moment-photo { transform: scale(var(--moment-scale, 1)); }

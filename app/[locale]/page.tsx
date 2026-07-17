@@ -1,27 +1,10 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
-import { homeMoments } from "@/lib/products";
-import ProductMoment from "@/components/ProductMoment";
+import Bestsellers from "@/components/Bestsellers";
 import Countdown from "@/components/Countdown";
 import NotifyForm from "@/components/NotifyForm";
 import Reveal from "@/components/Reveal";
-
-/**
- * Measured product fill (bounding box ÷ frame) for the three moment photos:
- *   bowl-killer   54.6% wide × 75.7% tall  — tall bowl
- *   hmd-tct-op    76.3% wide × 38.1% tall  — flat ring, little vertical mass
- *   bowl-phunnel  48.9% wide × 82.3% tall  — tallest
- *
- * The cards are identical squares, so raw object-contain leaves the ring
- * looking lost and FTP looking oversized. These nudges even out visual weight;
- * they're eyeballed against those numbers, not arbitrary.
- */
-const MOMENT_SCALE: Record<string, number> = {
-  "bowl-killer": 1,
-  "hmd-tct-op": 1.12,
-  "bowl-phunnel": 0.93,
-};
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -177,41 +160,8 @@ function HomeContent({ locale }: { locale: string }) {
         </Reveal>
       </section>
 
-      {/* ================= PRODUCT MOMENTS ================= */}
-      <div className="pt-16 md:pt-24">
-        <Reveal>
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex items-center gap-4">
-              <span className="w-10 h-px" style={{ background: "var(--border-strong)" }} />
-              <span
-                className="text-[0.6rem] tracking-[0.35em] uppercase"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {t("featured_tag")}
-              </span>
-            </div>
-          </div>
-        </Reveal>
-
-        {homeMoments.map((product, i) => (
-          <ProductMoment
-            key={product.id}
-            product={product}
-            locale={locale}
-            index={i + 1}
-            flip={i % 2 === 1}
-            scale={MOMENT_SCALE[product.slug] ?? 1}
-          />
-        ))}
-
-        <Reveal>
-          <div className="max-w-6xl mx-auto px-6 pb-24 md:pb-32 flex justify-center">
-            <Link href={`/${locale}/products`} className="pill-outline">
-              {uk ? "Уся колекція" : "See the full collection"}
-            </Link>
-          </div>
-        </Reveal>
-      </div>
+      {/* ================= BESTSELLERS ================= */}
+      <Bestsellers locale={locale} />
 
       {/* ================= ABOUT ================= */}
       <section className="py-24 md:py-32 px-6" style={{ borderTop: "1px solid var(--border)" }}>

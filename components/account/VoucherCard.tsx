@@ -46,7 +46,7 @@ export default function VoucherCard({
 
   const badge =
     state === "active"
-      ? { text: L.active, bg: "#f8f880", fg: "#111" }
+      ? { text: L.active, bg: "var(--accent)", fg: "#111" }
       : state === "used"
       ? { text: L.used, bg: "var(--ink)", fg: "#fff" }
       : { text: L.expired, bg: "var(--bg-soft)", fg: "var(--text-muted)" };

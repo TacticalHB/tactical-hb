@@ -88,7 +88,7 @@ export default function LoyaltyDashboard({
       {/* Hero card (dark + yellow, Gymshark-style) */}
       <div className="rounded-3xl px-7 py-9 sm:px-10 sm:py-12 text-center" style={{ background: "var(--ink)" }}>
         <div className="text-[11px] tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>{L.title}</div>
-        <div className="font-display leading-none tabular-nums" style={{ color: "#f8f880", fontSize: "clamp(3.5rem,12vw,6rem)" }}>
+        <div className="font-display leading-none tabular-nums" style={{ color: "var(--accent)", fontSize: "clamp(3.5rem,12vw,6rem)" }}>
           {xp.toLocaleString(uk ? "uk-UA" : "en-GB")}
           <span className="text-[0.28em] align-top ml-2" style={{ color: "rgba(255,255,255,0.6)" }}>{L.xp}</span>
         </div>
@@ -102,16 +102,16 @@ export default function LoyaltyDashboard({
                 <span style={{ color: "rgba(255,255,255,0.6)" }}>{money(next.spend_eur)}</span>
               </div>
               <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <div className="h-full rounded-full transition-[width] duration-[1100ms] ease-out" style={{ width: `${barW * 100}%`, background: "#f8f880" }} />
+                <div className="h-full rounded-full transition-[width] duration-[1100ms] ease-out" style={{ width: `${barW * 100}%`, background: "var(--accent)" }} />
               </div>
               <div className="text-sm mt-3" style={{ color: "#fff" }}>
-                {money(toNext)} {L.toNext} — <span style={{ color: "#f8f880" }}>{L.voucherWorth(money(next.voucher_eur))}</span>
+                {money(toNext)} {L.toNext} — <span style={{ color: "var(--accent)" }}>{L.voucherWorth(money(next.voucher_eur))}</span>
               </div>
             </>
           ) : (
             <div className="py-2">
-              <div className="h-2.5 rounded-full" style={{ background: "#f8f880" }} />
-              <div className="text-sm mt-3 font-medium" style={{ color: "#f8f880" }}>{L.maxTier}</div>
+              <div className="h-2.5 rounded-full" style={{ background: "var(--accent)" }} />
+              <div className="text-sm mt-3 font-medium" style={{ color: "var(--accent)" }}>{L.maxTier}</div>
             </div>
           )}
         </div>

@@ -17,11 +17,11 @@ function AboutContent() {
 
   return (
     <div style={{ background: "var(--bg)" }}>
-      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
+      <div className="relative overflow-hidden pt-36 pb-20" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
         <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
           <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>ABOUT</span>
         </div>
-        <div className="max-w-7xl mx-auto relative">
+        <div className="page-container relative">
           <Reveal>
             <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("story_tag")}</span>
             <h1 className="font-display text-5xl md:text-7xl max-w-3xl" style={{ color: "var(--text)" }}>{t("story_title")}</h1>
@@ -29,7 +29,7 @@ function AboutContent() {
         </div>
       </div>
 
-      <section className="max-w-7xl mx-auto px-6 py-24">
+      <section className="page-container py-24">
         <div className="grid md:grid-cols-2 gap-16 items-start">
           <Reveal>
             <div className="flex flex-col gap-6 text-sm md:text-base leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -43,7 +43,7 @@ function AboutContent() {
               style={{ background: "var(--ink)" }}>
               <span className="font-display text-[9rem] leading-none select-none" style={{ color: "rgba(255,255,255,0.04)" }}>TCT</span>
               <div className="absolute bottom-8 left-8">
-                <div className="text-xs tracking-[0.3em] uppercase mb-2" style={{ color: "var(--gold-bright)" }}>Ukraine</div>
+                <div className="text-xs tracking-[0.3em] uppercase mb-2" style={{ color: "var(--accent)" }}>Ukraine</div>
                 <div className="font-display text-3xl" style={{ color: "#f4f3f0" }}>Premium Craft</div>
               </div>
             </div>
@@ -51,8 +51,8 @@ function AboutContent() {
         </div>
       </section>
 
-      <section className="py-24 px-6" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
-        <div className="max-w-7xl mx-auto">
+      <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
+        <div className="page-container">
           <Reveal>
             <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("values_tag")}</span>
             <h2 className="font-display text-5xl md:text-6xl mb-14" style={{ color: "var(--text)" }}>{t("values_title")}</h2>

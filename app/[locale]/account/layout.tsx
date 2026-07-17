@@ -22,8 +22,8 @@ export default async function AccountLayout({
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-6" style={{ background: "#ffffff" }}>
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12">
+    <div className="min-h-screen pt-24 pb-20 page-container" style={{ background: "#ffffff" }}>
+      <div className="flex flex-col md:flex-row gap-8 md:gap-12">
         {user && <AccountNav locale={locale} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>

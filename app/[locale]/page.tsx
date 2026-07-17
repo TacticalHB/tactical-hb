@@ -24,7 +24,7 @@ function HomeContent({ locale }: { locale: string }) {
           shouty section. The product photo is a transparent cut-out, so it
           floats directly on the page — no panel, no frame. */}
       <section className="relative min-h-screen pt-16 flex flex-col">
-        <div className="flex-1 w-full max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8 md:gap-12 items-center py-12 md:py-0">
+        <div className="flex-1 w-full page-container grid md:grid-cols-2 gap-8 md:gap-12 items-center py-12 md:py-0">
           {/* Copy */}
           <div>
             <Reveal>
@@ -75,7 +75,7 @@ function HomeContent({ locale }: { locale: string }) {
               filter, only a low opacity to sit back as a watermark. */}
           <Reveal delay={200}>
             <div
-              className="hero-screen relative w-full max-w-[400px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden"
+              className="hero-screen relative w-full max-w-[480px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden"
               style={{ background: "#000000" }}
             >
               <div
@@ -91,7 +91,7 @@ function HomeContent({ locale }: { locale: string }) {
                 src="/tct-logo.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[54%] max-w-[220px]"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[54%] max-w-[264px]"
                 style={{ opacity: 0.09 }}
               />
             </div>
@@ -100,7 +100,7 @@ function HomeContent({ locale }: { locale: string }) {
 
         {/* Hero footer — launch countdown + notify */}
         <Reveal delay={480}>
-          <div className="w-full max-w-7xl mx-auto px-6 pb-12 md:pb-14">
+          <div className="w-full page-container pb-12 md:pb-14">
             <div className="h-px w-full mb-8" style={{ background: "var(--border)" }} />
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
               <div>
@@ -126,10 +126,10 @@ function HomeContent({ locale }: { locale: string }) {
       {/* ================= PROMO VIDEO =================
           Inset as a rounded panel with air around it, so the one dark block on
           the page reads as a deliberate object rather than a slab. */}
-      <section className="px-6 py-10 md:py-16">
+      <section className="page-container py-10 md:py-16">
         <Reveal>
           <div
-            className="max-w-6xl mx-auto relative overflow-hidden rounded-[20px] aspect-video"
+            className="relative overflow-hidden rounded-[20px] aspect-video"
             style={{ background: "#000000" }}
           >
             {/* blurred ambient fill (same video, scaled + blurred behind) */}
@@ -164,8 +164,8 @@ function HomeContent({ locale }: { locale: string }) {
       <Bestsellers locale={locale} />
 
       {/* ================= ABOUT ================= */}
-      <section className="py-24 md:py-32 px-6" style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <section className="py-24 md:py-32" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="page-container grid md:grid-cols-2 gap-12 md:gap-20 items-center">
           <Reveal>
             <div className="max-w-md">
               <div className="flex items-center gap-4 mb-6">

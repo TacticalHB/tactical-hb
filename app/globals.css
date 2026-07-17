@@ -9,11 +9,19 @@
   /* Dark accents */
   --ink: #111114;
   --ink-2: #1a1a1d;
-  /* Brand accent — electric yellow (used on dark surfaces + as fills).
-     On light surfaces the pale yellow is illegible as text, so --gold maps
+  /* Header/footer atmosphere — a soft dark gradient, not pure black */
+  --fog: linear-gradient(to bottom, #2a2d33, #1c1f24);
+  /* Brand accent — burnished brass (dark surfaces + fills).
+     On light surfaces, pale brass is illegible as text, so --gold maps
      to dark ink; accents on light backgrounds render dark for legibility. */
-  --gold: #111114;        /* accent on light surfaces -> dark ink */
-  --gold-bright: #f8f880; /* brand yellow: on dark + button/badge fills */
+  --gold: #111114;           /* accent on light surfaces -> dark ink */
+  --accent: #C4A35A;         /* burnished brass: on dark + button/badge fills */
+  --accent-hover: #B08F4A;
+  --accent-rgb: 196, 163, 90;
+  --accent-ember-bright-rgb: 228, 210, 160;
+  /* Layout */
+  --container-max: 1680px;
+  --page-padding: clamp(1.25rem, 3vw, 3.5rem);
   /* Text */
   --text: #17160f;
   --text-muted: #6c6860;
@@ -42,7 +50,14 @@ body {
   letter-spacing: 0.03em;
 }
 
-::selection { background: var(--gold-bright); color: #111114; }
+::selection { background: var(--accent); color: #111114; }
+
+.page-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--page-padding);
+}
 
 /* ---- Scroll-reveal animation ---- */
 .reveal {
@@ -250,7 +265,7 @@ body {
 .smoke-bg {
   background-color: var(--ink);
   background-image:
-    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(214,150,70,0.07), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(var(--accent-rgb), 0.07), transparent 60%),
     radial-gradient(ellipse 60% 45% at 85% 90%, rgba(120,110,150,0.06), transparent 60%),
     radial-gradient(ellipse 50% 60% at 50% 50%, rgba(255,255,255,0.025), transparent 70%);
 }
@@ -264,17 +279,17 @@ body {
 .btn-dark:hover { background: #000; letter-spacing: 0.12em; }
 
 .btn-gold {
-  background: var(--gold-bright);
+  background: var(--accent);
   color: var(--ink);
   transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
-.btn-gold:hover { background: #eaea5c; letter-spacing: 0.12em; }
+.btn-gold:hover { background: var(--accent-hover); letter-spacing: 0.12em; }
 
 /* ---- Nav (dark) ---- */
 .nav-link { color: #9a978f; transition: color 0.22s ease; }
-.nav-link:hover { color: var(--gold-bright); }
+.nav-link:hover { color: var(--accent); }
 .nav-lang { color: #9a978f; border-color: var(--border-dark); transition: color 0.22s ease, border-color 0.22s ease; }
-.nav-lang:hover { color: var(--gold-bright); border-color: var(--gold-bright); }
+.nav-lang:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ---- Form fields (light) ---- */
 .field {
@@ -301,13 +316,13 @@ body {
   outline: none;
   transition: border-color 0.22s ease;
 }
-.field-dark:focus { border-color: var(--gold-bright); }
+.field-dark:focus { border-color: var(--accent); }
 .field-dark::placeholder { color: #6a665e; }
 
 /* ---- Links ---- */
 .link-gold { color: var(--gold); border-color: var(--gold); transition: opacity 0.22s ease; }
 .link-gold:hover { opacity: 0.6; }
-.link-gold-bright { color: var(--gold-bright); border-color: var(--gold-bright); transition: opacity 0.22s ease; }
+.link-gold-bright { color: var(--accent); border-color: var(--accent); transition: opacity 0.22s ease; }
 .link-gold-bright:hover { opacity: 0.7; }
 
 /* ---- Contact card ---- */

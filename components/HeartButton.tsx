@@ -55,7 +55,7 @@ export default function HeartButton({
         width={size}
         height={size}
         viewBox="0 0 24 24"
-        fill={filled ? (onDark ? "#f8f880" : "#111") : "none"}
+        fill={filled ? (onDark ? "var(--accent)" : "#111") : "none"}
         stroke={filled && !onDark ? "#111" : stroke}
         strokeWidth="1.6"
         className="transition-colors"

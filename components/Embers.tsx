@@ -38,6 +38,10 @@ export default function Embers({
     let raf = 0;
     let running = true;
 
+    const root = getComputedStyle(document.documentElement);
+    const accentRgb = root.getPropertyValue("--accent-rgb").trim() || "196, 163, 90";
+    const accentBrightRgb = root.getPropertyValue("--accent-ember-bright-rgb").trim() || "228, 210, 160";
+
     const spawn = (initial: boolean): Particle => {
       const ember = Math.random() < 0.7;
       const bright = ember && Math.random() < 0.18;
@@ -80,10 +84,10 @@ export default function Embers({
 
         if (p.ember) {
           ctx.shadowBlur = p.bright ? 10 : 6;
-          ctx.shadowColor = "rgba(214,150,70,0.9)";
+          ctx.shadowColor = `rgba(${accentRgb},0.9)`;
           ctx.fillStyle = p.bright
-            ? `rgba(255,210,150,${a})`
-            : `rgba(220,160,85,${a})`;
+            ? `rgba(${accentBrightRgb},${a})`
+            : `rgba(${accentRgb},${a})`;
         } else {
           ctx.shadowBlur = 0;
           ctx.fillStyle = `rgba(190,190,196,${a})`;

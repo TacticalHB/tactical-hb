@@ -12,7 +12,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
       <div className="smoke-bg aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center">
         {/* soft spotlight glow */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.10) 0%, transparent 65%)" }} />
+          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(var(--accent-rgb),0.10) 0%, transparent 65%)" }} />
 
         {hasPhoto ? (
           <Image
@@ -26,7 +26,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
           <>
             <span className="product-card-watermark font-display text-6xl tracking-widest select-none"
               style={{ color: "rgba(255,255,255,0.05)" }}>TCT</span>
-            <div className="product-card-accent h-px absolute bottom-6" style={{ background: "var(--gold-bright)" }} />
+            <div className="product-card-accent h-px absolute bottom-6" style={{ background: "var(--accent)" }} />
           </>
         )}
       </div>

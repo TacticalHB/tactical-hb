@@ -57,7 +57,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
-      <div className="px-6 md:px-10 lg:px-14 pt-8 pb-24">
+      <div className="page-container pt-8 pb-24">
         {/* Top bar */}
         <div className="flex items-end justify-between pb-5 border-b" style={{ borderColor: "#e5e5e5" }}>
           <h1 className="text-xl md:text-2xl font-medium">

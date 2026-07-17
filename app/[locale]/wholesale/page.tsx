@@ -17,11 +17,11 @@ function WholesaleContent() {
 
   return (
     <div style={{ background: "var(--bg)" }}>
-      <div className="relative overflow-hidden pt-36 pb-20 px-6" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
+      <div className="relative overflow-hidden pt-36 pb-20" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
         <div className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none overflow-hidden">
           <span className="font-display text-[16vw] leading-none select-none" style={{ color: "rgba(23,22,15,0.035)" }}>WHOLESALE</span>
         </div>
-        <div className="max-w-7xl mx-auto relative">
+        <div className="page-container relative">
           <Reveal>
             <h1 className="font-display text-6xl md:text-8xl" style={{ color: "var(--text)" }}>{t("title")}</h1>
             <p className="mt-4 text-sm max-w-md" style={{ color: "var(--text-muted)" }}>{t("subtitle")}</p>
@@ -29,7 +29,7 @@ function WholesaleContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-16">
+      <div className="page-container py-20 grid md:grid-cols-2 gap-16">
         <Reveal>
           <WholesaleForm />
         </Reveal>

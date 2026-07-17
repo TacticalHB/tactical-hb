@@ -12,7 +12,7 @@ export default async function UnlockPage({
     >
       <div className="w-full max-w-sm text-center">
         <div className="font-display text-3xl tracking-widest mb-8" style={{ color: "#f4f3f0" }}>
-          TACTICAL <span style={{ color: "#f8f880" }}>HB</span>
+          TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
         </div>
         <p className="text-sm mb-8" style={{ color: "#9a978f" }}>
           This site is currently in development.
@@ -32,8 +32,7 @@ export default async function UnlockPage({
           />
           <button
             type="submit"
-            className="font-display text-lg tracking-widest py-3"
-            style={{ background: "#f8f880", color: "#111114" }}
+            className="btn-gold font-display text-lg tracking-widest py-3"
           >
             Enter
           </button>

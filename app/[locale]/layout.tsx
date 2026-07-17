@@ -30,12 +30,6 @@ export default async function LocaleLayout({
       <AuthProvider>
       <FavouritesProvider locale={locale}>
       <CartProvider>
-        {/* White frame around the whole page (Apple-style grid frame) */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-[100]"
-          style={{ border: "10px solid #ffffff" }}
-        />
         <Navbar locale={locale} />
         <main className="flex-1">{children}</main>
         <Footer />

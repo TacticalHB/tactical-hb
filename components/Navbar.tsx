@@ -59,7 +59,7 @@ export default function Navbar({ locale }: { locale: string }) {
         <span
           key={bump}
           className="cart-badge absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-semibold tabular-nums"
-          style={{ background: "var(--gold-bright)", color: "var(--ink)" }}
+          style={{ background: "var(--accent)", color: "var(--ink)" }}
         >
           {count}
         </span>
@@ -71,7 +71,7 @@ export default function Navbar({ locale }: { locale: string }) {
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50"
-        style={{ background: "var(--ink)", borderBottom: "1px solid var(--border-dark)" }}
+        style={{ background: "var(--fog)", borderBottom: "1px solid var(--border-dark)" }}
       >
         {/* TCT logo — pinned to the very left edge of the page (Nike-style) */}
         <Link
@@ -83,9 +83,9 @@ export default function Navbar({ locale }: { locale: string }) {
           <img src="/tct-logo.svg" alt="TCT" className="h-9 w-9 sm:h-10 sm:w-10" />
         </Link>
 
-        <div className="max-w-7xl mx-auto pl-16 sm:pl-20 md:pl-24 pr-6 h-16 flex items-center justify-between">
+        <div className="page-container pl-14 sm:pl-16 md:pl-20 h-16 flex items-center justify-between">
           <Link href={`/${locale}`} className="hidden md:block font-display text-2xl tracking-widest" style={{ color: "#f4f3f0" }}>
-            TACTICAL <span style={{ color: "var(--gold-bright)" }}>HB</span>
+            TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-9">
@@ -121,7 +121,7 @@ export default function Navbar({ locale }: { locale: string }) {
 
         {menuOpen && (
           <div className="md:hidden border-t px-6 py-6 flex flex-col gap-5"
-            style={{ background: "var(--ink-2)", borderColor: "var(--border-dark)" }}>
+            style={{ background: "#1c1f24", borderColor: "var(--border-dark)" }}>
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
                 className="nav-link text-xs tracking-[0.2em] uppercase">

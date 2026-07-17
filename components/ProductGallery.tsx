@@ -13,7 +13,7 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
       <div className="smoke-bg aspect-[4/5] relative overflow-hidden mb-4 flex items-center justify-center">
         <Embers density={0.7} />
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(212,177,94,0.12) 0%, transparent 65%)" }} />
+          style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(var(--accent-rgb),0.12) 0%, transparent 65%)" }} />
         <Image
           src={photos[selected]}
           alt={name}

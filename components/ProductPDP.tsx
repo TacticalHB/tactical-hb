@@ -193,7 +193,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
       <Banner locale={locale} />
 
       {/* ---- Main PDP grid ---- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 md:pt-12 pb-16">
+      <div className="page-container pt-8 md:pt-12 pb-16">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
 
           {/* Gallery: rail + main image */}
@@ -354,7 +354,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
       </div>
 
       {/* ---- Brand slogan statement (every product) + optional features band ---- */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+      <div className="page-container pb-20">
         <h2 className="font-display text-4xl md:text-6xl tracking-wide leading-[0.95]" style={{ color: "#111" }}>
           {SITE_SLOGAN}
         </h2>

@@ -31,7 +31,7 @@ export default function Bestsellers({ locale }: { locale: string }) {
   const seeAll = uk ? "Уся колекція" : "See the full collection";
 
   return (
-    <section className="px-6 py-24 md:py-32">
+    <section className="page-container py-24 md:py-32">
       <div className="max-w-5xl mx-auto">
         <Reveal>
           {/* Deliberately NOT the bold condensed display face — the brief asks

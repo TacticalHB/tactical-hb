@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Product } from "@/lib/products";
 import HeartButton from "./HeartButton";
+import HmdMaterialSelector from "./HmdMaterialSelector";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
@@ -83,6 +84,9 @@ export default function NikeProductCard({ product, locale }: { product: Product;
             €{price.toFixed(2)}
           </div>
         </Link>
+
+        {/* HMD-only material selector (Rimowa style). UI-only for now. */}
+        {product.category === "hmd" && <HmdMaterialSelector locale={locale} />}
       </div>
     </div>
   );

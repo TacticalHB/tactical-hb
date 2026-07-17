@@ -1,17 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { readSupabaseEnv } from "./env";
 
 /** Server Supabase client for Server Components / Route Handlers / Server Actions.
-    Reads & refreshes the auth session from cookies. */
+    Reads & refreshes the auth session from cookies.
+    Returns null when the config is missing OR malformed — see ./env. */
 export async function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const env = readSupabaseEnv();
+  if (!env) return null;
 
   const cookieStore = await cookies();
   return createServerClient(
-    url,
-    key,
+    env.url,
+    env.key,
     {
       cookies: {
         getAll() {

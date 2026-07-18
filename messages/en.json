@@ -78,7 +78,8 @@
     "form_success": "Thank you! We'll reply shortly.",
     "instagram": "Instagram",
     "telegram": "Telegram",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "form_error": "Something went wrong. Please try again or email us directly."
   },
   "footer": {
     "follow": "Follow us",

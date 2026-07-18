@@ -7,13 +7,34 @@ export default function ContactForm() {
   const t = useTranslations("contact");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const data = new FormData(e.currentTarget);
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSubmitted(true);
+    setFailed(false);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: String(data.get("name") ?? ""),
+          email: String(data.get("email") ?? ""),
+          message: String(data.get("message") ?? ""),
+        }),
+      });
+      if (!res.ok) throw new Error(`contact endpoint returned ${res.status}`);
+      setSubmitted(true);
+    } catch (err) {
+      // Leave the form mounted and filled — losing a long message on a failed
+      // send is worse than the failure itself.
+      console.error("[contact] submit failed:", err);
+      setFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -44,6 +65,11 @@ export default function ContactForm() {
         </label>
         <textarea name="message" rows={6} required className="field resize-none" />
       </div>
+      {failed && (
+        <p role="alert" className="text-sm tracking-wide" style={{ color: "#b42318" }}>
+          {t("form_error")}
+        </p>
+      )}
       <button type="submit" disabled={loading} className="btn-gold font-display text-lg tracking-widest py-4 disabled:opacity-60">
         {loading ? "..." : t("form_submit")}
       </button>

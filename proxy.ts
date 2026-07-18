@@ -35,5 +35,8 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|.*\\..*).*)"],
+  // `api` is excluded: next-intl would locale-prefix API routes, turning a
+  // POST to /api/contact into a 307 to /uk/api/contact that never reaches the
+  // handler. Route handlers have no locale and must be left alone.
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };

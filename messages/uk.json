@@ -78,7 +78,8 @@
     "form_success": "Дякуємо! Ми відповімо найближчим часом.",
     "instagram": "Instagram",
     "telegram": "Telegram",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "form_error": "Щось пішло не так. Спробуйте ще раз або напишіть нам напряму."
   },
   "footer": {
     "follow": "Слідкуйте за нами",

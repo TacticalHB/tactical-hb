@@ -1,31 +1,22 @@
-import { formatBoth, type Money } from "@/lib/currency";
+import { formatMoney, currencyForLocale, type Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
-   One price, both currencies.
+   One price, one currency.
 
-   The locale's currency is the headline (УКР → UAH, ENG → EUR) and the other
-   sits next to it in small muted text, so both are always visible without
-   competing. Every price on the site renders through this so they can never
-   drift apart in format.
+   The currency follows the site language (УКР → UAH, ENG → EUR) and only
+   changes when the language does — never both at once, never side by side.
+   Every price renders through this so formats can't drift apart.
 --------------------------------------------------------------------------- */
 
 export default function Price({
   money,
   locale,
   className = "",
-  secondaryClassName = "",
 }: {
   money: Money;
   locale: string;
-  /** styling for the headline amount — inherits the caller's size/colour */
+  /** inherits the caller's size/colour */
   className?: string;
-  secondaryClassName?: string;
 }) {
-  const { primary, secondary } = formatBoth(money, locale);
-  return (
-    <span className={`inline-flex items-baseline gap-2 ${className}`}>
-      <span>{primary}</span>
-      <span className={`text-[0.8em] font-normal opacity-60 ${secondaryClassName}`}>{secondary}</span>
-    </span>
-  );
+  return <span className={className}>{formatMoney(money, currencyForLocale(locale))}</span>;
 }

@@ -1,9 +1,9 @@
 /* ---------------------------------------------------------------------------
    Dual-currency pricing (UAH + EUR).
 
-   Currency follows the site language: УКР → UAH, ENG → EUR. The chosen
-   currency is the headline price and the other is shown alongside in small
-   text, so both are always visible.
+   Currency follows the site language: УКР → UAH, ENG → EUR. One currency is
+   shown at a time — never both at once — and it changes only when the language
+   does.
 
    Two kinds of amount:
 
@@ -47,11 +47,4 @@ export function formatMoney(m: Money, currency: Currency): string {
   return currency === "UAH"
     ? `₴${Math.round(m.uah).toLocaleString("uk-UA")}`
     : `€${m.eur.toFixed(2)}`;
-}
-
-/** The headline price for a locale, plus the other currency for secondary display. */
-export function formatBoth(m: Money, locale: string): { primary: string; secondary: string } {
-  const primary = currencyForLocale(locale);
-  const other: Currency = primary === "UAH" ? "EUR" : "UAH";
-  return { primary: formatMoney(m, primary), secondary: formatMoney(m, other) };
 }

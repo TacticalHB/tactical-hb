@@ -273,7 +273,12 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           <div className="w-full lg:w-[380px] shrink-0">
             <h1 className="text-2xl font-medium leading-tight">{name}</h1>
             <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
-            <p className="text-lg font-medium mt-4"><Price money={price} locale={locale} /></p>
+            {/* Single currency here — the headline price reads cleaner on the
+                detail page. Currency follows the language (УКР → ₴, ENG → €).
+                Listing/cart/search still show both side by side. */}
+            <p className="text-lg font-medium mt-4">
+              <Price money={price} locale={locale} />
+            </p>
 
             {/* Colour variants — swatch selector (Black / Purple …) */}
             {variants && (

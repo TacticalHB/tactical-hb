@@ -4,18 +4,19 @@ import { useState } from "react";
 import { addMoney, currencyForLocale, formatMoney, money, type Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
-   Rimowa-style material selector for HMD product cards.
+   HMD material add-ons, in two presentations:
 
-   Two square swatches, light/white, hairline border, with a thin offset ring
-   on a selected one (Rimowa's "floating outline"). The options have no colour,
-   so they're told apart by a minimal glyph — a filled disc for the lid (a
-   solid cover) and a ring for the rubber (an O-ring).
+   • "pdp"  — Rimowa's list selector: a bordered panel of full-width rows, name
+              on the left and price on the right, selected rows filled.
+   • "card" — compact square swatches for the products grid, where a full-width
+              list would swamp the tile. Told apart by a minimal glyph: a filled
+              disc for the lid (a solid cover), a ring for the rubber (an O-ring).
 
    ADDITIVE, not mutually exclusive: each option is an independent toggle, so
    none / one / both can be on. These are paid add-ons, so the module owns the
-   upcharges and exposes materialUpcharge() for the card to fold into its
-   live price. Controlled component — the card holds the state so the price
-   and the swatches never disagree.
+   upcharges and exposes materialUpcharge() for the parent to fold into its live
+   price. Controlled component — the parent holds the state so the price and the
+   selector can never disagree.
 --------------------------------------------------------------------------- */
 
 export type HmdMaterial = { lid: boolean; rubber: boolean };
@@ -69,8 +70,8 @@ export default function HmdMaterialSelector({
   onToggle: (key: keyof HmdMaterial) => void;
   locale: string;
   /** "card" = compact swatches for the products grid.
-      "pdp"  = larger Rimowa-style squares sized to match the colour swatches
-               already on the detail page (36px, gap-3, 13px label). */
+      "pdp"  = Rimowa's list selector: a bordered panel of full-width rows,
+               name on the left and price on the right, selected row filled. */
   variant?: "card" | "pdp";
 }) {
   const uk = locale === "uk";
@@ -80,15 +81,77 @@ export default function HmdMaterialSelector({
   const names = OPTIONS.filter((o) => value[o.key]).map((o) => (uk ? o.uk : o.en));
   const summary = names.length ? names.join(" + ") : uk ? "Базова" : "Base";
 
+  /* ---- PDP: Rimowa-style option list ----
+     Rimowa's is a single-select dropdown; ours must allow none/one/both, so the
+     rows stay open and toggle independently, with a tick marking the chosen
+     ones. Everything else — the bordered panel, full-width rows, name left /
+     detail right, filled selected row — follows the reference. */
+  if (isPdp) {
+    return (
+      <div>
+        <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
+          {label}: <span style={{ color: "#111111" }}>{summary}</span>
+        </div>
+        <div
+          className="rounded-[4px] overflow-hidden"
+          style={{ border: "1px solid #cacacc" }}
+          role="group"
+          aria-label={label}
+        >
+          {OPTIONS.map((o, i) => {
+            const active = value[o.key];
+            const name = uk ? o.uk : o.en;
+            const price = formatMoney(MATERIAL_PRICE[o.key], currencyForLocale(locale));
+            const hovered = hoverKey === o.key;
+            return (
+              <button
+                key={o.key}
+                type="button"
+                role="checkbox"
+                aria-checked={active}
+                onClick={() => onToggle(o.key)}
+                onMouseEnter={() => setHoverKey(o.key)}
+                onMouseLeave={() => setHoverKey(null)}
+                className="w-full flex items-center justify-between px-5 py-4 text-[15px] text-left transition-colors"
+                style={{
+                  background: active ? "#f0f0f0" : hovered ? "#f7f7f7" : "#ffffff",
+                  borderTop: i > 0 ? "1px solid #e4e4e6" : "none",
+                  color: "#111111",
+                  fontWeight: active ? 500 : 400,
+                }}
+              >
+                <span>{name}</span>
+                <span
+                  className="flex items-center gap-2 text-[14px]"
+                  style={{ color: active ? "#111111" : "#707072" }}
+                >
+                  +{price}
+                  {active && (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path
+                        d="M2.5 7.5l3 3 6-6"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={isPdp ? "" : "mt-3"}>
-      <div
-        className={isPdp ? "text-[13px] mb-2" : "text-[11px] tracking-[0.08em] uppercase mb-1.5"}
-        style={{ color: isPdp ? "#707072" : "#8a8a8e" }}
-      >
+    <div className="mt-3">
+      <div className="text-[11px] tracking-[0.08em] uppercase mb-1.5" style={{ color: "#8a8a8e" }}>
         {label}: <span style={{ color: "#111111" }}>{summary}</span>
       </div>
-      <div className={`flex ${isPdp ? "gap-3" : "gap-1.5"}`} role="group" aria-label={label}>
+      <div className="flex gap-1.5" role="group" aria-label={label}>
         {OPTIONS.map((o) => {
           const active = value[o.key];
           const name = uk ? o.uk : o.en;
@@ -103,7 +166,7 @@ export default function HmdMaterialSelector({
               onClick={() => onToggle(o.key)}
               onMouseEnter={() => setHoverKey(o.key)}
               onMouseLeave={() => setHoverKey(null)}
-              className={`grid place-items-center transition-colors ${isPdp ? "w-9 h-9 rounded-[4px]" : "w-[30px] h-[30px] rounded-[5px]"}`}
+              className="grid place-items-center w-[30px] h-[30px] rounded-[5px] transition-colors"
               style={{
                 background: "#ffffff",
                 color: active ? "#111111" : "#9a9a9e",
@@ -112,13 +175,13 @@ export default function HmdMaterialSelector({
                 // smooths the border-colour change.
                 border: active
                   ? "1px solid #111111"
-                  : `1px solid ${hoverKey === o.key ? "#111111" : isPdp ? "#d6d6d6" : "#d9d9d9"}`,
+                  : `1px solid ${hoverKey === o.key ? "#111111" : "#d9d9d9"}`,
                 // Rimowa's selected swatch: a thin ink ring floating just
                 // outside the square (1px white gap, then 1px ink).
                 boxShadow: active ? "0 0 0 2px #ffffff, 0 0 0 3px #111111" : "none",
               }}
             >
-              <Glyph kind={o.glyph} size={isPdp ? 16 : 14} />
+              <Glyph kind={o.glyph} />
             </button>
           );
         })}

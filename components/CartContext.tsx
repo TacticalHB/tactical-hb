@@ -2,13 +2,14 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { products, Product } from "@/lib/products";
+import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
 
 export type CartLine = { slug: string; qty: number };
 
 type CartCtx = {
   lines: CartLine[];
   count: number;
-  subtotal: number;
+  subtotal: Money;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
   addToCart: (product: Product, sourceEl?: HTMLElement | null) => void;
@@ -52,10 +53,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [lines]);
 
   const count = lines.reduce((n, l) => n + l.qty, 0);
-  const subtotal = lines.reduce((s, l) => {
+  // Subtotal carries both currencies so the drawer can show either without
+  // re-converting (and without the two ever disagreeing).
+  const subtotal = lines.reduce<Money>((s, l) => {
     const p = products.find((p) => p.slug === l.slug);
-    return s + (p ? p.price * l.qty : 0);
-  }, 0);
+    return p ? addMoney(s, scaleMoney(money(p.price, p.priceUah), l.qty)) : s;
+  }, money(0, 0));
 
   const addToCart = useCallback((product: Product, sourceEl?: HTMLElement | null) => {
     // Pick the currently VISIBLE cart icon (nav renders both a desktop and a

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { products } from "@/lib/products";
+import Price from "@/components/Price";
+import { money } from "@/lib/currency";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useCart } from "@/components/CartContext";
 
@@ -111,7 +113,7 @@ export default function FavouritesList({ locale }: { locale: string }) {
                 <Link href={`/${locale}/products/${p.slug}`} className="block text-[15px] font-medium hover:opacity-70" style={{ color: "#111" }}>
                   {uk ? p.nameUk : p.nameEn}
                 </Link>
-                <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>€{p.price.toFixed(2)}</div>
+                <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></div>
                 <div className="flex items-center gap-3 mt-3">
                   <button
                     onClick={(e) => {

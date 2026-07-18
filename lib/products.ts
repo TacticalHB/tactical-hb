@@ -1,4 +1,4 @@
-export type Variant = { name: string; swatch: string; image: string; price?: number };
+export type Variant = { name: string; swatch: string; image: string; price?: number; priceUah?: number };
 
 export type Product = {
   id: string;
@@ -10,6 +10,8 @@ export type Product = {
   descriptionUk: string;
   descriptionEn: string;
   price: number;
+  /** Hand-set UAH price (not a conversion of `price`) — see lib/currency.ts */
+  priceUah: number;
   currency: string;
   category: "hmd" | "bowl" | "accessory";
   featured: boolean;
@@ -54,7 +56,8 @@ export const products: Product[] = [
     taglineEn: "Classic aluminium. Excellent performance.",
     descriptionUk: "Класична версія з алюмінію для відмінної продуктивності. Рівномірний розподіл тепла без екстремальних температур. Включає кришку.",
     descriptionEn: "Classic aluminium version for excellent performance. Uniform heat distribution without temperature extremes. Includes lid.",
-    price: 14.5,
+    price: 29,
+    priceUah: 1080,
     currency: "EUR",
     category: "hmd",
     featured: true,
@@ -70,7 +73,8 @@ export const products: Product[] = [
     taglineEn: "Surface-treated craft edition.",
     descriptionUk: "Видання A.Craft з обробкою поверхні алюмінію. Без кришки. Унікальна тактична естетика.",
     descriptionEn: "A.Craft edition with aluminium surface treatment. Without lid. Unique tactical aesthetic.",
-    price: 12,
+    price: 24,
+    priceUah: 900,
     currency: "EUR",
     category: "hmd",
     featured: true,
@@ -138,7 +142,8 @@ export const products: Product[] = [
     taglineEn: "100% non-stick surface.",
     descriptionUk: "Повністю антипригарне покриття (100% без PFOA). Запобігає прилипанню тютюну, легке очищення. Доступний у фіолетовому та чорному кольорах.",
     descriptionEn: "Fully non-stick surface treatment (100% PFOA FREE). Prevents tobacco adhesion, easy cleaning. Available in purple and black.",
-    price: 21,
+    price: 30,
+    priceUah: 1150,
     currency: "EUR",
     category: "hmd",
     featured: true,
@@ -148,8 +153,8 @@ export const products: Product[] = [
     tileScale: 1.5,
     gridImage: "/images/hmd-op-black.png",
     variants: [
-      { name: "Black", swatch: "#1c1c1e", image: "/images/hmd-op-black.png", price: 21 },
-      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 24 },
+      { name: "Black", swatch: "#1c1c1e", image: "/images/hmd-op-black.png", price: 30, priceUah: 1150 },
+      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1200 },
     ],
     pdp: {
       photos: [],
@@ -205,7 +210,8 @@ export const products: Product[] = [
     taglineEn: "Handmade natural clay.",
     descriptionUk: "Класична форма ручної роботи з натуральної глини. Сильний та насичений дим. Оптимальна товщина стінок для стабільного утримання тепла.",
     descriptionEn: "Classic handmade bowl from natural clay. Strong and rich smoke. Optimal wall thickness for steady heat retention.",
-    price: 6.2,
+    price: 11,
+    priceUah: 420,
     currency: "EUR",
     category: "bowl",
     featured: true,
@@ -267,7 +273,8 @@ export const products: Product[] = [
     taglineEn: "Bright, soft solo sessions.",
     descriptionUk: "Ручна робота з натуральної глини. Яскравий та м'який дим 35–40 хвилин. Для індивідуального використання. Ємність 10–12 г.",
     descriptionEn: "Handmade from natural clay. Bright and soft smoke for 35–40 minutes. For solo use. Capacity 10–12g.",
-    price: 5.5,
+    price: 10,
+    priceUah: 370,
     currency: "EUR",
     category: "bowl",
     featured: false,
@@ -327,7 +334,8 @@ export const products: Product[] = [
     taglineEn: "Handmade natural clay.",
     descriptionUk: "Класичний фанель з унікальною вставкою. Неймовірна насиченість та м'якість диму. Для тих, хто цінує процес.",
     descriptionEn: "Classic phunnel with unique insert. Incredible richness and mildness of smoke. For those who value the process.",
-    price: 7.3,
+    price: 13,
+    priceUah: 500,
     currency: "EUR",
     category: "bowl",
     featured: true,
@@ -391,7 +399,8 @@ export const products: Product[] = [
     taglineEn: "Rechargeable timer windcover.",
     descriptionUk: "Type-C зарядка. Вбудований таймер з налаштуванням хвилин та секунд. Час нагріву 6 хвилин під вітрозахистом.",
     descriptionEn: "Type-C rechargeable. Built-in timer with minute and second settings. Heating time 6 min under wind cover.",
-    price: 22,
+    price: 23,
+    priceUah: 850,
     currency: "EUR",
     category: "accessory",
     featured: true,

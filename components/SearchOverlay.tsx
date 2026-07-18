@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { products } from "@/lib/products";
+import Price from "./Price";
+import { money } from "@/lib/currency";
 
 export default function SearchOverlay({
   open,
@@ -102,7 +104,7 @@ export default function SearchOverlay({
                             <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>
                             <div className="text-xs tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>{p.category}</div>
                           </div>
-                          <span className="font-display text-lg" style={{ color: "var(--gold)" }}>€{p.price.toFixed(2)}</span>
+                          <span className="font-display text-lg" style={{ color: "var(--gold)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></span>
                         </button>
                       </li>
                     );

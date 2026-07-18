@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Product } from "@/lib/products";
 import HeartButton from "./HeartButton";
 import HmdMaterialSelector, { materialUpcharge, type HmdMaterial } from "./HmdMaterialSelector";
+import Price from "./Price";
+import { addMoney, money } from "@/lib/currency";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
@@ -22,8 +24,10 @@ export default function NikeProductCard({ product, locale }: { product: Product;
   const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
 
   const image = variants ? variants[idx].image : product.gridImage;
-  const basePrice = variants ? variants[idx].price ?? product.price : product.price;
-  const price = basePrice + (isHmd ? materialUpcharge(material) : 0);
+  const basePrice = variants
+    ? money(variants[idx].price ?? product.price, variants[idx].priceUah ?? product.priceUah)
+    : money(product.price, product.priceUah);
+  const price = isHmd ? addMoney(basePrice, materialUpcharge(material)) : basePrice;
   const href = `/${locale}/products/${product.slug}`;
 
   return (
@@ -86,14 +90,18 @@ export default function NikeProductCard({ product, locale }: { product: Product;
             </div>
           )}
           <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
-            €{price.toFixed(2)}
+            <Price money={price} locale={locale} />
           </div>
         </Link>
 
         {/* HMD-only material selector (Rimowa style). Additive add-ons that
             fold into the live price above; not wired to cart/URL yet. */}
         {isHmd && (
-          <HmdMaterialSelector value={material} onChange={setMaterial} locale={locale} />
+          <HmdMaterialSelector
+            value={material}
+            onToggle={(k) => setMaterial((prev) => ({ ...prev, [k]: !prev[k] }))}
+            locale={locale}
+          />
         )}
       </div>
     </div>

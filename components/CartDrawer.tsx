@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { products } from "@/lib/products";
 import { useCart } from "./CartContext";
+import Price from "./Price";
+import { money } from "@/lib/currency";
 
 export default function CartDrawer({ locale }: { locale: string }) {
   const { cartOpen, setCartOpen, lines, subtotal, changeQty, removeLine, count } = useCart();
@@ -79,7 +81,7 @@ export default function CartDrawer({ locale }: { locale: string }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>
-                      <div className="font-display text-base" style={{ color: "var(--gold)" }}>€{p.price.toFixed(2)}</div>
+                      <div className="font-display text-base" style={{ color: "var(--gold)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></div>
                       <div className="flex items-center gap-3 mt-1.5">
                         <div className="flex items-center border" style={{ borderColor: "var(--border-strong)", borderRadius: 6 }}>
                           <button onClick={() => changeQty(l.slug, -1)} className="px-2 py-0.5 text-sm" style={{ color: "var(--text-muted)" }} aria-label="Decrease">–</button>
@@ -103,7 +105,7 @@ export default function CartDrawer({ locale }: { locale: string }) {
           <div className="px-6 py-5 border-t" style={{ borderColor: "var(--border)" }}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>{t.subtotal}</span>
-              <span className="font-display text-2xl" style={{ color: "var(--text)" }}>€{subtotal.toFixed(2)}</span>
+              <span className="font-display text-2xl" style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
             </div>
             <button
               disabled

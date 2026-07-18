@@ -6,6 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
+import HmdMaterialSelector, { materialUpcharge, type HmdMaterial } from "./HmdMaterialSelector";
+import Price from "./Price";
+import { addMoney, money } from "@/lib/currency";
 
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
@@ -144,7 +147,14 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const [variantIdx, setVariantIdx] = useState(initialVariant);
   const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
-  const price = variants ? variants[variantIdx].price ?? product.price : product.price;
+  // HMD material add-ons — additive, default nothing selected (base price).
+  const isHmd = product.category === "hmd";
+  const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
+
+  const basePrice = variants
+    ? money(variants[variantIdx].price ?? product.price, variants[variantIdx].priceUah ?? product.priceUah)
+    : money(product.price, product.priceUah);
+  const price = isHmd ? addMoney(basePrice, materialUpcharge(material)) : basePrice;
 
   const selectVariant = (i: number) => {
     setVariantIdx(i);
@@ -263,7 +273,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           <div className="w-full lg:w-[380px] shrink-0">
             <h1 className="text-2xl font-medium leading-tight">{name}</h1>
             <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
-            <p className="text-lg font-medium mt-4">€{price.toFixed(2)}</p>
+            <p className="text-lg font-medium mt-4"><Price money={price} locale={locale} /></p>
 
             {/* Colour variants — swatch selector (Black / Purple …) */}
             {variants && (
@@ -285,6 +295,18 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     />
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* HMD add-ons — additive, folded into the live price above */}
+            {isHmd && (
+              <div className="mt-6">
+                <HmdMaterialSelector
+            value={material}
+            onToggle={(k) => setMaterial((prev) => ({ ...prev, [k]: !prev[k] }))}
+            locale={locale}
+            variant="pdp"
+          />
               </div>
             )}
 

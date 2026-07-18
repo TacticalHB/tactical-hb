@@ -194,10 +194,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
       {/* ---- Main PDP grid ---- */}
       <div className="page-container pt-8 md:pt-12 pb-16">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Grid capped + centred: the page container is 1680px, which pushed the
+            flex-1 gallery to ~858px and let the image dominate. 1100px puts the
+            main image at ~604px (1100 − 380 info − 48 gap − 68 rail). */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-[1100px] mx-auto">
 
           {/* Gallery: rail + main image */}
-          <div className="flex-1 flex flex-col-reverse md:flex-row gap-3 lg:sticky lg:top-24 self-start w-full">
+          <div className="flex-1 flex flex-col-reverse md:flex-row gap-3 lg:sticky lg:top-24 self-start w-full mx-auto max-w-[620px] lg:max-w-none">
             {/* Thumbnail rail */}
             {photos.length > 1 && (
               <div className="flex md:flex-col gap-2 md:max-h-[600px] md:overflow-y-auto shrink-0">
@@ -224,7 +227,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   alt={name}
                   fill
                   priority
-                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  sizes="(max-width: 1024px) 100vw, 620px"
                   className="object-contain pdp-fade"
                 />
               ) : (

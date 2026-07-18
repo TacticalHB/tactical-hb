@@ -2,15 +2,46 @@
 
 import { useMemo, useState } from "react";
 import { products as ALL, Product } from "@/lib/products";
+import { currencyForLocale, type Currency } from "@/lib/currency";
 import NikeProductCard from "./NikeProductCard";
 
 type CatKey = "all" | "hmd" | "bowl" | "accessory";
 
-const PRICE_BANDS: { key: string; test: (p: Product) => boolean }[] = [
-  { key: "u10", test: (p) => p.price < 10 },
-  { key: "10-20", test: (p) => p.price >= 10 && p.price <= 20 },
-  { key: "20+", test: (p) => p.price > 20 },
+/**
+ * Price bands, held in BOTH currencies so the filter matches the prices the
+ * shopper is actually looking at — and so the labels can never quote a
+ * currency the page isn't using.
+ *
+ * Re-cut for the current catalogue (€10–€32 / ₴370–₴1200): the previous
+ * "Under €10" band matched nothing once prices rose, leaving a filter that
+ * always returned an empty grid. These split the range 3 / 2 / 2, and the two
+ * currencies group the products identically.
+ *
+ * Ranges are [lo, hi) — no product sits exactly on a boundary.
+ */
+type Band = { key: string; eur: [number, number]; uah: [number, number] };
+
+const PRICE_BANDS: Band[] = [
+  { key: "low", eur: [0, 15], uah: [0, 550] },
+  { key: "mid", eur: [15, 25], uah: [550, 950] },
+  { key: "high", eur: [25, Infinity], uah: [950, Infinity] },
 ];
+
+const bandRange = (b: Band, c: Currency) => (c === "UAH" ? b.uah : b.eur);
+
+function inBand(p: Product, b: Band, c: Currency): boolean {
+  const [lo, hi] = bandRange(b, c);
+  const value = c === "UAH" ? p.priceUah : p.price;
+  return value >= lo && value < hi;
+}
+
+function bandLabel(b: Band, c: Currency, uk: boolean): string {
+  const [lo, hi] = bandRange(b, c);
+  const sym = c === "UAH" ? "₴" : "€";
+  if (lo === 0) return uk ? `До ${sym}${hi}` : `Under ${sym}${hi}`;
+  if (hi === Infinity) return uk ? `${sym}${lo} та вище` : `${sym}${lo} & Above`;
+  return `${sym}${lo} – ${sym}${hi}`;
+}
 
 export default function ProductsBrowser({ locale }: { locale: string }) {
   const [cat, setCat] = useState<CatKey>("all");
@@ -19,6 +50,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const [showFilters, setShowFilters] = useState(true);
 
   const uk = locale === "uk";
+  const currency = currencyForLocale(locale);
   const L = {
     title: uk ? "Продукти" : "Products",
     hide: uk ? "Сховати фільтри" : "Hide Filters",
@@ -35,20 +67,16 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       bowl: uk ? "Чаші" : "Bowls",
       accessory: uk ? "Аксесуари" : "Accessories",
     } as Record<CatKey, string>,
-    bands: {
-      "u10": uk ? "До €10" : "Under €10",
-      "10-20": "€10 – €20",
-      "20+": uk ? "€20 та вище" : "€20 & Above",
-    } as Record<string, string>,
   };
 
   const list = useMemo(() => {
     let l = ALL.filter((p) => cat === "all" || p.category === cat);
-    if (bands.length) l = l.filter((p) => bands.some((k) => PRICE_BANDS.find((b) => b.key === k)!.test(p)));
+    if (bands.length)
+      l = l.filter((p) => bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
     if (sort === "price-asc") l = [...l].sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") l = [...l].sort((a, b) => b.price - a.price);
     return l;
-  }, [cat, bands, sort]);
+  }, [cat, bands, sort, currency]);
 
   const toggleBand = (k: string) =>
     setBands((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
@@ -117,7 +145,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
                         onChange={() => toggleBand(b.key)}
                         className="w-4 h-4 accent-black"
                       />
-                      {L.bands[b.key]}
+                      {bandLabel(b, currency, uk)}
                     </label>
                   ))}
                 </div>

@@ -331,14 +331,14 @@ export const products: Product[] = [
     currency: "EUR",
     category: "bowl",
     featured: true,
-    image: "/images/ftp-hero.png",
+    image: "/images/ftp-hero-v2.png",
     tileImage: "/images/ftp-bowl-tile.png",
     tileBg: "linear-gradient(180deg, #c9e6f6 0%, #e9f5fb 55%, #ffffff 100%)",
     tileTitle: "FTP BOWL",
     tileScale: 1.0,
-    gridImage: "/images/ftp-hero.png",
+    gridImage: "/images/ftp-hero-v2.png",
     pdp: {
-      photos: ["/images/ftp-hero.png", "/images/ftp-2.png", "/images/ftp-3.png"],
+      photos: ["/images/ftp-hero-v2.png", "/images/ftp-2.png", "/images/ftp-3.png"],
       colourShownEn: "Matte Black",
       colourShownUk: "Матовий чорний",
       shortEn:

@@ -18,7 +18,7 @@ import Reveal from "./Reveal";
  * up and the bowls eased down.
  */
 const ITEMS = [
-  { slug: "bowl-phunnel", label: "FTP Bowl", img: "/images/ftp-cut.png", scale: 0.9 },
+  { slug: "bowl-phunnel", label: "FTP Bowl", img: "/images/ftp-cut-v2.png", scale: 0.9 },
   { slug: "bowl-killer", label: "Killer Bowl", img: "/images/killer-cut.png", scale: 0.96 },
   { slug: "hmd-tct-op", label: "HMD TCT OP", img: "/images/hmd-op-black.png", scale: 1.2 },
   { slug: "hmd-a-craft", label: "HMD A Craft", img: "/images/acraft-cut.png", scale: 1.16 },

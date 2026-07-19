@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { addMoney, currencyForLocale, formatMoney, money, type Money } from "@/lib/currency";
+import { currencyForLocale, formatMoney } from "@/lib/currency";
+import { MATERIAL_PRICE, type HmdMaterial } from "@/lib/hmd-options";
 
 /* ---------------------------------------------------------------------------
    HMD material add-ons, in two presentations:
@@ -13,32 +14,10 @@ import { addMoney, currencyForLocale, formatMoney, money, type Money } from "@/l
               disc for the lid (a solid cover), a ring for the rubber (an O-ring).
 
    ADDITIVE, not mutually exclusive: each option is an independent toggle, so
-   none / one / both can be on. These are paid add-ons, so the module owns the
-   upcharges and exposes materialUpcharge() for the parent to fold into its live
-   price. Controlled component — the parent holds the state so the price and the
-   selector can never disagree.
+   none / one / both can be on. Pricing lives in lib/hmd-options so the cart can
+   price a line without importing a component. Controlled — the parent holds the
+   state so the price and the selector can never disagree.
 --------------------------------------------------------------------------- */
-
-export type HmdMaterial = { lid: boolean; rubber: boolean };
-
-/**
- * Add-on upcharges. Derived from EUR at the display rate (see lib/currency),
- * so both currencies stay in step if the rate moves:
- *   lid    €4.00 → ₴206
- *   rubber €2.50 → ₴129
- *   both   €6.50 → ₴335   (purely additive in both currencies)
- */
-export const MATERIAL_PRICE: Record<"lid" | "rubber", Money> = {
-  lid: money(4),
-  rubber: money(2.5),
-};
-
-export function materialUpcharge(sel: HmdMaterial): Money {
-  let total = money(0, 0);
-  if (sel.lid) total = addMoney(total, MATERIAL_PRICE.lid);
-  if (sel.rubber) total = addMoney(total, MATERIAL_PRICE.rubber);
-  return total;
-}
 
 const OPTIONS = [
   { key: "lid" as const, en: "With Lid", uk: "З кришкою", glyph: "disc" as const },

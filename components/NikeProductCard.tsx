@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Product } from "@/lib/products";
 import HeartButton from "./HeartButton";
-import HmdMaterialSelector, { materialUpcharge, type HmdMaterial } from "./HmdMaterialSelector";
+import HmdMaterialSelector from "./HmdMaterialSelector";
+import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 
@@ -94,8 +95,9 @@ export default function NikeProductCard({ product, locale }: { product: Product;
           </div>
         </Link>
 
-        {/* HMD-only material selector (Rimowa style). Additive add-ons that
-            fold into the live price above; not wired to cart/URL yet. */}
+        {/* HMD-only material selector (Rimowa style). A price preview only —
+            this card has no add-to-bag; the choice that reaches the cart is the
+            one made on the product page. */}
         {isHmd && (
           <HmdMaterialSelector
             value={material}

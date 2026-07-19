@@ -3,8 +3,34 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { products, Product } from "@/lib/products";
 import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
+import { materialUpcharge } from "@/lib/hmd-options";
 
-export type CartLine = { slug: string; qty: number };
+/** What the shopper chose. Absent fields = the base configuration. */
+export type CartOptions = { variant?: string; lid?: boolean; rubber?: boolean };
+
+export type CartLine = { slug: string; qty: number; options?: CartOptions };
+
+/**
+ * Identity of a cart line. The same product in two configurations must be two
+ * separate lines, so the key folds in the options — keying on slug alone (as
+ * this used to) silently merged "Purple + lid" into "Black".
+ */
+export function lineKey(slug: string, o?: CartOptions): string {
+  return [slug, o?.variant ?? "", o?.lid ? "lid" : "", o?.rubber ? "rubber" : ""].join("|");
+}
+
+/** Price of one unit of a line: variant price + any add-ons. */
+export function linePrice(line: CartLine): Money {
+  const p = products.find((x) => x.slug === line.slug);
+  if (!p) return money(0, 0);
+  const v = line.options?.variant
+    ? p.variants?.find((x) => x.name === line.options!.variant)
+    : undefined;
+  const base = money(v?.price ?? p.price, v?.priceUah ?? p.priceUah);
+  // Add-ons only exist on heat devices; ignore stray flags on anything else.
+  if (p.category !== "hmd") return base;
+  return addMoney(base, materialUpcharge({ lid: !!line.options?.lid, rubber: !!line.options?.rubber }));
+}
 
 type CartCtx = {
   lines: CartLine[];
@@ -12,9 +38,9 @@ type CartCtx = {
   subtotal: Money;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
-  addToCart: (product: Product, sourceEl?: HTMLElement | null) => void;
-  removeLine: (slug: string) => void;
-  changeQty: (slug: string, delta: number) => void;
+  addToCart: (product: Product, sourceEl?: HTMLElement | null, options?: CartOptions) => void;
+  removeLine: (key: string) => void;
+  changeQty: (key: string, delta: number) => void;
   registerCartIcon: (el: HTMLElement | null) => void;
   bump: number;
 };
@@ -42,7 +68,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const s = localStorage.getItem(STORAGE);
-      if (s) setLines(JSON.parse(s));
+      if (s) {
+        // Untrusted input, and carts saved before options existed are still
+        // valid — a missing `options` simply means the base configuration.
+        const parsed: unknown = JSON.parse(s);
+        if (Array.isArray(parsed)) {
+          setLines(
+            parsed
+              .filter((l): l is CartLine => !!l && typeof l.slug === "string" && typeof l.qty === "number")
+              .map((l) => ({ slug: l.slug, qty: l.qty, options: l.options }))
+          );
+        }
+      }
     } catch {}
   }, []);
 
@@ -55,12 +92,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const count = lines.reduce((n, l) => n + l.qty, 0);
   // Subtotal carries both currencies so the drawer can show either without
   // re-converting (and without the two ever disagreeing).
-  const subtotal = lines.reduce<Money>((s, l) => {
-    const p = products.find((p) => p.slug === l.slug);
-    return p ? addMoney(s, scaleMoney(money(p.price, p.priceUah), l.qty)) : s;
-  }, money(0, 0));
+  const subtotal = lines.reduce<Money>(
+    (s, l) => addMoney(s, scaleMoney(linePrice(l), l.qty)),
+    money(0, 0)
+  );
 
-  const addToCart = useCallback((product: Product, sourceEl?: HTMLElement | null) => {
+  const addToCart = useCallback((product: Product, sourceEl?: HTMLElement | null, options?: CartOptions) => {
     // Pick the currently VISIBLE cart icon (nav renders both a desktop and a
     // mobile bag; the hidden one reports a zero-size rect at 0,0).
     const icons =
@@ -104,24 +141,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setTimeout(() => fly.remove(), 880);
     }
 
+    const key = lineKey(product.slug, options);
     setLines((prev) => {
-      const ex = prev.find((l) => l.slug === product.slug);
-      if (ex) return prev.map((l) => (l.slug === product.slug ? { ...l, qty: l.qty + 1 } : l));
-      return [...prev, { slug: product.slug, qty: 1 }];
+      const ex = prev.find((l) => lineKey(l.slug, l.options) === key);
+      if (ex)
+        return prev.map((l) =>
+          lineKey(l.slug, l.options) === key ? { ...l, qty: l.qty + 1 } : l
+        );
+      return [...prev, { slug: product.slug, qty: 1, options }];
     });
     setBump((b) => b + 1);
   }, []);
 
   const removeLine = useCallback(
-    (slug: string) => setLines((prev) => prev.filter((l) => l.slug !== slug)),
+    (key: string) => setLines((prev) => prev.filter((l) => lineKey(l.slug, l.options) !== key)),
     []
   );
 
   const changeQty = useCallback(
-    (slug: string, delta: number) =>
+    (key: string, delta: number) =>
       setLines((prev) =>
         prev.flatMap((l) =>
-          l.slug === slug ? (l.qty + delta <= 0 ? [] : [{ ...l, qty: l.qty + delta }]) : [l]
+          lineKey(l.slug, l.options) === key
+            ? l.qty + delta <= 0
+              ? []
+              : [{ ...l, qty: l.qty + delta }]
+            : [l]
         )
       ),
     []

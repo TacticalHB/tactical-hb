@@ -3,9 +3,21 @@
 import Image from "next/image";
 import { useEffect } from "react";
 import { products } from "@/lib/products";
-import { useCart } from "./CartContext";
+import { useCart, lineKey, linePrice, type CartLine } from "./CartContext";
 import Price from "./Price";
-import { money } from "@/lib/currency";
+
+
+/** "Purple · With Lid + With Rubber" — what the shopper actually picked. */
+function describeOptions(l: CartLine, locale: string): string | null {
+  const uk = locale === "uk";
+  const parts: string[] = [];
+  if (l.options?.variant) parts.push(l.options.variant);
+  const addons: string[] = [];
+  if (l.options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
+  if (l.options?.rubber) addons.push(uk ? "З гумкою" : "With Rubber");
+  if (addons.length) parts.push(addons.join(" + "));
+  return parts.length ? parts.join(" · ") : null;
+}
 
 export default function CartDrawer({ locale }: { locale: string }) {
   const { cartOpen, setCartOpen, lines, subtotal, changeQty, removeLine, count } = useCart();
@@ -72,23 +84,32 @@ export default function CartDrawer({ locale }: { locale: string }) {
               {lines.map((l) => {
                 const p = products.find((pp) => pp.slug === l.slug);
                 if (!p) return null;
+                const key = lineKey(l.slug, l.options);
                 const name = p.tileTitle || (locale === "uk" ? p.nameUk : p.nameEn);
-                const thumb = p.tileImage || p.image;
+                // Show the chosen colour's photo, not the default one.
+                const chosen = l.options?.variant
+                  ? p.variants?.find((v) => v.name === l.options!.variant)
+                  : undefined;
+                const thumb = chosen?.image || p.tileImage || p.image;
+                const spec = describeOptions(l, locale);
                 return (
-                  <li key={l.slug} className="flex gap-4">
+                  <li key={key} className="flex gap-4">
                     <div className="relative w-16 h-16 shrink-0" style={{ background: "var(--bg-soft)", borderRadius: 8 }}>
                       <Image src={thumb} alt={name} fill sizes="64px" className="object-contain p-1.5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>
-                      <div className="font-display text-base" style={{ color: "var(--gold)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></div>
+                        {spec && (
+                          <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{spec}</div>
+                        )}
+                      <div className="font-display text-base" style={{ color: "var(--gold)" }}><Price money={linePrice(l)} locale={locale} /></div>
                       <div className="flex items-center gap-3 mt-1.5">
                         <div className="flex items-center border" style={{ borderColor: "var(--border-strong)", borderRadius: 6 }}>
-                          <button onClick={() => changeQty(l.slug, -1)} className="px-2 py-0.5 text-sm" style={{ color: "var(--text-muted)" }} aria-label="Decrease">–</button>
+                          <button onClick={() => changeQty(key, -1)} className="px-2 py-0.5 text-sm" style={{ color: "var(--text-muted)" }} aria-label="Decrease">–</button>
                           <span className="px-2 text-sm tabular-nums" style={{ color: "var(--text)" }}>{l.qty}</span>
-                          <button onClick={() => changeQty(l.slug, 1)} className="px-2 py-0.5 text-sm" style={{ color: "var(--text-muted)" }} aria-label="Increase">+</button>
+                          <button onClick={() => changeQty(key, 1)} className="px-2 py-0.5 text-sm" style={{ color: "var(--text-muted)" }} aria-label="Increase">+</button>
                         </div>
-                        <button onClick={() => removeLine(l.slug)} className="text-xs tracking-wide uppercase" style={{ color: "var(--text-faint)" }}>
+                        <button onClick={() => removeLine(key)} className="text-xs tracking-wide uppercase" style={{ color: "var(--text-faint)" }}>
                           {locale === "uk" ? "Видалити" : "Remove"}
                         </button>
                       </div>

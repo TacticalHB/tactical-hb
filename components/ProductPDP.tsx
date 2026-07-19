@@ -6,7 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
-import HmdMaterialSelector, { materialUpcharge, type HmdMaterial } from "./HmdMaterialSelector";
+import HmdMaterialSelector from "./HmdMaterialSelector";
+import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 
@@ -318,7 +319,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             {/* Buttons */}
             <div className="flex flex-col gap-3 mt-8">
               <button
-                onClick={() => addToCart(product, mainImgRef.current)}
+                onClick={() =>
+                  addToCart(product, mainImgRef.current, {
+                    variant: variants?.[variantIdx]?.name,
+                    lid: isHmd ? material.lid : undefined,
+                    rubber: isHmd ? material.rubber : undefined,
+                  })
+                }
                 className="h-14 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
                 style={{ background: "#111111", color: "#ffffff" }}
               >

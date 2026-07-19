@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/supabase/require-user";
-import { adminConfigured, isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/admin";
 import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
 import VoucherRedeemForm from "@/components/account/VoucherRedeemForm";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -62,12 +62,6 @@ export default async function AdminVouchersPage({
           ? "Позначає ваучер як використаний. Дія безпечна для повторного виконання — перше погашення залишається."
           : "Marks a voucher as used. Safe to run twice — the first redemption stands."}
       </p>
-
-      {!adminConfigured() && (
-        <p className="mb-6 text-sm" style={{ color: "#b42318" }}>
-          ADMIN_EMAILS is not set — redemption will be refused.
-        </p>
-      )}
 
       <VoucherRedeemForm locale={locale} />
 

@@ -19,6 +19,15 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
     { href: `${base}/settings`, label: uk ? "Налаштування" : "Account Settings" },
   ];
 
+  // Admin-only. Hiding it is a convenience, not the security boundary — the
+  // page 404s and the redeem action refuses independently for non-admins.
+  if (isAdmin) {
+    items.push({
+      href: `${base}/admin/vouchers`,
+      label: uk ? "Ваучери (адмін)" : "Vouchers (admin)",
+    });
+  }
+
   const isActive = (href: string) =>
     href === base ? pathname === base || pathname === `${base}/` : pathname.startsWith(href);
 

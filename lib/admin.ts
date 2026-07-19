@@ -29,8 +29,3 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   if (list.length === 0) return false; // unset → nobody, never everybody
   return list.includes(email.trim().toLowerCase());
 }
-
-/** True when at least one admin is configured — used to explain a locked page. */
-export function adminConfigured(): boolean {
-  return adminList().length > 0;
-}

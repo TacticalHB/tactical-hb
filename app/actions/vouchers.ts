@@ -2,19 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/lib/admin";
 import type { Voucher } from "@/lib/loyalty/vouchers";
 
 /* ---------------------------------------------------------------------------
    Voucher redemption — the single choke point for "this voucher was spent".
 
    Everything that redeems a voucher should funnel through markVoucherUsed():
-     • today  — called manually (admin/testing)
-     • later  — called by the Shopify order webhook once it confirms the
-                discount code was actually applied to a paid order
+     • today  — an admin redeeming a code by hand
+     • later  — the order webhook, once it confirms the code was applied to a
+                paid order
 
    It delegates to the SQL function public.mark_voucher_used(), which is
    SECURITY DEFINER + service_role-only and IDEMPOTENT (a retry keeps the
    original used_at). That matters: webhooks are delivered at-least-once.
+
+   AUTHORISATION LIVES HERE, not on the page that calls it. Next.js exposes
+   every exported server action as its own endpoint, so guarding only the admin
+   page would be theatre — anyone with the action id could burn every voucher.
+   This runs with the service-role key and bypasses RLS, so it must establish
+   for itself that the caller is an admin.
 --------------------------------------------------------------------------- */
 
 export type MarkVoucherResult =
@@ -33,6 +41,15 @@ export type MarkVoucherResult =
  * Safe to call more than once for the same code — the first redemption wins.
  */
 export async function markVoucherUsed(code: string, orderId?: string): Promise<MarkVoucherResult> {
+  // Authorise BEFORE touching anything. Deliberately vague to the caller: a
+  // stranger probing this endpoint learns nothing about who is an admin.
+  const supabase = await createClient();
+  const caller = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (!isAdminEmail(caller?.email)) {
+    console.warn("[markVoucherUsed] refused for", caller?.email ?? "anonymous");
+    return { ok: false, error: "Not authorised." };
+  }
+
   const trimmed = code?.trim();
   if (!trimmed) return { ok: false, error: "A voucher code is required." };
 

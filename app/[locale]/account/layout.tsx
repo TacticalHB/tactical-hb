@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "@/components/account/AccountNav";
+import { isAdminEmail } from "@/lib/admin";
 
 /**
  * Account shell.
@@ -24,7 +25,7 @@ export default async function AccountLayout({
   return (
     <div className="min-h-screen pt-24 pb-20 page-container" style={{ background: "#ffffff" }}>
       <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-        {user && <AccountNav locale={locale} />}
+        {user && <AccountNav locale={locale} isAdmin={isAdminEmail(user.email)} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 
-export default function AccountNav({ locale }: { locale: string }) {
+export default function AccountNav({ locale, isAdmin = false }: { locale: string; isAdmin?: boolean }) {
   const uk = locale === "uk";
   const pathname = usePathname();
   const router = useRouter();

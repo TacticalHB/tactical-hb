@@ -15,6 +15,26 @@ function AboutContent() {
     { title: t("value_4_title"), text: t("value_4_text") },
   ];
 
+  const payMethods = [t("pay_method_1"), t("pay_method_2"), t("pay_method_3"), t("pay_method_4")];
+
+  const returnTerms = [
+    { title: t("return_1_title"), text: t("return_1_text") },
+    { title: t("return_2_title"), text: t("return_2_text") },
+    { title: t("return_3_title"), text: t("return_3_text") },
+    { title: t("return_4_title"), text: t("return_4_text") },
+    { title: t("return_5_title"), text: t("return_5_text") },
+  ];
+
+  // Seller details Monobank requires to be publicly visible for acquiring.
+  const legalRows = [
+    { label: t("legal_name_label"), value: t("legal_name_value") },
+    { label: t("legal_founder_label"), value: t("legal_founder_value") },
+    { label: t("legal_tax_label"), value: t("legal_tax_value") },
+    { label: t("legal_address_label"), value: t("legal_address_value") },
+    { label: t("legal_email_label"), value: t("legal_email_value"), href: `mailto:${t("legal_email_value")}` },
+    { label: t("legal_phone_label"), value: t("legal_phone_value"), href: `tel:${t("legal_phone_value").replace(/\s/g, "")}` },
+  ];
+
   return (
     <div style={{ background: "var(--bg)" }}>
       <div className="relative overflow-hidden pt-36 pb-20" style={{ background: "var(--bg-soft)", borderBottom: "1px solid var(--border)" }}>
@@ -68,6 +88,107 @@ function AboutContent() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Payment */}
+      <section className="page-container py-24">
+        <Reveal>
+          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("payment_tag")}</span>
+          <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("payment_title")}</h2>
+        </Reveal>
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-start">
+          <Reveal>
+            <div className="flex flex-col gap-6 text-sm md:text-base leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              <p>{t("payment_text_1")}</p>
+              <p>{t("payment_text_2")}</p>
+            </div>
+          </Reveal>
+          <Reveal delay={140}>
+            <div className="flex flex-wrap gap-3">
+              {payMethods.map((m) => (
+                <span
+                  key={m}
+                  className="px-5 py-3 text-xs tracking-[0.15em] uppercase"
+                  style={{ border: "1px solid var(--border-strong)", color: "var(--text)", background: "var(--bg-card)" }}
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
+            <p className="text-xs mt-6 leading-relaxed" style={{ color: "var(--text-faint)" }}>{t("payment_note")}</p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Delivery */}
+      <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
+        <div className="page-container">
+          <Reveal>
+            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("delivery_tag")}</span>
+            <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("delivery_title")}</h2>
+          </Reveal>
+          <Reveal delay={100}>
+            <div className="grid md:grid-cols-2 gap-12 md:gap-16 text-sm md:text-base leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              <p>{t("delivery_text_1")}</p>
+              <p>{t("delivery_text_2")}</p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Returns & refunds */}
+      <section className="page-container py-24">
+        <Reveal>
+          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("returns_tag")}</span>
+          <h2 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{t("returns_title")}</h2>
+          <p className="text-sm md:text-base leading-relaxed max-w-2xl mb-14" style={{ color: "var(--text-muted)" }}>{t("returns_intro")}</p>
+        </Reveal>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {returnTerms.map((r, i) => (
+            <Reveal key={r.title} delay={i * 80}>
+              <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--gold)" }}>
+                <div className="font-display text-5xl mb-5" style={{ color: "var(--gold)", opacity: 0.35 }}>0{i + 1}</div>
+                <h3 className="font-medium text-sm mb-3 tracking-wide" style={{ color: "var(--text)" }}>{r.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{r.text}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={120}>
+          <p className="text-sm leading-relaxed mt-14 pt-8 max-w-3xl" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border)" }}>
+            {t("returns_refund")}
+          </p>
+        </Reveal>
+      </section>
+
+      {/* Seller / legal details */}
+      <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
+        <div className="page-container">
+          <Reveal>
+            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("legal_tag")}</span>
+            <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("legal_title")}</h2>
+          </Reveal>
+          <Reveal delay={100}>
+            <dl className="max-w-3xl">
+              {legalRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid sm:grid-cols-[minmax(0,14rem)_1fr] gap-1 sm:gap-8 py-5"
+                  style={{ borderBottom: "1px solid var(--border)" }}
+                >
+                  <dt className="text-xs tracking-[0.15em] uppercase pt-0.5" style={{ color: "var(--text-faint)" }}>{row.label}</dt>
+                  <dd className="text-sm md:text-base" style={{ color: "var(--text)" }}>
+                    {row.href ? (
+                      <a href={row.href} className="transition-opacity hover:opacity-70" style={{ color: "var(--text)" }}>{row.value}</a>
+                    ) : (
+                      row.value
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
         </div>
       </section>
     </div>

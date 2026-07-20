@@ -33,10 +33,12 @@ export default function CartDrawer({ locale }: { locale: string }) {
     title: locale === "uk" ? "Кошик" : "Cart",
     empty: locale === "uk" ? "Ваш кошик порожній" : "Your cart is empty",
     subtotal: locale === "uk" ? "Проміжний підсумок" : "Subtotal",
+    // Must name the same providers as the About page — a reviewer comparing
+    // the two should not find the checkout advertising a different gateway.
     note:
       locale === "uk"
-        ? "Оплата (LiqPay / PayPal) підключається до запуску."
-        : "Checkout (LiqPay / PayPal) connects at launch.",
+        ? "Оплата (Plata by Mono, Apple Pay, Google Pay, PayPal) підключається до запуску."
+        : "Checkout (Plata by Mono, Apple Pay, Google Pay, PayPal) connects at launch.",
     checkout: locale === "uk" ? "Оформити" : "Checkout",
   };
 

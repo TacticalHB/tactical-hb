@@ -48,7 +48,14 @@
     "why_2_title": "Unique Design",
     "why_2_text": "Military-tactical aesthetic found nowhere else in the hookah industry.",
     "why_3_title": "Flexible Terms",
-    "why_3_text": "Low minimums, shipping across Europe and the Middle East."
+    "why_3_text": "Low minimums, shipping across Europe and the Middle East.",
+    "form_phone": "Telephone (WhatsApp)",
+    "form_city": "City",
+    "form_business_type": "Business Type",
+    "form_business_required": "Please select your business type.",
+    "biz_shop": "Shop / Online Retailer",
+    "biz_distribution": "Distribution",
+    "biz_lounge": "Shisha Lounge / Bar"
   },
   "about": {
     "title": "About Us",

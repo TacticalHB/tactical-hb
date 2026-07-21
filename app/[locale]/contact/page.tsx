@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import ContactForm from "@/components/ContactForm";
 import Reveal from "@/components/Reveal";
+import { SALES_EMAIL } from "@/lib/contact-info";
 
 export default function ContactPage() {
   return <ContactContent />;
@@ -14,6 +15,12 @@ function ContactContent() {
       label: t("method_email"),
       handle: t("email_value"),
       href: `mailto:${t("email_value")}`,
+    },
+    {
+      // Wholesale and sales go to a separate inbox; general enquiries stay above.
+      label: t("method_sales"),
+      handle: SALES_EMAIL,
+      href: `mailto:${SALES_EMAIL}`,
     },
     {
       label: t("method_instagram"),

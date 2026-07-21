@@ -62,7 +62,10 @@
     "biz_lounge": "Shisha Lounge / Bar",
     "form_message": "Tell us about your business and what you're interested in",
     "form_submit": "Submit Enquiry",
-    "form_success": "Thank you! We'll be in touch shortly."
+    "form_success": "Thank you! We'll be in touch shortly.",
+    "form_error": "Something went wrong. Please try again, or email us at Sales.tactical-hb@outlook.com.",
+    "sales_label": "Wholesale enquiries",
+    "sales_note": "Prefer email? Write to us directly and we'll reply within one business day."
   },
   "about": {
     "title": "About Us",
@@ -142,12 +145,15 @@
     "form_message": "Message",
     "form_submit": "Send",
     "form_success": "Thank you! We'll reply shortly.",
-    "form_error": "Something went wrong. Please try again or email us directly."
+    "form_error": "Something went wrong. Please try again or email us directly.",
+    "method_sales": "Sales & Wholesale"
   },
   "footer": {
     "follow": "Follow us",
     "tagline": "Premium hookah accessories from Ukraine.",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "email_general": "General",
+    "email_sales": "Wholesale"
   },
   "newsletter": {
     "title": "Sign up to get news from Tactical HB",

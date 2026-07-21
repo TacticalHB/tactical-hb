@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import HoneypotField from "./HoneypotField";
 
 // Enquiry types. `subjectEn` is a stable English label sent to the API so the
 // admin inbox reads the same regardless of the visitor's language; `labelKey`
@@ -21,6 +22,8 @@ export default function ContactForm() {
   // Pre-select the most common reason so the field is never empty.
   const [type, setType] = useState<(typeof ENQUIRY_TYPES)[number]["value"]>("product");
   const [hoverType, setHoverType] = useState<string | null>(null);
+  // When the form appeared, so the server can tell a person from a script.
+  const mountedAt = useRef(Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +42,9 @@ export default function ContactForm() {
           email: String(data.get("email") ?? ""),
           message: String(data.get("message") ?? ""),
           subject: subjectEn,
+          // Spam screening — see lib/anti-spam.
+          company_website: String(data.get("company_website") ?? ""),
+          ts: mountedAt.current,
         }),
       });
       if (!res.ok) throw new Error(`contact endpoint returned ${res.status}`);
@@ -67,6 +73,8 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <HoneypotField />
+
       {/* Enquiry type — refined pills. Selected fills with ink and shows a brass
           check; brass stays reserved for the accent so selection reads clearly. */}
       <div>

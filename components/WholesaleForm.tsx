@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import HoneypotField from "./HoneypotField";
 
 export default function WholesaleForm() {
   const t = useTranslations("wholesale");
@@ -11,6 +12,9 @@ export default function WholesaleForm() {
   const [businessType, setBusinessType] = useState("");
   const [bizError, setBizError] = useState(false);
   const [hoverBiz, setHoverBiz] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  // When the form appeared, so the server can tell a person from a script.
+  const mountedAt = useRef(Date.now());
 
   // Single-select, so labels double as stable values. Order and wording are
   // deliberate — no "Hotel / Restaurant".
@@ -30,10 +34,42 @@ export default function WholesaleForm() {
       setBizError(true);
       return;
     }
+    const data = new FormData(e.currentTarget);
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSubmitted(true);
+    setFailed(false);
+
+    // Send the label, not the internal value — "Shisha Lounge / Bar" is what
+    // the reader needs, "lounge" is an implementation detail.
+    const typeLabel = businessOptions.find((o) => o.value === businessType)?.label ?? businessType;
+
+    try {
+      const res = await fetch("/api/wholesale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: String(data.get("name") ?? ""),
+          company: String(data.get("company") ?? ""),
+          email: String(data.get("email") ?? ""),
+          phone: String(data.get("phone") ?? ""),
+          country: String(data.get("country") ?? ""),
+          city: String(data.get("city") ?? ""),
+          businessType: typeLabel,
+          message: String(data.get("message") ?? ""),
+          // Spam screening — see lib/anti-spam.
+          company_website: String(data.get("company_website") ?? ""),
+          ts: mountedAt.current,
+        }),
+      });
+      if (!res.ok) throw new Error(`wholesale endpoint returned ${res.status}`);
+      setSubmitted(true);
+    } catch (err) {
+      // Leave the form mounted and filled — losing a long enquiry on a failed
+      // send is worse than the failure itself.
+      console.error("[wholesale] submit failed:", err);
+      setFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -47,6 +83,7 @@ export default function WholesaleForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <HoneypotField />
       {[
         { name: "name", label: t("form_name"), type: "text" },
         { name: "company", label: t("form_company"), type: "text" },
@@ -142,6 +179,12 @@ export default function WholesaleForm() {
         <label className={label} style={labelStyle}>{t("form_message")}</label>
         <textarea name="message" rows={5} required className="field resize-none" />
       </div>
+
+      {failed && (
+        <p role="alert" className="text-sm leading-relaxed" style={{ color: "#b42318" }}>
+          {t("form_error")}
+        </p>
+      )}
 
       <button type="submit" disabled={loading} className="btn-gold font-display text-lg tracking-widest py-4 disabled:opacity-60">
         {loading ? "..." : t("form_submit")}

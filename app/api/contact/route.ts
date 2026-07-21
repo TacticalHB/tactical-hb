@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { screen } from "@/lib/anti-spam";
 
 /* ---------------------------------------------------------------------------
    Contact form → admin@tactical-hb.com, via Resend.
@@ -37,6 +38,13 @@ export async function POST(request: NextRequest) {
   }
 
   const b = (body ?? {}) as Record<string, unknown>;
+
+  // Spam screening before any work. "drop" answers 200 so a bot never learns
+  // to retry; the message simply goes nowhere.
+  const verdict = screen(request, b);
+  if (verdict === "reject") return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  if (verdict === "drop") return NextResponse.json({ ok: true });
+
   const name = String(b.name ?? "").trim();
   const email = String(b.email ?? "").trim();
   const message = String(b.message ?? "").trim();

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart, linePrice } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
 import { describeLine } from "@/lib/cart-display";
+import { currencyForLocale, formatMoney, scaleMoney } from "@/lib/currency";
 import { makeOrderNo, saveOrder, type DeliveryDetails, type OrderLine } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
@@ -53,6 +54,8 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   // Clearing the cart on success would otherwise trip the empty-cart guard and
   // bounce the shopper back to /cart instead of the confirmation page.
   const placedRef = useRef(false);
+  // When checkout opened, so the order endpoint can tell a person from a script.
+  const mountedAt = useRef(Date.now());
 
   // Prefill from the signed-in account.
   useEffect(() => {
@@ -151,7 +154,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     setStep("payment");
   };
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     setPlacing(true);
     // Snapshot BEFORE clearing the cart, and freeze prices as they stand now.
     const orderLines: OrderLine[] = lines.flatMap((l) => {
@@ -169,9 +172,47 @@ export default function CheckoutClient({ locale }: { locale: string }) {
       }];
     });
 
+    const orderNo = makeOrderNo();
+    const currency = currencyForLocale(locale);
+
+    // Notify sales BEFORE clearing anything. Until orders are written to
+    // Supabase this email is the only record of the order, so it is sent while
+    // the data still exists rather than from the confirmation page (which would
+    // re-send on every refresh).
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNo,
+          locale,
+          // Spam screening. No honeypot here — there is no form for a bot to
+          // fill; reaching this point requires completing two checkout steps.
+          ts: mountedAt.current,
+          paymentMethod: L.card,
+          totalLabel: formatMoney(subtotal, currency),
+          delivery: form,
+          lines: orderLines.map((l) => ({
+            name: l.name,
+            qty: l.qty,
+            colour: l.colour,
+            material: l.material,
+            addons: l.addons,
+            unitPriceLabel: formatMoney(scaleMoney(l.unitPrice, l.qty), currency),
+          })),
+        }),
+      });
+      if (!res.ok) throw new Error(`order endpoint returned ${res.status}`);
+    } catch (err) {
+      // A failed notification must never block the customer — they have done
+      // nothing wrong and the snapshot still reaches the confirmation page.
+      // Logged loudly because it means the shop may not learn about this order.
+      console.error("[order] notification failed:", err);
+    }
+
     placedRef.current = true;
     saveOrder({
-      orderNo: makeOrderNo(),
+      orderNo,
       createdAt: new Date().toISOString(),
       locale,
       delivery: form,

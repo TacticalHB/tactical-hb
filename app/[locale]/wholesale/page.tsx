@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import WholesaleForm from "@/components/WholesaleForm";
 import Reveal from "@/components/Reveal";
+import { SALES_EMAIL } from "@/lib/contact-info";
 
 export default function WholesalePage() {
   return <WholesaleContent />;
@@ -81,6 +82,23 @@ function WholesaleContent() {
           <div className="md:sticky md:top-32">
             <h2 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{t("form_heading")}</h2>
             <p className="text-base leading-relaxed max-w-md" style={{ color: "var(--text-muted)" }}>{t("closing")}</p>
+
+            {/* Direct line to sales — the same address the form posts to. */}
+            <div className="mt-10 pt-8 max-w-md" style={{ borderTop: "1px solid var(--border)" }}>
+              <p className="text-xs tracking-[0.25em] uppercase mb-3" style={{ color: "var(--text-faint)" }}>
+                {t("sales_label")}
+              </p>
+              <a
+                href={`mailto:${SALES_EMAIL}`}
+                className="text-lg md:text-xl break-words transition-opacity hover:opacity-70"
+                style={{ color: "var(--text)" }}
+              >
+                {SALES_EMAIL}
+              </a>
+              <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--text-muted)" }}>
+                {t("sales_note")}
+              </p>
+            </div>
           </div>
         </Reveal>
         <Reveal delay={140}>

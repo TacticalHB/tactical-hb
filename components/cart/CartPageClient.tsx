@@ -7,6 +7,7 @@ import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import ExpressPayButtons from "@/components/checkout/ExpressPayButtons";
 import CartInfoSections from "./CartInfoSections";
+import NewsletterPromo from "@/components/NewsletterPromo";
 import Price from "@/components/Price";
 
 /* ---------------------------------------------------------------------------
@@ -69,7 +70,11 @@ export default function CartPageClient({ locale }: { locale: string }) {
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-12 xl:gap-16 items-start">
         {/* Lines */}
-        <ul className="flex flex-col">
+        <div>
+          {/* Newsletter prompt — cart page and footer only, never the mini cart. */}
+          <NewsletterPromo locale={locale} />
+
+          <ul className="flex flex-col mt-8">
           {lines.map((l, i) => {
             const d = describeLine(l, locale);
             if (!d) return null;
@@ -148,7 +153,8 @@ export default function CartPageClient({ locale }: { locale: string }) {
               </li>
             );
           })}
-        </ul>
+          </ul>
+        </div>
 
         {/* Summary */}
         <aside className="lg:sticky lg:top-28 p-7" style={{ background: "var(--bg-soft)" }}>

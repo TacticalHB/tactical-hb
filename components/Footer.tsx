@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import CookieSettingsButton from "./CookieSettingsButton";
+import NewsletterPromo from "./NewsletterPromo";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -23,6 +24,11 @@ export default function Footer() {
           className="text-sm tracking-[0.2em] uppercase nav-link">
           {t("follow")} <span style={{ color: "var(--accent)" }}>@tactical_hb</span>
         </a>
+
+        {/* Newsletter prompt — footer and cart page only. */}
+        <div className="w-full max-w-[560px] flex justify-center pt-2">
+          <NewsletterPromo locale={locale} variant="dark" />
+        </div>
 
         <div className="w-full pt-8 flex flex-col sm:flex-row items-center justify-between gap-3"
           style={{ borderTop: "1px solid var(--border-dark)" }}>

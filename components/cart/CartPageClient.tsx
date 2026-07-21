@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import ExpressPayButtons from "@/components/checkout/ExpressPayButtons";
+import CartInfoSections from "./CartInfoSections";
 import Price from "@/components/Price";
 
 /* ---------------------------------------------------------------------------
@@ -190,6 +191,8 @@ export default function CartPageClient({ locale }: { locale: string }) {
           </div>
 
           <ExpressPayButtons locale={locale} />
+
+          <CartInfoSections locale={locale} />
         </aside>
       </div>
     </div>

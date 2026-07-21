@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
 
 export default function WholesaleForm() {
   const t = useTranslations("wholesale");
+  const uk = useLocale() === "uk";
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [businessType, setBusinessType] = useState("");
@@ -57,18 +58,19 @@ export default function WholesaleForm() {
         </div>
       ))}
 
-      {/* Telephone — sits with the contact details. WhatsApp-friendly: type=tel,
-          seeded with "+" so the country code reads as the expected format. */}
+      {/* Telephone — sits with the contact details. WhatsApp-friendly: type=tel.
+          Ukrainian visitors get the country code pre-filled; English-language
+          visitors may be anywhere, so they only get the "+". */}
       <div>
         <label className={label} style={labelStyle}>{t("form_phone")}</label>
         <input
           type="tel"
           name="phone"
           required
-          defaultValue="+"
+          defaultValue={uk ? "+380" : "+"}
           inputMode="tel"
           autoComplete="tel"
-          placeholder="+380 00 000 0000"
+          placeholder={uk ? "+380 00 000 0000" : "+00 000 000 000"}
           className="field"
         />
       </div>

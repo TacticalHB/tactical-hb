@@ -1,22 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-
-/* Body scroll lock, reference-counted across every slide-over on the page.
-   Per-instance save/restore is wrong when two panels overlap: the second one
-   captures "hidden" as the previous value and restores it on close, leaving
-   the page permanently unscrollable. Only the last panel to close releases. */
-let lockCount = 0;
-
-function lockScroll() {
-  if (lockCount === 0) document.body.style.overflow = "hidden";
-  lockCount += 1;
-}
-
-function releaseScroll() {
-  lockCount = Math.max(0, lockCount - 1);
-  if (lockCount === 0) document.body.style.overflow = "";
-}
+// Shared with modals — see lib/scroll-lock for why this must not be per-component.
+import { lockScroll, releaseScroll } from "@/lib/scroll-lock";
 
 /* ---------------------------------------------------------------------------
    The right-hand slide-over used by the mini cart and the "Added to Shopping

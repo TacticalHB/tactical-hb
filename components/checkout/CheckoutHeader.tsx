@@ -7,20 +7,21 @@ import Link from "next/link";
    footer: once someone is paying, every other link is a way to lose them.
 --------------------------------------------------------------------------- */
 
-export type Step = "delivery" | "payment";
+export type Step = "identification" | "delivery" | "payment";
 
 export default function CheckoutHeader({
   locale,
   current,
-  onBack,
+  onStepBack,
 }: {
   locale: string;
   current: Step;
-  /** Only offered on later steps; undefined renders no back affordance. */
-  onBack?: () => void;
+  /** Lets a completed step be revisited; undefined renders it as plain text. */
+  onStepBack?: (step: Step) => void;
 }) {
   const uk = locale === "uk";
   const steps: { id: Step; label: string }[] = [
+    { id: "identification", label: uk ? "Ідентифікація" : "Identification" },
     { id: "delivery", label: uk ? "Доставка" : "Delivery" },
     { id: "payment", label: uk ? "Оплата" : "Payment" },
   ];
@@ -42,12 +43,15 @@ export default function CheckoutHeader({
           </div>
         </div>
 
-        <nav aria-label={uk ? "Кроки оформлення" : "Checkout steps"} className="flex items-center gap-4 pb-5">
+        <nav
+          aria-label={uk ? "Кроки оформлення" : "Checkout steps"}
+          className="flex items-center gap-2.5 sm:gap-4 pb-5 overflow-x-auto -mx-1 px-1"
+        >
           {steps.map((s, i) => {
             const done = i < currentIdx;
             const active = i === currentIdx;
             return (
-              <div key={s.id} className="flex items-center gap-4">
+              <div key={s.id} className="flex items-center gap-2.5 sm:gap-4 shrink-0">
                 <div className="flex items-center gap-2.5">
                   <span
                     className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium"
@@ -66,9 +70,9 @@ export default function CheckoutHeader({
                       i + 1
                     )}
                   </span>
-                  {done && onBack ? (
+                  {done && onStepBack ? (
                     <button
-                      onClick={onBack}
+                      onClick={() => onStepBack(s.id)}
                       className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
                       style={{ color: "var(--text)" }}
                     >
@@ -84,7 +88,7 @@ export default function CheckoutHeader({
                   )}
                 </div>
                 {i < steps.length - 1 && (
-                  <span className="w-8 h-px" style={{ background: "var(--border-strong)" }} />
+                  <span className="w-5 sm:w-8 h-px shrink-0" style={{ background: "var(--border-strong)" }} />
                 )}
               </div>
             );

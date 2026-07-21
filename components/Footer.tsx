@@ -1,11 +1,16 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
+import { usePathname } from "next/navigation";
 import CookieSettingsButton from "./CookieSettingsButton";
 
 export default function Footer() {
   const t = useTranslations("footer");
   const locale = useLocale();
+  const pathname = usePathname();
+
+  // Checkout uses its own minimal chrome — see Navbar.
+  if (pathname.startsWith(`/${locale}/checkout`)) return null;
 
   return (
     <footer style={{ background: "var(--fog)" }}>

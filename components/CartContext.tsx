@@ -38,11 +38,31 @@ type CartCtx = {
   subtotal: Money;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
-  addToCart: (product: Product, sourceEl?: HTMLElement | null, options?: CartOptions) => void;
+  /** `showPanel` opens the "Added to Shopping Bag" slide-over instead of the
+      fly-to-cart animation. Off by default so existing callers are unchanged. */
+  addToCart: (
+    product: Product,
+    sourceEl?: HTMLElement | null,
+    options?: CartOptions,
+    showPanel?: boolean
+  ) => void;
   removeLine: (key: string) => void;
   changeQty: (key: string, delta: number) => void;
+  clearCart: () => void;
   registerCartIcon: (el: HTMLElement | null) => void;
   bump: number;
+  /** The line just added, for the confirmation slide-over. */
+  lastAdded: CartLine | null;
+  addedOpen: boolean;
+  setAddedOpen: (v: boolean) => void;
+  /**
+   * False until the saved cart has been read back from localStorage. Callers
+   * that treat an empty cart as meaningful (checkout redirects, "your bag is
+   * empty") MUST wait for this — on first render `lines` is always [], which
+   * is indistinguishable from a genuinely empty bag and would bounce a
+   * customer out of checkout on any hard load or refresh.
+   */
+  hydrated: boolean;
 };
 
 const Ctx = createContext<CartCtx | null>(null);
@@ -59,6 +79,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [bump, setBump] = useState(0);
+  const [lastAdded, setLastAdded] = useState<CartLine | null>(null);
+  const [addedOpen, setAddedOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const cartIconRef = useRef<HTMLElement | null>(null);
 
   const registerCartIcon = useCallback((el: HTMLElement | null) => {
@@ -80,14 +103,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           );
         }
       }
-    } catch {}
+    } catch {
+    } finally {
+      // Must run even if the read threw, or consumers wait forever.
+      setHydrated(true);
+    }
   }, []);
 
   useEffect(() => {
+    // Don't write before the restore has run — the initial [] would erase a
+    // saved cart on every page load.
+    if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE, JSON.stringify(lines));
     } catch {}
-  }, [lines]);
+  }, [lines, hydrated]);
 
   const count = lines.reduce((n, l) => n + l.qty, 0);
   // Subtotal carries both currencies so the drawer can show either without
@@ -97,7 +127,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     money(0, 0)
   );
 
-  const addToCart = useCallback((product: Product, sourceEl?: HTMLElement | null, options?: CartOptions) => {
+  const addToCart = useCallback((
+    product: Product,
+    sourceEl?: HTMLElement | null,
+    options?: CartOptions,
+    showPanel = false
+  ) => {
     // Pick the currently VISIBLE cart icon (nav renders both a desktop and a
     // mobile bag; the hidden one reports a zero-size rect at 0,0).
     const icons =
@@ -110,7 +145,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (sourceEl && target && !reduce) {
+    // The fly animation and the slide-over would fight each other — the parcel
+    // lands behind the panel's backdrop. Only one of the two ever runs.
+    if (sourceEl && target && !reduce && !showPanel) {
       const s = sourceEl.getBoundingClientRect();
       const t = target.getBoundingClientRect();
       const tx = t.left + t.width / 2 - (s.left + s.width / 2);
@@ -151,7 +188,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { slug: product.slug, qty: 1, options }];
     });
     setBump((b) => b + 1);
+    if (showPanel) {
+      setLastAdded({ slug: product.slug, qty: 1, options });
+      setAddedOpen(true);
+    }
   }, []);
+
+  const clearCart = useCallback(() => setLines([]), []);
 
   const removeLine = useCallback(
     (key: string) => setLines((prev) => prev.filter((l) => lineKey(l.slug, l.options) !== key)),
@@ -174,7 +217,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ lines, count, subtotal, cartOpen, setCartOpen, addToCart, removeLine, changeQty, registerCartIcon, bump }}
+      value={{
+        lines, count, subtotal, cartOpen, setCartOpen, addToCart, removeLine, changeQty,
+        clearCart, registerCartIcon, bump, lastAdded, addedOpen, setAddedOpen, hydrated,
+      }}
     >
       {children}
     </Ctx.Provider>

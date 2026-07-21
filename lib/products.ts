@@ -38,7 +38,7 @@ export type Product = {
     benefitsUk?: string[];
     tipsEn?: string[];
     tipsUk?: string[];
-    specs?: { labelEn: string; labelUk: string; value: string }[];
+    specs?: { labelEn: string; labelUk: string; valueEn: string; valueUk: string }[];
     statementEn?: string;
     statementUk?: string;
     features?: { icon: "flame" | "clock" | "hands" | "wave" | "cloud" | "user" | "droplet" | "mesh" | "layers" | "shield" | "sparkle"; titleEn: string; titleUk: string; textEn: string; textUk: string }[];
@@ -117,12 +117,12 @@ export const products: Product[] = [
         "Не розігрівайте HMD на плитці для вугілля",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", value: "Non-toxic aluminium" },
-        { labelEn: "Surface", labelUk: "Поверхня", value: "A.Craft surface treatment" },
-        { labelEn: "Heating time", labelUk: "Час нагріву", value: "≈ 6 min under wind cover" },
-        { labelEn: "Session duration", labelUk: "Тривалість сесії", value: "90+ min with proper use" },
-        { labelEn: "Weight", labelUk: "Вага", value: "—" },
-        { labelEn: "Dimensions", labelUk: "Розміри", value: "—" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Non-toxic aluminium", valueUk: "Нетоксичний алюміній" },
+        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "A.Craft surface treatment", valueUk: "Обробка поверхні A.Craft" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під вітрозахистом" },
+        { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
+        { labelEn: "Weight", labelUk: "Вага", valueEn: "—", valueUk: "—" },
+        { labelEn: "Dimensions", labelUk: "Розміри", valueEn: "—", valueUk: "—" },
       ],
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
@@ -187,10 +187,10 @@ export const products: Product[] = [
         "Не розігрівайте HMD на плитці для вугілля",
       ],
       specs: [
-        { labelEn: "Surface", labelUk: "Поверхня", value: "Fully non-stick" },
-        { labelEn: "Coating", labelUk: "Покриття", value: "100% PFOA FREE" },
-        { labelEn: "Finishes", labelUk: "Кольори", value: "Black & purple" },
-        { labelEn: "Material", labelUk: "Матеріал", value: "Tactical-grade inspired" },
+        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "Fully non-stick", valueUk: "Повністю антипригарна" },
+        { labelEn: "Coating", labelUk: "Покриття", valueEn: "100% PFOA FREE", valueUk: "100% БЕЗ PFOA" },
+        { labelEn: "Finishes", labelUk: "Кольори", valueEn: "Black & purple", valueUk: "Чорний і фіолетовий" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Tactical-grade inspired", valueUk: "Тактичного класу" },
       ],
       features: [
         { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", textEn: "100% PFOA-free", textUk: "100% без PFOA" },
@@ -252,8 +252,8 @@ export const products: Product[] = [
         "Поводьтеся обережно — натуральна глина крихка",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
-        { labelEn: "Surface", labelUk: "Поверхня", value: "Glazed black matte" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
+        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "Glazed black matte", valueUk: "Чорна матова глазур" },
       ],
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & rich", textUk: "М'який і насичений" },
@@ -311,10 +311,10 @@ export const products: Product[] = [
         "Поводьтеся обережно — натуральна глина крихка",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
-        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", value: "10–12 g" },
-        { labelEn: "Weight", labelUk: "Вага", value: "—" },
-        { labelEn: "Measurements", labelUk: "Розміри", value: "—" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
+        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", valueEn: "10–12 g", valueUk: "10–12 г" },
+        { labelEn: "Weight", labelUk: "Вага", valueEn: "—", valueUk: "—" },
+        { labelEn: "Measurements", labelUk: "Розміри", valueEn: "—", valueUk: "—" },
       ],
       features: [
         { icon: "cloud", titleEn: "Smoke", titleUk: "Дим", textEn: "Bright & soft", textUk: "Яскравий і м'який" },
@@ -376,10 +376,10 @@ export const products: Product[] = [
         "Поводьтеся обережно — натуральна глина крихка",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", value: "Natural clay" },
-        { labelEn: "Design", labelUk: "Дизайн", value: "2-in-1 (interchangeable inserts)" },
-        { labelEn: "Insert 1", labelUk: "Вставка 1", value: "Aluminium phunnel sleeve" },
-        { labelEn: "Insert 2", labelUk: "Вставка 2", value: "Stainless steel mesh screen" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
+        { labelEn: "Design", labelUk: "Дизайн", valueEn: "2-in-1 (interchangeable inserts)", valueUk: "2-в-1 (змінні вставки)" },
+        { labelEn: "Insert 1", labelUk: "Вставка 1", valueEn: "Aluminium phunnel sleeve", valueUk: "Алюмінієва вставка-фанел" },
+        { labelEn: "Insert 2", labelUk: "Вставка 2", valueEn: "Stainless steel mesh screen", valueUk: "Сітка з нержавіючої сталі" },
       ],
       features: [
         { icon: "layers", titleEn: "Design", titleUk: "Дизайн", textEn: "2-in-1 inserts", textUk: "2-в-1 вставки" },

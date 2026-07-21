@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "./CartContext";
 import CartDrawer from "./CartDrawer";
+import AddedToBagPanel from "./AddedToBagPanel";
 import SearchOverlay from "./SearchOverlay";
 import AccountMenu from "./AccountMenu";
 
@@ -37,6 +38,10 @@ export default function Navbar({ locale }: { locale: string }) {
   const otherLocale = locale === "uk" ? "en" : "uk";
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
+  // Checkout runs on its own minimal chrome — every nav link there is a way to
+  // lose someone mid-purchase. Declared after the hooks so hook order is stable.
+  const onCheckout = pathname.startsWith(`/${locale}/checkout`);
+
   const navLinks = [
     { href: `/${locale}/products`, label: t("products") },
     { href: `/${locale}/wholesale`, label: t("wholesale") },
@@ -66,6 +71,8 @@ export default function Navbar({ locale }: { locale: string }) {
       )}
     </button>
   );
+
+  if (onCheckout) return null;
 
   return (
     <>
@@ -138,6 +145,7 @@ export default function Navbar({ locale }: { locale: string }) {
 
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} locale={locale} />
       <CartDrawer locale={locale} />
+      <AddedToBagPanel locale={locale} />
     </>
   );
 }

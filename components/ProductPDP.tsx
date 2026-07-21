@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
@@ -181,7 +182,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     : (uk ? "Аксесуар" : "Accessory");
 
   const L = {
-    addToBag: uk ? "Додати в кошик" : "Add to Bag",
+    addToBag: uk ? "Додати в кошик" : "Add to Shopping Bag",
     favourite: uk ? "В обране" : "Favourite",
     colour: uk ? "Колір" : "Colour Shown",
     style: uk ? "Модель" : "Style",
@@ -318,19 +319,45 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
             {/* Buttons */}
             <div className="flex flex-col gap-3 mt-8">
-              <button
-                onClick={() =>
-                  addToCart(product, mainImgRef.current, {
-                    variant: variants?.[variantIdx]?.name,
-                    lid: isHmd ? material.lid : undefined,
-                    rubber: isHmd ? material.rubber : undefined,
-                  })
-                }
-                className="h-14 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
-                style={{ background: "#111111", color: "#ffffff" }}
-              >
-                {L.addToBag}
-              </button>
+              {/* Add to bag + express pay, side by side. The slide-over replaces
+                  the fly-to-cart animation here (passing null as the source). */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    addToCart(
+                      product,
+                      null,
+                      {
+                        variant: variants?.[variantIdx]?.name,
+                        lid: isHmd ? material.lid : undefined,
+                        rubber: isHmd ? material.rubber : undefined,
+                      },
+                      true
+                    )
+                  }
+                  className="flex-1 h-14 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
+                  style={{ background: "#111111", color: "#ffffff" }}
+                >
+                  {L.addToBag}
+                </button>
+                <button
+                  onClick={() =>
+                    toast(uk ? "Apple Pay — незабаром" : "Apple Pay — coming soon", {
+                      description: uk
+                        ? "Онлайн-оплату буде підключено найближчим часом."
+                        : "Online payment is being connected shortly.",
+                    })
+                  }
+                  aria-label={uk ? "Apple Pay — незабаром" : "Apple Pay — coming soon"}
+                  className="w-[124px] h-14 rounded-full flex items-center justify-center transition-opacity hover:opacity-85"
+                  style={{ background: "#000000", color: "#ffffff" }}
+                >
+                  <svg width="46" height="20" viewBox="0 0 42 18" fill="currentColor" aria-hidden="true">
+                    <path d="M8.2 3.1c.5-.6.8-1.4.7-2.2-.7 0-1.6.5-2.1 1.1-.5.5-.9 1.4-.7 2.2.8 0 1.6-.4 2.1-1.1zm.7 1.2c-1.2-.1-2.2.7-2.7.7-.6 0-1.4-.6-2.3-.6-1.2 0-2.3.7-2.9 1.8-1.2 2.1-.3 5.3.9 7 .6.9 1.3 1.8 2.2 1.8.9 0 1.2-.6 2.3-.6s1.4.6 2.3.5c.9 0 1.5-.8 2.1-1.7.7-1 .9-1.9.9-2-.1 0-1.8-.7-1.8-2.7 0-1.7 1.4-2.5 1.4-2.5-.7-1.1-1.9-1.3-2.4-1.7z" />
+                    <text x="14" y="13.5" fontSize="11.5" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="500">Pay</text>
+                  </svg>
+                </button>
+              </div>
               <button
                 onClick={toggleFav}
                 className="h-14 rounded-full text-[15px] font-medium border flex items-center justify-center gap-2 transition-colors hover:border-black"
@@ -368,7 +395,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     {pdp.specs.map((s) => (
                       <tr key={s.labelEn} className="border-b last:border-0" style={{ borderColor: "#efefef" }}>
                         <td className="py-2.5 pr-4" style={{ color: "#707072" }}>{uk ? s.labelUk : s.labelEn}</td>
-                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{s.value}</td>
+                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{uk ? s.valueUk : s.valueEn}</td>
                       </tr>
                     ))}
                   </tbody>

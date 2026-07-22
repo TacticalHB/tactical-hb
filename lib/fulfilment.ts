@@ -27,6 +27,12 @@ export type PaymentRow = {
   amount_uah: number;
   discount_eur: number;
   voucher_code: string | null;
+  shipping_method: string | null;
+  shipping_uah: number;
+  np_city_ref: string | null;
+  np_city_name: string | null;
+  np_warehouse_ref: string | null;
+  np_warehouse_name: string | null;
   delivery: Record<string, unknown>;
   lines: {
     slug: string; name: string; qty: number;
@@ -84,6 +90,12 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
         voucher_code: payment.voucher_code,
         email: payment.email,
         delivery: payment.delivery,
+        shipping_method: payment.shipping_method,
+        shipping_uah: payment.shipping_uah,
+        np_city_ref: payment.np_city_ref,
+        np_city_name: payment.np_city_name,
+        np_warehouse_ref: payment.np_warehouse_ref,
+        np_warehouse_name: payment.np_warehouse_name,
         source: "monobank",
         external_ref: payment.reference,
       })
@@ -144,15 +156,23 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
 async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
   const d = p.delivery as Record<string, string>;
   const name = [d.firstName, d.surname].filter(Boolean).join(" ");
-  const address = [
-    name, d.address, d.apartment,
-    [d.city, d.postcode].filter(Boolean).join(", "),
-    d.country,
-  ].filter(Boolean).join("\n");
+  const np = p.shipping_method === "nova_poshta";
+
+  // For a branch delivery the address IS the branch — the street fields were
+  // never collected, so printing them would show an empty address.
+  const address = np
+    ? [name, `${p.np_city_name ?? ""}`, p.np_warehouse_name ?? ""].filter(Boolean).join("\n")
+    : [name, d.address, d.apartment, [d.city, d.postcode].filter(Boolean).join(", "), d.country]
+        .filter(Boolean).join("\n");
+
+  const totalUah = Math.round(p.amount_uah + p.shipping_uah);
 
   const rows: [string, string][] = [
     ["Order", p.reference],
-    ["Paid", `₴${Math.round(p.amount_uah).toLocaleString("uk-UA")}  (€${p.amount_eur.toFixed(2)})`],
+    ["Paid", `₴${totalUah.toLocaleString("uk-UA")}  (goods ₴${Math.round(p.amount_uah).toLocaleString("uk-UA")} / €${p.amount_eur.toFixed(2)})`],
+    ["Shipping", np
+      ? `Nova Poshta — ₴${Math.round(p.shipping_uah).toLocaleString("uk-UA")}`
+      : "International — invoice separately"],
     ["Customer", name],
     ["Email", p.email],
     ["Telephone", d.phone ?? ""],

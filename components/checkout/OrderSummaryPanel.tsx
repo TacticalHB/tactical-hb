@@ -15,15 +15,24 @@ export default function OrderSummaryPanel({
   locale,
   discount,
   voucherCode,
+  shippingUah,
+  shippingPending,
 }: {
   locale: string;
   /** Applied voucher value, in both currencies. Omitted when none is applied. */
   discount?: Money;
   voucherCode?: string | null;
+  /** Quoted Nova Poshta cost, or null when no branch is chosen yet. */
+  shippingUah?: number | null;
+  /** International: shipping is invoiced after the order, not now. */
+  shippingPending?: boolean;
 }) {
   const { lines, subtotal, count } = useCart();
   const uk = locale === "uk";
-  const total = discount ? subtractMoney(subtotal, discount) : subtotal;
+  const goods = discount ? subtractMoney(subtotal, discount) : subtotal;
+  // Shipping is quoted in UAH only, and only added to the UAH side. The EUR
+  // figure stays the merchandise value, which is what loyalty is based on.
+  const total: Money = { eur: goods.eur, uah: goods.uah + (shippingUah ?? 0) };
 
   const L = {
     title: uk ? "Підсумок замовлення" : "Order Summary",
@@ -32,6 +41,7 @@ export default function OrderSummaryPanel({
     discount: uk ? "Ваучер" : "Voucher",
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується згодом" : "Calculated later",
+    shippingAfter: uk ? "Після оформлення" : "After your order",
     total: uk ? "Разом" : "Total",
     totalNote: uk ? "Без вартості доставки" : "Excludes delivery",
     qty: uk ? "К-сть" : "Qty",
@@ -84,7 +94,13 @@ export default function OrderSummaryPanel({
         )}
         <div className="flex items-center justify-between">
           <span style={{ color: "var(--text-muted)" }}>{L.shipping}</span>
-          <span style={{ color: "var(--text-muted)" }}>{L.shippingNote}</span>
+          <span style={{ color: shippingUah != null ? "var(--text)" : "var(--text-muted)" }}>
+            {shippingUah != null
+              ? `₴${shippingUah.toLocaleString("uk-UA")}`
+              : shippingPending
+              ? L.shippingAfter
+              : L.shippingNote}
+          </span>
         </div>
       </div>
 
@@ -94,7 +110,9 @@ export default function OrderSummaryPanel({
           <Price money={total} locale={locale} />
         </span>
       </div>
-      <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>{L.totalNote}</p>
+      {shippingUah == null && (
+        <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>{L.totalNote}</p>
+      )}
     </aside>
   );
 }

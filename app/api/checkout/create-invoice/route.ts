@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money } from "@/lib/currency";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
+import { getDeliveryPrice } from "@/lib/nova-poshta";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
 
@@ -106,7 +107,47 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const total = subtractMoney(priced.subtotal, discount);
+  const goods = subtractMoney(priced.subtotal, discount);
+
+  // ---- Shipping, re-quoted here -------------------------------------------
+  // The browser sends only the chosen branch. Trusting a cost from the client
+  // would let anyone post shipping: 0.
+  const shipReq = (b.shipping ?? {}) as Record<string, unknown>;
+  const shippingMethod = String(shipReq.method ?? "international") === "nova_poshta"
+    ? "nova_poshta"
+    : "international";
+
+  let shippingUah = 0;
+  let npCityRef: string | null = null;
+  let npCityName: string | null = null;
+  let npWarehouseRef: string | null = null;
+  let npWarehouseName: string | null = null;
+
+  if (shippingMethod === "nova_poshta") {
+    npCityRef = String(shipReq.cityRef ?? "").trim().slice(0, 80) || null;
+    npCityName = String(shipReq.cityName ?? "").trim().slice(0, 120) || null;
+    npWarehouseRef = String(shipReq.warehouseRef ?? "").trim().slice(0, 80) || null;
+    npWarehouseName = String(shipReq.warehouseName ?? "").trim().slice(0, 300) || null;
+
+    if (!npCityRef || !npWarehouseRef) {
+      return NextResponse.json({ ok: false, error: "no_branch" }, { status: 400 });
+    }
+
+    try {
+      shippingUah = await getDeliveryPrice({
+        cityRecipientRef: npCityRef,
+        declaredValueUah: goods.uah,
+      });
+    } catch (e) {
+      // Refuse rather than guess. Charging an unquoted amount, or shipping for
+      // free because the lookup failed, are both worse than asking them to retry.
+      console.error("[invoice] shipping quote failed:", e);
+      return NextResponse.json({ ok: false, error: "shipping_unavailable" }, { status: 502 });
+    }
+  }
+
+  // Goods in both currencies; shipping is UAH-only and charged on top.
+  const total = { eur: goods.eur, uah: goods.uah + shippingUah };
   if (total.uah <= 0) {
     // A voucher covering the whole basket leaves nothing to charge. Monobank
     // cannot create a zero invoice, and this needs a different flow.
@@ -116,19 +157,31 @@ export async function POST(request: NextRequest) {
   const amountKop = toKopiyky(total.uah);
   const reference = makeReference();
 
-  // A basket is sent only when it reconciles exactly with the amount charged.
-  // With a voucher applied it cannot, and a mismatch risks Monobank rejecting
-  // the invoice — so the discounted case sends no basket at all.
+  // A basket is sent only when it reconciles EXACTLY with the amount charged.
+  // Shipping is included as its own line so it still adds up. A voucher cannot
+  // be expressed as a basket line, so the discounted case sends no basket at
+  // all rather than risk Monobank rejecting a mismatched invoice.
   const basket: BasketItem[] | undefined =
     discount.eur > 0
       ? undefined
-      : priced.lines.map((l) => ({
-          name: l.name,
-          qty: l.qty,
-          sum: toKopiyky(l.total.uah),
-          unit: locale === "uk" ? "шт." : "pcs",
-          code: l.slug,
-        }));
+      : [
+          ...priced.lines.map((l) => ({
+            name: l.name,
+            qty: l.qty,
+            sum: toKopiyky(l.total.uah),
+            unit: locale === "uk" ? "шт." : "pcs",
+            code: l.slug,
+          })),
+          ...(shippingUah > 0
+            ? [{
+                name: locale === "uk" ? "Доставка — Нова Пошта" : "Delivery — Nova Poshta",
+                qty: 1,
+                sum: toKopiyky(shippingUah),
+                unit: locale === "uk" ? "шт." : "pcs",
+                code: "shipping-np",
+              }]
+            : []),
+        ];
 
   // ---- Record the intent BEFORE sending anyone to pay ---------------------
   // If this insert fails we must not create an invoice: a customer could pay
@@ -141,10 +194,18 @@ export async function POST(request: NextRequest) {
     user_id: userId,
     email,
     locale,
-    amount_eur: total.eur,
-    amount_uah: total.uah,
+    // Merchandise only — this is the loyalty basis. Shipping is stored apart
+    // so postage never earns XP.
+    amount_eur: goods.eur,
+    amount_uah: goods.uah,
     discount_eur: discount.eur,
     voucher_code: voucherCode,
+    shipping_method: shippingMethod,
+    shipping_uah: shippingUah,
+    np_city_ref: npCityRef,
+    np_city_name: npCityName,
+    np_warehouse_ref: npWarehouseRef,
+    np_warehouse_name: npWarehouseName,
     delivery,
     lines: priced.lines.map((l) => {
       const d = describeLine({ slug: l.slug, qty: l.qty }, locale);

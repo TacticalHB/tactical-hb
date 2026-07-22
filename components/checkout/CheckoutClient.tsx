@@ -7,6 +7,7 @@ import { useCart } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
 import { money, subtractMoney } from "@/lib/currency";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
+import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
 import { type DeliveryDetails } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
@@ -29,6 +30,7 @@ import AccountCreatingScreen from "./AccountCreatingScreen";
 --------------------------------------------------------------------------- */
 
 type Identity = "guest" | "account";
+type Destination = "ukraine" | "international";
 
 export default function CheckoutClient({ locale }: { locale: string }) {
   const uk = locale === "uk";
@@ -52,9 +54,19 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const [placing, setPlacing] = useState(false);
   const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
 
+  // Ukrainian visitors default to branch delivery; everyone else to an address.
+  const [destination, setDestination] = useState<Destination>(uk ? "ukraine" : "international");
+  const [np, setNp] = useState<NovaPoshtaSelection | null>(null);
+
   // A voucher is denominated in EUR; money() converts it for the UAH side.
   const discount = voucher ? money(voucher.amountEur) : money(0, 0);
-  const total = subtractMoney(subtotal, discount);
+  const goods = subtractMoney(subtotal, discount);
+
+  // Shipping is UAH-only — Nova Poshta quotes in hryvnia and it is charged on
+  // top of the goods. International shipping is billed after the order, so it
+  // adds nothing here.
+  const shippingUah = destination === "ukraine" ? np?.costUah ?? 0 : 0;
+  const total = { eur: goods.eur, uah: goods.uah + shippingUah };
 
   // A voucher applied to one basket must not survive a change to that basket —
   // its minimum-order rule was checked against the old contents.
@@ -105,6 +117,18 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     contact: uk ? "Контактні дані" : "Contact details",
     address: uk ? "Адреса доставки" : "Shipping address",
     method: uk ? "Спосіб доставки" : "Delivery method",
+    destUkraine: uk ? "Україна — Нова Пошта" : "Ukraine — Nova Poshta",
+    destUkraineNote: uk
+      ? "Доставка у відділення. Вартість розраховується одразу."
+      : "Delivery to a branch. Cost calculated instantly.",
+    destIntl: uk ? "Міжнародна доставка" : "International delivery",
+    destIntlNote: uk
+      ? "Доставка за адресою за межі України."
+      : "Address delivery outside Ukraine.",
+    intlNotice: uk
+      ? "Вартість доставки буде розрахована після оформлення замовлення — ми зв'яжемося з вами й виставимо рахунок окремо. Зараз ви сплачуєте лише за товар."
+      : "Shipping cost will be calculated after your order is placed — we'll contact you and invoice it separately. You're paying for the goods only at this stage.",
+    needBranch: uk ? "Оберіть місто та відділення Нової Пошти." : "Please choose a city and a Nova Poshta branch.",
     methodName: "Nova Poshta / Ukrposhta",
     methodNote: uk ? "Вартість розраховується згодом" : "Calculated later",
     methodHint: uk
@@ -162,8 +186,16 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const submitDelivery = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const need: (keyof DeliveryDetails)[] = ["firstName", "surname", "phone", "address", "city", "postcode", "country"];
+
+    // Branch delivery needs a branch, not a street address; international needs
+    // the full address. Requiring both would block every customer.
+    const need: (keyof DeliveryDetails)[] =
+      destination === "ukraine"
+        ? ["firstName", "surname", "phone"]
+        : ["firstName", "surname", "phone", "address", "city", "postcode", "country"];
     if (need.some((k) => !form[k].trim())) return setError(L.required);
+
+    if (destination === "ukraine" && !np?.warehouseRef) return setError(L.needBranch);
     // A bare "+" or "+380" is the seeded prefix, not a number.
     if (form.phone.replace(/[^\d]/g, "").length < 9) return setError(L.badPhone);
     setStep("payment");
@@ -189,6 +221,18 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           ts: mountedAt.current,
           delivery: form,
           voucherCode: voucher?.code ?? null,
+          // Only the branch is sent. The cost is re-quoted server-side — a
+          // shipping price from the browser would be trivially set to zero.
+          shipping:
+            destination === "ukraine" && np?.warehouseRef
+              ? {
+                  method: "nova_poshta",
+                  cityRef: np.cityRef,
+                  cityName: np.cityName,
+                  warehouseRef: np.warehouseRef,
+                  warehouseName: np.warehouseName,
+                }
+              : { method: "international" },
           lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),
       });
@@ -364,45 +408,75 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 </div>
               </div>
 
-              <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.address}</h2>
-              <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                <div className="sm:col-span-2">
-                  <label className={labelCls} style={labelSt}>{L.street}</label>
-                  <input className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className={labelCls} style={labelSt}>{L.apartment}</label>
-                  <input className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
-                </div>
-                <div>
-                  <label className={labelCls} style={labelSt}>{L.city}</label>
-                  <input className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
-                </div>
-                <div>
-                  <label className={labelCls} style={labelSt}>{L.postcode}</label>
-                  <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className={labelCls} style={labelSt}>{L.country}</label>
-                  <input className={field} autoComplete="country-name" value={form.country} onChange={set("country")} required />
-                </div>
-              </div>
-
+              {/* Destination decides which form follows: a Nova Poshta branch
+                  within Ukraine, or a full address anywhere else. */}
               <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.method}</h2>
-              <div className="p-5 mb-8" style={{ border: "1px solid var(--ink)" }}>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="flex items-center gap-3 text-[15px]" style={{ color: "var(--text)" }}>
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-                      style={{ border: "1px solid var(--ink)" }}>
-                      <span className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />
-                    </span>
-                    {L.methodName}
-                  </span>
-                  <span className="text-[13px] shrink-0" style={{ color: "var(--text-muted)" }}>{L.methodNote}</span>
-                </div>
-                <p className="text-[13px] mt-3 ml-7" style={{ color: "var(--text-muted)" }}>{L.methodHint}</p>
+              <div className="flex flex-col gap-3 mb-8" role="radiogroup" aria-label={L.method}>
+                {([
+                  { id: "ukraine" as const, title: L.destUkraine, note: L.destUkraineNote },
+                  { id: "international" as const, title: L.destIntl, note: L.destIntlNote },
+                ]).map((o) => {
+                  const active = destination === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => { setDestination(o.id); setError(null); }}
+                      className="w-full flex items-start gap-3.5 p-5 text-left transition-colors"
+                      style={{
+                        border: active ? "1px solid var(--ink)" : "1px solid var(--border-strong)",
+                        background: "var(--field-bg)",
+                      }}
+                    >
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                        style={{ border: `1px solid ${active ? "var(--ink)" : "var(--border-strong)"}` }}>
+                        {active && <span className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />}
+                      </span>
+                      <span>
+                        <span className="block text-[15px]" style={{ color: "var(--text)", fontWeight: active ? 500 : 400 }}>{o.title}</span>
+                        <span className="block text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>{o.note}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
+              {destination === "ukraine" ? (
+                <div className="mb-8">
+                  <NovaPoshtaPicker locale={locale} cart={lines} value={np} onChange={setNp} />
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.address}</h2>
+                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                    <div className="sm:col-span-2">
+                      <label className={labelCls} style={labelSt}>{L.street}</label>
+                      <input className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelCls} style={labelSt}>{L.apartment}</label>
+                      <input className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
+                    </div>
+                    <div>
+                      <label className={labelCls} style={labelSt}>{L.city}</label>
+                      <input className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
+                    </div>
+                    <div>
+                      <label className={labelCls} style={labelSt}>{L.postcode}</label>
+                      <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelCls} style={labelSt}>{L.country}</label>
+                      <input className={field} autoComplete="country-name" value={form.country} onChange={set("country")} required />
+                    </div>
+                  </div>
+                  <p className="text-[13px] leading-relaxed p-4 mb-8" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
+                    {L.intlNotice}
+                  </p>
+                </>
+              )}
               <button
                 type="submit"
                 className="w-full sm:w-auto sm:min-w-[280px] h-12 px-8 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
@@ -477,7 +551,13 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           <p className="text-[12px] mt-8" style={{ color: "var(--text-faint)" }}>{L.secure}</p>
         </div>
 
-        <OrderSummaryPanel locale={locale} discount={discount} voucherCode={voucher?.code ?? null} />
+        <OrderSummaryPanel
+          locale={locale}
+          discount={discount}
+          voucherCode={voucher?.code ?? null}
+          shippingUah={destination === "ukraine" ? np?.costUah ?? null : null}
+          shippingPending={destination === "international"}
+        />
       </div>
     </div>
   );

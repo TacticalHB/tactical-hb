@@ -46,6 +46,7 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
     orderNo: uk ? "Номер замовлення" : "Order No",
     shipping: uk ? "Дані доставки" : "Shipping details",
     total: uk ? "Разом" : "Total",
+    discount: uk ? "Ваучер" : "Voucher",
     qty: uk ? "К-сть" : "Qty",
     none: uk ? "Замовлення не знайдено." : "No recent order found.",
     noneBody: uk
@@ -142,10 +143,24 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
           </div>
         </dl>
 
-        <div className="flex items-center justify-between py-5 mb-2" style={{ borderTop: "1px solid var(--border-strong)" }}>
+        {order.discount && order.discount.eur > 0 && (
+          <div className="flex items-center justify-between pt-5 text-[14px]" style={{ borderTop: "1px solid var(--border-strong)" }}>
+            <span style={{ color: "var(--text-muted)" }}>
+              {L.discount}
+              {order.voucherCode && <span className="font-mono tracking-wider"> · {order.voucherCode}</span>}
+            </span>
+            <span style={{ color: "var(--accent-hover)" }}>−{formatMoney(order.discount, currency)}</span>
+          </div>
+        )}
+
+        <div
+          className="flex items-center justify-between py-5 mb-2"
+          style={{ borderTop: order.discount && order.discount.eur > 0 ? "none" : "1px solid var(--border-strong)" }}
+        >
           <span className="text-[15px]" style={{ color: "var(--text)" }}>{L.total}</span>
           <span className="text-[19px] font-medium" style={{ color: "var(--text)" }}>
-            {formatMoney(order.subtotal, currency)}
+            {/* Older snapshots have no `total`; fall back to the subtotal. */}
+            {formatMoney(order.total ?? order.subtotal, currency)}
           </span>
         </div>
 

@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
     ["Email", email],
     ["Telephone", cap(d.phone, LIMITS.phone)],
     ["Payment", cap(b.paymentMethod, LIMITS.text)],
+    ["Voucher", cap(b.voucherCode, LIMITS.text)],
+    ["Discount", cap(b.discountLabel, 40)],
     ["Total", cap(b.totalLabel, 40)],
     ["Language", cap(b.locale, 8)],
   ];

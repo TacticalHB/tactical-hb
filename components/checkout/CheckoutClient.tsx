@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useCart, linePrice } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
 import { describeLine } from "@/lib/cart-display";
-import { currencyForLocale, formatMoney, scaleMoney } from "@/lib/currency";
+import { currencyForLocale, formatMoney, money, scaleMoney, subtractMoney } from "@/lib/currency";
+import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import { makeOrderNo, saveOrder, type DeliveryDetails, type OrderLine } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
@@ -50,6 +51,18 @@ export default function CheckoutClient({ locale }: { locale: string }) {
 
   const [error, setError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
+  const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
+
+  // A voucher is denominated in EUR; money() converts it for the UAH side.
+  const discount = voucher ? money(voucher.amountEur) : money(0, 0);
+  const total = subtractMoney(subtotal, discount);
+
+  // A voucher applied to one basket must not survive a change to that basket —
+  // its minimum-order rule was checked against the old contents.
+  useEffect(() => {
+    if (voucher) setVoucher(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines]);
 
   // Clearing the cart on success would otherwise trip the empty-cart guard and
   // bounce the shopper back to /cart instead of the confirmation page.
@@ -190,7 +203,9 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           // fill; reaching this point requires completing two checkout steps.
           ts: mountedAt.current,
           paymentMethod: L.card,
-          totalLabel: formatMoney(subtotal, currency),
+          totalLabel: formatMoney(total, currency),
+          voucherCode: voucher?.code ?? null,
+          discountLabel: discount.eur > 0 ? formatMoney(discount, currency) : null,
           delivery: form,
           lines: orderLines.map((l) => ({
             name: l.name,
@@ -218,6 +233,9 @@ export default function CheckoutClient({ locale }: { locale: string }) {
       delivery: form,
       lines: orderLines,
       subtotal,
+      discount,
+      total,
+      voucherCode: voucher?.code ?? null,
       paymentMethod: L.card,
       accountCreated,
     });
@@ -445,6 +463,19 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 <p className="text-[13px] mt-3 ml-7" style={{ color: "var(--text-muted)" }}>{L.cardNote}</p>
               </div>
 
+              {/* Voucher — last thing before paying, so the total it changes is
+                  the one directly above the pay button. */}
+              <div className="mb-6">
+                <VoucherField
+                  locale={locale}
+                  signedIn={!!user}
+                  cart={lines}
+                  applied={voucher}
+                  onApply={setVoucher}
+                  onRemove={() => setVoucher(null)}
+                />
+              </div>
+
               <div className="flex items-center gap-3 my-6">
                 <span className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
                 <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: "var(--text-faint)" }}>{L.orExpress}</span>
@@ -479,7 +510,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           <p className="text-[12px] mt-8" style={{ color: "var(--text-faint)" }}>{L.secure}</p>
         </div>
 
-        <OrderSummaryPanel locale={locale} />
+        <OrderSummaryPanel locale={locale} discount={discount} voucherCode={voucher?.code ?? null} />
       </div>
     </div>
   );

@@ -45,6 +45,11 @@ export type OrderSnapshot = {
   delivery: DeliveryDetails;
   lines: OrderLine[];
   subtotal: Money;
+  /** Voucher value applied, if any. Absent on orders saved before vouchers existed. */
+  discount?: Money;
+  /** Subtotal minus discount — what the customer actually pays. */
+  total?: Money;
+  voucherCode?: string | null;
   /** Payment method the shopper chose. No card data is ever held here. */
   paymentMethod: string;
   accountCreated: boolean;

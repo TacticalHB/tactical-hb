@@ -4,20 +4,32 @@ import Image from "next/image";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
+import { subtractMoney, type Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
    The order summary rail shown beside every checkout step, so what's being
    paid for is never off-screen.
 --------------------------------------------------------------------------- */
 
-export default function OrderSummaryPanel({ locale }: { locale: string }) {
+export default function OrderSummaryPanel({
+  locale,
+  discount,
+  voucherCode,
+}: {
+  locale: string;
+  /** Applied voucher value, in both currencies. Omitted when none is applied. */
+  discount?: Money;
+  voucherCode?: string | null;
+}) {
   const { lines, subtotal, count } = useCart();
   const uk = locale === "uk";
+  const total = discount ? subtractMoney(subtotal, discount) : subtotal;
 
   const L = {
     title: uk ? "Підсумок замовлення" : "Order Summary",
     items: uk ? "товарів" : "items",
     subtotal: uk ? "Проміжний підсумок" : "Subtotal",
+    discount: uk ? "Ваучер" : "Voucher",
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується згодом" : "Calculated later",
     total: uk ? "Разом" : "Total",
@@ -59,6 +71,17 @@ export default function OrderSummaryPanel({ locale }: { locale: string }) {
           <span style={{ color: "var(--text-muted)" }}>{L.subtotal}</span>
           <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
         </div>
+        {discount && discount.eur > 0 && (
+          <div className="flex items-center justify-between">
+            <span style={{ color: "var(--text-muted)" }}>
+              {L.discount}
+              {voucherCode && <span className="font-mono tracking-wider"> · {voucherCode}</span>}
+            </span>
+            <span style={{ color: "var(--accent-hover)" }}>
+              −<Price money={discount} locale={locale} />
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span style={{ color: "var(--text-muted)" }}>{L.shipping}</span>
           <span style={{ color: "var(--text-muted)" }}>{L.shippingNote}</span>
@@ -68,7 +91,7 @@ export default function OrderSummaryPanel({ locale }: { locale: string }) {
       <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: "1px solid var(--border-strong)" }}>
         <span className="text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.total}</span>
         <span className="text-[19px] font-medium" style={{ color: "var(--text)" }}>
-          <Price money={subtotal} locale={locale} />
+          <Price money={total} locale={locale} />
         </span>
       </div>
       <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>{L.totalNote}</p>

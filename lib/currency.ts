@@ -39,6 +39,15 @@ export const addMoney = (a: Money, b: Money): Money => ({ eur: a.eur + b.eur, ua
 
 export const scaleMoney = (m: Money, n: number): Money => ({ eur: m.eur * n, uah: m.uah * n });
 
+/**
+ * Subtract, clamped at zero — a voucher worth more than the basket discounts
+ * the basket to nothing, it never becomes a negative charge.
+ */
+export const subtractMoney = (a: Money, b: Money): Money => ({
+  eur: Math.max(0, Math.round((a.eur - b.eur) * 100) / 100),
+  uah: Math.max(0, Math.round(a.uah - b.uah)),
+});
+
 /** Which currency a locale shows as its headline price. */
 export const currencyForLocale = (locale: string): Currency => (locale === "uk" ? "UAH" : "EUR");
 

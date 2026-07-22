@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CartLine } from "@/components/CartContext";
 
 /* ---------------------------------------------------------------------------
@@ -45,9 +45,23 @@ export default function NovaPoshtaPicker({
   const [quoting, setQuoting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [whQuery, setWhQuery] = useState("");
+  const [whOpen, setWhOpen] = useState(false);
+
   const boxRef = useRef<HTMLDivElement>(null);
+  const whBoxRef = useRef<HTMLDivElement>(null);
   // Guards against a slow earlier response overwriting a newer one.
   const searchSeq = useRef(0);
+
+  // Filter by branch number or street. Capped because rendering a thousand
+  // rows on every keystroke is what makes a long list feel broken.
+  const shownWarehouses = useMemo(() => {
+    const q = whQuery.trim().toLowerCase();
+    const matches = q
+      ? warehouses.filter((w) => w.number.includes(q) || w.name.toLowerCase().includes(q))
+      : warehouses;
+    return matches.slice(0, 60);
+  }, [warehouses, whQuery]);
 
   const L = {
     city: uk ? "Місто" : "City",
@@ -56,6 +70,9 @@ export default function NovaPoshtaPicker({
     chooseCityFirst: uk ? "Спершу оберіть місто" : "Choose a city first",
     loading: uk ? "Завантаження…" : "Loading…",
     noBranches: uk ? "Відділень не знайдено" : "No branches found",
+    branchSearch: uk ? "Номер відділення або вулиця" : "Branch number or street",
+    noMatch: uk ? "Нічого не знайдено" : "No matches",
+    change: uk ? "Змінити" : "Change",
     delivery: uk ? "Вартість доставки" : "Delivery cost",
     calculating: uk ? "Розраховуємо…" : "Calculating…",
     failed: uk ? "Не вдалося завантажити дані Нової Пошти." : "Couldn't load Nova Poshta data.",
@@ -68,7 +85,9 @@ export default function NovaPoshtaPicker({
   // Close the suggestion list on an outside click.
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpenList(false);
+      const t = e.target as Node;
+      if (boxRef.current && !boxRef.current.contains(t)) setOpenList(false);
+      if (whBoxRef.current && !whBoxRef.current.contains(t)) setWhOpen(false);
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
@@ -115,6 +134,9 @@ export default function NovaPoshtaPicker({
     setOpenList(false);
     setCities([]);
     setWarehouses([]);
+    // A branch search from the previous city would filter the new city's list.
+    setWhQuery("");
+    setWhOpen(false);
     // City changed, so any previous branch and quote are void.
     onChange(null);
     setError(null);
@@ -227,23 +249,68 @@ export default function NovaPoshtaPicker({
         )}
       </div>
 
-      {/* Warehouse */}
-      <div>
-        <label htmlFor="np-warehouse" className={labelCls} style={labelSt}>{L.warehouse}</label>
-        <select
-          id="np-warehouse"
-          className="field appearance-none"
-          disabled={!value?.cityRef || loadingWh}
-          value={value?.warehouseRef ?? ""}
-          onChange={(e) => pickWarehouse(e.target.value)}
-        >
-          <option value="" disabled>
-            {!value?.cityRef ? L.chooseCityFirst : loadingWh ? L.loading : warehouses.length === 0 ? L.noBranches : "—"}
-          </option>
-          {warehouses.map((w) => (
-            <option key={w.ref} value={w.ref}>{w.name}</option>
-          ))}
-        </select>
+      {/* Warehouse — searchable. Kyiv has well over a thousand branches, so a
+          plain dropdown is unusable even once it contains the right one. */}
+      <div ref={whBoxRef} className="relative">
+        <label htmlFor="np-warehouse" className={labelCls} style={labelSt}>
+          {L.warehouse}
+          {warehouses.length > 0 && (
+            <span className="ml-2 normal-case tracking-normal" style={{ color: "var(--text-muted)" }}>
+              ({warehouses.length})
+            </span>
+          )}
+        </label>
+
+        {value?.warehouseRef ? (
+          <div className="flex items-start justify-between gap-4 p-4" style={{ border: "1px solid var(--border-strong)", background: "var(--field-bg)" }}>
+            <span className="text-[14px] leading-snug" style={{ color: "var(--text)" }}>{value.warehouseName}</span>
+            <button
+              type="button"
+              onClick={() => { onChange({ ...value, warehouseRef: "", warehouseName: "", costUah: null }); setWhQuery(""); setWhOpen(true); }}
+              className="text-[12px] underline underline-offset-4 shrink-0 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {L.change}
+            </button>
+          </div>
+        ) : (
+          <input
+            id="np-warehouse"
+            className="field"
+            autoComplete="off"
+            disabled={!value?.cityRef || loadingWh}
+            placeholder={
+              !value?.cityRef ? L.chooseCityFirst : loadingWh ? L.loading : L.branchSearch
+            }
+            value={whQuery}
+            onChange={(e) => { setWhQuery(e.target.value); setWhOpen(true); }}
+            onFocus={() => setWhOpen(true)}
+          />
+        )}
+
+        {whOpen && !value?.warehouseRef && warehouses.length > 0 && (
+          <ul
+            className="absolute z-20 left-0 right-0 mt-1 max-h-[300px] overflow-y-auto"
+            style={{ background: "var(--field-bg)", border: "1px solid var(--border-strong)" }}
+          >
+            {shownWarehouses.length === 0 ? (
+              <li className="px-4 py-3 text-[13px]" style={{ color: "var(--text-muted)" }}>{L.noMatch}</li>
+            ) : (
+              shownWarehouses.map((w) => (
+                <li key={w.ref}>
+                  <button
+                    type="button"
+                    onClick={() => { pickWarehouse(w.ref); setWhOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-[13.5px] leading-snug transition-colors hover:bg-[color:var(--bg-soft)]"
+                    style={{ color: "var(--text)" }}
+                  >
+                    {w.name}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
       </div>
 
       {/* Quote */}

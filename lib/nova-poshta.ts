@@ -90,13 +90,29 @@ type RawWarehouse = {
   TotalMaxWeightAllowed?: string;
 };
 
+/** Rows per request. Nova Poshta caps a page; more cities need several. */
+const WAREHOUSE_PAGE = 500;
+/** Kyiv is the largest at well over a thousand; this is a runaway guard. */
+const MAX_WAREHOUSE_PAGES = 8;
+
 export async function getWarehouses(cityRef: string): Promise<NpWarehouse[]> {
   if (!cityRef) return [];
-  const rows = await call<RawWarehouse>("Address", "getWarehouses", {
-    CityRef: cityRef,
-    Limit: "500",
-    Page: "1",
-  });
+
+  // MUST paginate. Requesting a single page of 500 silently truncates every
+  // large city — Kyiv, Kharkiv, Lviv and Odesa all return exactly 500, which
+  // is the cap, not the count. Customers whose branch fell past it could not
+  // select it at all.
+  const rows: RawWarehouse[] = [];
+  for (let page = 1; page <= MAX_WAREHOUSE_PAGES; page++) {
+    const batch = await call<RawWarehouse>("Address", "getWarehouses", {
+      CityRef: cityRef,
+      Limit: String(WAREHOUSE_PAGE),
+      Page: String(page),
+    });
+    rows.push(...batch);
+    // A short page is the last page.
+    if (batch.length < WAREHOUSE_PAGE) break;
+  }
 
   return rows
     .map((w) => ({

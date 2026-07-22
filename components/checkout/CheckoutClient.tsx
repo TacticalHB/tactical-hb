@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCart, linePrice } from "@/components/CartContext";
+import { useCart } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
-import { describeLine } from "@/lib/cart-display";
-import { currencyForLocale, formatMoney, money, scaleMoney, subtractMoney } from "@/lib/currency";
+import { money, subtractMoney } from "@/lib/currency";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
-import { makeOrderNo, saveOrder, type DeliveryDetails, type OrderLine } from "@/lib/checkout";
+import { type DeliveryDetails } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
 import ExpressPayButtons from "./ExpressPayButtons";
@@ -64,9 +63,6 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines]);
 
-  // Clearing the cart on success would otherwise trip the empty-cart guard and
-  // bounce the shopper back to /cart instead of the confirmation page.
-  const placedRef = useRef(false);
   // When checkout opened, so the order endpoint can tell a person from a script.
   const mountedAt = useRef(Date.now());
 
@@ -84,7 +80,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   // Nothing to check out. Waits for `hydrated` — before the saved cart is read
   // back, `lines` is [] for reasons that have nothing to do with the shopper.
   useEffect(() => {
-    if (hydrated && lines.length === 0 && !placedRef.current) router.replace(`/${locale}/cart`);
+    if (hydrated && lines.length === 0) router.replace(`/${locale}/cart`);
   }, [hydrated, lines.length, locale, router]);
 
   const L = {
@@ -130,10 +126,16 @@ export default function CheckoutClient({ locale }: { locale: string }) {
       ? "Оплата карткою через захищену сторінку Monobank."
       : "Pay by card through Monobank's secure page.",
     orExpress: uk ? "або сплатіть швидше" : "or pay faster with",
-    place: uk ? "Оформити замовлення" : "Place order",
+    place: uk ? "Перейти до оплати" : "Continue to payment",
     notLive: uk
-      ? "Онлайн-оплату ще підключаємо. Ви оформлюєте замовлення зараз — ми зв'яжемося з вами, щоб узгодити оплату та доставку. Кошти зараз не списуються."
-      : "Online payment is still being connected. You're placing your order now — we'll contact you to arrange payment and delivery. No money is taken at this stage.",
+      ? "Ви перейдете на захищену сторінку Monobank, щоб завершити оплату карткою."
+      : "You'll be taken to Monobank's secure page to complete your card payment.",
+    payFailed: uk
+      ? "Не вдалося створити платіж. Спробуйте ще раз або напишіть на admin@tactical-hb.com."
+      : "We couldn't start the payment. Please try again, or email admin@tactical-hb.com.",
+    payUnavailable: uk
+      ? "Оплата карткою тимчасово недоступна. Спробуйте пізніше."
+      : "Card payment is temporarily unavailable. Please try again shortly.",
     backDelivery: uk ? "Назад до доставки" : "Back to delivery",
     required: uk ? "Заповніть усі обов'язкові поля." : "Please fill in all required fields.",
     badEmail: uk ? "Введіть дійсну електронну пошту." : "Enter a valid email address.",
@@ -167,85 +169,50 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     setStep("payment");
   };
 
-  const placeOrder = async () => {
+  /**
+   * Hand off to Monobank.
+   *
+   * We send only what is in the basket — the server prices it and decides what
+   * to charge. The cart is deliberately NOT cleared here: nothing has been paid
+   * until Monobank says so, and a customer who abandons the payment page must
+   * come back to a basket that still holds their things.
+   */
+  const payWithMonobank = async () => {
     setPlacing(true);
-    // Snapshot BEFORE clearing the cart, and freeze prices as they stand now.
-    const orderLines: OrderLine[] = lines.flatMap((l) => {
-      const d = describeLine(l, locale);
-      if (!d) return [];
-      return [{
-        slug: l.slug,
-        qty: l.qty,
-        name: d.name,
-        image: d.image,
-        colour: d.colour,
-        material: d.material,
-        addons: d.addons,
-        unitPrice: linePrice(l),
-      }];
-    });
-
-    const orderNo = makeOrderNo();
-    const currency = currencyForLocale(locale);
-
-    // Notify sales BEFORE clearing anything. Until orders are written to
-    // Supabase this email is the only record of the order, so it is sent while
-    // the data still exists rather than from the confirmation page (which would
-    // re-send on every refresh).
+    setError(null);
     try {
-      const res = await fetch("/api/order", {
+      const res = await fetch("/api/checkout/create-invoice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderNo,
           locale,
-          // Spam screening. No honeypot here — there is no form for a bot to
-          // fill; reaching this point requires completing two checkout steps.
           ts: mountedAt.current,
-          paymentMethod: L.card,
-          totalLabel: formatMoney(total, currency),
-          voucherCode: voucher?.code ?? null,
-          discountLabel: discount.eur > 0 ? formatMoney(discount, currency) : null,
           delivery: form,
-          lines: orderLines.map((l) => ({
-            name: l.name,
-            qty: l.qty,
-            colour: l.colour,
-            material: l.material,
-            addons: l.addons,
-            unitPriceLabel: formatMoney(scaleMoney(l.unitPrice, l.qty), currency),
-          })),
+          voucherCode: voucher?.code ?? null,
+          lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),
       });
-      if (!res.ok) throw new Error(`order endpoint returned ${res.status}`);
-    } catch (err) {
-      // A failed notification must never block the customer — they have done
-      // nothing wrong and the snapshot still reaches the confirmation page.
-      // Logged loudly because it means the shop may not learn about this order.
-      console.error("[order] notification failed:", err);
-    }
+      const data = (await res.json()) as { ok?: boolean; pageUrl?: string; error?: string };
 
-    placedRef.current = true;
-    saveOrder({
-      orderNo,
-      createdAt: new Date().toISOString(),
-      locale,
-      delivery: form,
-      lines: orderLines,
-      subtotal,
-      discount,
-      total,
-      voucherCode: voucher?.code ?? null,
-      paymentMethod: L.card,
-      accountCreated,
-    });
-    clearCart();
-    router.push(`/${locale}/checkout/confirmation`);
+      if (!res.ok || !data.ok || !data.pageUrl) {
+        setPlacing(false);
+        setError(data.error === "not_configured" ? L.payUnavailable : L.payFailed);
+        console.error("[pay] invoice creation failed:", res.status, data.error);
+        return;
+      }
+
+      // Off to Monobank's hosted page. The webhook fulfils the order.
+      window.location.href = data.pageUrl;
+    } catch (err) {
+      setPlacing(false);
+      setError(L.payFailed);
+      console.error("[pay] invoice request failed:", err);
+    }
   };
 
   // Render nothing while the cart is still loading, and while the redirect
   // above is in flight — a flash of the form would be worse than a blank beat.
-  if (!hydrated || (lines.length === 0 && !placedRef.current)) return null;
+  if (!hydrated || lines.length === 0) return null;
 
   /* ---- Account creation interstitial (sits inside step 1) ---- */
   if (showAccount) {
@@ -488,7 +455,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
               </p>
 
               <button
-                onClick={placeOrder}
+                onClick={payWithMonobank}
                 disabled={placing}
                 className="w-full sm:w-auto sm:min-w-[280px] h-12 px-8 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 disabled:opacity-50"
                 style={{ background: "var(--accent)", color: "#111114" }}

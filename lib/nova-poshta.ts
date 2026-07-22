@@ -90,29 +90,31 @@ type RawWarehouse = {
   TotalMaxWeightAllowed?: string;
 };
 
-/** Rows per request. Nova Poshta caps a page; more cities need several. */
-const WAREHOUSE_PAGE = 500;
-/** Kyiv is the largest at well over a thousand; this is a runaway guard. */
-const MAX_WAREHOUSE_PAGES = 8;
+/** How many branches to return per lookup. */
+const WAREHOUSE_LIMIT = 50;
 
-export async function getWarehouses(cityRef: string): Promise<NpWarehouse[]> {
+/**
+ * Branches in a city, narrowed by `query` (branch number or street).
+ *
+ * SEARCHES SERVER-SIDE rather than downloading the city. Kyiv has ~4000
+ * branches: fetching them all needed eight sequential requests (which timed
+ * out) and shipped close to a megabyte to the browser. Worse, the first
+ * attempt asked for one page of 500 and silently truncated — Kyiv, Kharkiv,
+ * Lviv and Odesa all returned exactly 500, the cap rather than the count, so a
+ * customer whose branch fell past it could not select it at all.
+ *
+ * Letting Nova Poshta do the filtering is one request, a small payload, and no
+ * truncation a customer can hit.
+ */
+export async function getWarehouses(cityRef: string, query = ""): Promise<NpWarehouse[]> {
   if (!cityRef) return [];
 
-  // MUST paginate. Requesting a single page of 500 silently truncates every
-  // large city — Kyiv, Kharkiv, Lviv and Odesa all return exactly 500, which
-  // is the cap, not the count. Customers whose branch fell past it could not
-  // select it at all.
-  const rows: RawWarehouse[] = [];
-  for (let page = 1; page <= MAX_WAREHOUSE_PAGES; page++) {
-    const batch = await call<RawWarehouse>("Address", "getWarehouses", {
-      CityRef: cityRef,
-      Limit: String(WAREHOUSE_PAGE),
-      Page: String(page),
-    });
-    rows.push(...batch);
-    // A short page is the last page.
-    if (batch.length < WAREHOUSE_PAGE) break;
-  }
+  const rows = await call<RawWarehouse>("Address", "getWarehouses", {
+    CityRef: cityRef,
+    FindByString: query.trim(),
+    Limit: String(WAREHOUSE_LIMIT),
+    Page: "1",
+  });
 
   return rows
     .map((w) => ({

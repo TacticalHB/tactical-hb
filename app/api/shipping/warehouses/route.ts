@@ -11,11 +11,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid_body" }, { status: 400 });
   }
 
-  const cityRef = String((body as { cityRef?: unknown })?.cityRef ?? "").trim().slice(0, 80);
+  const b = (body ?? {}) as { cityRef?: unknown; query?: unknown };
+  const cityRef = String(b.cityRef ?? "").trim().slice(0, 80);
+  const query = String(b.query ?? "").trim().slice(0, 80);
   if (!cityRef) return NextResponse.json({ ok: true, warehouses: [] });
 
   try {
-    return NextResponse.json({ ok: true, warehouses: await getWarehouses(cityRef) });
+    return NextResponse.json({ ok: true, warehouses: await getWarehouses(cityRef, query) });
   } catch (e) {
     if (e instanceof NovaPoshtaError && e.message.includes("NOVA_POSHTA_API_KEY")) {
       return NextResponse.json({ ok: false, error: "not_configured" }, { status: 500 });

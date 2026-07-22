@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CartLine } from "@/components/CartContext";
 
 /* ---------------------------------------------------------------------------
@@ -53,15 +53,9 @@ export default function NovaPoshtaPicker({
   // Guards against a slow earlier response overwriting a newer one.
   const searchSeq = useRef(0);
 
-  // Filter by branch number or street. Capped because rendering a thousand
-  // rows on every keystroke is what makes a long list feel broken.
-  const shownWarehouses = useMemo(() => {
-    const q = whQuery.trim().toLowerCase();
-    const matches = q
-      ? warehouses.filter((w) => w.number.includes(q) || w.name.toLowerCase().includes(q))
-      : warehouses;
-    return matches.slice(0, 60);
-  }, [warehouses, whQuery]);
+  // Nova Poshta does the filtering, so this is simply what came back.
+  const shownWarehouses = warehouses;
+  const whSeq = useRef(0);
 
   const L = {
     city: uk ? "Місто" : "City",
@@ -129,6 +123,40 @@ export default function NovaPoshtaPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
+  /** Ask the server for branches in `cityRef` matching `q`. */
+  const loadWarehouses = useCallback(async (cityRef: string, q: string) => {
+    const seq = ++whSeq.current;
+    setLoadingWh(true);
+    try {
+      const res = await fetch("/api/shipping/warehouses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cityRef, query: q }),
+      });
+      const data = await res.json();
+      if (seq !== whSeq.current) return; // superseded by a later keystroke
+      if (!data.ok) {
+        setError(data.error === "not_configured" ? L.notConfigured : L.failed);
+        setWarehouses([]);
+        return;
+      }
+      setWarehouses(data.warehouses ?? []);
+    } catch {
+      if (seq === whSeq.current) setError(L.failed);
+    } finally {
+      if (seq === whSeq.current) setLoadingWh(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced branch search, once a city is chosen.
+  useEffect(() => {
+    const cityRef = value?.cityRef;
+    if (!cityRef || value?.warehouseRef) return;
+    const id = setTimeout(() => void loadWarehouses(cityRef, whQuery), 250);
+    return () => clearTimeout(id);
+  }, [whQuery, value?.cityRef, value?.warehouseRef, loadWarehouses]);
+
   async function pickCity(city: NpCity) {
     setQuery(city.name);
     setOpenList(false);
@@ -141,26 +169,9 @@ export default function NovaPoshtaPicker({
     onChange(null);
     setError(null);
 
-    setLoadingWh(true);
-    try {
-      const res = await fetch("/api/shipping/warehouses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cityRef: city.ref }),
-      });
-      const data = await res.json();
-      if (!data.ok) {
-        setError(data.error === "not_configured" ? L.notConfigured : L.failed);
-        return;
-      }
-      setWarehouses(data.warehouses ?? []);
-      // Hold the city so a branch can be attached to it.
-      onChange({ cityRef: city.ref, cityName: city.name, warehouseRef: "", warehouseName: "", costUah: null });
-    } catch {
-      setError(L.failed);
-    } finally {
-      setLoadingWh(false);
-    }
+    // Hold the city so a branch can be attached to it. The debounced effect
+    // above loads the first page of branches for it.
+    onChange({ cityRef: city.ref, cityName: city.name, warehouseRef: "", warehouseName: "", costUah: null });
   }
 
   async function pickWarehouse(ref: string) {

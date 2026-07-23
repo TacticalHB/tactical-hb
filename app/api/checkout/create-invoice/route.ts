@@ -218,6 +218,9 @@ export async function POST(request: NextRequest) {
         colour: d?.colour ?? null,
         material: d?.material ?? null,
         addons: d?.addons ?? null,
+        // Frozen here so the confirmation email shows the exact variant the
+        // customer bought, not whatever the catalogue default is later.
+        image: d?.image ?? null,
       };
     }),
   });

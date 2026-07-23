@@ -1,7 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SALES_EMAIL } from "@/lib/contact-info";
+import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { esc, rowsHtml, sendMail } from "@/lib/email";
+import { buildOrderEmail } from "@/lib/order-email";
 
 /* ---------------------------------------------------------------------------
    Turning a confirmed payment into an order.
@@ -38,6 +39,10 @@ export type PaymentRow = {
     slug: string; name: string; qty: number;
     unit_eur: number; unit_uah: number;
     colour?: string | null; material?: string | null; addons?: string | null;
+    /** Captured at checkout so the confirmation shows the chosen variant.
+        Absent on orders placed before it was recorded — the email falls back
+        to the product's default image. */
+    image?: string | null;
   }[];
 };
 
@@ -136,9 +141,14 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     // 4. Link the order back to the payment for reconciliation.
     await admin.from("payments").update({ order_id: order.id }).eq("id", payment.id);
 
-    // 5. Tell the shop. Never let a mail failure undo a paid order.
+    // 5. Tell the shop, then the customer. Both are best-effort: a mail
+    //    failure must never undo a paid order, and each is awaited separately
+    //    so one failing still lets the other through.
     await notifySales(payment, order.id).catch((e) =>
       console.error("[fulfil] sales notification failed:", e)
+    );
+    await sendOrderConfirmation(payment).catch((e) =>
+      console.error("[fulfil] customer confirmation failed:", e)
     );
 
     console.log("[fulfil] order created:", order.id, "ref", payment.reference);
@@ -223,4 +233,29 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
       </div>
     `,
   });
+}
+
+/**
+ * The customer's own confirmation.
+ *
+ * Sent from admin@tactical-hb.com with the same address as reply-to, so a
+ * customer with a question simply replies and it lands in the right inbox.
+ * Language follows the locale captured at checkout, never the email address.
+ */
+async function sendOrderConfirmation(p: PaymentRow): Promise<void> {
+  const siteUrl = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
+  const { subject, html, text } = buildOrderEmail(p, siteUrl);
+
+  const result = await sendMail({
+    to: p.email,
+    from: `Tactical HB <${ADMIN_EMAIL}>`,
+    replyTo: ADMIN_EMAIL,
+    subject,
+    html,
+    text,
+  });
+
+  if (!result.ok) {
+    console.error("[fulfil] confirmation email not sent:", result.error, "ref", p.reference);
+  }
 }

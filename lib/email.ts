@@ -28,6 +28,12 @@ export async function sendMail(opts: {
   html: string;
   /** Hitting reply in the inbox should answer the customer directly. */
   replyTo?: string;
+  /**
+   * Override the sender. Must be on a domain verified in Resend — anything
+   * else is rejected outright. Used so order confirmations come from the
+   * address customers should reply to.
+   */
+  from?: string;
 }): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -38,7 +44,7 @@ export async function sendMail(opts: {
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
-      from: FROM,
+      from: opts.from ?? FROM,
       to: opts.to,
       replyTo: opts.replyTo,
       subject: opts.subject,

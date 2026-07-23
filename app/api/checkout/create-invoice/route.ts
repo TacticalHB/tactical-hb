@@ -118,25 +118,44 @@ export async function POST(request: NextRequest) {
     : "international";
 
   let shippingUah = 0;
+  let npDeliveryType: "warehouse" | "courier" | null = null;
   let npCityRef: string | null = null;
   let npCityName: string | null = null;
   let npWarehouseRef: string | null = null;
   let npWarehouseName: string | null = null;
+  let npAddress: string | null = null;
+  let npNotes: string | null = null;
 
   if (shippingMethod === "nova_poshta") {
+    npDeliveryType = shipReq.deliveryType === "courier" ? "courier" : "warehouse";
     npCityRef = String(shipReq.cityRef ?? "").trim().slice(0, 80) || null;
     npCityName = String(shipReq.cityName ?? "").trim().slice(0, 120) || null;
-    npWarehouseRef = String(shipReq.warehouseRef ?? "").trim().slice(0, 80) || null;
-    npWarehouseName = String(shipReq.warehouseName ?? "").trim().slice(0, 300) || null;
+    if (!npCityRef) return NextResponse.json({ ok: false, error: "no_city" }, { status: 400 });
 
-    if (!npCityRef || !npWarehouseRef) {
-      return NextResponse.json({ ok: false, error: "no_branch" }, { status: 400 });
+    if (npDeliveryType === "courier") {
+      const street = String(shipReq.street ?? "").trim().slice(0, 160);
+      const building = String(shipReq.building ?? "").trim().slice(0, 40);
+      const apartment = String(shipReq.apartment ?? "").trim().slice(0, 40);
+      npNotes = String(shipReq.notes ?? "").trim().slice(0, 400) || null;
+      if (!street || !building) {
+        return NextResponse.json({ ok: false, error: "no_address" }, { status: 400 });
+      }
+      // One readable line — this is what the packer and courier read.
+      npAddress = [`${street}, ${building}`, apartment ? (locale === "uk" ? `кв. ${apartment}` : `apt. ${apartment}`) : ""]
+        .filter(Boolean)
+        .join(", ");
+    } else {
+      npWarehouseRef = String(shipReq.warehouseRef ?? "").trim().slice(0, 80) || null;
+      npWarehouseName = String(shipReq.warehouseName ?? "").trim().slice(0, 300) || null;
+      if (!npWarehouseRef) return NextResponse.json({ ok: false, error: "no_branch" }, { status: 400 });
     }
 
     try {
       shippingUah = await getDeliveryPrice({
         cityRecipientRef: npCityRef,
         declaredValueUah: goods.uah,
+        // Courier delivers to the door; branch is warehouse-to-warehouse.
+        serviceType: npDeliveryType === "courier" ? "WarehouseDoors" : "WarehouseWarehouse",
       });
     } catch (e) {
       // Refuse rather than guess. Charging an unquoted amount, or shipping for
@@ -202,10 +221,13 @@ export async function POST(request: NextRequest) {
     voucher_code: voucherCode,
     shipping_method: shippingMethod,
     shipping_uah: shippingUah,
+    np_delivery_type: npDeliveryType,
     np_city_ref: npCityRef,
     np_city_name: npCityName,
     np_warehouse_ref: npWarehouseRef,
     np_warehouse_name: npWarehouseName,
+    np_address: npAddress,
+    np_notes: npNotes,
     delivery,
     lines: priced.lines.map((l) => {
       const d = describeLine({ slug: l.slug, qty: l.qty }, locale);

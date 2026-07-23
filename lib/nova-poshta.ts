@@ -162,10 +162,15 @@ type RawPrice = { Cost?: number | string };
  * insurance — passing the basket total keeps the customer covered for what they
  * actually bought.
  */
+/** Branch pickup vs courier to the door — Nova Poshta's service types. */
+export type NpServiceType = "WarehouseWarehouse" | "WarehouseDoors";
+
 export async function getDeliveryPrice(opts: {
   cityRecipientRef: string;
   declaredValueUah: number;
   weightKg?: number;
+  /** Defaults to branch-to-branch; pass WarehouseDoors for courier delivery. */
+  serviceType?: NpServiceType;
 }): Promise<number> {
   const senderRef = await getSenderCityRef();
 
@@ -173,7 +178,7 @@ export async function getDeliveryPrice(opts: {
     CitySender: senderRef,
     CityRecipient: opts.cityRecipientRef,
     Weight: String(opts.weightKg ?? DEFAULT_WEIGHT_KG),
-    ServiceType: "WarehouseWarehouse",
+    ServiceType: opts.serviceType ?? "WarehouseWarehouse",
     Cost: String(Math.max(1, Math.round(opts.declaredValueUah))),
     CargoType: "Cargo",
     SeatsAmount: "1",

@@ -128,7 +128,9 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     intlNotice: uk
       ? "Вартість доставки буде розрахована після оформлення замовлення — ми зв'яжемося з вами й виставимо рахунок окремо. Зараз ви сплачуєте лише за товар."
       : "Shipping cost will be calculated after your order is placed — we'll contact you and invoice it separately. You're paying for the goods only at this stage.",
-    needBranch: uk ? "Оберіть місто та відділення Нової Пошти." : "Please choose a city and a Nova Poshta branch.",
+    needCity: uk ? "Оберіть місто доставки." : "Please choose a delivery city.",
+    needBranch: uk ? "Оберіть відділення Нової Пошти." : "Please choose a Nova Poshta branch.",
+    needAddress: uk ? "Вкажіть вулицю та будинок для кур'єрської доставки." : "Please enter the street and building for courier delivery.",
     methodName: "Nova Poshta / Ukrposhta",
     methodNote: uk ? "Вартість розраховується згодом" : "Calculated later",
     methodHint: uk
@@ -195,7 +197,14 @@ export default function CheckoutClient({ locale }: { locale: string }) {
         : ["firstName", "surname", "phone", "address", "city", "postcode", "country"];
     if (need.some((k) => !form[k].trim())) return setError(L.required);
 
-    if (destination === "ukraine" && !np?.warehouseRef) return setError(L.needBranch);
+    if (destination === "ukraine") {
+      if (!np?.cityRef) return setError(L.needCity);
+      if (np.deliveryType === "courier") {
+        if (!np.street.trim() || !np.building.trim()) return setError(L.needAddress);
+      } else if (!np.warehouseRef) {
+        return setError(L.needBranch);
+      }
+    }
     // A bare "+" or "+380" is the seeded prefix, not a number.
     if (form.phone.replace(/[^\d]/g, "").length < 9) return setError(L.badPhone);
     setStep("payment");
@@ -221,17 +230,29 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           ts: mountedAt.current,
           delivery: form,
           voucherCode: voucher?.code ?? null,
-          // Only the branch is sent. The cost is re-quoted server-side — a
-          // shipping price from the browser would be trivially set to zero.
+          // Only the destination is sent — never the cost. The server re-quotes,
+          // so a shipping price from the browser would be trivially set to zero.
           shipping:
-            destination === "ukraine" && np?.warehouseRef
-              ? {
-                  method: "nova_poshta",
-                  cityRef: np.cityRef,
-                  cityName: np.cityName,
-                  warehouseRef: np.warehouseRef,
-                  warehouseName: np.warehouseName,
-                }
+            destination === "ukraine" && np?.cityRef
+              ? np.deliveryType === "courier"
+                ? {
+                    method: "nova_poshta",
+                    deliveryType: "courier",
+                    cityRef: np.cityRef,
+                    cityName: np.cityName,
+                    street: np.street,
+                    building: np.building,
+                    apartment: np.apartment,
+                    notes: np.notes,
+                  }
+                : {
+                    method: "nova_poshta",
+                    deliveryType: "warehouse",
+                    cityRef: np.cityRef,
+                    cityName: np.cityName,
+                    warehouseRef: np.warehouseRef,
+                    warehouseName: np.warehouseName,
+                  }
               : { method: "international" },
           lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),

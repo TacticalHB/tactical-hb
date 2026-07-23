@@ -115,11 +115,14 @@ export function buildOrderEmail(
   const d = p.delivery as Record<string, string>;
   const name = [d.firstName, d.surname].filter(Boolean).join(" ");
   const np = p.shipping_method === "nova_poshta";
+  const courier = np && p.np_delivery_type === "courier";
 
-  // A branch delivery has no street address — those fields were never asked
-  // for, so printing them would leave blank lines.
+  // Branch delivery has no street address (the branch is the address); courier
+  // has a street address but no branch.
   const addressLines = np
-    ? [name, p.np_city_name ?? "", p.np_warehouse_name ?? ""]
+    ? courier
+      ? [name, p.np_city_name ?? "", p.np_address ?? "", p.np_notes ?? ""]
+      : [name, p.np_city_name ?? "", p.np_warehouse_name ?? ""]
     : [name, d.address, d.apartment, [d.city, d.postcode].filter(Boolean).join(", "), d.country];
   const address = addressLines.filter(Boolean);
 

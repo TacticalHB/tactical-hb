@@ -30,10 +30,13 @@ export type PaymentRow = {
   voucher_code: string | null;
   shipping_method: string | null;
   shipping_uah: number;
+  np_delivery_type: string | null;
   np_city_ref: string | null;
   np_city_name: string | null;
   np_warehouse_ref: string | null;
   np_warehouse_name: string | null;
+  np_address: string | null;
+  np_notes: string | null;
   delivery: Record<string, unknown>;
   lines: {
     slug: string; name: string; qty: number;
@@ -97,10 +100,13 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
         delivery: payment.delivery,
         shipping_method: payment.shipping_method,
         shipping_uah: payment.shipping_uah,
+        np_delivery_type: payment.np_delivery_type,
         np_city_ref: payment.np_city_ref,
         np_city_name: payment.np_city_name,
         np_warehouse_ref: payment.np_warehouse_ref,
         np_warehouse_name: payment.np_warehouse_name,
+        np_address: payment.np_address,
+        np_notes: payment.np_notes,
         source: "monobank",
         external_ref: payment.reference,
       })
@@ -167,11 +173,14 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
   const d = p.delivery as Record<string, string>;
   const name = [d.firstName, d.surname].filter(Boolean).join(" ");
   const np = p.shipping_method === "nova_poshta";
+  const courier = np && p.np_delivery_type === "courier";
 
-  // For a branch delivery the address IS the branch — the street fields were
-  // never collected, so printing them would show an empty address.
+  // Branch delivery has no street address (the fields were never collected) —
+  // the branch IS the address. Courier has a street address but no branch.
   const address = np
-    ? [name, `${p.np_city_name ?? ""}`, p.np_warehouse_name ?? ""].filter(Boolean).join("\n")
+    ? courier
+      ? [name, p.np_city_name ?? "", p.np_address ?? "", p.np_notes ? `Notes: ${p.np_notes}` : ""].filter(Boolean).join("\n")
+      : [name, p.np_city_name ?? "", p.np_warehouse_name ?? ""].filter(Boolean).join("\n")
     : [name, d.address, d.apartment, [d.city, d.postcode].filter(Boolean).join(", "), d.country]
         .filter(Boolean).join("\n");
 
@@ -181,7 +190,7 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
     ["Order", p.reference],
     ["Paid", `₴${totalUah.toLocaleString("uk-UA")}  (goods ₴${Math.round(p.amount_uah).toLocaleString("uk-UA")} / €${p.amount_eur.toFixed(2)})`],
     ["Shipping", np
-      ? `Nova Poshta — ₴${Math.round(p.shipping_uah).toLocaleString("uk-UA")}`
+      ? `Nova Poshta ${courier ? "courier" : "branch"} — ₴${Math.round(p.shipping_uah).toLocaleString("uk-UA")}`
       : "International — invoice separately"],
     ["Customer", name],
     ["Email", p.email],

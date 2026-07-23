@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import CookieSettingsButton from "./CookieSettingsButton";
 import NewsletterPromo from "./NewsletterPromo";
+import PaymentMethods from "./PaymentMethods";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 
 export default function Footer() {
@@ -51,6 +52,15 @@ export default function Footer() {
         {/* Newsletter prompt — footer and cart page only. */}
         <div className="w-full max-w-[560px] flex justify-center pt-2">
           <NewsletterPromo locale={locale} variant="dark" />
+        </div>
+
+        {/* Accepted payment methods — the brands a customer meets on Monobank's
+            secure page. */}
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <span className="text-[10px] tracking-[0.25em] uppercase" style={{ color: "#6a665e" }}>
+            {t("payment_methods")}
+          </span>
+          <PaymentMethods />
         </div>
 
         <div className="w-full pt-8 flex flex-col sm:flex-row items-center justify-between gap-3"

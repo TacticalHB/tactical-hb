@@ -49,7 +49,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       id: "payment",
       icon: <CardIcon />,
       title: uk ? "Захищена оплата" : "Secured Payment",
-      sub: uk ? "Plata by Mono (Monobank)" : "Plata by Mono (Monobank)",
+      sub: uk ? "Plata by Mono, Apple Pay, Google Pay" : "Plata by Mono, Apple Pay, Google Pay",
     },
     {
       id: "delivery",
@@ -71,7 +71,8 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       body: uk ? (
         <>
           <p className="mb-4">
-            Ми приймаємо оплату карткою через Plata by Mono (Monobank).
+            Ми приймаємо оплату карткою — Visa та Mastercard — через Plata by Mono (Monobank). На
+            захищеній сторінці оплати також доступні Apple Pay і Google Pay.
           </p>
           <p className="mb-4">
             Кожен платіж обробляє сертифікований платіжний шлюз — дані вашої картки передаються в
@@ -88,7 +89,8 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       ) : (
         <>
           <p className="mb-4">
-            We accept card payments through Plata by Mono (Monobank).
+            We accept card payments — Visa and Mastercard — through Plata by Mono (Monobank). On the
+            secure payment page you can also pay with Apple Pay or Google Pay.
           </p>
           <p className="mb-4">
             Every transaction is handled by a certified payment gateway — your card details travel

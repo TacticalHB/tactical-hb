@@ -86,7 +86,7 @@
     "value_4_text": "Wholesale clients across Europe, USA, and the Middle East.",
     "payment_tag": "Payment",
     "payment_title": "Simple, secure checkout",
-    "payment_text_1": "We accept card payments through Plata by Mono (Monobank). Every transaction is handled by a certified payment gateway — your card details travel encrypted and are never stored on our servers.",
+    "payment_text_1": "We accept card payments — Visa and Mastercard — through Plata by Mono (Monobank), and on the secure payment page you can also pay with Apple Pay or Google Pay. Every transaction is handled by a certified payment gateway — your card details travel encrypted and are never stored on our servers.",
     "payment_text_2": "Checkout takes a few taps and needs no account. You'll receive confirmation by email the moment your payment succeeds, and we begin preparing your order the same working day.",
     "payment_note": "Prices are shown in hryvnia (₴) for orders within Ukraine and in euro (€) elsewhere.",
     "delivery_tag": "Delivery",
@@ -107,7 +107,9 @@
     "return_5_title": "How to start",
     "return_5_text": "Email admin@tactical-hb.com with your order number and we'll send return instructions the same day.",
     "returns_refund": "Refunds are issued to the original payment method within 14 days of us receiving and inspecting the returned item.",
-    "pay_method_1": "Plata by Mono"
+    "pay_method_1": "Plata by Mono",
+    "pay_method_2": "Apple Pay",
+    "pay_method_3": "Google Pay"
   },
   "contact": {
     "title": "Get in Touch",
@@ -136,7 +138,8 @@
     "tagline": "Premium hookah accessories from Ukraine.",
     "rights": "All rights reserved.",
     "email_general": "General",
-    "email_sales": "Wholesale"
+    "email_sales": "Wholesale",
+    "payment_methods": "Payment methods"
   },
   "newsletter": {
     "title": "Sign up to get news from Tactical HB",

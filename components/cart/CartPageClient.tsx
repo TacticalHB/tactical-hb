@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
-import ExpressPayButtons from "@/components/checkout/ExpressPayButtons";
 import CartInfoSections from "./CartInfoSections";
 import NewsletterPromo from "@/components/NewsletterPromo";
 import Price from "@/components/Price";
@@ -34,7 +33,6 @@ export default function CartPageClient({ locale }: { locale: string }) {
     total: uk ? "Разом" : "Total",
     totalNote: uk ? "Без вартості доставки" : "Excludes delivery",
     checkout: uk ? "Перейти до оформлення" : "Proceed to checkout",
-    or: uk ? "або сплатіть швидше" : "or pay faster with",
     remove: uk ? "Видалити" : "Remove",
     colour: uk ? "Колір" : "Colour",
     material: uk ? "Матеріал" : "Materials",
@@ -189,14 +187,6 @@ export default function CartPageClient({ locale }: { locale: string }) {
           >
             {L.checkout}
           </button>
-
-          <div className="flex items-center gap-3 my-5">
-            <span className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
-            <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: "var(--text-faint)" }}>{L.or}</span>
-            <span className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
-          </div>
-
-          <ExpressPayButtons locale={locale} />
 
           <CartInfoSections locale={locale} />
         </aside>

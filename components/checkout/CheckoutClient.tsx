@@ -12,7 +12,6 @@ import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/li
 import { type DeliveryDetails } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
-import ExpressPayButtons from "./ExpressPayButtons";
 import AccountCreatingScreen from "./AccountCreatingScreen";
 
 /* ---------------------------------------------------------------------------
@@ -161,7 +160,6 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     cardNote: uk
       ? "Оплата карткою через захищену сторінку Monobank."
       : "Pay by card through Monobank's secure page.",
-    orExpress: uk ? "або сплатіть швидше" : "or pay faster with",
     place: uk ? "Перейти до оплати" : "Continue to payment",
     notLive: uk
       ? "Ви перейдете на захищену сторінку Monobank, щоб завершити оплату карткою."
@@ -599,14 +597,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 />
               </div>
 
-              <div className="flex items-center gap-3 my-6">
-                <span className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
-                <span className="text-[11px] tracking-[0.15em] uppercase" style={{ color: "var(--text-faint)" }}>{L.orExpress}</span>
-                <span className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
-              </div>
-              <ExpressPayButtons locale={locale} className="mb-8 max-w-[320px]" />
-
-              <p className="text-[13px] leading-relaxed p-4 mb-6" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
+              <p className="text-[13px] leading-relaxed p-4 mb-6 mt-6" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
                 {L.notLive}
               </p>
 

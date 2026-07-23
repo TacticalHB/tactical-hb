@@ -49,7 +49,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       id: "payment",
       icon: <CardIcon />,
       title: uk ? "Захищена оплата" : "Secured Payment",
-      sub: uk ? "Plata by Mono, Apple Pay, Google Pay, PayPal" : "Plata by Mono, Apple Pay, Google Pay, PayPal",
+      sub: uk ? "Plata by Mono (Monobank)" : "Plata by Mono (Monobank)",
     },
     {
       id: "delivery",
@@ -71,7 +71,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       body: uk ? (
         <>
           <p className="mb-4">
-            Ми приймаємо оплату карткою через Plata by Mono, а також Apple Pay, Google Pay і PayPal.
+            Ми приймаємо оплату карткою через Plata by Mono (Monobank).
           </p>
           <p className="mb-4">
             Кожен платіж обробляє сертифікований платіжний шлюз — дані вашої картки передаються в
@@ -88,7 +88,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       ) : (
         <>
           <p className="mb-4">
-            We accept card payments through Plata by Mono, along with Apple Pay, Google Pay and PayPal.
+            We accept card payments through Plata by Mono (Monobank).
           </p>
           <p className="mb-4">
             Every transaction is handled by a certified payment gateway — your card details travel
@@ -109,31 +109,45 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       body: uk ? (
         <>
           <p className="mb-4">
-            Ми відправляємо замовлення Новою Поштою та Укрпоштою — у відділення, поштомат або
+            У межах України ми відправляємо Новою Поштою та Укрпоштою — у відділення, поштомат або
             кур&apos;єром за вашою адресою.
           </p>
           <p className="mb-4">
-            Передаємо посилку перевізникові протягом 1–2 робочих днів після підтвердження оплати.
+            <strong style={{ color: "var(--text)" }}>Доставка в межах України.</strong>{" "}Вартість
+            доставки розраховується під час оформлення та сплачується на сайті разом із замовленням —
+            оплатити її при отриманні неможливо.
           </p>
-          <p>
-            Вартість доставки розраховується за тарифами перевізника та сплачується отримувачем, якщо
-            умовами акції не передбачено інше. Номер накладної надійде на вашу пошту одразу після
-            відправлення.
+          <p className="mb-4">
+            <strong style={{ color: "var(--text)" }}>Міжнародна доставка.</strong>{" "}Доставку можна
+            сплатити на сайті під час оформлення. Якщо цього не зробити, ми надішлемо окремий лист із
+            запитом на оплату доставки, і замовлення буде остаточно підтверджено лише після її
+            отримання.
+          </p>
+          <p style={{ color: "var(--text-faint)" }}>
+            Посилку передаємо перевізникові протягом 1–2 робочих днів після підтвердження оплати, а
+            номер накладної надійде на вашу пошту одразу після відправлення.
           </p>
         </>
       ) : (
         <>
           <p className="mb-4">
-            We ship with Nova Poshta and Ukrposhta — to a branch, a parcel locker, or by courier to
-            your door.
+            Within Ukraine we ship with Nova Poshta and Ukrposhta — to a branch, a parcel locker, or
+            by courier to your door.
           </p>
           <p className="mb-4">
-            Orders are handed to the carrier within 1–2 business days of payment confirmation.
+            <strong style={{ color: "var(--text)" }}>Delivery within Ukraine.</strong>{" "}The delivery
+            cost is calculated at checkout and paid on the website together with your order — it
+            cannot be paid on collection.
           </p>
-          <p>
-            Delivery is charged at the carrier&apos;s own rates and paid by the recipient on collection,
-            unless a promotion states otherwise. A tracking number is emailed to you as soon as the
-            parcel is dispatched.
+          <p className="mb-4">
+            <strong style={{ color: "var(--text)" }}>International delivery.</strong>{" "}Delivery can be
+            paid on the website at checkout. If it isn&apos;t, we&apos;ll email you a separate payment
+            request for shipping, and your order is only fully confirmed once that delivery payment is
+            received.
+          </p>
+          <p style={{ color: "var(--text-faint)" }}>
+            Orders are handed to the carrier within 1–2 business days of payment confirmation, and a
+            tracking number is emailed to you as soon as the parcel is dispatched.
           </p>
         </>
       ),

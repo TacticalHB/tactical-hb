@@ -15,7 +15,7 @@ function AboutContent() {
     { title: t("value_4_title"), text: t("value_4_text") },
   ];
 
-  const payMethods = [t("pay_method_1"), t("pay_method_2"), t("pay_method_3"), t("pay_method_4")];
+  const payMethods = [t("pay_method_1")];
 
   const returnTerms = [
     { title: t("return_1_title"), text: t("return_1_text") },
@@ -23,16 +23,6 @@ function AboutContent() {
     { title: t("return_3_title"), text: t("return_3_text") },
     { title: t("return_4_title"), text: t("return_4_text") },
     { title: t("return_5_title"), text: t("return_5_text") },
-  ];
-
-  // Seller details Monobank requires to be publicly visible for acquiring.
-  const legalRows = [
-    { label: t("legal_name_label"), value: t("legal_name_value") },
-    { label: t("legal_founder_label"), value: t("legal_founder_value") },
-    { label: t("legal_tax_label"), value: t("legal_tax_value") },
-    { label: t("legal_address_label"), value: t("legal_address_value") },
-    { label: t("legal_email_label"), value: t("legal_email_value"), href: `mailto:${t("legal_email_value")}` },
-    { label: t("legal_phone_label"), value: t("legal_phone_value"), href: `tel:${t("legal_phone_value").replace(/\s/g, "")}` },
   ];
 
   return (
@@ -160,36 +150,6 @@ function AboutContent() {
             {t("returns_refund")}
           </p>
         </Reveal>
-      </section>
-
-      {/* Seller / legal details */}
-      <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
-        <div className="page-container">
-          <Reveal>
-            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("legal_tag")}</span>
-            <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("legal_title")}</h2>
-          </Reveal>
-          <Reveal delay={100}>
-            <dl className="max-w-3xl">
-              {legalRows.map((row) => (
-                <div
-                  key={row.label}
-                  className="grid sm:grid-cols-[minmax(0,14rem)_1fr] gap-1 sm:gap-8 py-5"
-                  style={{ borderBottom: "1px solid var(--border)" }}
-                >
-                  <dt className="text-xs tracking-[0.15em] uppercase pt-0.5" style={{ color: "var(--text-faint)" }}>{row.label}</dt>
-                  <dd className="text-sm md:text-base" style={{ color: "var(--text)" }}>
-                    {row.href ? (
-                      <a href={row.href} className="transition-opacity hover:opacity-70" style={{ color: "var(--text)" }}>{row.value}</a>
-                    ) : (
-                      row.value
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
-        </div>
       </section>
     </div>
   );

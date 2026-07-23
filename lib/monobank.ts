@@ -58,6 +58,12 @@ export type CreateInvoiceInput = {
   basket?: BasketItem[];
   /** Seconds the invoice stays payable. */
   validitySeconds?: number;
+  /**
+   * Where Monobank returns the customer after payment. Confirmed by Monobank
+   * support (not successUrl/failUrl — only this). Cosmetic: the webhook, not
+   * this redirect, is the source of truth for fulfilment.
+   */
+  redirectUrl?: string;
 };
 
 export type CreatedInvoice = { invoiceId: string; pageUrl: string };
@@ -74,6 +80,8 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<CreatedI
       // Sent only when it reconciles exactly with `amount` — see the caller.
       ...(input.basket?.length ? { basketOrder: input.basket } : {}),
     },
+    // Return the customer to our own success page after payment.
+    ...(input.redirectUrl ? { redirectUrl: input.redirectUrl } : {}),
   };
 
   const res = await fetch(`${API}/invoice/create`, {

@@ -237,6 +237,10 @@ export async function POST(request: NextRequest) {
       reference,
       destination: `Tactical HB — ${reference}`,
       webHookUrl: `${siteUrl()}/api/monobank/webhook`,
+      // Monobank returns the customer here after payment (confirmed by their
+      // support). Locale-prefixed so they come back to the language they
+      // checked out in; built from SITE_URL so it follows the environment.
+      redirectUrl: `${siteUrl()}/${locale}/checkout/success`,
       basket,
       validitySeconds: 3600,
     });

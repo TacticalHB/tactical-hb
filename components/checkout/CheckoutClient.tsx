@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
@@ -8,6 +8,7 @@ import { useAuth } from "@/components/AuthContext";
 import { money, subtractMoney } from "@/lib/currency";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
+import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/lib/countries";
 import { type DeliveryDetails } from "@/lib/checkout";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
@@ -47,7 +48,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   // visitors may be anywhere, so they only get the "+".
   const [form, setForm] = useState<DeliveryDetails>({
     email: "", firstName: "", surname: "", phone: uk ? "+380" : "+",
-    address: "", apartment: "", city: "", postcode: "", country: uk ? "Україна" : "Ukraine",
+    address: "", apartment: "", city: "", postcode: "", country: "",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +58,10 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   // Ukrainian visitors default to branch delivery; everyone else to an address.
   const [destination, setDestination] = useState<Destination>(uk ? "ukraine" : "international");
   const [np, setNp] = useState<NovaPoshtaSelection | null>(null);
+  // The chosen country code, "OTHER", or "" (nothing picked yet). Address
+  // fields stay hidden until this is set. form.country holds the resolved name.
+  const [countryCode, setCountryCode] = useState("");
+  const countries = useMemo(() => countryOptions(locale), [locale]);
 
   // A voucher is denominated in EUR; money() converts it for the UAH side.
   const discount = voucher ? money(voucher.amountEur) : money(0, 0);
@@ -144,6 +149,11 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     city: uk ? "Місто" : "City",
     postcode: uk ? "Поштовий індекс" : "Postcode",
     country: uk ? "Країна" : "Country",
+    countrySelect: uk ? "Оберіть країну" : "Select a country",
+    countryOther: uk ? "Інша (вказати)" : "Other (type it)",
+    countryOtherLabel: uk ? "Назва країни" : "Country name",
+    needCountry: uk ? "Оберіть країну доставки." : "Please choose a delivery country.",
+    countryBlocked: uk ? "На жаль, ми не доставляємо в цю країну." : "We're unable to ship to that destination.",
     toPayment: uk ? "Продовжити до оплати" : "Continue to payment",
     payment: uk ? "Оплата" : "Payment",
     payMethod: uk ? "Спосіб оплати" : "Payment method",
@@ -188,6 +198,18 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const submitDelivery = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Country first for international — the address fields are hidden until it's
+    // chosen, so a generic "fill required fields" here would point at inputs the
+    // customer can't see. countryCode is only set by picking from the list or
+    // choosing "Other".
+    if (destination === "international" && !countryCode) return setError(L.needCountry);
+
+    // A typed "Other" country bypasses the dropdown exclusions — block the one
+    // destination we can't ship to at all.
+    if (destination === "international" && countryCode === OTHER && isBlockedManualCountry(form.country)) {
+      return setError(L.countryBlocked);
+    }
 
     // Branch delivery needs a branch, not a street address; international needs
     // the full address. Requiring both would block every customer.
@@ -471,31 +493,70 @@ export default function CheckoutClient({ locale }: { locale: string }) {
               ) : (
                 <>
                   <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.address}</h2>
-                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                    <div className="sm:col-span-2">
-                      <label className={labelCls} style={labelSt}>{L.street}</label>
-                      <input className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={labelCls} style={labelSt}>{L.apartment}</label>
-                      <input className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
-                    </div>
-                    <div>
-                      <label className={labelCls} style={labelSt}>{L.city}</label>
-                      <input className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
-                    </div>
-                    <div>
-                      <label className={labelCls} style={labelSt}>{L.postcode}</label>
-                      <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className={labelCls} style={labelSt}>{L.country}</label>
-                      <input className={field} autoComplete="country-name" value={form.country} onChange={set("country")} required />
+
+                  {/* Country first — the rest of the address appears once chosen. */}
+                  <div className="mb-4">
+                    <label htmlFor="country-select" className={labelCls} style={labelSt}>{L.country}</label>
+                    <div className="relative">
+                      <select
+                        id="country-select"
+                        className={`${field} appearance-none pr-10`}
+                        value={countryCode}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          setCountryCode(code);
+                          // Resolve the stored name: a real country's localised
+                          // name, or blank for "Other" so the customer types it.
+                          setForm((f) => ({ ...f, country: code && code !== OTHER ? countryName(code, locale) : "" }));
+                        }}
+                        required
+                      >
+                        <option value="" disabled>{L.countrySelect}</option>
+                        {countries.map((c) => (
+                          <option key={c.code} value={c.code}>{c.name}</option>
+                        ))}
+                        <option value={OTHER}>{L.countryOther}</option>
+                      </select>
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6"
+                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} aria-hidden="true">
+                        <path d="M4 7l6 6 6-6" />
+                      </svg>
                     </div>
                   </div>
-                  <p className="text-[13px] leading-relaxed p-4 mb-8" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
-                    {L.intlNotice}
-                  </p>
+
+                  {countryCode === OTHER && (
+                    <div className="mb-4">
+                      <label htmlFor="country-other" className={labelCls} style={labelSt}>{L.countryOtherLabel}</label>
+                      <input id="country-other" className={field} autoComplete="country-name"
+                        value={form.country} onChange={set("country")} autoFocus required />
+                    </div>
+                  )}
+
+                  {countryCode && (
+                    <>
+                      <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                        <div className="sm:col-span-2">
+                          <label className={labelCls} style={labelSt}>{L.street}</label>
+                          <input className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className={labelCls} style={labelSt}>{L.apartment}</label>
+                          <input className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
+                        </div>
+                        <div>
+                          <label className={labelCls} style={labelSt}>{L.city}</label>
+                          <input className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
+                        </div>
+                        <div>
+                          <label className={labelCls} style={labelSt}>{L.postcode}</label>
+                          <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
+                        </div>
+                      </div>
+                      <p className="text-[13px] leading-relaxed p-4 mb-8" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
+                        {L.intlNotice}
+                      </p>
+                    </>
+                  )}
                 </>
               )}
               <button

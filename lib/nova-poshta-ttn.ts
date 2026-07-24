@@ -99,8 +99,9 @@ export function normalisePhone(raw: string): string {
   return digits;
 }
 
-function today(): string {
-  const d = new Date();
+/** A Nova Poshta dispatch date (DD.MM.YYYY), `offsetDays` from today. */
+function npDate(offsetDays = 0): string {
+  const d = new Date(Date.now() + offsetDays * 86_400_000);
   const p = (n: number) => String(n).padStart(2, "0");
   return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
@@ -295,10 +296,10 @@ export async function createTtn(input: CreateTtnInput): Promise<CreatedTtn> {
   const weight = String(input.weightKg ?? DEFAULT_WEIGHT_KG);
   const seat = seatCm(input.dimsMm);
 
-  const rows = await npCall<RawDocument>("InternetDocument", "save", {
+  const body = (dispatchDate: string) => ({
     PayerType: PAYER_TYPE,
     PaymentMethod: PAYMENT_METHOD,
-    DateTime: today(),
+    DateTime: dispatchDate,
     CargoType: CARGO_TYPE,
     Weight: weight,
     ServiceType: serviceType,
@@ -328,6 +329,22 @@ export async function createTtn(input: CreateTtnInput): Promise<CreatedTtn> {
     ContactRecipient: recipient.contactRef,
     RecipientsPhone: normalisePhone(input.recipient.phone),
   });
+
+  // Nova Poshta enforces a same-day dispatch cut-off: past it, a waybill dated
+  // today is refused with "DateTime cannot be less then now". An evening order
+  // ships the next working day anyway, so retry once dated tomorrow rather than
+  // dropping it to manual creation over a clock.
+  let rows: RawDocument[];
+  try {
+    rows = await npCall<RawDocument>("InternetDocument", "save", body(npDate(0)));
+  } catch (e) {
+    if (e instanceof NovaPoshtaError && /DateTime cannot be less/i.test(e.message)) {
+      console.warn("[ttn] past Nova Poshta's same-day cut-off — dispatching", npDate(1));
+      rows = await npCall<RawDocument>("InternetDocument", "save", body(npDate(1)));
+    } else {
+      throw e;
+    }
+  }
 
   const doc = rows[0];
   if (!doc?.IntDocNumber || !doc?.Ref) {

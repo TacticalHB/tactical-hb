@@ -19,6 +19,34 @@ export const DEFAULT_WEIGHT_KG = 1;
 /** Where parcels are dispatched from. Overridable without a code change. */
 const SENDER_CITY = process.env.NOVA_POSHTA_SENDER_CITY || "Харків";
 
+/**
+ * Parcel-locker (poshtomat) delivery surcharge in UAH.
+ *
+ * Nova Poshta charges more to deliver to a poshtomat than to a branch, but
+ * getDocumentPrice only accepts a city — never the specific warehouse — so the
+ * quote always returns the branch rate and misses it. Measured at ₴10 for the
+ * 1 kg parcels this shop currently ships; defaulted a little higher so the shop
+ * never under-charges, and env-overridable for when the tariff changes.
+ */
+const POSTOMAT_SURCHARGE_UAH = (() => {
+  // A deliberate "0" must disable the surcharge, so `|| 15` won't do — it would
+  // read a valid zero as unset. Fall back to the default only when truly unset
+  // or unparseable.
+  const raw = process.env.NOVA_POSHTA_POSTOMAT_SURCHARGE_UAH;
+  const n = raw == null || raw.trim() === "" ? NaN : Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : 15;
+})();
+
+/**
+ * True for a parcel locker. Nova Poshta sets CategoryOfWarehouse to "Postomat"
+ * and also names them 'Поштомат …', so either signal identifies one; the
+ * category is preferred where present.
+ */
+export function isPostomat(w: { category?: string | null; name?: string | null }): boolean {
+  if (w.category) return w.category.toLowerCase() === "postomat";
+  return /поштомат/i.test(w.name ?? "");
+}
+
 export class NovaPoshtaError extends Error {
   constructor(message: string) {
     super(message);
@@ -87,13 +115,14 @@ export async function searchCities(query: string, limit = 20): Promise<NpCity[]>
 
 /* ---- Warehouses ----------------------------------------------------------- */
 
-export type NpWarehouse = { ref: string; name: string; number: string; maxWeightKg: number };
+export type NpWarehouse = { ref: string; name: string; number: string; maxWeightKg: number; category: string };
 
 type RawWarehouse = {
   Ref: string;
   Description: string;
   Number: string;
   TotalMaxWeightAllowed?: string;
+  CategoryOfWarehouse?: string;
 };
 
 /** How many branches to return per lookup. */
@@ -128,6 +157,7 @@ export async function getWarehouses(cityRef: string, query = ""): Promise<NpWare
       name: w.Description,
       number: w.Number,
       maxWeightKg: Number(w.TotalMaxWeightAllowed) || 0,
+      category: w.CategoryOfWarehouse ?? "",
     }))
     // "№12" sorts after "№9" as text; order by the branch number instead.
     .sort((a, b) => (Number(a.number) || 0) - (Number(b.number) || 0));
@@ -177,6 +207,8 @@ export async function getDeliveryPrice(opts: {
   weightKg?: number;
   /** Defaults to branch-to-branch; pass WarehouseDoors for courier delivery. */
   serviceType?: NpServiceType;
+  /** Destination is a parcel locker — add the surcharge the estimate can't see. */
+  postomat?: boolean;
 }): Promise<number> {
   const senderRef = await getSenderCityRef();
 
@@ -194,5 +226,5 @@ export async function getDeliveryPrice(opts: {
   if (!Number.isFinite(cost) || cost < 0) {
     throw new NovaPoshtaError("getDocumentPrice returned no usable cost");
   }
-  return Math.round(cost);
+  return Math.round(cost) + (opts.postomat ? POSTOMAT_SURCHARGE_UAH : 0);
 }

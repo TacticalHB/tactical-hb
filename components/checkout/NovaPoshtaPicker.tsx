@@ -14,7 +14,7 @@ import type { CartLine } from "@/components/CartContext";
 --------------------------------------------------------------------------- */
 
 export type NpCity = { ref: string; name: string; area: string; type: string };
-export type NpWarehouse = { ref: string; name: string; number: string; maxWeightKg: number };
+export type NpWarehouse = { ref: string; name: string; number: string; maxWeightKg: number; category: string };
 export type NpDeliveryType = "warehouse" | "courier";
 
 export type NovaPoshtaSelection = {
@@ -200,7 +200,7 @@ export default function NovaPoshtaPicker({
   }, [isCourier, whQuery, value?.cityRef, value?.warehouseRef, loadWarehouses]);
 
   /** Quote the delivery. cityRecipient is fixed; ServiceType follows the mode. */
-  const quote = useCallback(async (cityRef: string, type: NpDeliveryType, apply: (cost: number | null) => void) => {
+  const quote = useCallback(async (cityRef: string, type: NpDeliveryType, apply: (cost: number | null) => void, postomat = false) => {
     const seq = ++quoteSeq.current;
     setQuoting(true);
     setError(null);
@@ -211,6 +211,7 @@ export default function NovaPoshtaPicker({
         body: JSON.stringify({
           cityRef,
           deliveryType: type,
+          postomat,
           lines: cartRef.current.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),
       });
@@ -277,7 +278,9 @@ export default function NovaPoshtaPicker({
     if (!wh) return;
     const next: NovaPoshtaSelection = { ...value, warehouseRef: wh.ref, warehouseName: wh.name, costUah: null };
     onChange(next);
-    void quote(value.cityRef, "warehouse", (cost) => onChange({ ...next, costUah: cost }));
+    // Parcel lockers cost more; the quote adds the surcharge when told so.
+    const postomat = wh.category.toLowerCase() === "postomat";
+    void quote(value.cityRef, "warehouse", (cost) => onChange({ ...next, costUah: cost }), postomat);
   }
 
   const labelCls = "block text-[11px] tracking-[0.2em] uppercase mb-2";

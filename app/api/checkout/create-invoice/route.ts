@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money } from "@/lib/currency";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
-import { getDeliveryPrice } from "@/lib/nova-poshta";
+import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
 
@@ -164,6 +164,9 @@ export async function POST(request: NextRequest) {
         declaredValueUah: goods.uah,
         // Courier delivers to the door; branch is warehouse-to-warehouse.
         serviceType: npDeliveryType === "courier" ? "WarehouseDoors" : "WarehouseWarehouse",
+        // Re-derived here from the branch name we hold, never trusted from the
+        // client, so the surcharge on the amount charged can't be edited away.
+        postomat: npDeliveryType !== "courier" && isPostomat({ name: npWarehouseName }),
       });
     } catch (e) {
       // Refuse rather than guess. Charging an unquoted amount, or shipping for

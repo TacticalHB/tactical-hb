@@ -1,6 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createTtn, type TtnDestination } from "@/lib/nova-poshta-ttn";
+import { parcelFor } from "@/lib/parcel";
+import { products } from "@/lib/products";
 import type { PaymentRow } from "@/lib/fulfilment";
 
 /* ---------------------------------------------------------------------------
@@ -51,6 +53,26 @@ function describeParcel(p: PaymentRow): string {
   return `${p.reference} — ${goods}`.slice(0, 250);
 }
 
+/**
+ * The physical parcel for the order.
+ *
+ * Weight is taken from what was frozen on each line at checkout (add-ons
+ * included); dimensions come from the catalogue by slug, since a carton size
+ * doesn't change with the options. Older orders without a stored weight fall
+ * back to the catalogue, then to parcelFor's own default.
+ */
+function parcelForOrder(p: PaymentRow) {
+  const lines = p.lines.map((l) => {
+    const product = products.find((pr) => pr.slug === l.slug);
+    return {
+      weightG: l.weight_g ?? product?.weightG ?? 0,
+      dims: product?.dims ?? { l: 200, w: 150, h: 100 },
+      qty: l.qty,
+    };
+  });
+  return parcelFor(lines);
+}
+
 function destinationFor(p: PaymentRow): TtnDestination {
   if (p.np_delivery_type === "courier") {
     return {
@@ -83,6 +105,7 @@ export async function createTtnForOrder(orderId: string, payment: PaymentRow): P
   }
 
   const d = payment.delivery as Record<string, string>;
+  const parcel = parcelForOrder(payment);
 
   try {
     const ttn = await createTtn({
@@ -96,6 +119,9 @@ export async function createTtnForOrder(orderId: string, payment: PaymentRow): P
       // lose. Postage is excluded — it isn't part of the parcel's worth.
       declaredValueUah: payment.amount_uah,
       description: describeParcel(payment),
+      // Real weight/size, priced identically to what the customer was charged.
+      weightKg: parcel.weightKg,
+      dimsMm: parcel.dims,
     });
 
     const admin = createAdminClient();

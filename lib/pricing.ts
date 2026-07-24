@@ -1,6 +1,7 @@
 import { products } from "@/lib/products";
-import { materialUpcharge } from "@/lib/hmd-options";
+import { materialUpcharge, materialWeightG } from "@/lib/hmd-options";
 import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
+import type { Dims } from "@/lib/parcel";
 
 /* ---------------------------------------------------------------------------
    Authoritative cart pricing, computed on the server from the catalogue.
@@ -26,6 +27,9 @@ export type PricedLine = {
   name: string;
   unit: Money;
   total: Money;
+  /** Per-unit packed weight in grams, add-ons included — drives shipping. */
+  weightG: number;
+  dims: Dims;
 };
 
 export type PricedCart = { lines: PricedLine[]; subtotal: Money };
@@ -53,9 +57,12 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       : undefined;
 
     let unit = money(variant?.price ?? product.price, variant?.priceUah ?? product.priceUah);
+    let weightG = product.weightG;
     // Add-ons exist only on heat devices; ignore stray flags on anything else.
     if (product.category === "hmd") {
-      unit = addMoney(unit, materialUpcharge({ lid: !!l.options?.lid, rubber: !!l.options?.rubber }));
+      const material = { lid: !!l.options?.lid, rubber: !!l.options?.rubber };
+      unit = addMoney(unit, materialUpcharge(material));
+      weightG += materialWeightG(material);
     }
 
     lines.push({
@@ -64,6 +71,8 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       name: uk ? product.nameUk : product.nameEn,
       unit,
       total: scaleMoney(unit, safeQty),
+      weightG,
+      dims: product.dims,
     });
   }
 

@@ -7,7 +7,7 @@ import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector from "./HmdMaterialSelector";
-import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
+import { materialUpcharge, LID_WEIGHT_G, type HmdMaterial } from "@/lib/hmd-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 
@@ -186,6 +186,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     colour: uk ? "Колір" : "Colour Shown",
     style: uk ? "Модель" : "Style",
     specs: uk ? "Характеристики" : "Tech Specs",
+    weight: uk ? "Вага" : "Weight",
+    dimensions: uk ? "Розміри" : "Dimensions",
     tips: uk ? "Поради з використання" : "Tips for Use",
     delivery: uk ? "Доставка та повернення" : "Delivery & Returns",
     deliveryText: uk
@@ -356,6 +358,29 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               {colourShown && <li className="list-disc ml-5">{L.colour}: {colourShown}</li>}
               {pdp?.styleCode && <li className="list-disc ml-5">{L.style}: {pdp.styleCode}</li>}
             </ul>
+
+            {/* Weight & dimensions — from structured data, so every product shows
+                the same clean block in both languages. */}
+            <dl className="mt-6 pt-5 flex flex-col gap-2 text-[15px]" style={{ borderTop: "1px solid #efefef" }}>
+              <div className="flex justify-between gap-4">
+                <dt style={{ color: "#707072" }}>{L.weight}</dt>
+                <dd className="text-right" style={{ color: "#111" }}>
+                  {product.category === "hmd"
+                    ? uk
+                      ? `${product.weightG} г (${product.weightG + LID_WEIGHT_G} г з кришкою)`
+                      : `${product.weightG} g (${product.weightG + LID_WEIGHT_G} g with lid)`
+                    : uk
+                      ? `${product.weightG} г`
+                      : `${product.weightG} g`}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt style={{ color: "#707072" }}>{L.dimensions}</dt>
+                <dd className="text-right" style={{ color: "#111" }}>
+                  {`${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${uk ? "мм" : "mm"}`}
+                </dd>
+              </div>
+            </dl>
 
             {/* Key benefits */}
             {benefits.length > 0 && (

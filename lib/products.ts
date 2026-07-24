@@ -13,6 +13,13 @@ export type Product = {
   /** Hand-set UAH price (not a conversion of `price`) — see lib/currency.ts */
   priceUah: number;
   currency: string;
+  /** Packed weight in grams. For an HMD this is the weight WITHOUT the lid;
+      the lid add-on adds LID_WEIGHT_G (see lib/hmd-options). Drives the real
+      shipping weight in place of the old 1 kg default. */
+  weightG: number;
+  /** Packed carton size in millimetres. Used both on the page and to keep the
+      Nova Poshta volumetric weight honest. */
+  dims: { l: number; w: number; h: number };
   category: "hmd" | "bowl" | "accessory";
   featured: boolean;
   image: string;
@@ -59,6 +66,8 @@ export const products: Product[] = [
     price: 29,
     priceUah: 1080,
     currency: "EUR",
+    weightG: 125,
+    dims: { l: 122, w: 122, h: 42 },
     category: "hmd",
     featured: true,
     image: "/images/hmd-classic.jpg",
@@ -76,6 +85,8 @@ export const products: Product[] = [
     price: 24,
     priceUah: 900,
     currency: "EUR",
+    weightG: 125,
+    dims: { l: 122, w: 122, h: 42 },
     category: "hmd",
     featured: true,
     image: "/images/hmd-acraft-hero.png",
@@ -121,8 +132,6 @@ export const products: Product[] = [
         { labelEn: "Surface", labelUk: "Поверхня", valueEn: "A.Craft surface treatment", valueUk: "Обробка поверхні A.Craft" },
         { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під вітрозахистом" },
         { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
-        { labelEn: "Weight", labelUk: "Вага", valueEn: "—", valueUk: "—" },
-        { labelEn: "Dimensions", labelUk: "Розміри", valueEn: "—", valueUk: "—" },
       ],
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
@@ -145,6 +154,8 @@ export const products: Product[] = [
     price: 30,
     priceUah: 1150,
     currency: "EUR",
+    weightG: 125,
+    dims: { l: 122, w: 122, h: 42 },
     category: "hmd",
     featured: true,
     image: "/images/hmd-op-purple.png",
@@ -213,6 +224,8 @@ export const products: Product[] = [
     price: 11,
     priceUah: 420,
     currency: "EUR",
+    weightG: 325,
+    dims: { l: 109, w: 82, h: 82 },
     category: "bowl",
     featured: true,
     image: "/images/killer-hero-v2.png",
@@ -276,6 +289,8 @@ export const products: Product[] = [
     price: 10,
     priceUah: 370,
     currency: "EUR",
+    weightG: 300,
+    dims: { l: 109, w: 82, h: 82 },
     category: "bowl",
     featured: false,
     image: "/images/livanka-hero.png",
@@ -313,8 +328,6 @@ export const products: Product[] = [
       specs: [
         { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
         { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", valueEn: "10–12 g", valueUk: "10–12 г" },
-        { labelEn: "Weight", labelUk: "Вага", valueEn: "—", valueUk: "—" },
-        { labelEn: "Measurements", labelUk: "Розміри", valueEn: "—", valueUk: "—" },
       ],
       features: [
         { icon: "cloud", titleEn: "Smoke", titleUk: "Дим", textEn: "Bright & soft", textUk: "Яскравий і м'який" },
@@ -337,6 +350,8 @@ export const products: Product[] = [
     price: 13,
     priceUah: 500,
     currency: "EUR",
+    weightG: 345,
+    dims: { l: 109, w: 82, h: 82 },
     category: "bowl",
     featured: true,
     image: "/images/ftp-hero-v2.png",
@@ -402,6 +417,8 @@ export const products: Product[] = [
     price: 23,
     priceUah: 850,
     currency: "EUR",
+    weightG: 470,
+    dims: { l: 210, w: 108, h: 108 },
     category: "accessory",
     featured: true,
     image: "/images/windcover-hero-cut.png",

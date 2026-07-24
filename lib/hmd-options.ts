@@ -27,3 +27,17 @@ export function materialUpcharge(sel: HmdMaterial): Money {
   if (sel.rubber) total = addMoney(total, MATERIAL_PRICE.rubber);
   return total;
 }
+
+/* ---------------------------------------------------------------------------
+   How much the add-ons weigh — the shipping counterpart of the pricing above.
+
+   The lid takes an HMD from 125 g to 155 g (the two weights on the spec sheet),
+   so it adds 30 g. The rubber ring is a few grams at most; treated as zero
+   rather than pretending to a precision the scale never gave us.
+--------------------------------------------------------------------------- */
+
+export const LID_WEIGHT_G = 30;
+
+export function materialWeightG(sel: HmdMaterial): number {
+  return sel.lid ? LID_WEIGHT_G : 0;
+}

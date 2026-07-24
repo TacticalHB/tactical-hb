@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDeliveryPrice, NovaPoshtaError } from "@/lib/nova-poshta";
 import { priceCart } from "@/lib/pricing";
+import { parcelFor } from "@/lib/parcel";
 
 /* ---------------------------------------------------------------------------
    Delivery quote for a Nova Poshta branch.
@@ -31,11 +32,13 @@ export async function POST(request: NextRequest) {
   // Only meaningful for branch pickup — courier never goes to a locker.
   const postomat = b.deliveryType !== "courier" && b.postomat === true;
 
-  const { subtotal } = priceCart(b.lines);
+  const { lines, subtotal } = priceCart(b.lines);
   if (subtotal.uah <= 0) return NextResponse.json({ ok: false, error: "empty_cart" }, { status: 400 });
 
+  const parcel = parcelFor(lines);
+
   try {
-    const costUah = await getDeliveryPrice({ cityRecipientRef: cityRef, declaredValueUah: subtotal.uah, serviceType, postomat });
+    const costUah = await getDeliveryPrice({ cityRecipientRef: cityRef, declaredValueUah: subtotal.uah, serviceType, postomat, weightKg: parcel.weightKg });
     return NextResponse.json({ ok: true, costUah });
   } catch (e) {
     if (e instanceof NovaPoshtaError && e.message.includes("NOVA_POSHTA_API_KEY")) {

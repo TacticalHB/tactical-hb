@@ -49,6 +49,10 @@ export type PaymentRow = {
     slug: string; name: string; qty: number;
     unit_eur: number; unit_uah: number;
     colour?: string | null; material?: string | null; addons?: string | null;
+    /** Per-unit packed weight in grams, add-ons included. Absent on orders
+        placed before weights existed — the waybill falls back to catalogue
+        weights, then the default. */
+    weight_g?: number | null;
     /** Captured at checkout so the confirmation shows the chosen variant.
         Absent on orders placed before it was recorded — the email falls back
         to the product's default image. */

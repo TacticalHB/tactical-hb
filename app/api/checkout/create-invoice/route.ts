@@ -5,6 +5,7 @@ import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money } from "@/lib/currency";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
+import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
 
@@ -167,6 +168,8 @@ export async function POST(request: NextRequest) {
         // Re-derived here from the branch name we hold, never trusted from the
         // client, so the surcharge on the amount charged can't be edited away.
         postomat: npDeliveryType !== "courier" && isPostomat({ name: npWarehouseName }),
+        // Real chargeable weight, priced server-side from the catalogue.
+        weightKg: parcelFor(priced.lines).weightKg,
       });
     } catch (e) {
       // Refuse rather than guess. Charging an unquoted amount, or shipping for
@@ -254,6 +257,9 @@ export async function POST(request: NextRequest) {
         colour: d?.colour ?? null,
         material: d?.material ?? null,
         addons: d?.addons ?? null,
+        // Frozen with the line (add-ons included) so the waybill weighs the
+        // parcel from what was actually bought, not the catalogue default.
+        weight_g: l.weightG,
         // Frozen here so the confirmation email shows the exact variant the
         // customer bought, not whatever the catalogue default is later.
         image: d?.image ?? null,

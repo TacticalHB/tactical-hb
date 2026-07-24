@@ -30,11 +30,25 @@ const PAYMENT_METHOD = process.env.NOVA_POSHTA_PAYMENT_METHOD || "NonCash";
 const CARGO_TYPE = "Cargo";
 
 /**
- * Default parcel dimensions in cm, until real product dimensions exist. Nova
- * Poshta requires an OptionsSeat per seat for Cargo, and rejects the document
- * outright without one — a small accessories box is a safe stand-in.
+ * Fallback parcel dimensions in cm, for orders that reach here without real
+ * ones (placed before product weights existed). Nova Poshta requires an
+ * OptionsSeat per seat for Cargo and rejects the document without one.
  */
-const DEFAULT_SEAT = { width: 20, length: 20, height: 10 };
+const DEFAULT_SEAT = { l: 20, w: 20, h: 10 };
+
+/**
+ * Seat dimensions in whole centimetres, floored from the packed carton in mm.
+ *
+ * Flooring is deliberate: the chargeable weight already folds in the parcel's
+ * volumetric weight, so the seat only has to be small enough that Nova Poshta's
+ * own volumetric calc can't exceed it and inflate the charge above what we
+ * quoted. Rounding up could do exactly that.
+ */
+function seatCm(dimsMm?: { l: number; w: number; h: number }) {
+  if (!dimsMm) return DEFAULT_SEAT;
+  const cm = (mm: number) => Math.max(1, Math.floor(mm / 10));
+  return { l: cm(dimsMm.l), w: cm(dimsMm.w), h: cm(dimsMm.h) };
+}
 
 export type TtnRecipient = {
   firstName: string;
@@ -53,7 +67,10 @@ export type CreateTtnInput = {
   declaredValueUah: number;
   /** Goes on the waybill so a parcel can be identified without a lookup. */
   description: string;
+  /** Chargeable weight in kg (real weight, or volumetric where that's higher). */
   weightKg?: number;
+  /** Packed carton in mm, for the seat's declared dimensions. */
+  dimsMm?: { l: number; w: number; h: number };
 };
 
 export type CreatedTtn = {
@@ -276,6 +293,7 @@ export async function createTtn(input: CreateTtnInput): Promise<CreatedTtn> {
         );
 
   const weight = String(input.weightKg ?? DEFAULT_WEIGHT_KG);
+  const seat = seatCm(input.dimsMm);
 
   const rows = await npCall<RawDocument>("InternetDocument", "save", {
     PayerType: PAYER_TYPE,
@@ -285,13 +303,13 @@ export async function createTtn(input: CreateTtnInput): Promise<CreatedTtn> {
     Weight: weight,
     ServiceType: serviceType,
     SeatsAmount: "1",
-    // Required for Cargo — the parcel's single seat. Weight matches the top
-    // level; dimensions are the accessories-box default until real ones exist.
+    // Required for Cargo — the parcel's single seat, weight matching the top
+    // level and dimensions from the packed carton.
     OptionsSeat: [
       {
-        volumetricWidth: String(DEFAULT_SEAT.width),
-        volumetricLength: String(DEFAULT_SEAT.length),
-        volumetricHeight: String(DEFAULT_SEAT.height),
+        volumetricWidth: String(seat.w),
+        volumetricLength: String(seat.l),
+        volumetricHeight: String(seat.h),
         weight,
       },
     ],

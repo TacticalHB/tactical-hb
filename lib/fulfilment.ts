@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { esc, rowsHtml, sendMail } from "@/lib/email";
 import { buildOrderEmail } from "@/lib/order-email";
+import { createTtnForOrder } from "@/lib/order-ttn";
 
 /* ---------------------------------------------------------------------------
    Turning a confirmed payment into an order.
@@ -37,6 +38,12 @@ export type PaymentRow = {
   np_warehouse_name: string | null;
   np_address: string | null;
   np_notes: string | null;
+  /** Courier address in parts — np_address is the readable line, these are
+      what Nova Poshta's API can actually resolve. Null for branch delivery
+      and for orders placed before migration 0013. */
+  np_street: string | null;
+  np_building: string | null;
+  np_flat: string | null;
   delivery: Record<string, unknown>;
   lines: {
     slug: string; name: string; qty: number;
@@ -110,6 +117,9 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
         np_warehouse_name: payment.np_warehouse_name,
         np_address: payment.np_address,
         np_notes: payment.np_notes,
+        np_street: payment.np_street,
+        np_building: payment.np_building,
+        np_flat: payment.np_flat,
         source: "monobank",
         external_ref: payment.reference,
       })
@@ -159,6 +169,12 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     await sendOrderConfirmation(payment).catch((e) =>
       console.error("[fulfil] customer confirmation failed:", e)
     );
+
+    // 6. Book the parcel with Nova Poshta. Last on purpose: it is the only
+    //    step that can be redone by hand from /admin/orders, so nothing more
+    //    important should wait behind a courier API. Never throws — a failure
+    //    leaves the order 'paid', which is the manual-waybill queue.
+    await createTtnForOrder(order.id, payment);
 
     console.log("[fulfil] order created:", order.id, "ref", payment.reference);
     return { ok: true, orderId: order.id };

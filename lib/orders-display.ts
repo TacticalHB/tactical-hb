@@ -175,6 +175,7 @@ export function deliveryLabel(kind: DeliveryKind, uk: boolean): string {
 export function statusLabel(status: string, uk: boolean): string {
   const map: Record<string, [string, string]> = {
     paid: ["Оплачено", "Paid"],
+    processing: ["В обробці", "Processing"],
     shipped: ["Відправлено", "Shipped"],
     delivered: ["Доставлено", "Delivered"],
     cancelled: ["Скасовано", "Cancelled"],

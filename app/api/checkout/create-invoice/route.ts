@@ -125,6 +125,11 @@ export async function POST(request: NextRequest) {
   let npWarehouseName: string | null = null;
   let npAddress: string | null = null;
   let npNotes: string | null = null;
+  // Kept apart from npAddress: that line is for humans, these are what Nova
+  // Poshta's API can resolve into a street ref when the waybill is created.
+  let npStreet: string | null = null;
+  let npBuilding: string | null = null;
+  let npFlat: string | null = null;
 
   if (shippingMethod === "nova_poshta") {
     npDeliveryType = shipReq.deliveryType === "courier" ? "courier" : "warehouse";
@@ -144,6 +149,9 @@ export async function POST(request: NextRequest) {
       npAddress = [`${street}, ${building}`, apartment ? (locale === "uk" ? `кв. ${apartment}` : `apt. ${apartment}`) : ""]
         .filter(Boolean)
         .join(", ");
+      npStreet = street;
+      npBuilding = building;
+      npFlat = apartment || null;
     } else {
       npWarehouseRef = String(shipReq.warehouseRef ?? "").trim().slice(0, 80) || null;
       npWarehouseName = String(shipReq.warehouseName ?? "").trim().slice(0, 300) || null;
@@ -228,6 +236,9 @@ export async function POST(request: NextRequest) {
     np_warehouse_name: npWarehouseName,
     np_address: npAddress,
     np_notes: npNotes,
+    np_street: npStreet,
+    np_building: npBuilding,
+    np_flat: npFlat,
     delivery,
     lines: priced.lines.map((l) => {
       const d = describeLine({ slug: l.slug, qty: l.qty }, locale);

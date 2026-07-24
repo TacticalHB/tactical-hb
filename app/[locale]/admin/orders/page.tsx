@@ -28,6 +28,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
   paid: { bg: "#e7f2ec", fg: "#2f6b4f" },
+  processing: { bg: "#fbf1de", fg: "#8a5d16" },
   shipped: { bg: "#e8eef7", fg: "#2f5480" },
   delivered: { bg: "#eeedea", fg: "#5f5e5a" },
   cancelled: { bg: "#f9e9e8", fg: "#96322c" },

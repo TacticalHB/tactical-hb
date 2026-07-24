@@ -8,7 +8,7 @@ import "server-only";
 
    One endpoint does everything: POST /v2.0/json/ with a modelName and a
    calledMethod. Errors come back as HTTP 200 with success:false, so the status
-   code alone tells you nothing; `call()` normalises that into a thrown error.
+   code alone tells you nothing; `npCall()` normalises that into a thrown error.
 --------------------------------------------------------------------------- */
 
 const ENDPOINT = "https://api.novaposhta.ua/v2.0/json/";
@@ -32,7 +32,13 @@ function apiKey(): string {
   return k;
 }
 
-async function call<T>(modelName: string, calledMethod: string, methodProperties: Record<string, unknown>): Promise<T[]> {
+/**
+ * One call against the Nova Poshta API.
+ *
+ * Exported so the waybill module can reuse it — the API key handling and the
+ * success:false normalisation below must exist in exactly one place.
+ */
+export async function npCall<T>(modelName: string, calledMethod: string, methodProperties: Record<string, unknown>): Promise<T[]> {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -66,7 +72,7 @@ export async function searchCities(query: string, limit = 20): Promise<NpCity[]>
   const trimmed = query.trim();
   if (trimmed.length < 2) return [];
 
-  const rows = await call<RawCity>("Address", "getCities", {
+  const rows = await npCall<RawCity>("Address", "getCities", {
     FindByString: trimmed,
     Limit: String(limit),
   });
@@ -109,7 +115,7 @@ const WAREHOUSE_LIMIT = 50;
 export async function getWarehouses(cityRef: string, query = ""): Promise<NpWarehouse[]> {
   if (!cityRef) return [];
 
-  const rows = await call<RawWarehouse>("Address", "getWarehouses", {
+  const rows = await npCall<RawWarehouse>("Address", "getWarehouses", {
     CityRef: cityRef,
     FindByString: query.trim(),
     Limit: String(WAREHOUSE_LIMIT),
@@ -174,7 +180,7 @@ export async function getDeliveryPrice(opts: {
 }): Promise<number> {
   const senderRef = await getSenderCityRef();
 
-  const rows = await call<RawPrice>("InternetDocument", "getDocumentPrice", {
+  const rows = await npCall<RawPrice>("InternetDocument", "getDocumentPrice", {
     CitySender: senderRef,
     CityRecipient: opts.cityRecipientRef,
     Weight: String(opts.weightKg ?? DEFAULT_WEIGHT_KG),

@@ -19,12 +19,17 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
     { href: `${base}/settings`, label: uk ? "Налаштування" : "Account Settings" },
   ];
 
-  // Admin-only. Hiding it is a convenience, not the security boundary — the
-  // page 404s and the redeem action refuses independently for non-admins.
+  // Admin-only. Hiding these is a convenience, not the security boundary — the
+  // pages 404 and their actions refuse independently for non-admins.
   if (isAdmin) {
     items.push({
       href: `${base}/admin/vouchers`,
       label: uk ? "Ваучери (адмін)" : "Vouchers (admin)",
+    });
+    // Sits outside /account — it's a shop-wide queue, not this user's orders.
+    items.push({
+      href: `/${locale}/admin/orders`,
+      label: uk ? "Замовлення (адмін)" : "Orders (admin)",
     });
   }
 

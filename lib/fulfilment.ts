@@ -91,6 +91,9 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
       .from("orders")
       .insert({
         user_id: payment.user_id,
+        // Reached only after the webhook confirmed the invoice with Monobank,
+        // so the order is paid the moment it exists.
+        status: "paid",
         amount_eur: payment.amount_eur,
         amount_uah: payment.amount_uah,
         currency: "UAH",

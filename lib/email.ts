@@ -34,6 +34,15 @@ export async function sendMail(opts: {
    * address customers should reply to.
    */
   from?: string;
+  /**
+   * Files to attach, referenced by absolute URL — Resend fetches them itself.
+   *
+   * A URL rather than bytes on purpose: `public/` is deployed to the CDN and is
+   * not reliably present on a serverless function's own filesystem, so reading
+   * the file at send time is exactly the kind of thing that works locally and
+   * fails once deployed. The URL is the same asset the site already serves.
+   */
+  attachments?: { filename: string; path: string }[];
 }): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -50,6 +59,7 @@ export async function sendMail(opts: {
       subject: opts.subject,
       text: opts.text,
       html: opts.html,
+      ...(opts.attachments?.length ? { attachments: opts.attachments } : {}),
     });
     if (error) {
       // Most common cause: FROM is on a domain not verified in Resend.

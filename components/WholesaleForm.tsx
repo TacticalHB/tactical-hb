@@ -6,7 +6,8 @@ import HoneypotField from "./HoneypotField";
 
 export default function WholesaleForm() {
   const t = useTranslations("wholesale");
-  const uk = useLocale() === "uk";
+  const locale = useLocale();
+  const uk = locale === "uk";
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [businessType, setBusinessType] = useState("");
@@ -55,6 +56,8 @@ export default function WholesaleForm() {
           city: String(data.get("city") ?? ""),
           businessType: typeLabel,
           message: String(data.get("message") ?? ""),
+          // Decides which language the auto-reply and attached form are in.
+          locale,
           // Spam screening — see lib/anti-spam.
           company_website: String(data.get("company_website") ?? ""),
           ts: mountedAt.current,

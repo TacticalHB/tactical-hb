@@ -2,6 +2,7 @@ import "server-only";
 import { products } from "@/lib/products";
 import { esc } from "@/lib/email";
 import { eurToUah, UAH_PER_EUR } from "@/lib/currency";
+import { BG, CARD, INK, MUTED, FAINT, LINE, ACCENT, FONT, uah, emailShell } from "@/lib/email-theme";
 import type { PaymentRow } from "@/lib/fulfilment";
 
 /* ---------------------------------------------------------------------------
@@ -26,18 +27,10 @@ import type { PaymentRow } from "@/lib/fulfilment";
    UAH_PER_EUR). The two views are therefore each internally consistent but not
    a conversion of one another, which is exactly why the charged figure is
    printed rather than left to be inferred.
+
+   The palette, font stack, wordmark and footer live in lib/email-theme.ts,
+   shared with the shipping notification so the two cannot drift apart.
 --------------------------------------------------------------------------- */
-
-const BG = "#f7f5f1";
-const CARD = "#ffffff";
-const INK = "#17160f";
-const MUTED = "#6c6860";
-const FAINT = "#a39d92";
-const LINE = "#e4e0d8";
-const ACCENT = "#C4A35A";
-const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
-
-const uah = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
 
 type Copy = {
   subject: (ref: string) => string;
@@ -205,23 +198,7 @@ export function buildOrderEmail(
       };font-weight:${opts?.strong ? "600" : "400"};padding:6px 0;white-space:nowrap">${esc(value)}</td>
     </tr>`;
 
-  const html = `<!doctype html>
-<html lang="${p.locale === "uk" ? "uk" : "en"}">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(t.subject(p.reference))}</title></head>
-<body style="margin:0;padding:0;background:${BG}">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${BG}">
-    <tr><td align="center" style="padding:36px 16px 48px">
-
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px">
-
-        <!-- Wordmark -->
-        <tr><td align="center" style="padding-bottom:28px">
-          <span style="font-family:${FONT};font-size:19px;font-weight:700;letter-spacing:3px;color:${INK}">
-            TACTICAL <span style="color:${ACCENT}">HB</span>
-          </span>
-        </td></tr>
-
+  const inner = `
         <!-- Headline -->
         <tr><td align="center" style="padding-bottom:12px">
           <h1 style="margin:0;font-family:${FONT};font-size:27px;line-height:1.25;font-weight:700;color:${INK}">
@@ -289,19 +266,13 @@ export function buildOrderEmail(
           <p style="margin:0;font-family:${FONT};font-size:14px;line-height:1.6;color:${MUTED}">
             ${esc(t.closing)}
           </p>
-        </td></tr>
+        </td></tr>`;
 
-        <!-- Footer -->
-        <tr><td align="center" style="padding-top:36px;border-top:1px solid ${LINE};margin-top:20px">
-          <div style="font-family:${FONT};font-size:12px;letter-spacing:2px;color:${FAINT};padding-top:22px">
-            TACTICAL HB
-          </div>
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body></html>`;
+  const html = emailShell({
+    lang: p.locale === "uk" ? "uk" : "en",
+    title: esc(t.subject(p.reference)),
+    inner,
+  });
 
   const text = [
     t.headline,

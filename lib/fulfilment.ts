@@ -105,6 +105,9 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
         // Reached only after the webhook confirmed the invoice with Monobank,
         // so the order is paid the moment it exists.
         status: "paid",
+        // Carried onto the order because the shipping email is sent later by a
+        // cron job that has no payment row to read the language from.
+        locale: payment.locale,
         amount_eur: payment.amount_eur,
         amount_uah: payment.amount_uah,
         currency: "UAH",

@@ -32,6 +32,7 @@ export default function OrderTtnForm({
     saving: uk ? "Збереження…" : "Saving…",
     savedMsg: uk ? "Збережено" : "Saved",
     cleared: uk ? "ТТН видалено" : "TTN cleared",
+    track: uk ? "Відстежити" : "Track",
   };
 
   const dirty = ttn.replace(/\s+/g, "") !== (saved ?? "");
@@ -82,6 +83,18 @@ export default function OrderTtnForm({
           <span className="text-[12px]" style={{ color: "#4a7c59" }}>
             {L.savedMsg}
           </span>
+        )}
+        {/* Straight to Nova Poshta's tracking for this parcel. */}
+        {saved && (
+          <a
+            href={`https://novaposhta.ua/tracking/?cargo_number=${encodeURIComponent(saved)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12px] underline underline-offset-2 transition-opacity hover:opacity-70"
+            style={{ color: "#707072" }}
+          >
+            {L.track}
+          </a>
         )}
         {!dirty && !saved && !error && initial && (
           <span className="text-[12px]" style={{ color: "#8a8a8d" }}>

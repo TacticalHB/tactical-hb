@@ -7,6 +7,7 @@ import {
   DEFAULT_WEIGHT_KG,
   type NpServiceType,
 } from "@/lib/nova-poshta";
+import { hasLatin, toCyrillic } from "@/lib/transliterate";
 
 /* ---------------------------------------------------------------------------
    Creating a Nova Poshta waybill (ТТН).
@@ -208,13 +209,33 @@ async function createRecipient(r: TtnRecipient): Promise<{ counterpartyRef: stri
     throw new NovaPoshtaError(`Recipient phone is not a Ukrainian number: "${r.phone}"`);
   }
 
-  const rows = await npCall<RawSavedCounterparty>("Counterparty", "save", {
-    FirstName: r.firstName,
-    LastName: r.lastName,
-    Phone: phone,
-    CounterpartyType: "PrivatePerson",
-    CounterpartyProperty: "Recipient",
-  });
+  const save = (firstName: string, lastName: string) =>
+    npCall<RawSavedCounterparty>("Counterparty", "save", {
+      FirstName: firstName,
+      LastName: lastName,
+      Phone: phone,
+      CounterpartyType: "PrivatePerson",
+      CounterpartyProperty: "Recipient",
+    });
+
+  // Send what the customer actually typed first. Nova Poshta refuses Latin
+  // characters, so a name from the English site is retried transliterated
+  // rather than losing the waybill to a manual queue over an alphabet. A
+  // Cyrillic name never reaches the fallback and is never rewritten.
+  let rows: RawSavedCounterparty[];
+  try {
+    rows = await save(r.firstName, r.lastName);
+  } catch (e) {
+    const latin = hasLatin(r.firstName) || hasLatin(r.lastName);
+    if (e instanceof NovaPoshtaError && latin && /invalid characters/i.test(e.message)) {
+      const first = toCyrillic(r.firstName);
+      const last = toCyrillic(r.lastName);
+      console.warn(`[ttn] Nova Poshta refused a Latin name — retrying as "${first} ${last}"`);
+      rows = await save(first, last);
+    } else {
+      throw e;
+    }
+  }
 
   const saved = rows[0];
   const contactRef = saved?.ContactPerson?.data?.[0]?.Ref;

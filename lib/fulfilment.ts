@@ -49,6 +49,12 @@ export type PaymentRow = {
     slug: string; name: string; qty: number;
     unit_eur: number; unit_uah: number;
     colour?: string | null; material?: string | null; addons?: string | null;
+    /** What was chosen, in catalogue terms rather than the customer's language.
+        colour/addons above are translated for display and cannot be matched
+        back to a product; these can, which is what stock is decremented from.
+        Absent on orders placed before migration 0015 — those resolve to the
+        bare slug, which is all that can honestly be said about them. */
+    variant?: string | null; lid?: boolean; rubber?: boolean;
     /** Per-unit packed weight in grams, add-ons included. Absent on orders
         placed before weights existed — the waybill falls back to catalogue
         weights, then the default. */
@@ -147,11 +153,40 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
           quantity: l.qty,
           price_eur: l.unit_eur,
           price_uah: l.unit_uah,
+          variant: l.variant ?? null,
+          addon_lid: !!l.lid,
+          addon_rubber: !!l.rubber,
         }))
       );
       // Non-fatal: the order and the money are the important part, and the
       // items are recoverable from the payment row.
       if (itemsErr) console.error("[fulfil] order_items insert failed:", itemsErr.message);
+    }
+
+    // 2b. Take the goods off the shelf.
+    //
+    //     Reads the order_items just written, so it must follow them. Idempotent
+    //     in the database (one movement per order+sku), which is what makes a
+    //     replayed Monobank webhook safe.
+    //
+    //     Non-fatal, for the same reason as the line items: refusing to record a
+    //     paid order because a stock table disagreed would be far worse than a
+    //     count that needs correcting by hand. An unmatched sku is logged loudly
+    //     — it means something was sold that nobody has stocked yet, and only a
+    //     human can decide what that thing is.
+    {
+      const { data: stock, error: stockErr } = await admin.rpc("apply_order_stock", {
+        p_order_id: order.id,
+      });
+      if (stockErr) {
+        console.error("[fulfil] stock apply failed:", stockErr.code, stockErr.message);
+      } else {
+        const unmatched = (stock as { unmatched?: string[] } | null)?.unmatched ?? [];
+        if (unmatched.length) {
+          console.error("[fulfil] STOCK NOT DECREMENTED for unknown sku(s):",
+            unmatched.join(", "), "order:", order.id);
+        }
+      }
     }
 
     // 3. Burn the voucher. Non-fatal for the same reason — refusing to record

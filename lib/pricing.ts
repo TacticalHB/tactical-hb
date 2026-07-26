@@ -30,6 +30,14 @@ export type PricedLine = {
   /** Per-unit packed weight in grams, add-ons included — drives shipping. */
   weightG: number;
   dims: Dims;
+  /** The options this line was actually priced with, after validation: an
+      unrecognised variant is null, and add-on flags are false on anything that
+      cannot take them. Echoed back because the caller has to record WHAT was
+      bought, not only what it cost — the persisted order line is the only
+      place the chosen finish and add-ons survive, and stock is decremented
+      from it. Trusting the raw request here instead would let a caller name a
+      variant it never paid for. */
+  options: { variant: string | null; lid: boolean; rubber: boolean };
 };
 
 export type PricedCart = { lines: PricedLine[]; subtotal: Money };
@@ -59,8 +67,10 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
     let unit = money(variant?.price ?? product.price, variant?.priceUah ?? product.priceUah);
     let weightG = product.weightG;
     // Add-ons exist only on heat devices; ignore stray flags on anything else.
+    const material = product.category === "hmd"
+      ? { lid: !!l.options?.lid, rubber: !!l.options?.rubber }
+      : { lid: false, rubber: false };
     if (product.category === "hmd") {
-      const material = { lid: !!l.options?.lid, rubber: !!l.options?.rubber };
       unit = addMoney(unit, materialUpcharge(material));
       weightG += materialWeightG(material);
     }
@@ -73,6 +83,9 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       total: scaleMoney(unit, safeQty),
       weightG,
       dims: product.dims,
+      // `variant?.name`, not the requested string: an unknown variant was not
+      // priced, so it must not be recorded as sold either.
+      options: { variant: variant?.name ?? null, lid: material.lid, rubber: material.rubber },
     });
   }
 

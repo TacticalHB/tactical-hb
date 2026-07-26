@@ -74,32 +74,17 @@ function HomeContent({ locale }: { locale: string }) {
               radius + overflow-hidden), turned portrait, and now playing the
               brand loop rather than holding a static mark.
 
-              The film fills the card edge to edge — no letterbox, no inset
-              frame. It is 1:1 against a 3:4 card, so covering shows the middle
-              75% of the width and trims about an eighth off each side of the
-              emblem; that crop is deliberate, chosen over banding the card.
-              Centred is the right anchor for it: the mark sits symmetrically in
-              its frame, so both sides lose the same amount.
-
-              The centre glow that used to sit here has gone with the static
-              mark. It existed to stop an empty black rectangle reading as a
-              hole punched in the page, and the footage does that by itself. */}
+              The mark reveals itself here rather than a film doing it: the card
+              holds the official SVG masked over metal (see .tct-mark), pulling
+              back from inside the scope rings to the whole logo and holding.
+              Drawn rather than filmed, so the geometry is exactly the artwork,
+              it is sharp at any size, and it costs 6KB instead of megabytes. */}
           <Reveal delay={200}>
             <div
-              className="hero-screen relative w-full max-w-[480px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden"
+              className="hero-screen relative w-full max-w-[480px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden grid place-items-center"
               style={{ background: "#000000" }}
             >
-              <video
-                className="absolute inset-0 w-full h-full object-cover"
-                src="/videos/hero.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                aria-hidden="true"
-                tabIndex={-1}
-              />
+              <div className="tct-mark" aria-hidden="true" />
             </div>
           </Reveal>
         </div>

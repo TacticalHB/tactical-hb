@@ -138,6 +138,58 @@ body {
               0 2px 6px rgba(17, 17, 20, 0.06);
 }
 
+/* ---- Hero mark reveal ----
+   The mark is not a render of the logo, it IS the logo: /tct-logo.svg is used
+   as a mask over a metal gradient, so the geometry is the official artwork by
+   construction rather than something redrawn, and it stays sharp at any size
+   for about 6KB.
+
+   The pull-back begins deep inside the ring bundle on the right of the mark —
+   measured at 75% / 48% of the artwork, which is where the three arcs stack —
+   so the opening frames read as concentric rings before the letters arrive.
+   Scaling about that origin is what keeps the point fixed while the frame
+   widens around it. */
+.tct-mark {
+  width: 76%;
+  aspect-ratio: 1;
+  position: relative;
+  transform-origin: 75% 48%;
+  animation: tct-pullback 8s cubic-bezier(0.3, 0, 0.12, 1) infinite;
+  /* Matte black metal, lit from upper-left, with brass catching two edges.
+     The dark stops bottom out around #24242a rather than true black: the card
+     behind is #000, and anything darker than this simply dissolves into it and
+     the mark loses its shape. */
+  background:
+    radial-gradient(68% 54% at 26% 17%, rgba(var(--accent-rgb), 0.72) 0%, rgba(var(--accent-rgb), 0.14) 44%, transparent 68%),
+    radial-gradient(58% 58% at 84% 88%, rgba(var(--accent-rgb), 0.38) 0%, transparent 60%),
+    linear-gradient(158deg, #9a9aa6 0%, #43434c 20%, #24242a 42%, #62626e 60%, #2b2b32 78%, #82828e 100%);
+  -webkit-mask: url("/tct-logo.svg") center / contain no-repeat;
+  mask: url("/tct-logo.svg") center / contain no-repeat;
+}
+/* Travelling sheen. It sits inside the mark, so the mark's own mask clips it —
+   the light crosses the metal and never the black around it. */
+.tct-mark::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(104deg, transparent 40%, rgba(255, 255, 255, 0.42) 50%, transparent 60%);
+  animation: tct-sheen 8s ease-in-out infinite;
+}
+@keyframes tct-pullback {
+  0%   { transform: scale(9); }
+  72%  { transform: scale(1); }
+  100% { transform: scale(1); }   /* hold the settled mark for the last ~2.2s */
+}
+@keyframes tct-sheen {
+  0%, 52%   { transform: translateX(-130%); opacity: 0; }
+  64%       { opacity: 1; }
+  84%, 100% { transform: translateX(130%); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tct-mark { animation: none; transform: none; }
+  .tct-mark::after { animation: none; opacity: 0; }
+}
+
 /* ---- Product moment card ----
    Long, soft eases: the lift should feel like the card is being noticed,
    not like it reacts. Shadow is warm-neutral to suit the off-white page. */

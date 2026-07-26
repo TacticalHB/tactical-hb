@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runTracking } from "@/lib/order-tracking";
 import { runStockAlert } from "@/lib/stock-alert";
+import { runWeeklyBrief } from "@/lib/weekly-brief";
 
 /* ---------------------------------------------------------------------------
    Cron: the daily operations run — Nova Poshta statuses, shipping
-   notifications, and the low-stock warning.
+   notifications, the low-stock warning, and (Mondays) the weekly brief.
 
-   TWO JOBS, ONE SCHEDULE, and the path still says track-orders. The Hobby plan
-   allows a single cron run a day and this route owns it; a second entry in
-   vercel.json would never fire, which is worse than not adding one, because it
-   would look configured. Tracking runs first — a parcel the customer is waiting
-   on outranks a shelf the customer cannot see — and the stock scan follows on
-   the same authorised request. Renaming the path is left to Phase E of the OS
-   plan, when the admin routes are reorganised anyway.
+   THREE JOBS, ONE SCHEDULE, and the path still says track-orders. The Hobby
+   plan allows a single cron run a day and this route owns it; a second entry
+   in vercel.json would never fire, which is worse than not adding one, because
+   it would look configured. Tracking runs first — a parcel the customer is
+   waiting on outranks a shelf the customer cannot see — the stock scan
+   follows, and on Kyiv Mondays the Commander Brief is written, logged and
+   mailed to the shop's own address on the same authorised request (the 21:00
+   Kyiv hour makes it a Monday-evening brief). Renaming the path is left to
+   Phase E of the OS plan, when the admin routes are reorganised anyway.
 
    Scheduled in vercel.json. Vercel calls it with the CRON_SECRET as a bearer
    token, which is checked here — the route can send email and write order
@@ -51,11 +54,22 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  // Neither of these throws — each reports what it managed to do. Awaited in
+  // None of these throws — each reports what it managed to do. Awaited in
   // sequence rather than in parallel so a slow Nova Poshta batch cannot push
-  // the pair past maxDuration together, and so the logs read in order.
+  // the others past maxDuration together, and so the logs read in order.
   const tracking = await runTracking();
   const stock = await runStockAlert();
 
-  return NextResponse.json({ ok: true, ...tracking, stock });
+  // The Commander Brief writes itself on Kyiv Mondays (plan §6.5). Internal
+  // mail to the shop's own address — the founder's briefing, nobody else's.
+  const kyivWeekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Kyiv",
+    weekday: "short",
+  }).format(new Date());
+  const brief =
+    kyivWeekday === "Mon"
+      ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
+      : null;
+
+  return NextResponse.json({ ok: true, ...tracking, stock, brief });
 }

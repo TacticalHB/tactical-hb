@@ -6,18 +6,21 @@ import { fetchFinanceMonths } from "@/lib/finance-admin";
 import { fetchPartners } from "@/lib/partners-admin";
 import { followUpDue } from "@/lib/partners-display";
 import { currentPeriod } from "@/lib/costs-display";
+import { quietPartners } from "@/lib/followup-display";
+import { fetchAgentRuns } from "@/lib/agent-runs";
 
 /* ---------------------------------------------------------------------------
    Admin home.
 
-   Five links and three numbers, and that is the whole ambition for now. The
-   department map belongs to Phase E of the OS plan, and building it before the
-   modules exist would produce an impressive menu of empty rooms — the plan is
-   explicit that data comes first and the pyramid last.
+   Eight links and a handful of numbers, and that is the whole ambition for
+   now. The department map belongs to Phase E of the OS plan, and building it
+   before the modules exist would produce an impressive menu of empty rooms —
+   the plan is explicit that data comes first and the pyramid last.
 
    The numbers it does show are the ones the founder opens this page to check:
-   stock lines needing attention, this month's margin, follow-ups due. That is
-   the plan's two-minute test (§10) in its plainest possible form.
+   stock lines needing attention, this month's margin, follow-ups due, who has
+   gone quiet, when the last brief was written. That is the plan's two-minute
+   test (§10) in its plainest possible form.
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
@@ -58,10 +61,11 @@ export default async function AdminHomePage({
   await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
-  const [items, months, partnersRead] = await Promise.all([
+  const [items, months, partnersRead, briefRuns] = await Promise.all([
     fetchStock(),
     fetchFinanceMonths(1),
     fetchPartners(),
+    fetchAgentRuns("weekly_brief", 1),
   ]);
 
   const needsAttention =
@@ -96,6 +100,36 @@ export default async function AdminHomePage({
         : uk
           ? `${dueFollowUps} ${dueFollowUps === 1 ? "нагадування" : "нагадувань"} на сьогодні`
           : `${dueFollowUps} follow-up${dueFollowUps === 1 ? "" : "s"} due`;
+
+  const quietCount =
+    partnersRead === null ? null : quietPartners(partnersRead.partners, today).length;
+  const followUpsDetail =
+    quietCount === null
+      ? uk
+        ? "Партнери недоступні"
+        : "Partners unavailable"
+      : quietCount === 0
+        ? uk
+          ? "Ніхто не мовчить"
+          : "Nobody has gone quiet"
+        : uk
+          ? `${quietCount} ${quietCount === 1 ? "партнер мовчить" : "партнерів мовчать"} 90+ днів`
+          : `${quietCount} quiet for 90+ days`;
+
+  const latestBrief = briefRuns?.[0] ?? null;
+  const briefDetail =
+    briefRuns === null
+      ? uk
+        ? "Журнал недоступний"
+        : "Log unavailable"
+      : latestBrief === null
+        ? uk
+          ? "Ще жодного брифу"
+          : "No briefs yet"
+        : `${uk ? "Останній" : "Latest"}: ${new Date(latestBrief.createdAt).toLocaleDateString(
+            uk ? "uk-UA" : "en-GB",
+            { timeZone: "Europe/Kyiv", day: "numeric", month: "short" }
+          )}`;
 
   const stockDetail =
     needsAttention === null
@@ -150,6 +184,22 @@ export default async function AdminHomePage({
             title={uk ? "Партнери" : "Partners"}
             detail={partnersDetail}
             tone={dueFollowUps ? "#96322c" : undefined}
+          />
+          <Card
+            href={`/${locale}/admin/advisor`}
+            title={uk ? "Радник складу" : "Stock Advisor"}
+            detail={uk ? "Запас у тижнях, що виготовити" : "Weeks of cover, what to make"}
+          />
+          <Card
+            href={`/${locale}/admin/followups`}
+            title={uk ? "Листи партнерам" : "Follow-up drafts"}
+            detail={followUpsDetail}
+            tone={quietCount ? "#96322c" : undefined}
+          />
+          <Card
+            href={`/${locale}/admin/brief`}
+            title={uk ? "Тижневий бриф" : "Weekly Brief"}
+            detail={briefDetail}
           />
         </div>
       </div>

@@ -70,7 +70,24 @@ export const products: Product[] = [
     dims: { l: 122, w: 122, h: 42 },
     category: "hmd",
     featured: true,
-    image: "/images/hmd-classic.jpg",
+    image: "/images/hmd-classic-1.jpg",
+    gridImage: "/images/hmd-classic-1.jpg",
+    pdp: {
+      /* GALLERY ORDER IS FIXED — the filename number IS the gallery position, so
+         a future third shot is hmd-classic-3.jpg appended at the end. -1 is the
+         hero the customer meets first and must stay index 0. */
+      photos: [
+        "/images/hmd-classic-1.jpg", // 1st — product alone, studio background
+        "/images/hmd-classic-2.jpg", // 2nd — product on the TCT box
+      ],
+      // The existing catalogue description, unchanged: with a pdp block present
+      // the page reads shortEn/shortUk instead of descriptionEn/descriptionUk,
+      // so these must match or the copy on the page would silently change.
+      shortEn:
+        "Classic aluminium version for excellent performance. Uniform heat distribution without temperature extremes. Includes lid.",
+      shortUk:
+        "Класична версія з алюмінію для відмінної продуктивності. Рівномірний розподіл тепла без екстремальних температур. Включає кришку.",
+    },
     tags: ["aluminium", "lid", "classic"],
   },
   {

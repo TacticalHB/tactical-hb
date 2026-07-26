@@ -39,6 +39,14 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
       href: `/${locale}/admin/costs`,
       label: uk ? "Витрати (адмін)" : "Costs (admin)",
     });
+    items.push({
+      href: `/${locale}/admin/finance`,
+      label: uk ? "Фінанси (адмін)" : "Finance (admin)",
+    });
+    items.push({
+      href: `/${locale}/admin/partners`,
+      label: uk ? "Партнери (адмін)" : "Partners (admin)",
+    });
   }
 
   const isActive = (href: string) =>

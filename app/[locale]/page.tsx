@@ -71,31 +71,49 @@ function HomeContent({ locale }: { locale: string }) {
 
           {/* Vertical cinematic screen.
               Same framing language as the promo band below (#000 + 20px
-              radius + overflow-hidden), turned portrait. The centre glow does
-              the job the pillarboxed video does down there: it stops a flat
-              black rectangle reading as a hole punched in the page. The mark
-              is /tct-logo.svg — already the white variant, so it needs no
-              filter, only a low opacity to sit back as a watermark. */}
+              radius + overflow-hidden), turned portrait, and now playing the
+              brand loop rather than holding a static mark.
+
+              The film is 1:1 and the card is 3:4, and the mark runs to all four
+              edges of its frame — measured across the loop, every frame has
+              artwork at 0% and 100% of the width. Covering would therefore crop
+              the emblem's arms off both sides on every frame, so the sharp copy
+              is CONTAINED and a blurred, scaled copy of the same file fills the
+              band above and below it. That is the treatment the promo panel
+              already uses further down the page: no bars, no crop, no stretch.
+
+              The centre glow that used to sit here has gone with the static
+              mark. It existed to stop an empty black rectangle reading as a
+              hole punched in the page, and the footage does that by itself. */}
           <Reveal delay={200}>
             <div
               className="hero-screen relative w-full max-w-[480px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden"
               style={{ background: "#000000" }}
             >
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 62% 42% at 50% 50%, rgba(255,255,255,0.055) 0%, transparent 72%)",
-                }}
+              {/* ambient fill — same file, scaled and blurred out of focus */}
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ filter: "blur(40px) brightness(0.7)", transform: "scale(1.3)" }}
+                src="/videos/hero.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
                 aria-hidden="true"
+                tabIndex={-1}
               />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/tct-logo.svg"
-                alt=""
+              {/* the mark itself, whole */}
+              <video
+                className="absolute inset-0 w-full h-full object-contain"
+                src="/videos/hero.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
                 aria-hidden="true"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[54%] max-w-[264px]"
-                style={{ opacity: 0.09 }}
+                tabIndex={-1}
               />
             </div>
           </Reveal>

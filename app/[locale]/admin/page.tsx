@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchStock } from "@/lib/stock-admin";
-import { stockLevel } from "@/lib/stock-display";
+import { formatUah, stockLevel } from "@/lib/stock-display";
+import { fetchFinanceMonths } from "@/lib/finance-admin";
+import { fetchPartners } from "@/lib/partners-admin";
+import { followUpDue } from "@/lib/partners-display";
+import { currentPeriod } from "@/lib/costs-display";
 
 /* ---------------------------------------------------------------------------
    Admin home.
 
-   Three links and one number, and that is the whole ambition for now. The
+   Five links and three numbers, and that is the whole ambition for now. The
    department map belongs to Phase E of the OS plan, and building it before the
    modules exist would produce an impressive menu of empty rooms — the plan is
    explicit that data comes first and the pyramid last.
 
-   The one number it does show is how many stock lines need attention, because
-   that is the question the founder opens this page to answer.
+   The numbers it does show are the ones the founder opens this page to check:
+   stock lines needing attention, this month's margin, follow-ups due. That is
+   the plan's two-minute test (§10) in its plainest possible form.
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
@@ -53,10 +58,44 @@ export default async function AdminHomePage({
   await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
-  const items = await fetchStock();
+  const [items, months, partnersRead] = await Promise.all([
+    fetchStock(),
+    fetchFinanceMonths(1),
+    fetchPartners(),
+  ]);
 
   const needsAttention =
     items === null ? null : items.filter((i) => stockLevel(i) !== "ok").length;
+
+  const thisMonth = (months ?? []).find((m) => m.month === currentPeriod()) ?? null;
+  const financeDetail =
+    months === null
+      ? uk
+        ? "Фінанси недоступні"
+        : "Finance unavailable"
+      : thisMonth === null
+        ? uk
+          ? "Цього місяця ще порожньо"
+          : "Nothing this month yet"
+        : `${uk ? "Маржа" : "Margin"} ${formatUah(thisMonth.marginUah)}`;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const dueFollowUps =
+    partnersRead === null
+      ? null
+      : partnersRead.partners.filter((p) => followUpDue(p, today)).length;
+  const partnersDetail =
+    dueFollowUps === null
+      ? uk
+        ? "Партнери недоступні"
+        : "Partners unavailable"
+      : dueFollowUps === 0
+        ? uk
+          ? "Нагадувань немає"
+          : "No follow-ups due"
+        : uk
+          ? `${dueFollowUps} ${dueFollowUps === 1 ? "нагадування" : "нагадувань"} на сьогодні`
+          : `${dueFollowUps} follow-up${dueFollowUps === 1 ? "" : "s"} due`;
 
   const stockDetail =
     needsAttention === null
@@ -99,6 +138,18 @@ export default async function AdminHomePage({
             href={`/${locale}/admin/costs`}
             title={uk ? "Витрати" : "Costs"}
             detail={uk ? "Собівартість і операційні витрати" : "Unit costs and operating costs"}
+          />
+          <Card
+            href={`/${locale}/admin/finance`}
+            title={uk ? "Фінанси" : "Finance"}
+            detail={financeDetail}
+            tone={thisMonth !== null && thisMonth.marginUah < 0 ? "#96322c" : undefined}
+          />
+          <Card
+            href={`/${locale}/admin/partners`}
+            title={uk ? "Партнери" : "Partners"}
+            detail={partnersDetail}
+            tone={dueFollowUps ? "#96322c" : undefined}
           />
         </div>
       </div>

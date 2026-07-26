@@ -10,23 +10,28 @@ import Reveal from "./Reveal";
  * Every image here is a TRANSPARENT cut-out on purpose. The floating +
  * white-on-hover effect only works if the photo carries no background of its
  * own — a baked backdrop would flash as a grey box the instant the white
- * appears. ftp/killer/acraft were cut from their #f5f5f5 heroes for this;
- * hmd-op-black was already transparent.
+ * appears. Each is cut from the product's own photograph; hmd-op-cut exists
+ * separately from hmd-op-black because that file is the PDP's Black variant
+ * and must keep its own framing.
  *
- * `scale` evens out visual weight: two tall bowls vs two flat rings. Measured
- * fill (H): FTP 82%, Killer 82%, OP 40%, A-Craft 33% — so the rings get pushed
- * up and the bowls eased down.
+ * PAIRS ARE MATCHED IN THE IMAGE, NOT THE SCALE. Each row holds two products
+ * side by side, and their cut-outs are built to the same rendered geometry, so
+ * both members of a row share one scale value. Chasing a match by nudging
+ * `scale` does not hold: the old Killer cut carried a pale halo that made the
+ * bowl read smaller than its bounding box, so the numbers agreed while the page
+ * did not.
  *
- * FTP and Killer sit side by side in the first row, so their cut-outs are built
- * to the SAME geometry — product height 82% of the canvas, centre at 53% — and
- * therefore share one scale. Matching them by eye with different scale values
- * does not hold: the old Killer cut carried a pale halo that made the bowl read
- * smaller than its bounding box, so the numbers agreed while the page did not.
+ * Row 1 (FTP / Killer) matches on height — the two bowls have near-identical
+ * proportions, so one axis settles both. Row 2 (OP / A.Craft) cannot: the
+ * devices were shot at different angles, 2.08 vs 2.38 wide-to-tall, so matching
+ * width would leave the OP 15% taller and matching height would leave it 13%
+ * narrower. It is matched on AREA instead, which splits the difference rather
+ * than piling the whole error onto one dimension.
  */
 const ITEMS = [
   { slug: "bowl-phunnel", label: "FTP Bowl", img: "/images/ftp-cut-v2.png", scale: 0.9 },
   { slug: "bowl-killer", label: "Killer Bowl", img: "/images/killer-cut.png", scale: 0.9 },
-  { slug: "hmd-tct-op", label: "HMD TCT OP", img: "/images/hmd-op-black.png", scale: 1.2 },
+  { slug: "hmd-tct-op", label: "HMD TCT OP", img: "/images/hmd-op-cut.png", scale: 1.16 },
   { slug: "hmd-a-craft", label: "HMD A Craft", img: "/images/acraft-cut.png", scale: 1.16 },
 ];
 

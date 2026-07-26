@@ -30,7 +30,7 @@ export default async function AdminCostsPage({
 }) {
   const { locale } = await params;
   const { period: requested } = await searchParams;
-  await requireAdminPage(locale);
+  await requireAdminPage(locale, "/admin/costs");
 
   const uk = locale === "uk";
   const period = /^\d{4}-\d{2}$/.test(requested ?? "") ? requested! : currentPeriod();

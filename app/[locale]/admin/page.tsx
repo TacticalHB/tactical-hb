@@ -50,7 +50,7 @@ export default async function AdminHomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  await requireAdminPage(locale);
+  await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
   const items = await fetchStock();

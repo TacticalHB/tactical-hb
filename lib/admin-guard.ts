@@ -1,7 +1,6 @@
 import "server-only";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireUser } from "@/lib/supabase/require-user";
 import { isAdminEmail } from "@/lib/admin";
 
 /* ---------------------------------------------------------------------------
@@ -25,10 +24,21 @@ import { isAdminEmail } from "@/lib/admin";
  * Guard an admin page. 404s rather than showing "forbidden", so the existence
  * of /admin isn't advertised to a customer poking at URLs — the same choice
  * /admin/orders already makes.
+ *
+ * `path` is where to come back to after signing in. It exists because
+ * requireUser() sends every unauthenticated visitor to /account, which is
+ * right for an account page and wrong here: an admin who opens /admin/stock,
+ * signs in, and is deposited on their profile has been told the page doesn't
+ * work. The value is a path this code passes in, never anything from the
+ * request, so it cannot become an open redirect.
  */
-export async function requireAdminPage(locale: string): Promise<{ email: string }> {
-  const { user } = await requireUser(locale);
+export async function requireAdminPage(locale: string, path: string): Promise<{ email: string }> {
+  const supabase = await createClient();
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+
+  if (!user) redirect(`/${locale}/login?redirect=${encodeURIComponent(`/${locale}${path}`)}`);
   if (!isAdminEmail(user.email)) notFound();
+
   return { email: user.email! };
 }
 

@@ -26,10 +26,18 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
       href: `${base}/admin/vouchers`,
       label: uk ? "Ваучери (адмін)" : "Vouchers (admin)",
     });
-    // Sits outside /account — it's a shop-wide queue, not this user's orders.
+    // These sit outside /account — they are shop-wide, not this user's data.
     items.push({
       href: `/${locale}/admin/orders`,
       label: uk ? "Замовлення (адмін)" : "Orders (admin)",
+    });
+    items.push({
+      href: `/${locale}/admin/stock`,
+      label: uk ? "Склад (адмін)" : "Stock (admin)",
+    });
+    items.push({
+      href: `/${locale}/admin/costs`,
+      label: uk ? "Витрати (адмін)" : "Costs (admin)",
     });
   }
 

@@ -24,7 +24,7 @@ export default async function AdminStockPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  await requireAdminPage(locale);
+  await requireAdminPage(locale, "/admin/stock");
 
   const uk = locale === "uk";
   const items = await fetchStock();

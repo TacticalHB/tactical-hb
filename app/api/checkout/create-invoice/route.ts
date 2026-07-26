@@ -247,7 +247,22 @@ export async function POST(request: NextRequest) {
     np_flat: npFlat,
     delivery,
     lines: priced.lines.map((l) => {
-      const d = describeLine({ slug: l.slug, qty: l.qty }, locale);
+      // The options MUST be handed to describeLine. Without them it falls back
+      // to the PDP's default "colour shown" and reports no add-ons at all — so
+      // a paid Purple OP with a lid was recorded, emailed and packed as a plain
+      // Black one, and the €4 lid never appeared on the packing note.
+      const d = describeLine(
+        {
+          slug: l.slug,
+          qty: l.qty,
+          options: {
+            variant: l.options.variant ?? undefined,
+            lid: l.options.lid,
+            rubber: l.options.rubber,
+          },
+        },
+        locale
+      );
       return {
         slug: l.slug,
         name: l.name,
@@ -257,6 +272,13 @@ export async function POST(request: NextRequest) {
         colour: d?.colour ?? null,
         material: d?.material ?? null,
         addons: d?.addons ?? null,
+        // The choice itself, kept apart from the strings above: colour/addons
+        // are translated for the customer's eye ("Чорний", "З кришкою") and so
+        // can never be matched back to a product. These three are stable, and
+        // they are what stock is decremented from.
+        variant: l.options.variant,
+        lid: l.options.lid,
+        rubber: l.options.rubber,
         // Frozen with the line (add-ons included) so the waybill weighs the
         // parcel from what was actually bought, not the catalogue default.
         weight_g: l.weightG,

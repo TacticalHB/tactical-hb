@@ -14,12 +14,18 @@ import Reveal from "./Reveal";
  * hmd-op-black was already transparent.
  *
  * `scale` evens out visual weight: two tall bowls vs two flat rings. Measured
- * fill (H): FTP 81%, Killer 74%, OP 40%, A-Craft 33% — so the rings get pushed
+ * fill (H): FTP 82%, Killer 82%, OP 40%, A-Craft 33% — so the rings get pushed
  * up and the bowls eased down.
+ *
+ * FTP and Killer sit side by side in the first row, so their cut-outs are built
+ * to the SAME geometry — product height 82% of the canvas, centre at 53% — and
+ * therefore share one scale. Matching them by eye with different scale values
+ * does not hold: the old Killer cut carried a pale halo that made the bowl read
+ * smaller than its bounding box, so the numbers agreed while the page did not.
  */
 const ITEMS = [
   { slug: "bowl-phunnel", label: "FTP Bowl", img: "/images/ftp-cut-v2.png", scale: 0.9 },
-  { slug: "bowl-killer", label: "Killer Bowl", img: "/images/killer-cut.png", scale: 0.96 },
+  { slug: "bowl-killer", label: "Killer Bowl", img: "/images/killer-cut.png", scale: 0.9 },
   { slug: "hmd-tct-op", label: "HMD TCT OP", img: "/images/hmd-op-black.png", scale: 1.2 },
   { slug: "hmd-a-craft", label: "HMD A Craft", img: "/images/acraft-cut.png", scale: 1.16 },
 ];

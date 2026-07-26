@@ -25,8 +25,11 @@ function HomeContent({ locale }: { locale: string }) {
           floats directly on the page — no panel, no frame. */}
       <section className="relative min-h-screen pt-16 flex flex-col">
         <div className="flex-1 w-full page-container grid md:grid-cols-2 gap-8 md:gap-12 items-center py-12 md:py-0">
-          {/* Copy */}
-          <div>
+          {/* Copy. Nudged in from the page gutter on wide screens so the block
+              sits nearer the centre of the composition rather than hard against
+              the left edge. Mobile keeps the full gutter — there is no second
+              column to balance against there. */}
+          <div className="md:pl-8 lg:pl-16">
             <Reveal>
               <div className="flex items-center gap-4 mb-8">
                 <span className="w-10 h-px" style={{ background: "var(--border-strong)" }} />

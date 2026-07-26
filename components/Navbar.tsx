@@ -80,16 +80,10 @@ export default function Navbar({ locale }: { locale: string }) {
         className="fixed top-0 left-0 right-0 z-50"
         style={{ background: "var(--fog)", borderBottom: "1px solid var(--border-dark)" }}
       >
-        {/* TCT logo — pinned to the very left edge of the page (Nike-style) */}
-        <Link
-          href={`/${locale}`}
-          aria-label="Tactical HB — home"
-          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 flex items-center transition-opacity hover:opacity-80"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/tct-logo.svg" alt="TCT" className="h-9 w-9 sm:h-10 sm:w-10" />
-        </Link>
-
+        {/* The TCT mark used to sit pinned to the very left edge here. It was
+            removed deliberately — the wordmark alone carries the brand in the
+            bar. The left padding stays: it is what holds the wordmark in the
+            position it has always occupied, so nothing else in the bar moves. */}
         <div className="page-container pl-14 sm:pl-16 md:pl-20 h-16 flex items-center justify-between">
           <Link href={`/${locale}`} className="hidden md:block font-display text-2xl tracking-widest" style={{ color: "#f4f3f0" }}>
             TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>

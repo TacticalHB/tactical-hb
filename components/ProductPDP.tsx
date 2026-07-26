@@ -148,9 +148,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const [variantIdx, setVariantIdx] = useState(initialVariant);
   const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
-  // HMD material add-ons — additive, default nothing selected (base price).
+  /* HMD material add-ons — additive, and BOTH PRE-SELECTED here.
+     Browsing shows the base price (see NikeProductCard) so a customer scanning
+     the catalogue is never quoted the fully-loaded figure; by the time they
+     open a product they are choosing a specific device, so the complete
+     configuration is offered and they opt out of it rather than into it. */
   const isHmd = product.category === "hmd";
-  const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
+  const [material, setMaterial] = useState<HmdMaterial>({ lid: true, rubber: true });
 
   const basePrice = variants
     ? money(variants[variantIdx].price ?? product.price, variants[variantIdx].priceUah ?? product.priceUah)

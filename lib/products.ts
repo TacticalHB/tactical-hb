@@ -35,7 +35,10 @@ export type Product = {
   variants?: Variant[];
   /* Nike-style product detail page */
   pdp?: {
-    photos: string[];
+    /** Explicit gallery. OMIT IT to let the variant images be the gallery (the
+        colour selector then drives the photo). An empty array is different: it
+        blanks the gallery deliberately. */
+    photos?: string[];
     styleCode?: string;
     colourShownEn?: string;
     colourShownUk?: string;
@@ -175,7 +178,8 @@ export const products: Product[] = [
     dims: { l: 122, w: 122, h: 42 },
     category: "hmd",
     featured: true,
-    image: "/images/hmd-op-purple.png",
+    // Black is the first variant and the main picture, so the fallbacks agree.
+    image: "/images/hmd-op-black.png",
     tileImage: "/images/hmd-op-black.png",
     tileBg: "#f5f5f7",
     tileScale: 1.5,
@@ -185,7 +189,12 @@ export const products: Product[] = [
       { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1200 },
     ],
     pdp: {
-      photos: [],
+      /* No `photos` key on purpose: with it absent the gallery falls back to the
+         variant images, so Black (the first variant) is the main picture and
+         choosing Purple swaps the photo with the colour. An empty array here
+         used to blank the gallery entirely — the page read "Photos coming
+         soon" — which is not what an empty gallery should mean now that both
+         finishes have photography. */
       shortEn:
         "The HMD OP is a heat-management device engineered for overpack smoking. Its fully non-stick, 100% PFOA-free surface repels tobacco residue for clean, consistent heat distribution and effortless cleaning — even through intensive sessions. Precision-built and durable, it comes in black and purple finishes for a refined, tactical aesthetic.",
       shortUk:

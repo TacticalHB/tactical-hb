@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Product } from "@/lib/products";
 import HeartButton from "./HeartButton";
-import HmdMaterialSelector from "./HmdMaterialSelector";
-import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import Price from "./Price";
-import { addMoney, money } from "@/lib/currency";
+import { money } from "@/lib/currency";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
@@ -20,15 +18,16 @@ export default function NikeProductCard({ product, locale }: { product: Product;
 
   const [idx, setIdx] = useState(0);
 
-  // HMD material add-ons — additive, default nothing selected (base price).
-  const isHmd = product.category === "hmd";
-  const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
-
+  /* THE CARD ALWAYS QUOTES THE BASE PRICE. The add-ons used to be selectable
+     here as a price preview, which meant a customer scanning the catalogue
+     could be shown a figure well above the headline one before they had chosen
+     anything. Browsing shows what the product starts at; the configuration —
+     and the price that follows from it — belongs on the product page, where
+     both add-ons come pre-selected. */
   const image = variants ? variants[idx].image : product.gridImage;
-  const basePrice = variants
+  const price = variants
     ? money(variants[idx].price ?? product.price, variants[idx].priceUah ?? product.priceUah)
     : money(product.price, product.priceUah);
-  const price = isHmd ? addMoney(basePrice, materialUpcharge(material)) : basePrice;
   const href = `/${locale}/products/${product.slug}`;
 
   return (
@@ -94,17 +93,6 @@ export default function NikeProductCard({ product, locale }: { product: Product;
             <Price money={price} locale={locale} />
           </div>
         </Link>
-
-        {/* HMD-only material selector (Rimowa style). A price preview only —
-            this card has no add-to-bag; the choice that reaches the cart is the
-            one made on the product page. */}
-        {isHmd && (
-          <HmdMaterialSelector
-            value={material}
-            onToggle={(k) => setMaterial((prev) => ({ ...prev, [k]: !prev[k] }))}
-            locale={locale}
-          />
-        )}
       </div>
     </div>
   );

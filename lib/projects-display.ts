@@ -38,15 +38,15 @@ export function projectStatusLabel(s: ProjectStatus, uk: boolean): string {
 export function projectStatusTone(s: ProjectStatus): { bg: string; fg: string } {
   switch (s) {
     case "saving":
-      return { bg: "#e8eef4", fg: "#3d5a73" };
+      return { bg: "var(--console-info-soft)", fg: "var(--console-info)" };
     case "in_progress":
-      return { bg: "#e7f2ec", fg: "#2f6b4f" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
     case "done":
-      return { bg: "#ececee", fg: "#707072" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
     case "parked":
-      return { bg: "#fbf1de", fg: "#8a5d16" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     default:
-      return { bg: "#f2f2f3", fg: "#4a4a4d" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
   }
 }
 
@@ -78,15 +78,15 @@ export function exhibitionStatusLabel(s: ExhibitionStatus, uk: boolean): string 
 export function exhibitionStatusTone(s: ExhibitionStatus): { bg: string; fg: string } {
   switch (s) {
     case "confirmed":
-      return { bg: "#e7f2ec", fg: "#2f6b4f" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
     case "applied":
-      return { bg: "#e8eef4", fg: "#3d5a73" };
+      return { bg: "var(--console-info-soft)", fg: "var(--console-info)" };
     case "attended":
-      return { bg: "#ececee", fg: "#707072" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
     case "skipped":
-      return { bg: "#fbf1de", fg: "#8a5d16" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     default:
-      return { bg: "#f2f2f3", fg: "#4a4a4d" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
   }
 }
 
@@ -257,14 +257,14 @@ export function verdictTone(v: CoachVerdict): { bg: string; fg: string } {
   switch (v) {
     case "funded":
     case "on_track":
-      return { bg: "#e7f2ec", fg: "#2f6b4f" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
     case "behind":
     case "overdue":
-      return { bg: "#f9e9e8", fg: "#96322c" };
+      return { bg: "var(--console-alert-soft)", fg: "var(--console-alert)" };
     case "set_rate":
-      return { bg: "#fbf1de", fg: "#8a5d16" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     default:
-      return { bg: "#ececee", fg: "#707072" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
   }
 }
 

@@ -34,13 +34,13 @@ export default async function AdminPartnersPage({
   const dueCount = (partners ?? []).filter((p) => followUpDue(p, today)).length;
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Оптові партнери" : "Wholesale partners"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: dueCount > 0 ? "#96322c" : "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: dueCount > 0 ? "var(--console-alert)" : "var(--console-muted)" }}>
             {partners === null
               ? uk
                 ? "Не вдалося завантажити партнерів."
@@ -58,7 +58,7 @@ export default async function AdminPartnersPage({
         {partners === null && (
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0017_wholesale.sql у Supabase."
@@ -71,7 +71,7 @@ export default async function AdminPartnersPage({
         </div>
 
         {partners !== null && partners.length === 0 && (
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Реєстр порожній. Додайте першого партнера вище."
               : "The register is empty. Add the first partner above."}
@@ -81,7 +81,7 @@ export default async function AdminPartnersPage({
         {partners !== null && partners.length > 0 && (
           <div
             className="rounded-lg overflow-hidden"
-            style={{ border: "1px solid var(--border)", background: "#fff" }}
+            style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
           >
             {partners.map((p) => (
               <PartnerCard

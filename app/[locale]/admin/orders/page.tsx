@@ -27,20 +27,20 @@ import OrderTtnForm from "@/components/admin/OrderTtnForm";
 export const dynamic = "force-dynamic";
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
-  paid: { bg: "#e7f2ec", fg: "#2f6b4f" },
-  processing: { bg: "#fbf1de", fg: "#8a5d16" },
-  shipped: { bg: "#e8eef7", fg: "#2f5480" },
-  delivered: { bg: "#eeedea", fg: "#5f5e5a" },
-  cancelled: { bg: "#f9e9e8", fg: "#96322c" },
+  paid: { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" },
+  processing: { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" },
+  shipped: { bg: "var(--console-info-soft)", fg: "var(--console-info)" },
+  delivered: { bg: "var(--console-panel-2)", fg: "var(--console-muted)" },
+  cancelled: { bg: "var(--console-alert-soft)", fg: "var(--console-alert)" },
 };
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="text-[11px] tracking-[0.12em] uppercase mb-1" style={{ color: "#8a8a8d" }}>
+      <div className="text-[11px] tracking-[0.12em] uppercase mb-1" style={{ color: "var(--console-muted)" }}>
         {label}
       </div>
-      <div className="text-[13.5px] leading-relaxed" style={{ color: "#111" }}>
+      <div className="text-[13.5px] leading-relaxed" style={{ color: "var(--console-text)" }}>
         {children}
       </div>
     </div>
@@ -52,13 +52,13 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
   const tone = STATUS_TONE[order.status] ?? STATUS_TONE.delivered;
 
   return (
-    <article className="rounded-lg" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+    <article className="rounded-lg" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
       {/* Header — the scannable line: who, when, how much, what state. */}
       <header
         className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3.5"
-        style={{ borderBottom: "1px solid var(--border)", background: "#fcfcfb" }}
+        style={{ borderBottom: "1px solid var(--console-border)", background: "var(--console-panel-2)" }}
       >
-        <span className="font-mono text-[13.5px] tracking-wider" style={{ color: "#111" }}>
+        <span className="font-mono text-[13.5px] tracking-wider" style={{ color: "var(--console-text)" }}>
           {order.reference}
         </span>
         <span
@@ -68,31 +68,31 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           {statusLabel(order.status, uk)}
         </span>
         {order.source !== "monobank" && (
-          <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "#f1efe8", color: "#6f6d66" }}>
+          <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "var(--console-panel-2)", color: "var(--console-muted)" }}>
             {order.source}
           </span>
         )}
         {order.isGuest && (
-          <span className="text-[11px]" style={{ color: "#8a8a8d" }}>
+          <span className="text-[11px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "гість" : "guest"}
           </span>
         )}
 
-        <span className="ml-auto text-[12.5px]" style={{ color: "#707072" }}>
+        <span className="ml-auto text-[12.5px]" style={{ color: "var(--console-muted)" }}>
           {formatWhen(order.createdAt, uk)}
         </span>
-        <span className="text-[15px] font-medium tabular-nums" style={{ color: "#111" }}>
+        <span className="text-[15px] font-medium tabular-nums" style={{ color: "var(--console-text)" }}>
           {total.text}
         </span>
       </header>
 
       <div className="px-5 py-4 grid gap-5 md:grid-cols-3">
         <Field label={uk ? "Клієнт" : "Customer"}>
-          {order.name ?? <span style={{ color: "#a3a3a6" }}>—</span>}
+          {order.name ?? <span style={{ color: "var(--console-faint)" }}>—</span>}
           {order.email && (
             <>
               <br />
-              <a href={`mailto:${order.email}`} className="underline underline-offset-2" style={{ color: "#111" }}>
+              <a href={`mailto:${order.email}`} className="underline underline-offset-2" style={{ color: "var(--console-text)" }}>
                 {order.email}
               </a>
             </>
@@ -100,7 +100,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           {order.phone && (
             <>
               <br />
-              <a href={`tel:${order.phone.replace(/\s/g, "")}`} style={{ color: "#111" }}>
+              <a href={`tel:${order.phone.replace(/\s/g, "")}`} style={{ color: "var(--console-text)" }}>
                 {order.phone}
               </a>
             </>
@@ -112,13 +112,13 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           {order.deliveryDetail && (
             <>
               <br />
-              <span style={{ color: "#4a4a4d" }}>{order.deliveryDetail}</span>
+              <span style={{ color: "var(--console-muted)" }}>{order.deliveryDetail}</span>
             </>
           )}
           {order.deliveryNotes && (
             <>
               <br />
-              <span style={{ color: "#8a8a8d" }}>
+              <span style={{ color: "var(--console-muted)" }}>
                 {uk ? "Примітка: " : "Notes: "}
                 {order.deliveryNotes}
               </span>
@@ -128,12 +128,12 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
 
         <Field label={uk ? "Товари" : "Products"}>
           {order.items.length === 0 ? (
-            <span style={{ color: "#a3a3a6" }}>—</span>
+            <span style={{ color: "var(--console-faint)" }}>—</span>
           ) : (
             <ul className="flex flex-col gap-0.5">
               {order.items.map((it, i) => (
                 <li key={`${it.productId}-${i}`} className="flex gap-2">
-                  <span className="tabular-nums shrink-0" style={{ color: "#707072" }}>
+                  <span className="tabular-nums shrink-0" style={{ color: "var(--console-muted)" }}>
                     {it.qty}×
                   </span>
                   <span>{it.name}</span>
@@ -146,7 +146,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
 
       {/* Money detail + voucher, only when there's something to say. */}
       {(total.sub || order.voucherCode) && (
-        <div className="px-5 pb-3 flex flex-wrap gap-x-4 text-[12px]" style={{ color: "#8a8a8d" }}>
+        <div className="px-5 pb-3 flex flex-wrap gap-x-4 text-[12px]" style={{ color: "var(--console-muted)" }}>
           {total.sub && <span>{total.sub}</span>}
           {order.voucherCode && (
             <span>
@@ -157,7 +157,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         </div>
       )}
 
-      <footer className="px-5 py-4" style={{ borderTop: "1px solid var(--border)" }}>
+      <footer className="px-5 py-4" style={{ borderTop: "1px solid var(--console-border)" }}>
         <OrderTtnForm orderId={order.id} initial={order.ttn} locale={locale} />
       </footer>
     </article>
@@ -177,13 +177,13 @@ export default async function AdminOrdersPage({
   const orders = await fetchAdminOrders();
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Замовлення" : "Orders"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {orders === null
               ? uk
                 ? "Не вдалося завантажити замовлення."
@@ -197,7 +197,7 @@ export default async function AdminOrdersPage({
         {orders === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0012_order_status_ttn.sql у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."
@@ -206,7 +206,7 @@ export default async function AdminOrdersPage({
         )}
 
         {orders !== null && orders.length === 0 && (
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Замовлень поки немає." : "No orders yet."}
           </p>
         )}

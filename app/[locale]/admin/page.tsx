@@ -30,9 +30,11 @@ export const dynamic = "force-dynamic";
 
 type TermLine = { tag: string; level: string; tone: RoomTone; text: string };
 
+/* Gold is reserved for brand and system. Health reads green / amber / red, so
+   "needs attention" takes the amber light rather than borrowing the accent. */
 const TONE_COLOR: Record<RoomTone, string> = {
   ok: "var(--console-ok)",
-  warn: "var(--console-accent)",
+  warn: "var(--console-warn)",
   alert: "var(--console-alert)",
   idle: "var(--console-faint)",
 };
@@ -200,13 +202,13 @@ export default async function AdminHomePage({
     {
       id: "advisor",
       roomId: "stock",
-      color: "#4cd48b",
+      color: "var(--console-ok)",
       label: `${uk ? "Радник" : "Advisor"} · ${stockStat.text}`,
     },
     {
       id: "followup",
       roomId: "wholesale",
-      color: "#58c4dd",
+      color: "var(--console-info)",
       label: `${uk ? "Листи" : "Follow-up"} · ${
         quietCount === null ? "?" : quietCount === 0 ? "OK" : uk ? `${quietCount} мовчать` : `${quietCount} quiet`
       }`,
@@ -214,19 +216,19 @@ export default async function AdminHomePage({
     {
       id: "strategist",
       roomId: "marketing",
-      color: "#d4b15e",
+      color: "var(--console-accent)",
       label: `${uk ? "Стратег" : "Strategist"} · ${latestPlan ? shortDate(latestPlan.createdAt) : "—"}`,
     },
     {
       id: "coach",
       roomId: "projects",
-      color: "#b48ce8",
+      color: "var(--console-marketing)",
       label: `${uk ? "Коуч" : "Coach"} · ${projectsStat.text}`,
     },
     {
       id: "brief",
       roomId: "command",
-      color: "#e8e6df",
+      color: "var(--console-text)",
       label: `${uk ? "Бриф" : "Brief"} · ${latestBrief ? shortDate(latestBrief.createdAt) : "—"}`,
     },
   ];
@@ -356,10 +358,7 @@ export default async function AdminHomePage({
         </p>
       </header>
 
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid var(--console-border)", background: "var(--console-bg)" }}
-      >
+      <div className="console-card overflow-hidden" style={{ background: "var(--console-bg)" }}>
         <OfficeMap
           rooms={rooms}
           agents={agents}
@@ -368,10 +367,7 @@ export default async function AdminHomePage({
         />
       </div>
 
-      <section
-        className="mt-6 rounded-xl overflow-hidden"
-        style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
-      >
+      <section className="console-card mt-6 overflow-hidden">
         <div
           className="px-4 py-2 console-section-label"
           style={{ borderBottom: "1px solid var(--console-border)" }}

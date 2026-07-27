@@ -35,9 +35,9 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
   };
 
   return (
-    <div className="rounded-lg px-5 py-4" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+    <div className="rounded-lg px-5 py-4" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
-        <span className="text-[15.5px] font-medium" style={{ color: "#111" }}>
+        <span className="text-[15.5px] font-medium" style={{ color: "var(--console-text)" }}>
           {p.company}
         </span>
         <span
@@ -46,19 +46,19 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
         >
           {statusLabel(p.status, uk)}
         </span>
-        <span className="text-[13px]" style={{ color: "#96322c" }}>
+        <span className="text-[13px]" style={{ color: "var(--console-alert)" }}>
           {uk
             ? `тиша ${candidate.daysQuiet} дн`
             : `quiet ${candidate.daysQuiet} days`}
         </span>
         {candidate.alreadyScheduled && (
-          <span className="text-[13px]" style={{ color: "#707072" }}>
+          <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "— вже заплановано у CRM" : "— already scheduled in the CRM"}
           </span>
         )}
       </div>
 
-      <div className="text-[13px] mb-3" style={{ color: "#707072" }}>
+      <div className="text-[13px] mb-3" style={{ color: "var(--console-muted)" }}>
         {[
           p.contactName,
           p.email ?? (uk ? "без email" : "no email"),
@@ -80,8 +80,8 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
             className="rounded px-2.5 py-1 text-[12px] font-medium uppercase tracking-[0.08em]"
             style={
               lang === l
-                ? { background: "var(--ink)", color: "#fff" }
-                : { background: "#f1f0ee", color: "#707072" }
+                ? { background: "var(--console-accent)", color: "#14151a" }
+                : { background: "var(--console-panel-2)", color: "var(--console-muted)" }
             }
           >
             {l}
@@ -89,13 +89,13 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
         ))}
       </div>
 
-      <div className="rounded px-4 py-3 mb-3" style={{ background: "#f7f6f4", border: "1px solid var(--border)" }}>
-        <div className="text-[13.5px] font-medium mb-2" style={{ color: "#111" }}>
+      <div className="rounded px-4 py-3 mb-3" style={{ background: "var(--console-bg-2)", border: "1px solid var(--console-border)" }}>
+        <div className="text-[13.5px] font-medium mb-2" style={{ color: "var(--console-text)" }}>
           {draft.subject}
         </div>
         <pre
           className="text-[13.5px] whitespace-pre-wrap font-[inherit] m-0"
-          style={{ color: "#3a3a3c" }}
+          style={{ color: "var(--console-muted)" }}
         >
           {draft.body}
         </pre>
@@ -105,7 +105,7 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
         <button
           onClick={copy}
           className="rounded px-4 py-2 text-[13.5px] font-medium"
-          style={{ background: "var(--ink)", color: "#fff" }}
+          style={{ background: "var(--console-accent)", color: "#14151a" }}
         >
           {copied ? (uk ? "Скопійовано" : "Copied") : uk ? "Копіювати лист" : "Copy draft"}
         </button>
@@ -113,7 +113,7 @@ export default function FollowUpCard({ candidate, uk }: { candidate: FollowUpCan
           <a
             href={draftMailto(p.email, draft)}
             className="rounded px-4 py-2 text-[13.5px] font-medium"
-            style={{ border: "1px solid var(--border-strong)", color: "#111" }}
+            style={{ border: "1px solid var(--console-border)", color: "var(--console-text)" }}
           >
             {uk ? "Відкрити у пошті" : "Open in mail app"}
           </a>

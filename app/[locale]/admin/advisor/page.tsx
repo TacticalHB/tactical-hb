@@ -47,13 +47,13 @@ export default async function AdminAdvisorPage({
   const toMake = sorted === null ? 0 : sorted.filter((r) => r.suggested > 0).length;
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Радник складу" : "Stock Advisor"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {counts === null
               ? uk
                 ? "Не вдалося зібрати рекомендації."
@@ -65,7 +65,7 @@ export default async function AdminAdvisorPage({
                     : ` — ${toMake} production suggestion${toMake === 1 ? "" : "s"}`
                   : "")}
           </p>
-          <p className="text-[13px] mt-2" style={{ color: "#8a8a8d" }}>
+          <p className="text-[13px] mt-2" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Радник лише рекомендує: залишки змінюються тільки оплаченими замовленнями та партіями у «Складі». Швидкість продажів — оплачені одиниці за 30/60/90 днів."
               : "The advisor only recommends: levels change only through paid orders and batches in Stock. Velocity is paid units over the last 30/60/90 days."}
@@ -75,7 +75,7 @@ export default async function AdminAdvisorPage({
         {sorted === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграції до 0019_agents.sql включно у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."
@@ -84,7 +84,7 @@ export default async function AdminAdvisorPage({
         )}
 
         {sorted !== null && sorted.length === 0 && (
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Жодної позиції складу." : "No stock lines yet."}
           </p>
         )}

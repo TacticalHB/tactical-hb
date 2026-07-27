@@ -118,18 +118,18 @@ export default function CreativeCard({
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const inputClass =
-    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   return (
-    <div style={{ borderTop: "1px solid var(--border)" }}>
+    <div style={{ borderTop: "1px solid var(--console-border)" }}>
       {/* Reading row ---------------------------------------------------- */}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3 text-[13.5px]">
-        <span className="font-medium" style={{ color: "#111" }}>
+        <span className="font-medium" style={{ color: "var(--console-text)" }}>
           {c.title}
         </span>
         <span
@@ -138,20 +138,20 @@ export default function CreativeCard({
         >
           {creativeStatusLabel(c.status, uk)}
         </span>
-        <span style={{ color: "#8a8a8d" }}>{kindLabel(c.kind, uk)}</span>
+        <span style={{ color: "var(--console-muted)" }}>{kindLabel(c.kind, uk)}</span>
         {c.channels.length > 0 && (
-          <span style={{ color: "#4a4a4d" }}>
+          <span style={{ color: "var(--console-muted)" }}>
             {c.channels.map((ch) => channelLabel(ch, uk)).join(" · ")}
           </span>
         )}
-        {productLabel && <span style={{ color: "#8a8a8d" }}>{productLabel}</span>}
+        {productLabel && <span style={{ color: "var(--console-muted)" }}>{productLabel}</span>}
         {c.url && (
           <a
             href={c.url}
             target="_blank"
             rel="noreferrer"
             className="text-[12.5px] underline-offset-2 hover:underline"
-            style={{ color: "#4a4a4d" }}
+            style={{ color: "var(--console-muted)" }}
           >
             {L.openLink} ↗
           </a>
@@ -160,7 +160,7 @@ export default function CreativeCard({
           type="button"
           onClick={() => setOpen(!open)}
           className="ml-auto text-[12.5px] underline-offset-2 hover:underline"
-          style={{ color: "#4a4a4d" }}
+          style={{ color: "var(--console-muted)" }}
         >
           {open ? L.close : L.edit}
         </button>
@@ -252,8 +252,8 @@ export default function CreativeCard({
                   className="h-7 px-2.5 text-[12px] rounded-full transition-colors"
                   style={
                     on
-                      ? { background: "#111", color: "#fff", border: "1px solid #111" }
-                      : { background: "#fff", color: "#4a4a4d", border: "1px solid var(--border-strong)" }
+                      ? { background: "var(--console-accent)", color: "#14151a", border: "1px solid var(--console-accent)" }
+                      : { background: "transparent", color: "var(--console-muted)", border: "1px solid var(--console-border)" }
                   }
                 >
                   {channelLabel(ch, uk)}
@@ -266,7 +266,7 @@ export default function CreativeCard({
               onClick={onSave}
               disabled={busy !== null}
               className="ml-auto h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-              style={{ background: "#111", color: "#fff" }}
+              style={{ background: "var(--console-accent)", color: "#14151a" }}
             >
               {busy === "save" ? "…" : L.save}
             </button>
@@ -275,14 +275,14 @@ export default function CreativeCard({
               onClick={onDelete}
               disabled={busy !== null}
               className="h-9 px-3 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-              style={{ border: "1px solid #e6d4d2", color: "#96322c", background: "#fff" }}
+              style={{ border: "1px solid rgba(196,92,92,0.4)", color: "var(--console-alert)", background: "transparent" }}
             >
               {busy === "delete" ? "…" : L.remove}
             </button>
           </div>
 
           {(info || error) && (
-            <p className="mt-2 text-[12px]" style={{ color: error ? "#b3261e" : "#4a7c59" }}>
+            <p className="mt-2 text-[12px]" style={{ color: error ? "var(--console-alert)" : "var(--console-ok)" }}>
               {error ?? info}
             </p>
           )}

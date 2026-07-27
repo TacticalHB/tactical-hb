@@ -53,22 +53,22 @@ export default function UnitCostRow({
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
 
   return (
     <form
       onSubmit={onSubmit}
       className="flex flex-wrap items-center gap-2 px-5 py-3"
-      style={{ borderTop: "1px solid var(--border)" }}
+      style={{ borderTop: "1px solid var(--console-border)" }}
     >
       <div className="min-w-[210px] flex-1">
-        <div className="text-[13.5px]" style={{ color: "#111" }}>
+        <div className="text-[13.5px]" style={{ color: "var(--console-text)" }}>
           {itemName(item, uk)}
         </div>
-        <div className="font-mono text-[11px]" style={{ color: "#a3a3a6" }}>
+        <div className="font-mono text-[11px]" style={{ color: "var(--console-faint)" }}>
           {item.sku}
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function UnitCostRow({
         inputMode="decimal"
         autoComplete="off"
         aria-label={`${L.cost} — ${item.sku}`}
-        className="h-9 px-3 text-[13px] rounded w-[110px] tabular-nums outline-none transition-colors focus:border-black"
+        className="h-9 px-3 text-[13px] rounded w-[110px] tabular-nums outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
         style={inputStyle}
       />
       <input
@@ -88,7 +88,7 @@ export default function UnitCostRow({
         value={from}
         onChange={(e) => setFrom(e.target.value)}
         aria-label={`${L.from} — ${item.sku}`}
-        className="h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black"
+        className="h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
         style={inputStyle}
       />
       <input
@@ -97,25 +97,25 @@ export default function UnitCostRow({
         placeholder={L.note}
         autoComplete="off"
         aria-label={`${L.note} — ${item.sku}`}
-        className="h-9 px-3 text-[13px] rounded w-[160px] outline-none transition-colors focus:border-black"
+        className="h-9 px-3 text-[13px] rounded w-[160px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
         style={inputStyle}
       />
       <button
         type="submit"
         disabled={busy || !cost.trim()}
         className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-        style={{ background: "#111", color: "#fff" }}
+        style={{ background: "var(--console-accent)", color: "#14151a" }}
       >
         {busy ? L.saving : L.save}
       </button>
 
       {done && !error && (
-        <span className="text-[12px]" style={{ color: "#4a7c59" }}>
+        <span className="text-[12px]" style={{ color: "var(--console-ok)" }}>
           {L.saved}
         </span>
       )}
       {error && (
-        <span className="text-[12px] basis-full" style={{ color: "#b3261e" }}>
+        <span className="text-[12px] basis-full" style={{ color: "var(--console-alert)" }}>
           {error}
         </span>
       )}

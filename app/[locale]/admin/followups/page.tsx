@@ -36,13 +36,13 @@ export default async function AdminFollowUpsPage({
   const candidates = read === null ? null : quietPartners(read.partners, kyivDate(0));
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Листи партнерам" : "Follow-up drafts"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {candidates === null
               ? uk
                 ? "Не вдалося завантажити партнерів."
@@ -55,7 +55,7 @@ export default async function AdminFollowUpsPage({
                   ? `${candidates.length} ${candidates.length === 1 ? "партнер мовчить" : "партнерів мовчать"} понад ${QUIET_DAYS} днів`
                   : `${candidates.length} partner${candidates.length === 1 ? "" : "s"} quiet for ${QUIET_DAYS}+ days`}
           </p>
-          <p className="text-[13px] mt-2" style={{ color: "#8a8a8d" }}>
+          <p className="text-[13px] mt-2" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Система нічого не надсилає: чернетку копіюєте у свою пошту, редагуєте і вирішуєте самі. Статуси та дати — у "
               : "The system sends nothing: copy a draft into your own mail, edit it, and decide. Statuses and dates live in "}
@@ -69,7 +69,7 @@ export default async function AdminFollowUpsPage({
         {candidates === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0017_wholesale.sql у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."

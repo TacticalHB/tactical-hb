@@ -396,28 +396,57 @@ body {
 .product-card:hover .product-card-accent { width: 3.5rem; }
 
 /* ============================================================================
-   THB-OS console (Phase E) — the admin shell's own visual system.
-   Deliberately separate vars so the shop palette can evolve without moving
-   the console, and vice versa. Dark navy base, brass accent, neon status.
+   THB-OS — TACTICAL COMMAND DECK
+   The admin console's visual system. Scoped entirely to .thb-console so the
+   storefront's :root palette above is untouched: the shop stays light and
+   premium, the OS reads as an instrument panel.
+
+   Colour discipline, and it is the whole system:
+     gold   = brand and system (shared memory, active nav, primary action)
+     green / amber / red = health, and NOTHING else
+     everything else stays quiet grey
+   A colour that means "status" must never be spent on decoration, or the
+   panel stops being readable at a glance — which is the only thing it is for.
 ============================================================================ */
 .thb-console {
-  --console-bg: #0b0e13;
-  --console-panel: #10141b;
-  --console-panel-2: #161b24;
-  --console-border: #222a36;
-  --console-text: #e8e6df;
-  --console-muted: #8b93a1;
-  --console-faint: #5d6572;
-  --console-accent: #d4b15e;
-  --console-accent-dim: rgba(212, 177, 94, 0.14);
-  --console-alert: #e2574f;
-  --console-ok: #4cd48b;
-  --console-data: #58c4dd;
-  background: var(--console-bg);
+  /* Surfaces */
+  --console-bg: #0c0d10;        /* deepest — page behind everything */
+  --console-bg-2: #14151a;      /* content area */
+  --console-panel: #1a1b21;     /* cards, panels, sidebar */
+  --console-panel-2: #21222a;   /* nested rows, hover, inputs */
+  --console-border: #2a2b33;
+  --console-border-soft: #23242b;
+
+  /* Brand / system */
+  --console-accent: #C4A35A;
+  --console-accent-soft: rgba(196, 163, 90, 0.12);
+  --console-accent-line: rgba(196, 163, 90, 0.45);
+
+  /* Text */
+  --console-text: #E8E8EA;
+  --console-muted: #8B8D97;
+  --console-faint: #61636d;
+
+  /* Status — indicator lights only */
+  --console-ok: #3D9A6A;
+  --console-warn: #D4A017;
+  --console-alert: #C45C5C;
+  --console-info: #5B7C9A;
+  --console-marketing: #7A6B9A;
+  --console-ok-soft: rgba(61, 154, 106, 0.13);
+  --console-warn-soft: rgba(212, 160, 23, 0.13);
+  --console-alert-soft: rgba(196, 92, 92, 0.13);
+  --console-info-soft: rgba(91, 124, 154, 0.13);
+
+  --console-radius: 10px;
+
+  background: var(--console-bg-2);
   color: var(--console-text);
 }
 
+/* ---- Sidebar navigation ------------------------------------------------ */
 .console-nav-link {
+  position: relative;
   display: block;
   padding: 0.3rem 0.75rem;
   border-radius: 6px;
@@ -426,9 +455,19 @@ body {
   transition: color 0.18s ease, background 0.18s ease;
 }
 .console-nav-link:hover { color: var(--console-text); background: var(--console-panel-2); }
-.console-nav-link.active {
-  color: var(--console-accent);
-  background: var(--console-accent-dim);
+
+/* Active = a gold marker and gold text, not a filled slab. The sidebar should
+   read as an index with one line lit, not as a stack of buttons. */
+.console-nav-link.active { color: var(--console-accent); background: transparent; }
+.console-nav-link.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--console-accent);
 }
 .console-section-label {
   font-size: 0.62rem;
@@ -437,26 +476,185 @@ body {
   color: var(--console-faint);
 }
 
-/* Map rooms glow on hover; agents and data packets animate. */
+/* ---- Panels ------------------------------------------------------------ */
+.console-card {
+  background: var(--console-panel);
+  border: 1px solid var(--console-border);
+  border-radius: var(--console-radius);
+}
+.console-card-link {
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.console-card-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--console-accent-line);
+  background: var(--console-panel-2);
+}
+.console-inset {
+  background: var(--console-panel-2);
+  border: 1px solid var(--console-border-soft);
+  border-radius: 8px;
+}
+
+/* ---- Status chips: small pills, status colours only -------------------- */
+.console-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: opacity 0.18s ease;
+}
+.console-chip-ok      { color: var(--console-ok);      background: var(--console-ok-soft);      border-color: rgba(61,154,106,0.35); }
+.console-chip-warn    { color: var(--console-warn);    background: var(--console-warn-soft);    border-color: rgba(212,160,23,0.35); }
+.console-chip-alert   { color: var(--console-alert);   background: var(--console-alert-soft);   border-color: rgba(196,92,92,0.35); }
+.console-chip-info    { color: var(--console-info);    background: var(--console-info-soft);    border-color: rgba(91,124,154,0.35); }
+.console-chip-neutral { color: var(--console-muted);   background: var(--console-panel-2);      border-color: var(--console-border); }
+
+/* ---- Buttons ----------------------------------------------------------- */
+.console-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+              transform 0.18s ease, opacity 0.18s ease;
+}
+.console-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.console-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.console-btn-primary {
+  background: var(--console-accent);
+  color: #14151a;
+  border-color: var(--console-accent);
+}
+.console-btn-primary:hover:not(:disabled) { background: #d0b070; border-color: #d0b070; }
+.console-btn-secondary {
+  background: transparent;
+  color: var(--console-text);
+  border-color: var(--console-border);
+}
+.console-btn-secondary:hover:not(:disabled) {
+  border-color: var(--console-accent-line);
+  background: var(--console-panel-2);
+}
+.console-btn-danger {
+  background: transparent;
+  color: var(--console-alert);
+  border-color: rgba(196, 92, 92, 0.4);
+}
+.console-btn-danger:hover:not(:disabled) { background: var(--console-alert-soft); }
+
+/* ---- Fields ------------------------------------------------------------ */
+.console-field {
+  width: 100%;
+  background: var(--console-panel-2);
+  color: var(--console-text);
+  border: 1px solid var(--console-border);
+  border-radius: 7px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+.console-field:focus { border-color: var(--console-accent-line); }
+.console-field::placeholder { color: var(--console-faint); }
+.console-label {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--console-faint);
+  margin-bottom: 0.3rem;
+}
+
+/* ---- Tables: denser than the shop, hairline rules ---------------------- */
+.console-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.console-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--console-faint);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--console-border);
+  white-space: nowrap;
+}
+.console-table td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--console-border-soft);
+  color: var(--console-text);
+}
+.console-table tbody tr:last-child td { border-bottom: none; }
+.console-table tbody tr { transition: background 0.15s ease; }
+.console-table tbody tr:hover { background: var(--console-panel-2); }
+
+/* ---- Ops map ----------------------------------------------------------- */
 .thb-room { cursor: pointer; }
 .thb-room .thb-room-fill { transition: fill 0.22s ease; }
 .thb-room:hover .thb-room-fill { fill: var(--console-panel-2); }
-.thb-room:hover .thb-room-edge { stroke: var(--console-accent); }
+.thb-room:hover .thb-room-edge { stroke: var(--console-accent-line); }
 
 @keyframes thbCorePulse {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50%      { opacity: 1; transform: scale(1.05); }
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.04); }
 }
 .thb-core-glow {
-  animation: thbCorePulse 4.5s ease-in-out infinite;
+  animation: thbCorePulse 6s ease-in-out infinite;
   transform-origin: center;
   transform-box: fill-box;
 }
 @keyframes thbDataDash { to { stroke-dashoffset: -26; } }
 .thb-data-line {
   stroke-dasharray: 3 10;
-  animation: thbDataDash 2.6s linear infinite;
+  animation: thbDataDash 3.2s linear infinite;
 }
+
 @media (prefers-reduced-motion: reduce) {
   .thb-core-glow, .thb-data-line { animation: none; }
+  .console-btn:hover:not(:disabled),
+  .console-card-link:hover { transform: none; }
+}
+
+/* Native controls inherit the deck: without this a checkbox or a date picker
+   renders as a bright white chip on a dark panel. */
+.thb-console input[type="radio"] { accent-color: var(--console-accent); }
+.thb-console input[type="checkbox"] {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--console-border);
+  border-radius: 4px;
+  background: var(--console-panel-2);
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.thb-console input[type="checkbox"]:hover { border-color: var(--console-accent-line); }
+.thb-console input[type="checkbox"]:checked {
+  background: var(--console-accent);
+  border-color: var(--console-accent);
+}
+.thb-console input[type="checkbox"]:checked::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid #14151a;
+  border-bottom: 2px solid #14151a;
+  transform: rotate(-45deg) translateY(-1px);
+}
+.thb-console input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
 }

@@ -92,12 +92,12 @@ export default function ExhibitionCard({ exhibition, uk }: { exhibition: Exhibit
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const inputClass =
-    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   const dates =
     x.startsOn === null
@@ -107,10 +107,10 @@ export default function ExhibitionCard({ exhibition, uk }: { exhibition: Exhibit
         : `${x.startsOn} — ${x.endsOn}`;
 
   return (
-    <div style={{ borderTop: "1px solid var(--border)" }}>
+    <div style={{ borderTop: "1px solid var(--console-border)" }}>
       {/* Reading row ---------------------------------------------------- */}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3 text-[13.5px]">
-        <span className="font-medium" style={{ color: "#111" }}>
+        <span className="font-medium" style={{ color: "var(--console-text)" }}>
           {x.name}
         </span>
         <span
@@ -119,23 +119,23 @@ export default function ExhibitionCard({ exhibition, uk }: { exhibition: Exhibit
         >
           {exhibitionStatusLabel(x.status, uk)}
         </span>
-        {x.location && <span style={{ color: "#8a8a8d" }}>{x.location}</span>}
+        {x.location && <span style={{ color: "var(--console-muted)" }}>{x.location}</span>}
         {dates && (
-          <span className="tabular-nums" style={{ color: "#4a4a4d" }}>
+          <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
             {dates}
           </span>
         )}
         {x.budgetUah !== null && (
-          <span className="tabular-nums" style={{ color: "#4a4a4d" }}>
+          <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
             {formatUah(x.budgetUah)}
           </span>
         )}
-        {x.notes && <span style={{ color: "#a3a3a6" }}>{x.notes}</span>}
+        {x.notes && <span style={{ color: "var(--console-faint)" }}>{x.notes}</span>}
         <button
           type="button"
           onClick={() => setOpen(!open)}
           className="ml-auto text-[12.5px] underline-offset-2 hover:underline"
-          style={{ color: "#4a4a4d" }}
+          style={{ color: "var(--console-muted)" }}
         >
           {open ? L.close : L.edit}
         </button>
@@ -217,7 +217,7 @@ export default function ExhibitionCard({ exhibition, uk }: { exhibition: Exhibit
               onClick={onSave}
               disabled={busy !== null}
               className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-              style={{ background: "#111", color: "#fff" }}
+              style={{ background: "var(--console-accent)", color: "#14151a" }}
             >
               {busy === "save" ? "…" : L.save}
             </button>
@@ -226,14 +226,14 @@ export default function ExhibitionCard({ exhibition, uk }: { exhibition: Exhibit
               onClick={onDelete}
               disabled={busy !== null}
               className="h-9 px-3 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-              style={{ border: "1px solid #e6d4d2", color: "#96322c", background: "#fff" }}
+              style={{ border: "1px solid rgba(196,92,92,0.4)", color: "var(--console-alert)", background: "transparent" }}
             >
               {busy === "delete" ? "…" : L.remove}
             </button>
           </div>
 
           {(info || error) && (
-            <p className="mt-2 text-[12px]" style={{ color: error ? "#b3261e" : "#4a7c59" }}>
+            <p className="mt-2 text-[12px]" style={{ color: error ? "var(--console-alert)" : "var(--console-ok)" }}>
               {error ?? info}
             </p>
           )}

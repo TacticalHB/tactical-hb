@@ -47,13 +47,13 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
   }
 
   const field =
-    "w-full h-11 px-3 rounded-lg border text-[15px] outline-none transition-colors focus:border-black";
+    "w-full h-11 px-3 rounded-lg border text-[15px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   return (
     <div>
       <form onSubmit={onSubmit} className="flex flex-col gap-4 max-w-md">
         <div>
-          <label className="block text-[13px] mb-1.5" style={{ color: "#707072" }}>{L.code}</label>
+          <label className="block text-[13px] mb-1.5" style={{ color: "var(--console-muted)" }}>{L.code}</label>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -62,19 +62,19 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
             spellCheck={false}
             placeholder="TCT-XXXXXXXX"
             className={`${field} font-mono tracking-wider`}
-            style={{ borderColor: "#cacacc" }}
+            style={{ borderColor: "var(--console-border)" }}
           />
-          <p className="text-xs mt-1.5" style={{ color: "var(--text-faint)" }}>{L.hint}</p>
+          <p className="text-xs mt-1.5" style={{ color: "var(--console-faint)" }}>{L.hint}</p>
         </div>
 
         <div>
-          <label className="block text-[13px] mb-1.5" style={{ color: "#707072" }}>{L.order}</label>
+          <label className="block text-[13px] mb-1.5" style={{ color: "var(--console-muted)" }}>{L.order}</label>
           <input
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
             autoComplete="off"
             className={field}
-            style={{ borderColor: "#cacacc" }}
+            style={{ borderColor: "var(--console-border)" }}
           />
         </div>
 
@@ -82,7 +82,7 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
           type="submit"
           disabled={busy || !code.trim()}
           className="h-12 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 disabled:opacity-40"
-          style={{ background: "#111111", color: "#ffffff" }}
+          style={{ background: "var(--console-accent)", color: "#14151a" }}
         >
           {busy ? L.working : L.submit}
         </button>
@@ -93,9 +93,9 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
           role="status"
           className="mt-6 max-w-md rounded-xl p-4 text-sm"
           style={{
-            background: result.ok ? "#f2f7f2" : "#fdf3f2",
-            border: `1px solid ${result.ok ? "#cfe3cf" : "#f0cfcb"}`,
-            color: result.ok ? "#1c5b2a" : "#b42318",
+            background: result.ok ? "var(--console-ok-soft)" : "var(--console-alert-soft)",
+            border: `1px solid ${result.ok ? "rgba(61,154,106,0.35)" : "rgba(196,92,92,0.35)"}`,
+            color: result.ok ? "var(--console-ok)" : "var(--console-alert)",
           }}
         >
           {result.ok ? (

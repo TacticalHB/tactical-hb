@@ -78,11 +78,11 @@ export function creativeStatusLabel(s: CreativeStatus, uk: boolean): string {
 export function creativeStatusTone(s: CreativeStatus): { bg: string; fg: string } {
   switch (s) {
     case "active":
-      return { bg: "#e7f2ec", fg: "#2f6b4f" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
     case "paused":
-      return { bg: "#fbf1de", fg: "#8a5d16" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     default:
-      return { bg: "#ececee", fg: "#707072" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
   }
 }
 

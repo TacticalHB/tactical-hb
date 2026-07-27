@@ -51,13 +51,13 @@ export default async function AdminMarketingPage({
   const totals = spend === null ? null : spendTotals(spend, month);
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Маркетинг" : "Marketing"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {library === null
               ? uk
                 ? "Не вдалося завантажити бібліотеку."
@@ -75,7 +75,7 @@ export default async function AdminMarketingPage({
         {(creatives === null || spend === null) && (
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0020_marketing.sql у Supabase."
@@ -85,7 +85,7 @@ export default async function AdminMarketingPage({
 
         {/* Creative library ------------------------------------------------ */}
         <section className="mb-12">
-          <h2 className="text-[17px] font-semibold mb-3" style={{ color: "#111" }}>
+          <h2 className="text-[17px] font-semibold mb-3" style={{ color: "var(--console-text)" }}>
             {uk ? "Бібліотека креативів" : "Creative library"}
           </h2>
 
@@ -94,7 +94,7 @@ export default async function AdminMarketingPage({
           </div>
 
           {library !== null && library.length === 0 && (
-            <p className="text-[14.5px]" style={{ color: "#707072" }}>
+            <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
               {uk
                 ? "Бібліотека порожня. Додайте перший креатив вище."
                 : "The library is empty. Add the first creative above."}
@@ -104,7 +104,7 @@ export default async function AdminMarketingPage({
           {library !== null && library.length > 0 && (
             <div
               className="rounded-lg overflow-hidden"
-              style={{ border: "1px solid var(--border)", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
             >
               {library.map((c) => (
                 <CreativeCard key={c.id} creative={c} stockOptions={stockOptions} uk={uk} />
@@ -115,11 +115,11 @@ export default async function AdminMarketingPage({
 
         {/* Ad spend --------------------------------------------------------- */}
         <section>
-          <h2 className="text-[17px] font-semibold mb-1" style={{ color: "#111" }}>
+          <h2 className="text-[17px] font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Витрати на рекламу" : "Ad spend"}
           </h2>
           {totals !== null && totals.byChannel.length > 0 && (
-            <p className="mb-3 text-[13px]" style={{ color: "#707072" }}>
+            <p className="mb-3 text-[13px]" style={{ color: "var(--console-muted)" }}>
               {month}:{" "}
               {totals.byChannel
                 .map((t) => `${channelLabel(t.channel, uk)} ${formatUah(t.amountUah)}`)
@@ -127,7 +127,7 @@ export default async function AdminMarketingPage({
             </p>
           )}
           {totals !== null && totals.byChannel.length === 0 && (
-            <p className="mb-3 text-[13px]" style={{ color: "#a3a3a6" }}>
+            <p className="mb-3 text-[13px]" style={{ color: "var(--console-faint)" }}>
               {uk ? `За ${month} ще нічого не записано.` : `Nothing recorded for ${month} yet.`}
             </p>
           )}
@@ -139,7 +139,7 @@ export default async function AdminMarketingPage({
           {spend !== null && spend.length > 0 && (
             <div
               className="rounded-lg overflow-hidden"
-              style={{ border: "1px solid var(--border)", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
             >
               {spend.map((s) => (
                 <AdSpendRow key={s.id} entry={s} uk={uk} />

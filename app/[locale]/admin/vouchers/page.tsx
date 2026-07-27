@@ -52,12 +52,12 @@ export default async function AdminVouchersPage({
   const { activeVouchers, usedVouchers } = splitVouchers(recent);
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container max-w-3xl">
-      <h1 className="text-3xl font-semibold mb-2" style={{ color: "#111" }}>
+      <h1 className="text-3xl font-semibold mb-2" style={{ color: "var(--console-text)" }}>
         {uk ? "Погашення ваучерів" : "Redeem a voucher"}
       </h1>
-      <p className="text-[15px] mb-8" style={{ color: "#707072" }}>
+      <p className="text-[15px] mb-8" style={{ color: "var(--console-muted)" }}>
         {uk
           ? "Позначає ваучер як використаний. Дія безпечна для повторного виконання — перше погашення залишається."
           : "Marks a voucher as used. Safe to run twice — the first redemption stands."}
@@ -66,19 +66,19 @@ export default async function AdminVouchersPage({
       <VoucherRedeemForm locale={locale} />
 
       <div className="mt-12">
-        <h2 className="text-lg font-semibold mb-3" style={{ color: "#111" }}>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--console-text)" }}>
           {uk ? `Активні (${activeVouchers.length})` : `Outstanding (${activeVouchers.length})`}
         </h2>
         {activeVouchers.length === 0 ? (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          <p className="text-sm" style={{ color: "var(--console-muted)" }}>
             {uk ? "Немає непогашених ваучерів." : "No outstanding vouchers."}
           </p>
         ) : (
-          <ul className="text-sm divide-y" style={{ borderColor: "var(--border)" }}>
+          <ul className="text-sm divide-y" style={{ borderColor: "var(--console-border)" }}>
             {activeVouchers.map((v) => (
               <li key={v.id} className="flex items-center justify-between py-2.5">
-                <span className="font-mono tracking-wider" style={{ color: "#111" }}>{v.code}</span>
-                <span style={{ color: "var(--text-muted)" }}>
+                <span className="font-mono tracking-wider" style={{ color: "var(--console-text)" }}>{v.code}</span>
+                <span style={{ color: "var(--console-muted)" }}>
                   €{v.amount_eur.toFixed(2)} · {uk ? "діє до" : "expires"}{" "}
                   {new Date(v.expires_at).toLocaleDateString(uk ? "uk-UA" : "en-GB")}
                 </span>
@@ -90,14 +90,14 @@ export default async function AdminVouchersPage({
 
       {usedVouchers.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-lg font-semibold mb-3" style={{ color: "#111" }}>
+          <h2 className="text-lg font-semibold mb-3" style={{ color: "var(--console-text)" }}>
             {uk ? `Погашені (${usedVouchers.length})` : `Redeemed (${usedVouchers.length})`}
           </h2>
-          <ul className="text-sm divide-y" style={{ borderColor: "var(--border)" }}>
+          <ul className="text-sm divide-y" style={{ borderColor: "var(--console-border)" }}>
             {usedVouchers.map((v) => (
               <li key={v.id} className="flex items-center justify-between py-2.5" style={{ opacity: 0.65 }}>
-                <span className="font-mono tracking-wider" style={{ color: "#111" }}>{v.code}</span>
-                <span style={{ color: "var(--text-muted)" }}>
+                <span className="font-mono tracking-wider" style={{ color: "var(--console-text)" }}>{v.code}</span>
+                <span style={{ color: "var(--console-muted)" }}>
                   {v.used_at && new Date(v.used_at).toLocaleDateString(uk ? "uk-UA" : "en-GB")}
                   {v.used_order_id ? ` · ${v.used_order_id}` : ""}
                 </span>

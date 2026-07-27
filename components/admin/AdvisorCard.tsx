@@ -25,12 +25,12 @@ import {
 function Num({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div>
-      <div className="text-[11px] tracking-[0.12em] uppercase mb-0.5" style={{ color: "#8a8a8d" }}>
+      <div className="text-[11px] tracking-[0.12em] uppercase mb-0.5" style={{ color: "var(--console-muted)" }}>
         {label}
       </div>
       <div
         className={strong ? "text-[17px] font-semibold" : "text-[15px]"}
-        style={{ color: "#111" }}
+        style={{ color: "var(--console-text)" }}
       >
         {value}
       </div>
@@ -60,7 +60,7 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
   };
 
   return (
-    <div className="rounded-lg px-5 py-4" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+    <div className="rounded-lg px-5 py-4" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
         <span
           className="text-[11px] font-medium tracking-[0.08em] uppercase rounded px-2 py-0.5"
@@ -68,10 +68,10 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
         >
           {advisorStatusLabel(row.status, uk)}
         </span>
-        <span className="text-[15.5px] font-medium" style={{ color: "#111" }}>
+        <span className="text-[15.5px] font-medium" style={{ color: "var(--console-text)" }}>
           {name}
         </span>
-        <span className="text-[12.5px]" style={{ color: "#8a8a8d" }}>
+        <span className="text-[12.5px]" style={{ color: "var(--console-muted)" }}>
           {row.sku}
         </span>
       </div>
@@ -90,7 +90,7 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
           <button
             onClick={() => setOpen(!open)}
             className="text-[13px] underline underline-offset-2"
-            style={{ color: "#707072" }}
+            style={{ color: "var(--console-muted)" }}
           >
             {uk ? "Параметри" : "Settings"}
           </button>
@@ -98,12 +98,12 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
       </div>
 
       {open && (
-        <div className="mt-4 pt-4 flex flex-wrap items-end gap-3" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="mt-4 pt-4 flex flex-wrap items-end gap-3" style={{ borderTop: "1px solid var(--console-border)" }}>
           <div>
             <label
               htmlFor={`lead-${row.sku}`}
               className="text-[11px] tracking-[0.12em] uppercase block mb-1"
-              style={{ color: "#8a8a8d" }}
+              style={{ color: "var(--console-muted)" }}
             >
               {uk ? "Виробництво, днів" : "Lead time, days"}
             </label>
@@ -114,14 +114,14 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
               inputMode="numeric"
               placeholder="14"
               className="w-28 rounded px-3 py-2 text-[14px]"
-              style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
             />
           </div>
           <div>
             <label
               htmlFor={`batch-${row.sku}`}
               className="text-[11px] tracking-[0.12em] uppercase block mb-1"
-              style={{ color: "#8a8a8d" }}
+              style={{ color: "var(--console-muted)" }}
             >
               {uk ? "Кратність партії" : "Batch size"}
             </label>
@@ -132,24 +132,24 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
               inputMode="numeric"
               placeholder="—"
               className="w-28 rounded px-3 py-2 text-[14px]"
-              style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
             />
           </div>
           <button
             onClick={save}
             disabled={busy}
             className="rounded px-4 py-2 text-[13.5px] font-medium disabled:opacity-50"
-            style={{ background: "var(--ink)", color: "#fff" }}
+            style={{ background: "var(--console-accent)", color: "#14151a" }}
           >
             {busy ? "…" : uk ? "Зберегти" : "Save"}
           </button>
           {saved && (
-            <span className="text-[13px]" style={{ color: "#2f6b4f" }}>
+            <span className="text-[13px]" style={{ color: "var(--console-ok)" }}>
               {uk ? "Збережено" : "Saved"}
             </span>
           )}
           {error && (
-            <span className="text-[13px]" style={{ color: "#96322c" }}>
+            <span className="text-[13px]" style={{ color: "var(--console-alert)" }}>
               {error}
             </span>
           )}

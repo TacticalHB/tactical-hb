@@ -27,9 +27,9 @@ import { formatWhen } from "@/lib/orders-display";
 --------------------------------------------------------------------------- */
 
 const TONE: Record<string, { bg: string; fg: string }> = {
-  critical: { bg: "#f9e9e8", fg: "#96322c" },
-  low: { bg: "#fbf1de", fg: "#8a5d16" },
-  ok: { bg: "#e7f2ec", fg: "#2f6b4f" },
+  critical: { bg: "var(--console-alert-soft)", fg: "var(--console-alert)" },
+  low: { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" },
+  ok: { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" },
 };
 
 function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
@@ -37,7 +37,7 @@ function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: str
     <label
       htmlFor={htmlFor}
       className="text-[11px] tracking-[0.12em] uppercase block mb-1"
-      style={{ color: "#8a8a8d" }}
+      style={{ color: "var(--console-muted)" }}
     >
       {children}
     </label>
@@ -45,9 +45,9 @@ function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: str
 }
 
 const inputStyle: React.CSSProperties = {
-  border: "1px solid var(--border-strong)",
-  color: "#111",
-  background: "#fff",
+  border: "1px solid var(--console-border)",
+  color: "var(--console-text)",
+  background: "var(--console-panel-2)",
 };
 
 export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }) {
@@ -134,27 +134,27 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
   }
 
   return (
-    <article className="rounded-lg" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+    <article className="rounded-lg" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
       <header
         className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3.5"
-        style={{ borderBottom: open ? "1px solid var(--border)" : "none", background: "#fcfcfb" }}
+        style={{ borderBottom: open ? "1px solid var(--console-border)" : "none", background: "var(--console-panel-2)" }}
       >
-        <span className="text-[14.5px] font-medium" style={{ color: "#111" }}>
+        <span className="text-[14.5px] font-medium" style={{ color: "var(--console-text)" }}>
           {itemName(item, uk)}
         </span>
         {item.kind === "part" && (
-          <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "#f1efe8", color: "#6f6d66" }}>
+          <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "var(--console-panel-2)", color: "var(--console-muted)" }}>
             {L.part}
           </span>
         )}
-        <span className="font-mono text-[11.5px]" style={{ color: "#a3a3a6" }}>
+        <span className="font-mono text-[11.5px]" style={{ color: "var(--console-faint)" }}>
           {item.sku}
         </span>
 
-        <span className="ml-auto text-[12px]" style={{ color: "#8a8a8d" }}>
+        <span className="ml-auto text-[12px]" style={{ color: "var(--console-muted)" }}>
           {L.unitCost}:{" "}
           {item.unitCostUah === null ? (
-            <span style={{ color: "#c0bfbc" }}>{L.noCost}</span>
+            <span style={{ color: "var(--console-muted)" }}>{L.noCost}</span>
           ) : (
             formatUah(item.unitCostUah)
           )}
@@ -166,7 +166,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
         >
           {levelLabel(level, uk)}
         </span>
-        <span className="text-[19px] font-medium tabular-nums w-[3.5ch] text-right" style={{ color: "#111" }}>
+        <span className="text-[19px] font-medium tabular-nums w-[3.5ch] text-right" style={{ color: "var(--console-text)" }}>
           {onHand}
         </span>
 
@@ -174,7 +174,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
           type="button"
           onClick={() => setOpen((v) => !v)}
           className="text-[12px] underline underline-offset-2 transition-opacity hover:opacity-70"
-          style={{ color: "#707072" }}
+          style={{ color: "var(--console-muted)" }}
         >
           {open ? L.hide : L.show}
         </button>
@@ -193,14 +193,14 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                 placeholder={L.qty}
                 inputMode="numeric"
                 autoComplete="off"
-                className="h-9 px-3 text-[13px] rounded w-[90px] outline-none transition-colors focus:border-black"
+                className="h-9 px-3 text-[13px] rounded w-[90px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
                 style={inputStyle}
               />
               <button
                 type="submit"
                 disabled={busy !== null || !qty.trim()}
                 className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "#111", color: "#fff" }}
+                style={{ background: "var(--console-accent)", color: "#14151a" }}
               >
                 {busy === "receive" ? L.saving : L.add}
               </button>
@@ -210,7 +210,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
               onChange={(e) => setReceiveNote(e.target.value)}
               placeholder={L.note}
               autoComplete="off"
-              className="h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-black"
+              className="h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
               style={inputStyle}
             />
           </form>
@@ -226,14 +226,14 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                 placeholder={L.counted}
                 inputMode="numeric"
                 autoComplete="off"
-                className="h-9 px-3 text-[13px] rounded w-[90px] outline-none transition-colors focus:border-black"
+                className="h-9 px-3 text-[13px] rounded w-[90px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
                 style={inputStyle}
               />
               <button
                 type="submit"
                 disabled={busy !== null || !counted.trim() || !correctNote.trim()}
                 className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "#111", color: "#fff" }}
+                style={{ background: "var(--console-accent)", color: "#14151a" }}
               >
                 {busy === "correct" ? L.saving : L.apply}
               </button>
@@ -243,7 +243,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
               onChange={(e) => setCorrectNote(e.target.value)}
               placeholder={L.why}
               autoComplete="off"
-              className="h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-black"
+              className="h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
               style={inputStyle}
             />
           </form>
@@ -258,10 +258,10 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                   onChange={(e) => setCritical(e.target.value)}
                   inputMode="numeric"
                   aria-label={L.critical}
-                  className="h-9 px-3 text-[13px] rounded w-[70px] outline-none transition-colors focus:border-black"
+                  className="h-9 px-3 text-[13px] rounded w-[70px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
                   style={inputStyle}
                 />
-                <div className="text-[10.5px] mt-1" style={{ color: "#a3a3a6" }}>{L.critical}</div>
+                <div className="text-[10.5px] mt-1" style={{ color: "var(--console-faint)" }}>{L.critical}</div>
               </div>
               <div>
                 <input
@@ -269,16 +269,16 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                   onChange={(e) => setReorder(e.target.value)}
                   inputMode="numeric"
                   aria-label={L.reorder}
-                  className="h-9 px-3 text-[13px] rounded w-[70px] outline-none transition-colors focus:border-black"
+                  className="h-9 px-3 text-[13px] rounded w-[70px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
                   style={inputStyle}
                 />
-                <div className="text-[10.5px] mt-1" style={{ color: "#a3a3a6" }}>{L.reorder}</div>
+                <div className="text-[10.5px] mt-1" style={{ color: "var(--console-faint)" }}>{L.reorder}</div>
               </div>
               <button
                 type="submit"
                 disabled={busy !== null}
                 className="h-9 px-4 text-[13px] rounded self-start transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "#111", color: "#fff" }}
+                style={{ background: "var(--console-accent)", color: "#14151a" }}
               >
                 {busy === "thresholds" ? L.saving : L.save}
               </button>
@@ -289,20 +289,20 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
           <div className="md:col-span-3">
             <Label>{L.history}</Label>
             {item.movements.length === 0 ? (
-              <p className="text-[13px]" style={{ color: "#a3a3a6" }}>{L.noHistory}</p>
+              <p className="text-[13px]" style={{ color: "var(--console-faint)" }}>{L.noHistory}</p>
             ) : (
               <ul className="flex flex-col gap-1">
                 {item.movements.map((m) => (
                   <li key={m.id} className="flex flex-wrap items-baseline gap-x-3 text-[12.5px]">
                     <span
                       className="tabular-nums font-medium w-[4ch] text-right"
-                      style={{ color: m.delta < 0 ? "#96322c" : "#2f6b4f" }}
+                      style={{ color: m.delta < 0 ? "var(--console-alert)" : "var(--console-ok)" }}
                     >
                       {m.delta > 0 ? `+${m.delta}` : m.delta}
                     </span>
-                    <span style={{ color: "#4a4a4d" }}>{reasonLabel(m.reason, uk)}</span>
-                    {m.note && <span style={{ color: "#8a8a8d" }}>{m.note}</span>}
-                    <span className="ml-auto" style={{ color: "#a3a3a6" }}>
+                    <span style={{ color: "var(--console-muted)" }}>{reasonLabel(m.reason, uk)}</span>
+                    {m.note && <span style={{ color: "var(--console-muted)" }}>{m.note}</span>}
+                    <span className="ml-auto" style={{ color: "var(--console-faint)" }}>
                       {m.createdBy} · {formatWhen(m.createdAt, uk)}
                     </span>
                   </li>
@@ -312,7 +312,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
           </div>
 
           {(error || done) && (
-            <div className="md:col-span-3 text-[12.5px]" style={{ color: error ? "#b3261e" : "#4a7c59" }}>
+            <div className="md:col-span-3 text-[12.5px]" style={{ color: error ? "var(--console-alert)" : "var(--console-ok)" }}>
               {error ?? done}
             </div>
           )}

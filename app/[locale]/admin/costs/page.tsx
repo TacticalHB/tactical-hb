@@ -42,13 +42,13 @@ export default async function AdminCostsPage({
   const skuOptions = (items ?? []).map((i) => ({ sku: i.sku, name: itemName(i, uk) }));
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Витрати" : "Costs"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {entries === null
               ? uk
                 ? "Не вдалося завантажити витрати."
@@ -60,7 +60,7 @@ export default async function AdminCostsPage({
         {(items === null || entries === null) && (
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграції 0015_stock.sql і 0016_costs.sql у Supabase."
@@ -75,10 +75,10 @@ export default async function AdminCostsPage({
         {/* Unit costs -------------------------------------------------------- */}
         {items !== null && items.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-[15px] font-medium mb-3" style={{ color: "#111" }}>
+            <h2 className="text-[15px] font-medium mb-3" style={{ color: "var(--console-text)" }}>
               {uk ? "Собівартість одиниці" : "Unit costs"}
             </h2>
-            <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+            <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
               {items.map((item) => (
                 <UnitCostRow key={item.sku} item={item} today={today} uk={uk} />
               ))}
@@ -88,44 +88,44 @@ export default async function AdminCostsPage({
 
         {/* Cost entries ------------------------------------------------------ */}
         <section>
-          <h2 className="text-[15px] font-medium mb-3" style={{ color: "#111" }}>
+          <h2 className="text-[15px] font-medium mb-3" style={{ color: "var(--console-text)" }}>
             {uk ? "Операційні витрати" : "Operating costs"}
           </h2>
 
           {entries !== null && entries.length === 0 && (
-            <p className="text-[14.5px]" style={{ color: "#707072" }}>
+            <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
               {uk ? "За цей місяць витрат не записано." : "No costs recorded for this month."}
             </p>
           )}
 
           {entries !== null && entries.length > 0 && (
-            <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+            <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
               {entries.map((e) => (
                 <div
                   key={e.id}
                   className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3 text-[13.5px]"
-                  style={{ borderTop: "1px solid var(--border)" }}
+                  style={{ borderTop: "1px solid var(--console-border)" }}
                 >
-                  <span className="w-[7.5ch] tabular-nums" style={{ color: "#8a8a8d" }}>
+                  <span className="w-[7.5ch] tabular-nums" style={{ color: "var(--console-muted)" }}>
                     {e.incurredOn.slice(5)}
                   </span>
                   <span
                     className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
-                    style={{ background: "#f1efe8", color: "#6f6d66" }}
+                    style={{ background: "var(--console-panel-2)", color: "var(--console-muted)" }}
                   >
                     {categoryLabel(e.category, uk)}
                   </span>
-                  {e.supplier && <span style={{ color: "#4a4a4d" }}>{e.supplier}</span>}
-                  {e.note && <span style={{ color: "#8a8a8d" }}>{e.note}</span>}
+                  {e.supplier && <span style={{ color: "var(--console-muted)" }}>{e.supplier}</span>}
+                  {e.note && <span style={{ color: "var(--console-muted)" }}>{e.note}</span>}
                   {e.period && (
-                    <span className="text-[11.5px]" style={{ color: "#a3a3a6" }}>
+                    <span className="text-[11.5px]" style={{ color: "var(--console-faint)" }}>
                       {uk ? "щомісяця" : "monthly"}
                     </span>
                   )}
-                  <span className="ml-auto tabular-nums font-medium" style={{ color: "#111" }}>
+                  <span className="ml-auto tabular-nums font-medium" style={{ color: "var(--console-text)" }}>
                     {formatUah(e.amountUah)}
                     {e.amountEur !== null && (
-                      <span className="font-normal ml-2" style={{ color: "#8a8a8d" }}>
+                      <span className="font-normal ml-2" style={{ color: "var(--console-muted)" }}>
                         €{e.amountEur.toFixed(2)}
                       </span>
                     )}

@@ -30,9 +30,11 @@ export const dynamic = "force-dynamic";
 
 type TermLine = { tag: string; level: string; tone: RoomTone; text: string };
 
+/* Gold is reserved for brand and system. Health reads green / amber / red, so
+   "needs attention" takes the amber light rather than borrowing the accent. */
 const TONE_COLOR: Record<RoomTone, string> = {
   ok: "var(--console-ok)",
-  warn: "var(--console-accent)",
+  warn: "var(--console-warn)",
   alert: "var(--console-alert)",
   idle: "var(--console-faint)",
 };
@@ -356,10 +358,9 @@ export default async function AdminHomePage({
         </p>
       </header>
 
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid var(--console-border)", background: "var(--console-bg)" }}
-      >
+      {/* thb-map swaps in the Phase E palette for this block alone — see the
+          note in globals.css. The map is the one screen allowed to be loud. */}
+      <div className="thb-map console-card overflow-hidden" style={{ background: "var(--console-bg)" }}>
         <OfficeMap
           rooms={rooms}
           agents={agents}
@@ -368,10 +369,7 @@ export default async function AdminHomePage({
         />
       </div>
 
-      <section
-        className="mt-6 rounded-xl overflow-hidden"
-        style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
-      >
+      <section className="console-card mt-6 overflow-hidden">
         <div
           className="px-4 py-2 console-section-label"
           style={{ borderBottom: "1px solid var(--console-border)" }}

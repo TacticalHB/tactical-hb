@@ -29,8 +29,8 @@ export const dynamic = "force-dynamic";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg px-6 py-5" style={{ border: "1px solid var(--border)", background: "#fff" }}>
-      <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-3" style={{ color: "#8a8a8d" }}>
+    <section className="rounded-lg px-6 py-5" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
+      <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-3" style={{ color: "var(--console-muted)" }}>
         {title}
       </h2>
       {children}
@@ -44,9 +44,9 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
       {/* Budget ---------------------------------------------------------- */}
       <div className="lg:col-span-2">
         <Section title={uk ? `Бюджет на ${monthLabel(data.planMonth, uk)}` : `Budget for ${monthLabel(data.planMonth, uk)}`}>
-          <div className="text-[22px] font-semibold mb-1" style={{ color: "#111" }}>
+          <div className="text-[22px] font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {formatUah(data.totalBudgetUah)}
-            <span className="text-[14px] font-normal ml-2" style={{ color: "#707072" }}>
+            <span className="text-[14px] font-normal ml-2" style={{ color: "var(--console-muted)" }}>
               {data.budgetBasis === "trailing_spend"
                 ? uk
                   ? `середнє за ${data.trailingMonths.join(", ")}`
@@ -61,15 +61,15 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
               <div
                 key={c.channel}
                 className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-[14px]"
-                style={{ color: "#3a3a3c" }}
+                style={{ color: "var(--console-muted)" }}
               >
-                <span className="w-[90px] font-medium" style={{ color: "#111" }}>
+                <span className="w-[90px] font-medium" style={{ color: "var(--console-text)" }}>
                   {channelLabel(c.channel, uk)}
                 </span>
                 <span className="w-[100px] tabular-nums">
                   {c.basis === "organic" ? "—" : `${c.sharePct}% · ${formatUah(c.budgetUah)}`}
                 </span>
-                <span className="text-[13px]" style={{ color: "#8a8a8d" }}>
+                <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
                   {channelBasisLabel(c.basis, uk)}
                   {c.ordersPerKUah !== null &&
                     ` · ${c.ordersPerKUah} ${uk ? "зам./₴1000" : "orders/₴1000"}`}
@@ -85,23 +85,23 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
       {/* Push / avoid ----------------------------------------------------- */}
       <Section title={uk ? "Просувати" : "Push"}>
         {data.push.length === 0 ? (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Немає позицій, які можна впевнено рекламувати — все критичне або мало."
               : "Nothing can be pushed with confidence — everything is critical or low."}
           </p>
         ) : (
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.push.map((p) => (
               <li key={p.sku} className="py-1 flex flex-wrap items-baseline gap-x-3">
-                <span className="font-medium" style={{ color: "#111" }}>
+                <span className="font-medium" style={{ color: "var(--console-text)" }}>
                   {uk ? p.nameUk : p.nameEn}
                 </span>
-                <span className="text-[13px]" style={{ color: "#707072" }}>
+                <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
                   {pushReasonLabel(p.reason, uk)}
                   {p.units30 > 0 && ` · ${p.units30} ${uk ? "шт за 30 дн" : "pcs in 30 d"}`}
                 </span>
-                <span className="text-[13px] tabular-nums" style={{ color: p.grossMarginUah !== null && p.grossMarginUah < 0 ? "#96322c" : "#8a8a8d" }}>
+                <span className="text-[13px] tabular-nums" style={{ color: p.grossMarginUah !== null && p.grossMarginUah < 0 ? "var(--console-alert)" : "var(--console-muted)" }}>
                   {p.grossMarginUah === null
                     ? uk
                       ? "маржа невідома"
@@ -109,7 +109,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
                     : `${uk ? "маржа" : "margin"} ${formatUah(p.grossMarginUah)}`}
                 </span>
                 {!p.hasCreative && (
-                  <span className="text-[12px]" style={{ color: "#8a5d16" }}>
+                  <span className="text-[12px]" style={{ color: "var(--console-warn)" }}>
                     {uk ? "немає креативу" : "no creative"}
                   </span>
                 )}
@@ -121,16 +121,16 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
 
       <Section title={uk ? "Не рекламувати" : "Don't advertise"}>
         {data.avoid.length === 0 ? (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Склад нічого не забороняє." : "The shelf forbids nothing."}
           </p>
         ) : (
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.avoid.map((a) => {
               const tone = advisorStatusTone(a.status);
               return (
                 <li key={a.sku} className="py-1 flex flex-wrap items-baseline gap-x-3">
-                  <span style={{ color: "#111" }}>{uk ? a.nameUk : a.nameEn}</span>
+                  <span style={{ color: "var(--console-text)" }}>{uk ? a.nameUk : a.nameEn}</span>
                   <span
                     className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
                     style={{ background: tone.bg, color: tone.fg }}
@@ -142,7 +142,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
             })}
           </ul>
         )}
-        <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+        <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
           {uk
             ? "Реклама порожньої полиці купує розчарування (§6.4)."
             : "Advertising an empty shelf buys disappointment (§6.4)."}
@@ -152,15 +152,15 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
       {/* Creatives --------------------------------------------------------- */}
       <Section title={uk ? "Креативи: використати знову" : "Creatives to reuse"}>
         {data.reuse.length === 0 ? (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Активних креативів ще немає." : "No active creatives yet."}
           </p>
         ) : (
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.reuse.map((r) => (
               <li key={r.id} className="py-0.5">
                 {r.title}
-                <span className="text-[13px]" style={{ color: "#8a8a8d" }}>
+                <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
                   {" "}
                   · {kindLabel(r.kind, uk)}
                   {r.channels.length > 0 &&
@@ -171,12 +171,12 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
           </ul>
         )}
         {data.missingCreatives.length > 0 && (
-          <p className="text-[13px] mt-3" style={{ color: "#8a5d16" }}>
+          <p className="text-[13px] mt-3" style={{ color: "var(--console-warn)" }}>
             {uk ? "Бракує креативів: " : "Missing creatives: "}
             {data.missingCreatives.map((m) => (uk ? m.nameUk : m.nameEn)).join(", ")}
           </p>
         )}
-        <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+        <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
           <Link href={`/${locale}/admin/marketing`} className="underline underline-offset-2">
             {uk ? "Бібліотека креативів" : "Creative library"}
           </Link>
@@ -185,17 +185,17 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
 
       <Section title={uk ? "Поставити на паузу" : "Consider pausing"}>
         {data.pause.length === 0 ? (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Пауз не пропонується." : "Nothing suggests a pause."}
           </p>
         ) : (
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.pause.map((p, i) => (
               <li key={i} className="py-1">
                 {p.type === "creative_stock" ? (
                   <>
-                    <span style={{ color: "#111" }}>{p.title}</span>
-                    <span className="text-[13px]" style={{ color: "#707072" }}>
+                    <span style={{ color: "var(--console-text)" }}>{p.title}</span>
+                    <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
                       {" "}
                       —{" "}
                       {uk
@@ -205,8 +205,8 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
                   </>
                 ) : (
                   <>
-                    <span style={{ color: "#111" }}>{channelLabel(p.channel, uk)}</span>
-                    <span className="text-[13px]" style={{ color: "#707072" }}>
+                    <span style={{ color: "var(--console-text)" }}>{channelLabel(p.channel, uk)}</span>
+                    <span className="text-[13px]" style={{ color: "var(--console-muted)" }}>
                       {" "}
                       —{" "}
                       {uk
@@ -219,7 +219,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
             ))}
           </ul>
         )}
-        <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+        <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
           {uk
             ? "Лише пропозиція — пауза виконується руками, тут або на платформі."
             : "A suggestion only — pausing happens by hand, here or on the platform."}
@@ -230,7 +230,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
       <div className="lg:col-span-2">
         <Section title={uk ? "Чернетки текстів" : "Copy drafts"}>
           {data.copy.length === 0 ? (
-            <p className="text-[14px]" style={{ color: "#707072" }}>
+            <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {uk ? "Немає що просувати — немає і текстів." : "Nothing to push, so nothing to say."}
             </p>
           ) : (
@@ -239,21 +239,21 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
                 <div
                   key={c.sku}
                   className="rounded px-4 py-3 text-[13.5px]"
-                  style={{ border: "1px solid var(--border)", background: "#fafaf9" }}
+                  style={{ border: "1px solid var(--console-border)", background: "var(--console-panel-2)" }}
                 >
-                  <div className="font-medium mb-1" style={{ color: "#111" }}>
+                  <div className="font-medium mb-1" style={{ color: "var(--console-text)" }}>
                     {c.en.headline}
                   </div>
-                  <p style={{ color: "#3a3a3c" }}>{c.en.body}</p>
-                  <div className="font-medium mt-3 mb-1" style={{ color: "#111" }}>
+                  <p style={{ color: "var(--console-muted)" }}>{c.en.body}</p>
+                  <div className="font-medium mt-3 mb-1" style={{ color: "var(--console-text)" }}>
                     {c.uk.headline}
                   </div>
-                  <p style={{ color: "#3a3a3c" }}>{c.uk.body}</p>
+                  <p style={{ color: "var(--console-muted)" }}>{c.uk.body}</p>
                 </div>
               ))}
             </div>
           )}
-          <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+          <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Скопіюйте, відредагуйте, розмістіть самі — система нічого не публікує."
               : "Copy, edit, place them yourself — the system publishes nothing."}
@@ -265,7 +265,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
         <div className="lg:col-span-2">
           <div
             className="rounded-lg px-5 py-4 text-[13.5px]"
-            style={{ border: "1px solid #ecdfc4", background: "#fdf9f0", color: "#8a5d16" }}
+            style={{ border: "1px solid rgba(212,160,23,0.35)", background: "var(--console-warn-soft)", color: "var(--console-warn)" }}
           >
             {data.notes.map((n) => (
               <p key={n} className="py-0.5">
@@ -293,13 +293,13 @@ export default async function AdminStrategistPage({
   const data = latest !== null && isCampaignPlan(latest.output) ? latest.output : null;
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Маркетинг-стратег" : "Marketing Strategist"}
           </h1>
-          <p className="text-[14.5px] mb-4" style={{ color: "#707072" }}>
+          <p className="text-[14.5px] mb-4" style={{ color: "var(--console-muted)" }}>
             {runs === null
               ? uk
                 ? "Не вдалося прочитати журнал агентів."
@@ -319,7 +319,7 @@ export default async function AdminStrategistPage({
         {runs === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграції 0019 та 0020 у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."
@@ -328,7 +328,7 @@ export default async function AdminStrategistPage({
         )}
 
         {latest !== null && data === null && (
-          <p className="text-[14.5px] mb-6" style={{ color: "#707072" }}>
+          <p className="text-[14.5px] mb-6" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Останній запис створено старішою версією стратега і він не читається — складіть новий план."
               : "The latest run was generated by an earlier version of the strategist and can't be rendered — draft a fresh plan."}
@@ -339,10 +339,10 @@ export default async function AdminStrategistPage({
 
         {runs !== null && runs.length > 1 && (
           <div className="mt-8">
-            <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-2" style={{ color: "#8a8a8d" }}>
+            <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-2" style={{ color: "var(--console-muted)" }}>
               {uk ? "Попередні плани" : "Previous plans"}
             </h2>
-            <ul className="text-[13.5px]" style={{ color: "#707072" }}>
+            <ul className="text-[13.5px]" style={{ color: "var(--console-muted)" }}>
               {runs.slice(1).map((r) => (
                 <li key={r.id} className="py-0.5">
                   {new Date(r.createdAt).toLocaleString(uk ? "uk-UA" : "en-GB", {

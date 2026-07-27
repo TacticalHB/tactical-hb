@@ -23,8 +23,8 @@ export const dynamic = "force-dynamic";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg px-6 py-5" style={{ border: "1px solid var(--border)", background: "#fff" }}>
-      <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-3" style={{ color: "#8a8a8d" }}>
+    <section className="rounded-lg px-6 py-5" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
+      <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-3" style={{ color: "var(--console-muted)" }}>
         {title}
       </h2>
       {children}
@@ -49,7 +49,7 @@ function StockList({
       <div className="text-[13px] font-medium mb-1" style={{ color: tone }}>
         {title}
       </div>
-      <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+      <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
         {lines.map((l) => (
           <li key={l.sku} className="py-0.5">
             {uk ? l.nameUk : l.nameEn} — {l.onHand} {uk ? "на складі" : "on hand"}
@@ -65,14 +65,14 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Section title={uk ? `Тиждень ${data.week.from} — ${data.week.to}` : `Week ${data.week.from} — ${data.week.to}`}>
-        <div className="text-[22px] font-semibold mb-1" style={{ color: "#111" }}>
+        <div className="text-[22px] font-semibold mb-1" style={{ color: "var(--console-text)" }}>
           {briefUah(data.week.revenueUah)}
-          <span className="text-[14px] font-normal ml-2" style={{ color: "#707072" }}>
+          <span className="text-[14px] font-normal ml-2" style={{ color: "var(--console-muted)" }}>
             {weekDelta(data.week.revenueUah, data.week.prevRevenueUah)}{" "}
             {uk ? "до попереднього тижня" : "vs previous week"}
           </span>
         </div>
-        <p className="text-[14px]" style={{ color: "#3a3a3c" }}>
+        <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
           {data.week.orders} {uk ? "замовлень" : "orders"}
           {data.week.unpriced > 0 &&
             ` · ${data.week.unpriced} ${uk ? "без суми" : "unpriced"}`}
@@ -84,23 +84,23 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
 
       <Section title={uk ? "Місяць наростаючим підсумком" : "Month to date"}>
         {m === null ? (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Цього місяця ще нічого не записано." : "Nothing recorded this month yet."}
           </p>
         ) : (
           <>
-            <div className="text-[22px] font-semibold mb-1" style={{ color: m.marginUah < 0 ? "#96322c" : "#111" }}>
+            <div className="text-[22px] font-semibold mb-1" style={{ color: m.marginUah < 0 ? "var(--console-alert)" : "var(--console-text)" }}>
               {briefUah(m.marginUah)}
-              <span className="text-[14px] font-normal ml-2" style={{ color: "#707072" }}>
+              <span className="text-[14px] font-normal ml-2" style={{ color: "var(--console-muted)" }}>
                 {uk ? "маржа" : "margin"} · {m.month}
               </span>
             </div>
-            <p className="text-[14px]" style={{ color: "#3a3a3c" }}>
+            <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {uk ? "Дохід" : "Revenue"} {briefUah(m.revenueUah)} · {uk ? "Собівартість" : "COGS"}{" "}
               {briefUah(m.cogsUah)} · {uk ? "Витрати" : "Opex"} {briefUah(m.opexUah)}
             </p>
             {(m.uncostedLines > 0 || m.unpricedOrders > 0) && (
-              <p className="text-[13px] mt-1" style={{ color: "#8a5d16" }}>
+              <p className="text-[13px] mt-1" style={{ color: "var(--console-warn)" }}>
                 {uk
                   ? `Неповні дані: ${m.uncostedLines} рядків без собівартості, ${m.unpricedOrders} замовлень без суми.`
                   : `Incomplete data: ${m.uncostedLines} uncosted lines, ${m.unpricedOrders} unpriced orders.`}
@@ -115,21 +115,21 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
           title={advisorStatusLabel("critical", uk)}
           lines={data.stock.critical}
           uk={uk}
-          tone="#96322c"
+          tone="var(--console-alert)"
         />
-        <StockList title={advisorStatusLabel("low", uk)} lines={data.stock.low} uk={uk} tone="#8a5d16" />
+        <StockList title={advisorStatusLabel("low", uk)} lines={data.stock.low} uk={uk} tone="var(--console-warn)" />
         <StockList
           title={advisorStatusLabel("overstock", uk)}
           lines={data.stock.overstock}
           uk={uk}
-          tone="#3d5a73"
+          tone="var(--console-info)"
         />
         {data.stock.suggestions.length > 0 ? (
           <div>
-            <div className="text-[13px] font-medium mb-1" style={{ color: "#111" }}>
+            <div className="text-[13px] font-medium mb-1" style={{ color: "var(--console-text)" }}>
               {uk ? "Радник пропонує виготовити" : "Advisor suggests making"}
             </div>
-            <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+            <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {data.stock.suggestions.map((s) => (
                 <li key={s.sku} className="py-0.5">
                   <strong>{s.suggested}</strong> — {uk ? s.nameUk : s.nameEn}
@@ -140,12 +140,12 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
         ) : (
           data.stock.critical.length === 0 &&
           data.stock.low.length === 0 && (
-            <p className="text-[14px]" style={{ color: "#707072" }}>
+            <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {uk ? "Полиці в нормі." : "Shelves are fine."}
             </p>
           )
         )}
-        <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+        <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
           <Link href={`/${locale}/admin/advisor`} className="underline underline-offset-2">
             {uk ? "Повна таблиця радника" : "Full advisor table"}
           </Link>
@@ -153,11 +153,11 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
       </Section>
 
       <Section title={uk ? "Гурт" : "Wholesale"}>
-        <p className="text-[14px] mb-2" style={{ color: "#3a3a3c" }}>
+        <p className="text-[14px] mb-2" style={{ color: "var(--console-muted)" }}>
           {uk ? "Нагадувань на сьогодні" : "Follow-ups due"}: <strong>{data.wholesale.dueFollowUps}</strong>
         </p>
         {data.wholesale.quiet.length > 0 ? (
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.wholesale.quiet.map((q) => (
               <li key={q.company} className="py-0.5">
                 {q.company} — {uk ? `тиша ${q.daysQuiet} дн` : `quiet ${q.daysQuiet} days`}
@@ -165,11 +165,11 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
             ))}
           </ul>
         ) : (
-          <p className="text-[14px]" style={{ color: "#707072" }}>
+          <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Ніхто не затих." : "Nobody has gone quiet."}
           </p>
         )}
-        <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+        <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
           <Link href={`/${locale}/admin/followups`} className="underline underline-offset-2">
             {uk ? "Чернетки листів" : "Follow-up drafts"}
           </Link>
@@ -179,7 +179,7 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
       {data.topProducts.length > 0 && (
         <div className="lg:col-span-2">
           <Section title={uk ? "Продажі тижня" : "This week's sellers"}>
-            <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+            <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {data.topProducts.map((p) => (
                 <li key={p.sku} className="py-0.5">
                   {p.name} — {p.units} {uk ? "шт" : "pcs"}
@@ -194,16 +194,16 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
       {/* Phase D sections — optional: older stored runs simply lack them. */}
       {data.projects !== undefined && data.projects.length > 0 && (
         <Section title={uk ? "Накопичення на проєкти" : "Project savings"}>
-          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+          <ul className="text-[14px]" style={{ color: "var(--console-muted)" }}>
             {data.projects.map((p) => {
               const tone = verdictTone(p.verdict);
               return (
                 <li key={p.name} className="py-1 flex flex-wrap items-baseline gap-x-3">
-                  <span style={{ color: "#111" }}>{p.name}</span>
+                  <span style={{ color: "var(--console-text)" }}>{p.name}</span>
                   <span className="tabular-nums">
                     {briefUah(p.savedUah)}
                     {p.targetBudgetUah !== null && (
-                      <span style={{ color: "#a3a3a6" }}>
+                      <span style={{ color: "var(--console-faint)" }}>
                         {" "}
                         / {briefUah(p.targetBudgetUah)}
                         {p.progressPct !== null && ` · ${p.progressPct}%`}
@@ -217,7 +217,7 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
                     {verdictLabel(p.verdict, uk)}
                   </span>
                   {p.neededPerMonthUah !== null && (
-                    <span className="text-[13px] tabular-nums" style={{ color: "#707072" }}>
+                    <span className="text-[13px] tabular-nums" style={{ color: "var(--console-muted)" }}>
                       {uk ? "потрібно" : "needs"} {briefUah(p.neededPerMonthUah)}/{uk ? "міс" : "mo"}
                     </span>
                   )}
@@ -225,7 +225,7 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
               );
             })}
           </ul>
-          <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+          <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
             <Link href={`/${locale}/admin/projects`} className="underline underline-offset-2">
               {uk ? "Проєкти та виставки" : "Projects & exhibitions"}
             </Link>
@@ -236,27 +236,27 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
       {data.adSpend !== undefined && (
         <Section title={uk ? "Реклама цього місяця" : "This month's ad spend"}>
           {data.adSpend.byChannel.length === 0 ? (
-            <p className="text-[14px]" style={{ color: "#707072" }}>
+            <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
               {uk
                 ? `За ${data.adSpend.month} ще нічого не записано.`
                 : `Nothing recorded for ${data.adSpend.month} yet.`}
             </p>
           ) : (
             <>
-              <div className="text-[22px] font-semibold mb-1" style={{ color: "#111" }}>
+              <div className="text-[22px] font-semibold mb-1" style={{ color: "var(--console-text)" }}>
                 {briefUah(data.adSpend.totalUah)}
-                <span className="text-[14px] font-normal ml-2" style={{ color: "#707072" }}>
+                <span className="text-[14px] font-normal ml-2" style={{ color: "var(--console-muted)" }}>
                   {data.adSpend.month}
                 </span>
               </div>
-              <p className="text-[14px]" style={{ color: "#3a3a3c" }}>
+              <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
                 {data.adSpend.byChannel
                   .map((c) => `${channelLabel(c.channel, uk)} ${briefUah(c.amountUah)}`)
                   .join(" · ")}
               </p>
             </>
           )}
-          <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+          <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
             <Link href={`/${locale}/admin/strategist`} className="underline underline-offset-2">
               {uk ? "План стратега" : "Strategist's plan"}
             </Link>
@@ -281,13 +281,13 @@ export default async function AdminBriefPage({
   const data = latest !== null && isBriefData(latest.output) ? latest.output : null;
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Тижневий бриф" : "Weekly Brief"}
           </h1>
-          <p className="text-[14.5px] mb-4" style={{ color: "#707072" }}>
+          <p className="text-[14.5px] mb-4" style={{ color: "var(--console-muted)" }}>
             {runs === null
               ? uk
                 ? "Не вдалося прочитати журнал агентів."
@@ -304,7 +304,7 @@ export default async function AdminBriefPage({
         {runs === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0019_agents.sql у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."
@@ -313,7 +313,7 @@ export default async function AdminBriefPage({
         )}
 
         {latest !== null && data === null && (
-          <p className="text-[14.5px] mb-6" style={{ color: "#707072" }}>
+          <p className="text-[14.5px] mb-6" style={{ color: "var(--console-muted)" }}>
             {uk
               ? "Останній запис створено старішою версією брифу і він не читається — сформуйте новий."
               : "The latest run was generated by an earlier version of the brief and can't be rendered — generate a fresh one."}
@@ -324,10 +324,10 @@ export default async function AdminBriefPage({
 
         {runs !== null && runs.length > 1 && (
           <div className="mt-8">
-            <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-2" style={{ color: "#8a8a8d" }}>
+            <h2 className="text-[13px] font-medium tracking-[0.12em] uppercase mb-2" style={{ color: "var(--console-muted)" }}>
               {uk ? "Попередні запуски" : "Previous runs"}
             </h2>
-            <ul className="text-[13.5px]" style={{ color: "#707072" }}>
+            <ul className="text-[13.5px]" style={{ color: "var(--console-muted)" }}>
               {runs.slice(1).map((r) => (
                 <li key={r.id} className="py-0.5">
                   {new Date(r.createdAt).toLocaleString(uk ? "uk-UA" : "en-GB", {

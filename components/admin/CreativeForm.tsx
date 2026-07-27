@@ -92,20 +92,20 @@ export default function CreativeForm({
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const inputClass =
-    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   return (
     <form
       onSubmit={onSubmit}
       className="rounded-lg px-5 py-4"
-      style={{ border: "1px solid var(--border)", background: "#fff" }}
+      style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
     >
-      <div className="text-[13px] font-medium mb-3" style={{ color: "#111" }}>
+      <div className="text-[13px] font-medium mb-3" style={{ color: "var(--console-text)" }}>
         {L.title}
       </div>
 
@@ -179,8 +179,8 @@ export default function CreativeForm({
               className="h-7 px-2.5 text-[12px] rounded-full transition-colors"
               style={
                 on
-                  ? { background: "#111", color: "#fff", border: "1px solid #111" }
-                  : { background: "#fff", color: "#4a4a4d", border: "1px solid var(--border-strong)" }
+                  ? { background: "var(--console-accent)", color: "#14151a", border: "1px solid var(--console-accent)" }
+                  : { background: "transparent", color: "var(--console-muted)", border: "1px solid var(--console-border)" }
               }
             >
               {channelLabel(c, uk)}
@@ -192,14 +192,14 @@ export default function CreativeForm({
           type="submit"
           disabled={busy || !title.trim()}
           className="ml-auto h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-          style={{ background: "#111", color: "#fff" }}
+          style={{ background: "var(--console-accent)", color: "#14151a" }}
         >
           {busy ? "…" : L.add}
         </button>
       </div>
 
       {error && (
-        <p className="mt-2 text-[12px]" style={{ color: "#b3261e" }}>
+        <p className="mt-2 text-[12px]" style={{ color: "var(--console-alert)" }}>
           {error}
         </p>
       )}

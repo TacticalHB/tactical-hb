@@ -176,18 +176,18 @@ export default function PartnerCard({
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const inputClass =
-    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   return (
-    <div style={{ borderTop: "1px solid var(--border)" }}>
+    <div style={{ borderTop: "1px solid var(--console-border)" }}>
       {/* Reading row ---------------------------------------------------- */}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3 text-[13.5px]">
-        <span className="font-medium" style={{ color: "#111" }}>
+        <span className="font-medium" style={{ color: "var(--console-text)" }}>
           {p.company}
         </span>
         <span
@@ -196,17 +196,17 @@ export default function PartnerCard({
         >
           {statusLabel(p.status, uk)}
         </span>
-        {p.country && <span style={{ color: "#8a8a8d" }}>{p.country}</span>}
+        {p.country && <span style={{ color: "var(--console-muted)" }}>{p.country}</span>}
         {p.email && (
-          <span className="font-mono text-[12px]" style={{ color: "#8a8a8d" }}>
+          <span className="font-mono text-[12px]" style={{ color: "var(--console-muted)" }}>
             {p.email}
           </span>
         )}
         {p.orderCount > 0 && (
-          <span style={{ color: "#4a4a4d" }}>
+          <span style={{ color: "var(--console-muted)" }}>
             {L.orders(p.orderCount)} · {formatUah(p.revenueUah)}
             {p.lastOrderAt && (
-              <span style={{ color: "#a3a3a6" }}>
+              <span style={{ color: "var(--console-faint)" }}>
                 {" "}
                 · {L.lastOrder} {p.lastOrderAt.slice(0, 10)}
               </span>
@@ -216,7 +216,7 @@ export default function PartnerCard({
         {p.nextFollowUp && (
           <span
             className="tabular-nums"
-            style={{ color: due ? "#96322c" : "#a3a3a6" }}
+            style={{ color: due ? "var(--console-alert)" : "var(--console-faint)" }}
           >
             {L.followUp} {p.nextFollowUp}
           </span>
@@ -225,7 +225,7 @@ export default function PartnerCard({
           type="button"
           onClick={() => setOpen(!open)}
           className="ml-auto text-[12.5px] underline-offset-2 hover:underline"
-          style={{ color: "#4a4a4d" }}
+          style={{ color: "var(--console-muted)" }}
         >
           {open ? L.close : L.edit}
         </button>
@@ -318,7 +318,7 @@ export default function PartnerCard({
               onClick={onSave}
               disabled={busy !== null}
               className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-              style={{ background: "#111", color: "#fff" }}
+              style={{ background: "var(--console-accent)", color: "#14151a" }}
             >
               {busy === "save" ? "…" : L.save}
             </button>
@@ -332,7 +332,7 @@ export default function PartnerCard({
                 onClick={onLinkMatching}
                 disabled={busy !== null}
                 className="h-9 px-3 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-                style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+                style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
               >
                 {busy === "match" ? "…" : L.linkMatching(p.matchingOrders)}
               </button>
@@ -351,7 +351,7 @@ export default function PartnerCard({
               onClick={onLinkRef}
               disabled={busy !== null || !refInput.trim()}
               className="h-9 px-3 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-              style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
             >
               {busy === "ref" ? "…" : L.linkRef}
             </button>
@@ -360,24 +360,24 @@ export default function PartnerCard({
               onClick={onDelete}
               disabled={busy !== null}
               className="ml-auto h-9 px-3 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-              style={{ border: "1px solid #e6d4d2", color: "#96322c", background: "#fff" }}
+              style={{ border: "1px solid rgba(196,92,92,0.4)", color: "var(--console-alert)", background: "transparent" }}
             >
               {busy === "delete" ? "…" : L.remove}
             </button>
           </div>
 
           {(info || error) && (
-            <p className="mt-2 text-[12px]" style={{ color: error ? "#b3261e" : "#4a7c59" }}>
+            <p className="mt-2 text-[12px]" style={{ color: error ? "var(--console-alert)" : "var(--console-ok)" }}>
               {error ?? info}
             </p>
           )}
 
           <div className="mt-4">
-            <div className="text-[12px] font-medium mb-1" style={{ color: "#707072" }}>
+            <div className="text-[12px] font-medium mb-1" style={{ color: "var(--console-muted)" }}>
               {L.linkedOrders}
             </div>
             {orders.length === 0 && (
-              <p className="text-[12.5px]" style={{ color: "#a3a3a6" }}>
+              <p className="text-[12.5px]" style={{ color: "var(--console-faint)" }}>
                 {L.noOrders}
               </p>
             )}
@@ -386,14 +386,14 @@ export default function PartnerCard({
                 key={o.id}
                 className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1 text-[12.5px]"
               >
-                <span className="font-mono" style={{ color: "#4a4a4d" }}>
+                <span className="font-mono" style={{ color: "var(--console-muted)" }}>
                   {o.reference}
                 </span>
-                <span className="tabular-nums" style={{ color: "#8a8a8d" }}>
+                <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
                   {o.createdAt.slice(0, 10)}
                 </span>
-                <span style={{ color: "#8a8a8d" }}>{o.status}</span>
-                <span className="tabular-nums" style={{ color: "#111" }}>
+                <span style={{ color: "var(--console-muted)" }}>{o.status}</span>
+                <span className="tabular-nums" style={{ color: "var(--console-text)" }}>
                   {o.amountUah === null ? "—" : formatUah(o.amountUah)}
                 </span>
                 <button
@@ -401,7 +401,7 @@ export default function PartnerCard({
                   onClick={() => onUnlink(o.id)}
                   disabled={busy !== null}
                   className="text-[12px] underline-offset-2 hover:underline disabled:opacity-40"
-                  style={{ color: "#96322c" }}
+                  style={{ color: "var(--console-alert)" }}
                 >
                   {busy === o.id ? "…" : L.unlink}
                 </button>

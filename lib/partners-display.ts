@@ -36,14 +36,14 @@ export function statusLabel(s: PartnerStatus, uk: boolean): string {
 export function statusTone(s: PartnerStatus): { bg: string; fg: string } {
   switch (s) {
     case "active":
-      return { bg: "#e9f2ec", fg: "#4a7c59" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
     case "dormant":
-      return { bg: "#fdf3e7", fg: "#9a6b2f" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     case "rejected":
-      return { bg: "#f3f3f4", fg: "#8a8a8d" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
     default:
       // The three pre-order stages read as one family: work in progress.
-      return { bg: "#f1efe8", fg: "#6f6d66" };
+      return { bg: "var(--console-panel-2)", fg: "var(--console-muted)" };
   }
 }
 

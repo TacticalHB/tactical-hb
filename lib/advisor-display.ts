@@ -188,13 +188,13 @@ export function advisorStatusLabel(s: AdvisorStatus, uk: boolean): string {
 export function advisorStatusTone(s: AdvisorStatus): { bg: string; fg: string } {
   switch (s) {
     case "critical":
-      return { bg: "#f9e9e8", fg: "#96322c" };
+      return { bg: "var(--console-alert-soft)", fg: "var(--console-alert)" };
     case "low":
-      return { bg: "#fbf1de", fg: "#8a5d16" };
+      return { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" };
     case "overstock":
-      return { bg: "#e8eef4", fg: "#3d5a73" };
+      return { bg: "var(--console-info-soft)", fg: "var(--console-info)" };
     default:
-      return { bg: "#e7f2ec", fg: "#2f6b4f" };
+      return { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" };
   }
 }
 

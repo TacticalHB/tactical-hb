@@ -42,13 +42,13 @@ export default async function AdminStockPage({
         );
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Склад" : "Stock"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {counts === null
               ? uk
                 ? "Не вдалося завантажити склад."
@@ -60,7 +60,7 @@ export default async function AdminStockPage({
         {items === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграції 0015_stock.sql і 0016_costs.sql у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."
@@ -69,7 +69,7 @@ export default async function AdminStockPage({
         )}
 
         {sorted !== null && sorted.length === 0 && (
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {uk ? "Жодної позиції складу." : "No stock lines yet."}
           </p>
         )}

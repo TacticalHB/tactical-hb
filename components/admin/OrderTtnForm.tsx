@@ -56,7 +56,7 @@ export default function OrderTtnForm({
       <label
         htmlFor={`ttn-${orderId}`}
         className="text-[11px] tracking-[0.12em] uppercase"
-        style={{ color: "#8a8a8d" }}
+        style={{ color: "var(--console-muted)" }}
       >
         {L.label}
       </label>
@@ -68,19 +68,19 @@ export default function OrderTtnForm({
           placeholder={L.placeholder}
           inputMode="numeric"
           autoComplete="off"
-          className="h-9 px-3 text-[13px] font-mono rounded w-[190px] outline-none transition-colors focus:border-black"
-          style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+          className="h-9 px-3 text-[13px] font-mono rounded w-[190px] outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
+          style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
         />
         <button
           type="submit"
           disabled={busy || !dirty}
           className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-          style={{ background: "#111", color: "#fff" }}
+          style={{ background: "var(--console-accent)", color: "#14151a" }}
         >
           {busy ? L.saving : L.save}
         </button>
         {!dirty && saved && !error && (
-          <span className="text-[12px]" style={{ color: "#4a7c59" }}>
+          <span className="text-[12px]" style={{ color: "var(--console-ok)" }}>
             {L.savedMsg}
           </span>
         )}
@@ -91,19 +91,19 @@ export default function OrderTtnForm({
             target="_blank"
             rel="noopener noreferrer"
             className="text-[12px] underline underline-offset-2 transition-opacity hover:opacity-70"
-            style={{ color: "#707072" }}
+            style={{ color: "var(--console-muted)" }}
           >
             {L.track}
           </a>
         )}
         {!dirty && !saved && !error && initial && (
-          <span className="text-[12px]" style={{ color: "#8a8a8d" }}>
+          <span className="text-[12px]" style={{ color: "var(--console-muted)" }}>
             {L.cleared}
           </span>
         )}
       </div>
       {error && (
-        <span className="text-[12px]" style={{ color: "#b3261e" }}>
+        <span className="text-[12px]" style={{ color: "var(--console-alert)" }}>
           {error}
         </span>
       )}

@@ -57,12 +57,12 @@ export default function CostEntryForm({
   };
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const cls =
-    "h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded w-full outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,15 +94,15 @@ export default function CostEntryForm({
     <form
       onSubmit={onSubmit}
       className="rounded-lg px-5 py-5"
-      style={{ border: "1px solid var(--border)", background: "#fff" }}
+      style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
     >
-      <h2 className="text-[15px] font-medium mb-4" style={{ color: "#111" }}>
+      <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--console-text)" }}>
         {L.title}
       </h2>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.category}
           </label>
           <select
@@ -120,7 +120,7 @@ export default function CostEntryForm({
         </div>
 
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.uah}
           </label>
           <input
@@ -134,7 +134,7 @@ export default function CostEntryForm({
         </div>
 
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.eur}
           </label>
           <input
@@ -148,7 +148,7 @@ export default function CostEntryForm({
         </div>
 
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.date}
           </label>
           <input
@@ -161,7 +161,7 @@ export default function CostEntryForm({
         </div>
 
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.supplier}
           </label>
           <input
@@ -174,7 +174,7 @@ export default function CostEntryForm({
         </div>
 
         <div>
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.product}
           </label>
           <select value={sku} onChange={(e) => setSku(e.target.value)} className={cls} style={inputStyle}>
@@ -188,7 +188,7 @@ export default function CostEntryForm({
         </div>
 
         <div className="lg:col-span-2">
-          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "#8a8a8d" }}>
+          <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.note}
           </label>
           <input
@@ -202,7 +202,7 @@ export default function CostEntryForm({
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mt-4">
-        <label className="flex items-center gap-2 text-[13px]" style={{ color: "#4a4a4d" }}>
+        <label className="flex items-center gap-2 text-[13px]" style={{ color: "var(--console-muted)" }}>
           <input
             type="checkbox"
             checked={recurring}
@@ -216,13 +216,13 @@ export default function CostEntryForm({
           type="submit"
           disabled={busy || !amountUah.trim()}
           className="h-9 px-5 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-          style={{ background: "#111", color: "#fff" }}
+          style={{ background: "var(--console-accent)", color: "#14151a" }}
         >
           {busy ? L.adding : L.add}
         </button>
 
         {error && (
-          <span className="text-[12.5px]" style={{ color: "#b3261e" }}>
+          <span className="text-[12.5px]" style={{ color: "var(--console-alert)" }}>
             {error}
           </span>
         )}

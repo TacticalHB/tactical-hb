@@ -61,13 +61,13 @@ export default async function AdminProjectsPage({
   const fairs = exhibitions === null ? null : [...exhibitions].sort(byExhibitionOrder);
 
   return (
-    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
+          <h1 className="text-3xl font-semibold mb-1" style={{ color: "var(--console-text)" }}>
             {uk ? "Проєкти та виставки" : "Projects & Exhibitions"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
+          <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
             {projects === null
               ? uk
                 ? "Не вдалося завантажити проєкти."
@@ -81,7 +81,7 @@ export default async function AdminProjectsPage({
         {(projectsRead === null || exhibitions === null) && (
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
-            style={{ border: "1px solid #e6d4d2", background: "#fdf6f5", color: "#96322c" }}
+            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0021_projects.sql у Supabase."
@@ -94,13 +94,13 @@ export default async function AdminProjectsPage({
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
             style={{
-              border: "1px solid var(--border)",
-              background: "#fff",
+              border: "1px solid var(--console-border)",
+              background: "var(--console-panel)",
               color:
                 summary.avgMarginUah !== null &&
                 summary.totalNeededPerMonthUah > summary.avgMarginUah
-                  ? "#96322c"
-                  : "#3a3a3c",
+                  ? "var(--console-alert)"
+                  : "var(--console-muted)",
             }}
           >
             {uk
@@ -123,7 +123,7 @@ export default async function AdminProjectsPage({
           </div>
 
           {projects !== null && projects.length === 0 && (
-            <p className="text-[14.5px]" style={{ color: "#707072" }}>
+            <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
               {uk
                 ? "Реєстр порожній. Додайте перший проєкт вище — хоча б як ідею."
                 : "The register is empty. Add the first project above — even as an idea."}
@@ -133,7 +133,7 @@ export default async function AdminProjectsPage({
           {projects !== null && projects.length > 0 && (
             <div
               className="rounded-lg overflow-hidden"
-              style={{ border: "1px solid var(--border)", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
             >
               {projects.map((p) => (
                 <ProjectCard
@@ -151,7 +151,7 @@ export default async function AdminProjectsPage({
 
         {/* Exhibitions -------------------------------------------------------- */}
         <section>
-          <h2 className="text-[17px] font-semibold mb-3" style={{ color: "#111" }}>
+          <h2 className="text-[17px] font-semibold mb-3" style={{ color: "var(--console-text)" }}>
             {uk ? "Виставки" : "Exhibitions"}
           </h2>
 
@@ -160,7 +160,7 @@ export default async function AdminProjectsPage({
           </div>
 
           {fairs !== null && fairs.length === 0 && (
-            <p className="text-[14.5px]" style={{ color: "#707072" }}>
+            <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
               {uk
                 ? "Календар порожній. Фактичні витрати на виставки — у «Витратах», категорія «Виставки»."
                 : "The calendar is empty. Actual fair costs live in Costs under the Exhibitions category."}
@@ -170,7 +170,7 @@ export default async function AdminProjectsPage({
           {fairs !== null && fairs.length > 0 && (
             <div
               className="rounded-lg overflow-hidden"
-              style={{ border: "1px solid var(--border)", background: "#fff" }}
+              style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
             >
               {fairs.map((x) => (
                 <ExhibitionCard key={x.id} exhibition={x} uk={uk} />

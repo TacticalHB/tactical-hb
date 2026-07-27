@@ -150,12 +150,12 @@ export default function ProjectCard({
   }
 
   const inputStyle: React.CSSProperties = {
-    border: "1px solid var(--border-strong)",
-    color: "#111",
-    background: "#fff",
+    border: "1px solid var(--console-border)",
+    color: "var(--console-text)",
+    background: "var(--console-panel-2)",
   };
   const inputClass =
-    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-black";
+    "h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]";
 
   const adviceLine = (() => {
     switch (advice.verdict) {
@@ -193,11 +193,11 @@ export default function ProjectCard({
   })();
 
   return (
-    <div style={{ borderTop: "1px solid var(--border)" }}>
+    <div style={{ borderTop: "1px solid var(--console-border)" }}>
       {/* Reading row ---------------------------------------------------- */}
       <div className="px-5 py-3">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[13.5px]">
-          <span className="font-medium" style={{ color: "#111" }}>
+          <span className="font-medium" style={{ color: "var(--console-text)" }}>
             {p.name}
           </span>
           <span
@@ -212,14 +212,14 @@ export default function ProjectCard({
           >
             {verdictLabel(advice.verdict, uk)}
           </span>
-          <span className="tabular-nums" style={{ color: "#4a4a4d" }}>
+          <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
             {formatUah(p.savedUah)}
             {p.targetBudgetUah !== null && (
-              <span style={{ color: "#a3a3a6" }}> / {formatUah(p.targetBudgetUah)}</span>
+              <span style={{ color: "var(--console-faint)" }}> / {formatUah(p.targetBudgetUah)}</span>
             )}
           </span>
           {p.deadline && (
-            <span className="tabular-nums" style={{ color: "#8a8a8d" }}>
+            <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
               {uk ? "до" : "by"} {p.deadline}
             </span>
           )}
@@ -227,7 +227,7 @@ export default function ProjectCard({
             type="button"
             onClick={() => setOpen(!open)}
             className="ml-auto text-[12.5px] underline-offset-2 hover:underline"
-            style={{ color: "#4a4a4d" }}
+            style={{ color: "var(--console-muted)" }}
           >
             {open ? L.close : L.edit}
           </button>
@@ -236,7 +236,7 @@ export default function ProjectCard({
         {advice.progressPct !== null && (
           <div
             className="mt-2 h-1.5 rounded-full overflow-hidden"
-            style={{ background: "#ececee" }}
+            style={{ background: "var(--console-panel-2)" }}
             role="progressbar"
             aria-valuenow={advice.progressPct}
             aria-valuemin={0}
@@ -246,13 +246,13 @@ export default function ProjectCard({
               className="h-full rounded-full"
               style={{
                 width: `${advice.progressPct}%`,
-                background: advice.verdict === "behind" || advice.verdict === "overdue" ? "#96322c" : "#2f6b4f",
+                background: advice.verdict === "behind" || advice.verdict === "overdue" ? "var(--console-alert)" : "var(--console-ok)",
               }}
             />
           </div>
         )}
 
-        <p className="mt-1.5 text-[12.5px]" style={{ color: "#707072" }}>
+        <p className="mt-1.5 text-[12.5px]" style={{ color: "var(--console-muted)" }}>
           {adviceLine}
         </p>
       </div>
@@ -325,7 +325,7 @@ export default function ProjectCard({
               onClick={onSave}
               disabled={busy !== null}
               className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-              style={{ background: "#111", color: "#fff" }}
+              style={{ background: "var(--console-accent)", color: "#14151a" }}
             >
               {busy === "save" ? "…" : L.save}
             </button>
@@ -333,7 +333,7 @@ export default function ProjectCard({
 
           {/* Deposit ------------------------------------------------------ */}
           <div className="mt-4">
-            <div className="text-[12px] font-medium mb-1.5" style={{ color: "#707072" }}>
+            <div className="text-[12px] font-medium mb-1.5" style={{ color: "var(--console-muted)" }}>
               {L.depositTitle}
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -370,7 +370,7 @@ export default function ProjectCard({
                 onClick={onDeposit}
                 disabled={busy !== null || !depositAmount.trim()}
                 className="h-9 px-3 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-                style={{ border: "1px solid var(--border-strong)", color: "#111", background: "#fff" }}
+                style={{ border: "1px solid var(--console-border)", color: "var(--console-text)", background: "transparent" }}
               >
                 {busy === "deposit" ? "…" : L.record}
               </button>
@@ -379,7 +379,7 @@ export default function ProjectCard({
                 onClick={onDelete}
                 disabled={busy !== null}
                 className="ml-auto h-9 px-3 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-                style={{ border: "1px solid #e6d4d2", color: "#96322c", background: "#fff" }}
+                style={{ border: "1px solid rgba(196,92,92,0.4)", color: "var(--console-alert)", background: "transparent" }}
               >
                 {busy === "delete" ? "…" : L.remove}
               </button>
@@ -387,18 +387,18 @@ export default function ProjectCard({
           </div>
 
           {(info || error) && (
-            <p className="mt-2 text-[12px]" style={{ color: error ? "#b3261e" : "#4a7c59" }}>
+            <p className="mt-2 text-[12px]" style={{ color: error ? "var(--console-alert)" : "var(--console-ok)" }}>
               {error ?? info}
             </p>
           )}
 
           {/* Ledger -------------------------------------------------------- */}
           <div className="mt-4">
-            <div className="text-[12px] font-medium mb-1" style={{ color: "#707072" }}>
+            <div className="text-[12px] font-medium mb-1" style={{ color: "var(--console-muted)" }}>
               {L.ledger}
             </div>
             {entries.length === 0 && (
-              <p className="text-[12.5px]" style={{ color: "#a3a3a6" }}>
+              <p className="text-[12.5px]" style={{ color: "var(--console-faint)" }}>
                 {L.noLedger}
               </p>
             )}
@@ -407,17 +407,17 @@ export default function ProjectCard({
                 key={e.id}
                 className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1 text-[12.5px]"
               >
-                <span className="tabular-nums" style={{ color: "#8a8a8d" }}>
+                <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
                   {e.savedOn}
                 </span>
                 <span
                   className="tabular-nums font-medium"
-                  style={{ color: e.amountUah < 0 ? "#96322c" : "#2f6b4f" }}
+                  style={{ color: e.amountUah < 0 ? "var(--console-alert)" : "var(--console-ok)" }}
                 >
                   {e.amountUah < 0 ? "−" : "+"}
                   {formatUah(Math.abs(e.amountUah))}
                 </span>
-                {e.note && <span style={{ color: "#a3a3a6" }}>{e.note}</span>}
+                {e.note && <span style={{ color: "var(--console-faint)" }}>{e.note}</span>}
               </div>
             ))}
           </div>

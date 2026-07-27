@@ -13,12 +13,33 @@
 export type FinanceMonth = {
   month: string; // YYYY-MM, Kyiv
   ordersCount: number;
+  /** GOODS ONLY. orders.amount_uah has never included delivery — the invoice
+      is composed as goods + shipping (0022 §8). Adding the two together to
+      call it "revenue" is a decision for a page, not a silent one here. */
   revenueUah: number | null;
   unpricedOrders: number;
   cogsUah: number | null;
   uncostedLines: number;
   opexUah: number | null;
+  /** Counts shipping — revenue + shipping − cogs − opex, since 0022. */
   marginUah: number;
+  shippingChargedUah: number;
+};
+
+/** One row of public.finance_channel_monthly (0022). GROSS margin only:
+    opex is not attributable to retail or wholesale and is never split. */
+export type ChannelMonth = {
+  month: string;
+  channel: "retail" | "wholesale";
+  ordersCount: number;
+  revenueUah: number | null;
+  unpricedOrders: number;
+  shippingChargedUah: number;
+  units: number;
+  lineRevenueUah: number | null;
+  cogsUah: number | null;
+  uncostedLines: number;
+  grossMarginUah: number | null;
 };
 
 /** One row of public.finance_products_monthly. */

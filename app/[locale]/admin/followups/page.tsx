@@ -1,20 +1,30 @@
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchPartners } from "@/lib/partners-admin";
-import { quietPartners, QUIET_DAYS } from "@/lib/followup-display";
+import { fetchPartnerMessages } from "@/lib/followup-admin";
+import { quietPartners, QUIET_DAYS, SEND_COOLDOWN_DAYS } from "@/lib/followup-display";
 import { kyivDate } from "@/lib/advisor-admin";
 import FollowUpCard from "@/components/admin/FollowUpCard";
 
 /* ---------------------------------------------------------------------------
-   Admin: the Wholesale Follow-up Agent — who has gone quiet, and a letter
-   for each of them.
+   Admin: the Wholesale Follow-up Agent — who has gone quiet, a letter for
+   each of them, and (Phase F) a way to send it.
 
-   DRAFTS ONLY, NOTHING SENDS. That is the founder's Phase C rule, and it is
-   enforced structurally: there is no send path in this agent, in either
-   half, on this page or behind it. Drafts leave through the clipboard or a
-   mailto: link into the founder's own mail client. The record of relations
-   stays in /admin/partners — this page never changes a status, a note or a
-   follow-up date.
+   THE SEND GATE. Phase C's rule was "drafts only", enforced by there being no
+   send path at all. Phase F adds one, and it is narrow on purpose: one
+   partner at a time, the letter shown in full and editable, and a second
+   confirmation against the actual address before anything leaves. No bulk
+   send exists, and no cron path can reach a partner's inbox — the Monday job
+   still only writes to the founder. Every attempt is recorded in
+   partner_messages (0023), and a delivered letter shuts that partner's button
+   for SEND_COOLDOWN_DAYS.
+
+   The clipboard and mailto: exits remain, and are the only route when the
+   cooldown is shut or a partner has no email on file.
+
+   The record of the RELATIONSHIP still lives in /admin/partners — this page
+   never changes a status, a note or a follow-up date, because sending a
+   letter is not the same as deciding what the relationship now is.
 
    Quiet means: a live relationship (active or dormant) whose last countable
    order is 90+ days behind us. Leads that never ordered belong to the CRM's
@@ -32,7 +42,7 @@ export default async function AdminFollowUpsPage({
   await requireAdminPage(locale, "/admin/followups");
 
   const uk = locale === "uk";
-  const read = await fetchPartners();
+  const [read, messages] = await Promise.all([fetchPartners(), fetchPartnerMessages()]);
   const candidates = read === null ? null : quietPartners(read.partners, kyivDate(0));
 
   return (
@@ -57,13 +67,20 @@ export default async function AdminFollowUpsPage({
           </p>
           <p className="text-[13px] mt-2" style={{ color: "var(--console-muted)" }}>
             {uk
-              ? "Система нічого не надсилає: чернетку копіюєте у свою пошту, редагуєте і вирішуєте самі. Статуси та дати — у "
-              : "The system sends nothing: copy a draft into your own mail, edit it, and decide. Statuses and dates live in "}
+              ? `Нічого не йде саме: ви читаєте лист, редагуєте його і підтверджуєте адресу. Після надсилання кнопка для цього партнера закривається на ${SEND_COOLDOWN_DAYS} днів. Статуси та дати — у `
+              : `Nothing goes by itself: you read the letter, edit it, and confirm the address. After a send, that partner's button shuts for ${SEND_COOLDOWN_DAYS} days. Statuses and dates live in `}
             <Link href={`/${locale}/admin/partners`} className="underline underline-offset-2">
               {uk ? "Партнерах" : "Partners"}
             </Link>
             .
           </p>
+          {messages === null && (
+            <p className="text-[13px] mt-2" style={{ color: "var(--console-warn)" }}>
+              {uk
+                ? "Історію листів не прочитано — надсилання вимкнено, доки вона не стане доступною (міграція 0023)."
+                : "The send history is unreadable — sending stays off until it can be read (migration 0023)."}
+            </p>
+          )}
         </header>
 
         {candidates === null && (
@@ -80,7 +97,15 @@ export default async function AdminFollowUpsPage({
         {candidates !== null && candidates.length > 0 && (
           <div className="flex flex-col gap-3">
             {candidates.map((c) => (
-              <FollowUpCard key={c.partner.id} candidate={c} uk={uk} />
+              <FollowUpCard
+                key={c.partner.id}
+                candidate={c}
+                // null means the history read failed, which the card treats as
+                // "no sending" rather than "no history" — an unknown cooldown
+                // must never resolve to permission.
+                messages={messages === null ? null : (messages[c.partner.id] ?? [])}
+                uk={uk}
+              />
             ))}
           </div>
         )}

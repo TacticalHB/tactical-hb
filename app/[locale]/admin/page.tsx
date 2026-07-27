@@ -48,7 +48,7 @@ export default async function AdminHomePage({
   const { email } = await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
-  const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead] =
+  const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead, marginRuns] =
     await Promise.all([
       fetchStock(),
       fetchFinanceMonths(1),
@@ -57,6 +57,7 @@ export default async function AdminHomePage({
       fetchAdSpend(),
       fetchAgentRuns("marketing_strategist", 1),
       fetchProjects(),
+      fetchAgentRuns("cost_margin_guard", 1),
     ]);
 
   const shortDate = (iso: string) =>
@@ -81,6 +82,7 @@ export default async function AdminHomePage({
 
   const latestBrief = briefRuns?.[0] ?? null;
   const latestPlan = planRuns?.[0] ?? null;
+  const latestMargin = marginRuns?.[0] ?? null;
   const monthSpend = adSpendRows === null ? null : spendTotals(adSpendRows, currentPeriod());
   const savings = projectsRead === null ? null : coachSummary(projectsRead.projects, today, null);
 
@@ -177,17 +179,27 @@ export default async function AdminHomePage({
       ],
     },
     {
+      // The 3×3 grid has no free cell (eight rooms plus the core), so the
+      // Workshop rides here rather than going unreachable — §5 already gives
+      // "machine costs" to Suppliers & Costs.
       id: "costs",
       title: uk ? "ВИТРАТИ" : "SUPPLIERS & COSTS",
       href: p("/costs"),
-      chips: [{ label: uk ? "Витрати" : "Costs", href: p("/costs") }],
+      chips: [
+        { label: uk ? "Витрати" : "Costs", href: p("/costs") },
+        { label: uk ? "Постачальники" : "Suppliers", href: p("/suppliers") },
+        { label: uk ? "Майстерня" : "Workshop", href: p("/workshop") },
+      ],
     },
     {
       id: "finance",
       title: uk ? "ФІНАНСИ" : "FINANCE",
       href: p("/finance"),
       stat: financeStat,
-      chips: [{ label: uk ? "Огляд і CSV" : "Views & CSV", href: p("/finance") }],
+      chips: [
+        { label: uk ? "Огляд і CSV" : "Views & CSV", href: p("/finance") },
+        { label: uk ? "Маржа" : "Margin", href: p("/margin") },
+      ],
     },
     {
       id: "projects",
@@ -230,6 +242,15 @@ export default async function AdminHomePage({
       roomId: "command",
       color: "#e8e6df",
       label: `${uk ? "Бриф" : "Brief"} · ${latestBrief ? shortDate(latestBrief.createdAt) : "—"}`,
+    },
+    {
+      // The finance room had no agent until Phase F.
+      id: "margin",
+      roomId: "finance",
+      // Quiet grey-blue on purpose: this figure reports on health, so it must
+      // not BE a health colour, and gold belongs to brand and system.
+      color: "#9aa7b8",
+      label: `${uk ? "Маржа" : "Margin"} · ${latestMargin ? shortDate(latestMargin.createdAt) : "—"}`,
     },
   ];
 

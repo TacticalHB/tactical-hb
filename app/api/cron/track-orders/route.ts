@@ -2,20 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { runTracking } from "@/lib/order-tracking";
 import { runStockAlert } from "@/lib/stock-alert";
 import { runWeeklyBrief } from "@/lib/weekly-brief";
+import { runMarginGuard } from "@/lib/margin-admin";
 
 /* ---------------------------------------------------------------------------
    Cron: the daily operations run — Nova Poshta statuses, shipping
-   notifications, the low-stock warning, and (Mondays) the weekly brief.
+   notifications, the low-stock warning, and (Mondays) the margin check and
+   the weekly brief.
 
-   THREE JOBS, ONE SCHEDULE, and the path still says track-orders. The Hobby
+   FOUR JOBS, ONE SCHEDULE, and the path still says track-orders. The Hobby
    plan allows a single cron run a day and this route owns it; a second entry
    in vercel.json would never fire, which is worse than not adding one, because
    it would look configured. Tracking runs first — a parcel the customer is
    waiting on outranks a shelf the customer cannot see — the stock scan
-   follows, and on Kyiv Mondays the Commander Brief is written, logged and
-   mailed to the shop's own address on the same authorised request (the 21:00
-   Kyiv hour makes it a Monday-evening brief). Renaming the path is left to
-   Phase E of the OS plan, when the admin routes are reorganised anyway.
+   follows, and on Kyiv Mondays the Cost & Margin Guard and then the Commander
+   Brief run on the same authorised request (the 21:00 Kyiv hour makes it a
+   Monday-evening brief). Renaming the path is left to Phase E of the OS plan,
+   when the admin routes are reorganised anyway.
+
+   NOTHING SCHEDULED HERE WRITES TO A CUSTOMER OR A PARTNER. The shipping
+   notification answers a parcel that moved; the stock alert and the brief go
+   to the shop's own address. The follow-up send gate is deliberately absent
+   and must stay absent — §6.3 allows a partner letter only behind an explicit
+   human approval, and a cron job is the exact opposite of one.
 
    Scheduled in vercel.json. Vercel calls it with the CRON_SECRET as a bearer
    token, which is checked here — the route can send email and write order
@@ -60,16 +68,40 @@ export async function GET(request: NextRequest) {
   const tracking = await runTracking();
   const stock = await runStockAlert();
 
-  // The Commander Brief writes itself on Kyiv Mondays (plan §6.5). Internal
-  // mail to the shop's own address — the founder's briefing, nobody else's.
   const kyivWeekday = new Intl.DateTimeFormat("en-US", {
     timeZone: "Europe/Kyiv",
     weekday: "short",
   }).format(new Date());
-  const brief =
-    kyivWeekday === "Mon"
-      ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
-      : null;
+  const isMonday = kyivWeekday === "Mon";
 
-  return NextResponse.json({ ok: true, ...tracking, stock, brief });
+  // The Cost & Margin Guard checks the last full month (plan §6.2). It writes
+  // one agent_runs row and sends nothing on its own.
+  //
+  // BEFORE the brief, and the order is a real dependency now rather than a
+  // preference: the brief QUOTES the Guard's latest stored report, so running
+  // it second would put last Monday's margin in tonight's email — a figure
+  // that is stale in exactly the way an alert must never be. It was the other
+  // way round until the brief grew its margin section, for the timeout reason
+  // below; the dependency outranks it.
+  //
+  // The cost of this order: maxDuration is 60s and Hobby will not allow more,
+  // so on a slow Nova Poshta Monday the brief is now what gets cut rather than
+  // the margin row. The Guard is a handful of view reads and one insert —
+  // well under a second — so it buys that risk cheaply, but it is a real
+  // trade and this comment is where it is recorded.
+  //
+  // Re-reporting the same month every Monday is the point rather than a flaw:
+  // unit costs and supplier invoices arrive late, so each rerun is a truer
+  // picture than the last, and every run is timestamped.
+  const margin = isMonday
+    ? await runMarginGuard({ trigger: "cron", createdBy: "system" })
+    : null;
+
+  // The Commander Brief writes itself on Kyiv Mondays (plan §6.5). Internal
+  // mail to the shop's own address — the founder's briefing, nobody else's.
+  const brief = isMonday
+    ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
+    : null;
+
+  return NextResponse.json({ ok: true, ...tracking, stock, margin, brief });
 }

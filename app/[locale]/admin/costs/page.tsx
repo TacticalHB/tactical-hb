@@ -2,7 +2,8 @@ import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchStock } from "@/lib/stock-admin";
 import { itemName, formatUah } from "@/lib/stock-display";
 import { fetchCostEntries } from "@/lib/costs-admin";
-import { categoryLabel, currentPeriod } from "@/lib/costs-display";
+import { categoryLabel, currentPeriod, supplierText } from "@/lib/costs-display";
+import { fetchSupplierOptions } from "@/lib/suppliers-admin";
 import CostEntryForm from "@/components/admin/CostEntryForm";
 import UnitCostRow from "@/components/admin/UnitCostRow";
 
@@ -36,7 +37,11 @@ export default async function AdminCostsPage({
   const period = /^\d{4}-\d{2}$/.test(requested ?? "") ? requested! : currentPeriod();
   const today = new Date().toISOString().slice(0, 10);
 
-  const [items, entries] = await Promise.all([fetchStock(), fetchCostEntries(period)]);
+  const [items, entries, suppliers] = await Promise.all([
+    fetchStock(),
+    fetchCostEntries(period),
+    fetchSupplierOptions(),
+  ]);
 
   const monthTotal = (entries ?? []).reduce((s, e) => s + e.amountUah, 0);
   const skuOptions = (items ?? []).map((i) => ({ sku: i.sku, name: itemName(i, uk) }));
@@ -69,7 +74,7 @@ export default async function AdminCostsPage({
         )}
 
         <div className="mb-8">
-          <CostEntryForm today={today} skus={skuOptions} uk={uk} />
+          <CostEntryForm today={today} skus={skuOptions} suppliers={suppliers ?? []} uk={uk} />
         </div>
 
         {/* Unit costs -------------------------------------------------------- */}
@@ -115,7 +120,9 @@ export default async function AdminCostsPage({
                   >
                     {categoryLabel(e.category, uk)}
                   </span>
-                  {e.supplier && <span style={{ color: "var(--console-muted)" }}>{e.supplier}</span>}
+                  {supplierText(e) && (
+                    <span style={{ color: "var(--console-muted)" }}>{supplierText(e)}</span>
+                  )}
                   {e.note && <span style={{ color: "var(--console-muted)" }}>{e.note}</span>}
                   {e.period && (
                     <span className="text-[11.5px]" style={{ color: "var(--console-faint)" }}>

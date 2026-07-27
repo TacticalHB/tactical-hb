@@ -29,7 +29,10 @@ export async function fetchCostEntries(period?: string, limit = 200): Promise<Co
     const admin = createAdminClient();
     let q = admin
       .from("cost_entries")
-      .select("id, category, amount_uah, amount_eur, incurred_on, period, supplier, sku, note")
+      .select(
+        `id, category, amount_uah, amount_eur, incurred_on, period,
+         supplier, supplier_id, sku, note, suppliers ( name )`
+      )
       .order("incurred_on", { ascending: false })
       .limit(limit);
 
@@ -50,6 +53,7 @@ export async function fetchCostEntries(period?: string, limit = 200): Promise<Co
 
     return (data ?? []).map((r) => {
       const row = r as Record<string, unknown>;
+      const supplier = row.suppliers as { name?: unknown } | null;
       return {
         id: String(row.id),
         category: row.category as CostCategory,
@@ -58,6 +62,8 @@ export async function fetchCostEntries(period?: string, limit = 200): Promise<Co
         incurredOn: String(row.incurred_on),
         period: (row.period as string | null) ?? null,
         supplier: (row.supplier as string | null) ?? null,
+        supplierId: (row.supplier_id as string | null) ?? null,
+        supplierName: supplier?.name ? String(supplier.name) : null,
         sku: (row.sku as string | null) ?? null,
         note: (row.note as string | null) ?? null,
       };
@@ -75,7 +81,11 @@ export async function addCostEntry(input: {
   amountEur: number | null;
   incurredOn: string;
   period: string | null;
+  /** Free text, for a vendor with no record. Ignored by margin; kept as typed. */
   supplier: string | null;
+  /** The picked supplier, when there is one. Both may be set — the record
+      wins on display, and the text stays as the note of what was written. */
+  supplierId: string | null;
   sku: string | null;
   note: string | null;
   createdBy: string;
@@ -89,6 +99,7 @@ export async function addCostEntry(input: {
       incurred_on: input.incurredOn,
       period: input.period,
       supplier: input.supplier,
+      supplier_id: input.supplierId,
       sku: input.sku,
       note: input.note,
       created_by: input.createdBy,
@@ -117,6 +128,7 @@ export async function setUnitCost(input: {
   unitCostUah: number;
   effectiveFrom: string;
   note: string | null;
+  supplierId: string | null;
   createdBy: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
@@ -127,6 +139,7 @@ export async function setUnitCost(input: {
         unit_cost_uah: input.unitCostUah,
         effective_from: input.effectiveFrom,
         note: input.note,
+        supplier_id: input.supplierId,
         created_by: input.createdBy,
       },
       { onConflict: "sku,effective_from" }

@@ -5,6 +5,8 @@ import { isBriefData, briefUah, weekDelta, type BriefData } from "@/lib/brief-di
 import { advisorStatusLabel } from "@/lib/advisor-display";
 import { channelLabel } from "@/lib/marketing-display";
 import { verdictLabel, verdictTone } from "@/lib/projects-display";
+import { isCriticalAlert, marginAlertText } from "@/lib/margin-display";
+import { monthLabel } from "@/lib/finance-display";
 import GenerateBriefButton from "@/components/admin/GenerateBriefButton";
 
 /* ---------------------------------------------------------------------------
@@ -109,6 +111,94 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
           </>
         )}
       </Section>
+
+      {/* Phase F — the Guard's last word, quoted. This section computes
+          nothing: every figure here was decided by the Cost & Margin Guard
+          and is stamped with when it decided them. */}
+      {data.margin !== undefined && (
+        <Section
+          title={
+            uk
+              ? `Маржа за ${monthLabel(data.margin.month, uk)}`
+              : `Margin for ${monthLabel(data.margin.month, uk)}`
+          }
+        >
+          {data.margin.empty ? (
+            <p className="text-[14px]" style={{ color: "var(--console-muted)" }}>
+              {uk
+                ? "Того місяця не було ані замовлень, ані витрат — оцінювати нічого."
+                : "That month had no orders and no costs — nothing to judge."}
+            </p>
+          ) : (
+            <>
+              <div
+                className="text-[22px] font-semibold mb-1"
+                style={{
+                  color:
+                    data.margin.marginUah < 0 ? "var(--console-alert)" : "var(--console-text)",
+                }}
+              >
+                {briefUah(data.margin.marginUah)}
+                <span
+                  className="text-[14px] font-normal ml-2"
+                  style={{ color: "var(--console-muted)" }}
+                >
+                  {data.margin.alertCount === 0
+                    ? uk
+                      ? "нічого не позначено"
+                      : "nothing flagged"
+                    : uk
+                      ? `${data.margin.alertCount} сигналів${
+                          data.margin.criticalCount > 0
+                            ? `, ${data.margin.criticalCount} у збиток`
+                            : ""
+                        }`
+                      : `${data.margin.alertCount} flagged${
+                          data.margin.criticalCount > 0
+                            ? `, ${data.margin.criticalCount} losing money`
+                            : ""
+                        }`}
+                </span>
+              </div>
+
+              {data.margin.alerts.length > 0 && (
+                <ul className="grid gap-1.5 mt-3">
+                  {data.margin.alerts.map((a, i) => {
+                    const critical = isCriticalAlert(a);
+                    return (
+                      <li
+                        key={i}
+                        className="rounded px-3 py-2 text-[13.5px]"
+                        style={{
+                          background: critical
+                            ? "var(--console-alert-soft)"
+                            : "var(--console-warn-soft)",
+                          color: critical ? "var(--console-alert)" : "var(--console-warn)",
+                        }}
+                      >
+                        {marginAlertText(a, uk)}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </>
+          )}
+
+          <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
+            {uk ? "Перевірено " : "Checked "}
+            {new Date(data.margin.checkedAt).toLocaleString(uk ? "uk-UA" : "en-GB", {
+              timeZone: "Europe/Kyiv",
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+            {" · "}
+            <Link href={`/${locale}/admin/margin`} className="underline underline-offset-2">
+              {uk ? "Вартість і маржа" : "Cost & Margin Guard"}
+            </Link>
+          </p>
+        </Section>
+      )}
 
       <Section title={uk ? "Склад" : "Stock"}>
         <StockList

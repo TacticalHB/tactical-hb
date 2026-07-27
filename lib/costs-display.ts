@@ -19,6 +19,10 @@ export const COST_CATEGORIES = [
   "rnd",
   "exhibition",
   "ads",
+  // Acquiring and bank charges. Added in 0022 because §6.2 names payment fees
+  // as an input to the Margin Guard and there was nowhere honest to put them —
+  // buried in 'shop' or 'other' they can't be told apart from rent.
+  "fees",
   "other",
 ] as const;
 
@@ -39,6 +43,7 @@ export function categoryLabel(c: CostCategory, uk: boolean): string {
     rnd: "R&D",
     exhibition: "Exhibitions",
     ads: "Advertising",
+    fees: "Payment fees",
     other: "Other",
   };
   const ua: Record<CostCategory, string> = {
@@ -51,6 +56,7 @@ export function categoryLabel(c: CostCategory, uk: boolean): string {
     rnd: "R&D",
     exhibition: "Виставки",
     ads: "Реклама",
+    fees: "Комісії",
     other: "Інше",
   };
   return (uk ? ua : en)[c];
@@ -63,10 +69,21 @@ export type CostEntry = {
   amountEur: number | null;
   incurredOn: string;
   period: string | null;
+  /** Free text — what was typed at the time. Kept for legacy rows and for
+      one-off vendors that will never earn a supplier record (0022 §2). */
   supplier: string | null;
+  /** Set when the payee is a known supplier. Display prefers supplierName. */
+  supplierId: string | null;
+  supplierName: string | null;
   sku: string | null;
   note: string | null;
 };
+
+/** What to show in the supplier column: the record's name when there is one,
+    otherwise whatever was typed. */
+export function supplierText(e: CostEntry): string | null {
+  return e.supplierName ?? e.supplier;
+}
 
 /** Current month as YYYY-MM — the default filter, and the usual `period`. */
 export function currentPeriod(): string {

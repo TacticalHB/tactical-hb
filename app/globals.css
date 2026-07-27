@@ -394,3 +394,69 @@ body {
 .product-card:hover .product-card-name { color: #f4f3f0; }
 .product-card-accent { width: 2rem; transition: width 0.4s ease; }
 .product-card:hover .product-card-accent { width: 3.5rem; }
+
+/* ============================================================================
+   THB-OS console (Phase E) — the admin shell's own visual system.
+   Deliberately separate vars so the shop palette can evolve without moving
+   the console, and vice versa. Dark navy base, brass accent, neon status.
+============================================================================ */
+.thb-console {
+  --console-bg: #0b0e13;
+  --console-panel: #10141b;
+  --console-panel-2: #161b24;
+  --console-border: #222a36;
+  --console-text: #e8e6df;
+  --console-muted: #8b93a1;
+  --console-faint: #5d6572;
+  --console-accent: #d4b15e;
+  --console-accent-dim: rgba(212, 177, 94, 0.14);
+  --console-alert: #e2574f;
+  --console-ok: #4cd48b;
+  --console-data: #58c4dd;
+  background: var(--console-bg);
+  color: var(--console-text);
+}
+
+.console-nav-link {
+  display: block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--console-muted);
+  transition: color 0.18s ease, background 0.18s ease;
+}
+.console-nav-link:hover { color: var(--console-text); background: var(--console-panel-2); }
+.console-nav-link.active {
+  color: var(--console-accent);
+  background: var(--console-accent-dim);
+}
+.console-section-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--console-faint);
+}
+
+/* Map rooms glow on hover; agents and data packets animate. */
+.thb-room { cursor: pointer; }
+.thb-room .thb-room-fill { transition: fill 0.22s ease; }
+.thb-room:hover .thb-room-fill { fill: var(--console-panel-2); }
+.thb-room:hover .thb-room-edge { stroke: var(--console-accent); }
+
+@keyframes thbCorePulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.05); }
+}
+.thb-core-glow {
+  animation: thbCorePulse 4.5s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@keyframes thbDataDash { to { stroke-dashoffset: -26; } }
+.thb-data-line {
+  stroke-dasharray: 3 10;
+  animation: thbDataDash 2.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .thb-core-glow, .thb-data-line { animation: none; }
+}

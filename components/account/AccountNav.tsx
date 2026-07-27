@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 
-export default function AccountNav({ locale, isAdmin = false }: { locale: string; isAdmin?: boolean }) {
+export default function AccountNav({ locale }: { locale: string }) {
   const uk = locale === "uk";
   const pathname = usePathname();
   const router = useRouter();
@@ -19,59 +19,9 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
     { href: `${base}/settings`, label: uk ? "Налаштування" : "Account Settings" },
   ];
 
-  // Admin-only. Hiding these is a convenience, not the security boundary — the
-  // pages 404 and their actions refuse independently for non-admins.
-  if (isAdmin) {
-    items.push({
-      href: `${base}/admin/vouchers`,
-      label: uk ? "Ваучери (адмін)" : "Vouchers (admin)",
-    });
-    // These sit outside /account — they are shop-wide, not this user's data.
-    items.push({
-      href: `/${locale}/admin/orders`,
-      label: uk ? "Замовлення (адмін)" : "Orders (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/stock`,
-      label: uk ? "Склад (адмін)" : "Stock (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/costs`,
-      label: uk ? "Витрати (адмін)" : "Costs (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/finance`,
-      label: uk ? "Фінанси (адмін)" : "Finance (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/partners`,
-      label: uk ? "Партнери (адмін)" : "Partners (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/advisor`,
-      label: uk ? "Радник складу (адмін)" : "Stock Advisor (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/followups`,
-      label: uk ? "Листи партнерам (адмін)" : "Follow-ups (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/brief`,
-      label: uk ? "Тижневий бриф (адмін)" : "Weekly Brief (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/marketing`,
-      label: uk ? "Маркетинг (адмін)" : "Marketing (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/strategist`,
-      label: uk ? "Маркетинг-стратег (адмін)" : "Strategist (admin)",
-    });
-    items.push({
-      href: `/${locale}/admin/projects`,
-      label: uk ? "Проєкти (адмін)" : "Projects (admin)",
-    });
-  }
+  // The admin links that used to pile up here were Phase A–D scaffolding.
+  // Phase E gave the OS its own shell: admins enter through the person icon
+  // (AccountMenu routes them to /admin) and navigate in the console sidebar.
 
   const isActive = (href: string) =>
     href === base ? pathname === base || pathname === `${base}/` : pathname.startsWith(href);

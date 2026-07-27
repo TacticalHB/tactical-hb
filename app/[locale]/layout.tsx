@@ -2,13 +2,16 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { CartProvider } from "@/components/CartContext";
 import { AuthProvider } from "@/components/AuthContext";
-import { FavouritesProvider } from "@/components/FavouritesProvider";
-import { Toaster } from "sonner";
-import CookieConsent from "@/components/CookieConsent";
+
+/* ---------------------------------------------------------------------------
+   Locale root: only what BOTH faces of the app need — messages and a session.
+
+   The storefront chrome (nav, footer, cart, favourites, cookie banner) lives
+   in (shop)/layout.tsx; the admin console brings its own shell in
+   admin/layout.tsx. Splitting here is what lets /admin stop looking like the
+   shop at all, which is the whole point of OS Phase E.
+--------------------------------------------------------------------------- */
 
 export default async function LocaleLayout({
   children,
@@ -27,17 +30,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <AuthProvider>
-      <FavouritesProvider locale={locale}>
-      <CartProvider>
-        <Navbar locale={locale} />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster position="bottom-center" richColors closeButton />
-        <CookieConsent locale={locale} />
-      </CartProvider>
-      </FavouritesProvider>
-      </AuthProvider>
+      <AuthProvider>{children}</AuthProvider>
     </NextIntlClientProvider>
   );
 }

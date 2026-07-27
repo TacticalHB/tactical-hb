@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchStock } from "@/lib/stock-admin";
 import { formatUah, stockLevel } from "@/lib/stock-display";
@@ -12,49 +11,31 @@ import { fetchAdSpend } from "@/lib/marketing-admin";
 import { spendTotals } from "@/lib/marketing-display";
 import { fetchProjects } from "@/lib/projects-admin";
 import { coachSummary } from "@/lib/projects-display";
+import OfficeMap, { type MapAgent, type MapRoom, type RoomTone } from "@/components/admin/OfficeMap";
 
 /* ---------------------------------------------------------------------------
-   Admin home.
+   Admin home, Phase E: the department map.
 
-   Eight links and a handful of numbers, and that is the whole ambition for
-   now. The department map belongs to Phase E of the OS plan, and building it
-   before the modules exist would produce an impressive menu of empty rooms —
-   the plan is explicit that data comes first and the pyramid last.
+   The eight cards grew into the office the plan promised — rooms per
+   department, the shared memory in the middle, and the agents from Phases C–D
+   walking the floor with their live findings. Underneath, a terminal sitrep
+   carries the exact numbers the cards used to show: the two-minute test (plan
+   §10) must survive any amount of scenery.
 
-   The numbers it does show are the ones the founder opens this page to check:
-   stock lines needing attention, this month's margin, follow-ups due, who has
-   gone quiet, when the last brief was written. That is the plan's two-minute
-   test (§10) in its plainest possible form.
+   Reads only. Every figure on screen comes from the same read layer the cards
+   used; nothing here mutates and no agent gained a capability by being drawn.
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
 
-function Card({
-  href,
-  title,
-  detail,
-  tone,
-}: {
-  href: string;
-  title: string;
-  detail: string;
-  tone?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="rounded-lg px-6 py-6 transition-opacity hover:opacity-80"
-      style={{ border: "1px solid var(--border)", background: "#fff" }}
-    >
-      <div className="text-[17px] font-medium mb-1" style={{ color: "#111" }}>
-        {title}
-      </div>
-      <div className="text-[13.5px]" style={{ color: tone ?? "#707072" }}>
-        {detail}
-      </div>
-    </Link>
-  );
-}
+type TermLine = { tag: string; level: string; tone: RoomTone; text: string };
+
+const TONE_COLOR: Record<RoomTone, string> = {
+  ok: "var(--console-ok)",
+  warn: "var(--console-accent)",
+  alert: "var(--console-alert)",
+  idle: "var(--console-faint)",
+};
 
 export default async function AdminHomePage({
   params,
@@ -62,7 +43,7 @@ export default async function AdminHomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  await requireAdminPage(locale, "/admin");
+  const { email } = await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
   const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead] =
@@ -76,197 +57,337 @@ export default async function AdminHomePage({
       fetchProjects(),
     ]);
 
+  const shortDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(uk ? "uk-UA" : "en-GB", {
+      timeZone: "Europe/Kyiv",
+      day: "numeric",
+      month: "short",
+    });
+
   const needsAttention =
     items === null ? null : items.filter((i) => stockLevel(i) !== "ok").length;
 
   const thisMonth = (months ?? []).find((m) => m.month === currentPeriod()) ?? null;
-  const financeDetail =
-    months === null
-      ? uk
-        ? "Фінанси недоступні"
-        : "Finance unavailable"
-      : thisMonth === null
-        ? uk
-          ? "Цього місяця ще порожньо"
-          : "Nothing this month yet"
-        : `${uk ? "Маржа" : "Margin"} ${formatUah(thisMonth.marginUah)}`;
 
   const today = new Date().toISOString().slice(0, 10);
   const dueFollowUps =
     partnersRead === null
       ? null
       : partnersRead.partners.filter((p) => followUpDue(p, today)).length;
-  const partnersDetail =
-    dueFollowUps === null
-      ? uk
-        ? "Партнери недоступні"
-        : "Partners unavailable"
-      : dueFollowUps === 0
-        ? uk
-          ? "Нагадувань немає"
-          : "No follow-ups due"
-        : uk
-          ? `${dueFollowUps} ${dueFollowUps === 1 ? "нагадування" : "нагадувань"} на сьогодні`
-          : `${dueFollowUps} follow-up${dueFollowUps === 1 ? "" : "s"} due`;
-
   const quietCount =
     partnersRead === null ? null : quietPartners(partnersRead.partners, today).length;
-  const followUpsDetail =
-    quietCount === null
-      ? uk
-        ? "Партнери недоступні"
-        : "Partners unavailable"
-      : quietCount === 0
-        ? uk
-          ? "Ніхто не мовчить"
-          : "Nobody has gone quiet"
-        : uk
-          ? `${quietCount} ${quietCount === 1 ? "партнер мовчить" : "партнерів мовчать"} 90+ днів`
-          : `${quietCount} quiet for 90+ days`;
 
   const latestBrief = briefRuns?.[0] ?? null;
-  const briefDetail =
-    briefRuns === null
-      ? uk
-        ? "Журнал недоступний"
-        : "Log unavailable"
-      : latestBrief === null
-        ? uk
-          ? "Ще жодного брифу"
-          : "No briefs yet"
-        : `${uk ? "Останній" : "Latest"}: ${new Date(latestBrief.createdAt).toLocaleDateString(
-            uk ? "uk-UA" : "en-GB",
-            { timeZone: "Europe/Kyiv", day: "numeric", month: "short" }
-          )}`;
-
-  const stockDetail =
-    needsAttention === null
-      ? uk
-        ? "Склад недоступний"
-        : "Stock unavailable"
-      : needsAttention === 0
-        ? uk
-          ? "Все в нормі"
-          : "Everything in stock"
-        : uk
-          ? `${needsAttention} ${needsAttention === 1 ? "позиція потребує" : "позицій потребують"} уваги`
-          : `${needsAttention} ${needsAttention === 1 ? "line needs" : "lines need"} attention`;
-
-  const monthSpend = adSpendRows === null ? null : spendTotals(adSpendRows, currentPeriod());
-  const marketingDetail =
-    monthSpend === null
-      ? uk
-        ? "Креативи та витрати на рекламу"
-        : "Creatives and ad spend"
-      : monthSpend.totalUah === 0
-        ? uk
-          ? "Цього місяця витрат ще немає"
-          : "No spend recorded this month"
-        : `${uk ? "Реклама цього місяця" : "This month's ads"}: ${formatUah(monthSpend.totalUah)}`;
-
   const latestPlan = planRuns?.[0] ?? null;
-  const strategistDetail =
-    planRuns === null
-      ? uk
-        ? "Журнал недоступний"
-        : "Log unavailable"
-      : latestPlan === null
-        ? uk
-          ? "Ще жодного плану"
-          : "No plans yet"
-        : `${uk ? "Останній" : "Latest"}: ${new Date(latestPlan.createdAt).toLocaleDateString(
-            uk ? "uk-UA" : "en-GB",
-            { timeZone: "Europe/Kyiv", day: "numeric", month: "short" }
-          )}`;
-
+  const monthSpend = adSpendRows === null ? null : spendTotals(adSpendRows, currentPeriod());
   const savings = projectsRead === null ? null : coachSummary(projectsRead.projects, today, null);
-  const projectsDetail =
-    savings === null
-      ? uk
-        ? "Проєкти недоступні"
-        : "Projects unavailable"
-      : savings.projectsCounted === 0
-        ? uk
-          ? "Майбутні продукти й виставки"
-          : "Future products and fairs"
-        : uk
-          ? `Потрібно ≈ ${formatUah(savings.totalNeededPerMonthUah)}/міс на ${savings.projectsCounted} проєкти`
-          : `Needs ≈ ${formatUah(savings.totalNeededPerMonthUah)}/mo across ${savings.projectsCounted}`;
+
+  /* ---- room stats ---- */
+
+  const stockStat =
+    needsAttention === null
+      ? { text: "?", tone: "idle" as RoomTone }
+      : needsAttention === 0
+        ? { text: "OK", tone: "ok" as RoomTone }
+        : { text: uk ? `${needsAttention} низько` : `${needsAttention} low`, tone: "alert" as RoomTone };
+
+  const financeStat =
+    thisMonth === null
+      ? { text: uk ? "порожньо" : "empty", tone: "idle" as RoomTone }
+      : {
+          text: formatUah(thisMonth.marginUah),
+          tone: (thisMonth.marginUah < 0 ? "alert" : "ok") as RoomTone,
+        };
+
+  const wholesaleStat =
+    dueFollowUps === null
+      ? { text: "?", tone: "idle" as RoomTone }
+      : dueFollowUps > 0
+        ? { text: uk ? `${dueFollowUps} сьогодні` : `${dueFollowUps} due`, tone: "warn" as RoomTone }
+        : quietCount
+          ? { text: uk ? `${quietCount} мовчать` : `${quietCount} quiet`, tone: "warn" as RoomTone }
+          : { text: "OK", tone: "ok" as RoomTone };
+
+  const marketingStat =
+    monthSpend === null
+      ? { text: "?", tone: "idle" as RoomTone }
+      : monthSpend.totalUah === 0
+        ? { text: uk ? "без витрат" : "no spend", tone: "idle" as RoomTone }
+        : { text: formatUah(monthSpend.totalUah), tone: "ok" as RoomTone };
+
+  const projectsStat =
+    savings === null || savings.projectsCounted === 0
+      ? { text: "—", tone: "idle" as RoomTone }
+      : { text: `≈${formatUah(savings.totalNeededPerMonthUah)}/${uk ? "міс" : "mo"}`, tone: "warn" as RoomTone };
+
+  const commandStat =
+    latestBrief === null
+      ? { text: uk ? "без брифу" : "no brief", tone: "idle" as RoomTone }
+      : { text: shortDate(latestBrief.createdAt), tone: "ok" as RoomTone };
+
+  const p = (path: string) => `/${locale}/admin${path}`;
+
+  const rooms: MapRoom[] = [
+    {
+      id: "command",
+      title: uk ? "ШТАБ" : "COMMAND",
+      href: p("/brief"),
+      stat: commandStat,
+      chips: [{ label: uk ? "Тижневий бриф" : "Weekly Brief", href: p("/brief") }],
+    },
+    {
+      id: "orders",
+      title: uk ? "ПРОДАЖІ" : "COMMERCE",
+      href: p("/orders"),
+      chips: [
+        { label: uk ? "Замовлення" : "Orders", href: p("/orders") },
+        { label: uk ? "Ваучери" : "Vouchers", href: p("/vouchers") },
+      ],
+    },
+    {
+      id: "marketing",
+      title: uk ? "МАРКЕТИНГ" : "MARKETING",
+      href: p("/marketing"),
+      stat: marketingStat,
+      chips: [
+        { label: uk ? "Кампанії" : "Campaigns", href: p("/marketing") },
+        { label: uk ? "Стратег" : "Strategist", href: p("/strategist") },
+      ],
+    },
+    {
+      id: "stock",
+      title: uk ? "СКЛАД" : "STOCK & PRODUCTION",
+      href: p("/stock"),
+      stat: stockStat,
+      chips: [
+        { label: uk ? "Залишки" : "Stock", href: p("/stock") },
+        { label: uk ? "Радник" : "Advisor", href: p("/advisor") },
+      ],
+    },
+    {
+      id: "wholesale",
+      title: uk ? "ОПТ" : "WHOLESALE CRM",
+      href: p("/partners"),
+      stat: wholesaleStat,
+      chips: [
+        { label: uk ? "Партнери" : "Partners", href: p("/partners") },
+        { label: uk ? "Листи" : "Follow-ups", href: p("/followups") },
+      ],
+    },
+    {
+      id: "costs",
+      title: uk ? "ВИТРАТИ" : "SUPPLIERS & COSTS",
+      href: p("/costs"),
+      chips: [{ label: uk ? "Витрати" : "Costs", href: p("/costs") }],
+    },
+    {
+      id: "finance",
+      title: uk ? "ФІНАНСИ" : "FINANCE",
+      href: p("/finance"),
+      stat: financeStat,
+      chips: [{ label: uk ? "Огляд і CSV" : "Views & CSV", href: p("/finance") }],
+    },
+    {
+      id: "projects",
+      title: uk ? "ПРОЄКТИ" : "PROJECTS",
+      href: p("/projects"),
+      stat: projectsStat,
+      chips: [{ label: uk ? "Проєкти та виставки" : "Projects & Exhibitions", href: p("/projects") }],
+    },
+  ];
+
+  const agents: MapAgent[] = [
+    {
+      id: "advisor",
+      roomId: "stock",
+      color: "#4cd48b",
+      label: `${uk ? "Радник" : "Advisor"} · ${stockStat.text}`,
+    },
+    {
+      id: "followup",
+      roomId: "wholesale",
+      color: "#58c4dd",
+      label: `${uk ? "Листи" : "Follow-up"} · ${
+        quietCount === null ? "?" : quietCount === 0 ? "OK" : uk ? `${quietCount} мовчать` : `${quietCount} quiet`
+      }`,
+    },
+    {
+      id: "strategist",
+      roomId: "marketing",
+      color: "#d4b15e",
+      label: `${uk ? "Стратег" : "Strategist"} · ${latestPlan ? shortDate(latestPlan.createdAt) : "—"}`,
+    },
+    {
+      id: "coach",
+      roomId: "projects",
+      color: "#b48ce8",
+      label: `${uk ? "Коуч" : "Coach"} · ${projectsStat.text}`,
+    },
+    {
+      id: "brief",
+      roomId: "command",
+      color: "#e8e6df",
+      label: `${uk ? "Бриф" : "Brief"} · ${latestBrief ? shortDate(latestBrief.createdAt) : "—"}`,
+    },
+  ];
+
+  /* ---- terminal sitrep: the old cards' sentences, as a log ---- */
+
+  const lines: TermLine[] = [
+    {
+      tag: "stock-advisor",
+      level: needsAttention ? "WARN" : "OK",
+      tone: needsAttention === null ? "idle" : needsAttention ? "alert" : "ok",
+      text:
+        needsAttention === null
+          ? uk ? "Склад недоступний" : "Stock unavailable"
+          : needsAttention === 0
+            ? uk ? "Все в нормі" : "Everything in stock"
+            : uk
+              ? `${needsAttention} ${needsAttention === 1 ? "позиція потребує" : "позицій потребують"} уваги`
+              : `${needsAttention} ${needsAttention === 1 ? "line needs" : "lines need"} attention`,
+    },
+    {
+      tag: "finance",
+      level: thisMonth !== null && thisMonth.marginUah < 0 ? "ALERT" : "INFO",
+      tone: thisMonth === null ? "idle" : thisMonth.marginUah < 0 ? "alert" : "ok",
+      text:
+        months === null
+          ? uk ? "Фінанси недоступні" : "Finance unavailable"
+          : thisMonth === null
+            ? uk ? "Цього місяця ще порожньо" : "Nothing this month yet"
+            : `${uk ? "Маржа цього місяця" : "This month's margin"}: ${formatUah(thisMonth.marginUah)}`,
+    },
+    {
+      tag: "wholesale",
+      level: dueFollowUps ? "WARN" : "OK",
+      tone: dueFollowUps === null ? "idle" : dueFollowUps ? "warn" : "ok",
+      text:
+        dueFollowUps === null
+          ? uk ? "Партнери недоступні" : "Partners unavailable"
+          : dueFollowUps === 0
+            ? uk ? "Нагадувань немає" : "No follow-ups due"
+            : uk
+              ? `${dueFollowUps} ${dueFollowUps === 1 ? "нагадування" : "нагадувань"} на сьогодні`
+              : `${dueFollowUps} follow-up${dueFollowUps === 1 ? "" : "s"} due`,
+    },
+    {
+      tag: "followup-agent",
+      level: quietCount ? "WARN" : "OK",
+      tone: quietCount === null ? "idle" : quietCount ? "warn" : "ok",
+      text:
+        quietCount === null
+          ? uk ? "Партнери недоступні" : "Partners unavailable"
+          : quietCount === 0
+            ? uk ? "Ніхто не мовчить" : "Nobody has gone quiet"
+            : uk
+              ? `${quietCount} ${quietCount === 1 ? "партнер мовчить" : "партнерів мовчать"} 90+ днів`
+              : `${quietCount} quiet for 90+ days`,
+    },
+    {
+      tag: "marketing",
+      level: "INFO",
+      tone: monthSpend === null ? "idle" : "ok",
+      text:
+        monthSpend === null
+          ? uk ? "Маркетинг недоступний" : "Marketing unavailable"
+          : monthSpend.totalUah === 0
+            ? uk ? "Цього місяця витрат ще немає" : "No spend recorded this month"
+            : `${uk ? "Реклама цього місяця" : "This month's ads"}: ${formatUah(monthSpend.totalUah)}`,
+    },
+    {
+      tag: "strategist",
+      level: latestPlan ? "INFO" : "IDLE",
+      tone: latestPlan ? "ok" : "idle",
+      text:
+        planRuns === null
+          ? uk ? "Журнал недоступний" : "Log unavailable"
+          : latestPlan === null
+            ? uk ? "Ще жодного плану" : "No plans yet"
+            : `${uk ? "Останній план" : "Latest plan"}: ${shortDate(latestPlan.createdAt)}`,
+    },
+    {
+      tag: "savings-coach",
+      level: savings && savings.projectsCounted > 0 ? "INFO" : "IDLE",
+      tone: savings && savings.projectsCounted > 0 ? "warn" : "idle",
+      text:
+        savings === null
+          ? uk ? "Проєкти недоступні" : "Projects unavailable"
+          : savings.projectsCounted === 0
+            ? uk ? "Активних цілей немає" : "No active savings targets"
+            : uk
+              ? `Потрібно ≈ ${formatUah(savings.totalNeededPerMonthUah)}/міс на ${savings.projectsCounted} проєкти`
+              : `Needs ≈ ${formatUah(savings.totalNeededPerMonthUah)}/mo across ${savings.projectsCounted}`,
+    },
+    {
+      tag: "brief",
+      level: latestBrief ? "INFO" : "IDLE",
+      tone: latestBrief ? "ok" : "idle",
+      text:
+        briefRuns === null
+          ? uk ? "Журнал недоступний" : "Log unavailable"
+          : latestBrief === null
+            ? uk ? "Ще жодного брифу" : "No briefs yet"
+            : `${uk ? "Останній бриф" : "Latest brief"}: ${shortDate(latestBrief.createdAt)}`,
+    },
+  ];
+
+  const now = new Date().toLocaleString(uk ? "uk-UA" : "en-GB", {
+    timeZone: "Europe/Kyiv",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
-    <div className="min-h-screen pt-28 pb-24" style={{ background: "#f7f6f4" }}>
-      <div className="page-container">
-        <header className="mb-8">
-          <h1 className="text-3xl font-semibold mb-1" style={{ color: "#111" }}>
-            {uk ? "Панель" : "Operations"}
+    <div className="min-h-screen px-4 sm:px-8 py-8">
+      <header className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <h1 className="font-display text-4xl tracking-widest" style={{ color: "var(--console-text)" }}>
+            {uk ? "МАПА ОПЕРАЦІЙ" : "OPS MAP"}
           </h1>
-          <p className="text-[14.5px]" style={{ color: "#707072" }}>
-            Tactical HB
+          <p className="text-[12px] mt-1" style={{ color: "var(--console-muted)" }}>
+            {uk ? "Спільна памʼять · агенти лише радять" : "Shared memory · agents advise, never act"}
           </p>
-        </header>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Card
-            href={`/${locale}/admin/orders`}
-            title={uk ? "Замовлення" : "Orders"}
-            detail={uk ? "Оплачені, ТТН, відправлення" : "Paid orders, waybills, dispatch"}
-          />
-          <Card
-            href={`/${locale}/admin/stock`}
-            title={uk ? "Склад" : "Stock"}
-            detail={stockDetail}
-            tone={needsAttention ? "#96322c" : undefined}
-          />
-          <Card
-            href={`/${locale}/admin/costs`}
-            title={uk ? "Витрати" : "Costs"}
-            detail={uk ? "Собівартість і операційні витрати" : "Unit costs and operating costs"}
-          />
-          <Card
-            href={`/${locale}/admin/finance`}
-            title={uk ? "Фінанси" : "Finance"}
-            detail={financeDetail}
-            tone={thisMonth !== null && thisMonth.marginUah < 0 ? "#96322c" : undefined}
-          />
-          <Card
-            href={`/${locale}/admin/partners`}
-            title={uk ? "Партнери" : "Partners"}
-            detail={partnersDetail}
-            tone={dueFollowUps ? "#96322c" : undefined}
-          />
-          <Card
-            href={`/${locale}/admin/advisor`}
-            title={uk ? "Радник складу" : "Stock Advisor"}
-            detail={uk ? "Запас у тижнях, що виготовити" : "Weeks of cover, what to make"}
-          />
-          <Card
-            href={`/${locale}/admin/followups`}
-            title={uk ? "Листи партнерам" : "Follow-up drafts"}
-            detail={followUpsDetail}
-            tone={quietCount ? "#96322c" : undefined}
-          />
-          <Card
-            href={`/${locale}/admin/brief`}
-            title={uk ? "Тижневий бриф" : "Weekly Brief"}
-            detail={briefDetail}
-          />
-          <Card
-            href={`/${locale}/admin/marketing`}
-            title={uk ? "Маркетинг" : "Marketing"}
-            detail={marketingDetail}
-          />
-          <Card
-            href={`/${locale}/admin/strategist`}
-            title={uk ? "Маркетинг-стратег" : "Marketing Strategist"}
-            detail={strategistDetail}
-          />
-          <Card
-            href={`/${locale}/admin/projects`}
-            title={uk ? "Проєкти та виставки" : "Projects & Exhibitions"}
-            detail={projectsDetail}
-          />
         </div>
+        <p className="text-[12px] tabular-nums" style={{ color: "var(--console-faint)" }}>
+          {now} · {email}
+        </p>
+      </header>
+
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ border: "1px solid var(--console-border)", background: "var(--console-bg)" }}
+      >
+        <OfficeMap
+          rooms={rooms}
+          agents={agents}
+          coreTitle={uk ? "СПІЛЬНА ПАМʼЯТЬ" : "SHARED MEMORY"}
+          coreSub="Supabase"
+        />
       </div>
+
+      <section
+        className="mt-6 rounded-xl overflow-hidden"
+        style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
+      >
+        <div
+          className="px-4 py-2 console-section-label"
+          style={{ borderBottom: "1px solid var(--console-border)" }}
+        >
+          {uk ? "Зведення" : "Sitrep"}
+        </div>
+        <div className="px-4 py-3 font-mono text-[12.5px] leading-6 overflow-x-auto">
+          {lines.map((l) => (
+            <div key={l.tag} className="whitespace-nowrap">
+              <span style={{ color: TONE_COLOR[l.tone] }}>{l.tag.padEnd(15)}</span>
+              <span style={{ color: "var(--console-faint)" }}>[{l.level}] </span>
+              <span style={{ color: "var(--console-text)" }}>{l.text}</span>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -8,6 +8,13 @@ import {
 import { monthHasGaps, monthLabel } from "@/lib/finance-display";
 import { categoryLabel, currentPeriod, type CostCategory } from "@/lib/costs-display";
 import { formatUah } from "@/lib/stock-display";
+import { fetchFxRates } from "@/lib/fx-admin";
+import {
+  driftConsequence,
+  driftVerdictLabel,
+  driftVerdictTone,
+  shopRateDrift,
+} from "@/lib/fx-display";
 
 /* ---------------------------------------------------------------------------
    Admin: the finance snapshot.
@@ -18,9 +25,15 @@ import { formatUah } from "@/lib/stock-display";
    margin that quietly omits unknowns is the spreadsheet lie this module
    replaces (0018's header says why at length).
 
-   Revenue here is money in (orders.amount_uah — shipping and discounts
-   included). The product table below is merchandise (unit price × qty), and
-   the two will not reconcile to the hryvnia. They are different questions.
+   Goods here is orders.amount_uah, which is GOODS ONLY — delivery has always
+   been charged on top (0022 §8 explains how that went unnoticed), so shipping
+   is its own column and margin counts both. The product table below is
+   merchandise (unit price × qty), and the two will not reconcile to the
+   hryvnia. They are different questions.
+
+   The FX panel is a reading too. It compares the shop's hand-maintained rate
+   against the National Bank's and says how far apart they are; it cannot move
+   either one.
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
@@ -43,11 +56,18 @@ export default async function AdminFinancePage({
   const uk = locale === "uk";
   const month = /^\d{4}-\d{2}$/.test(requested ?? "") ? requested! : currentPeriod();
 
-  const [months, breakdown, products] = await Promise.all([
+  const [months, breakdown, products, fx] = await Promise.all([
     fetchFinanceMonths(12),
     fetchCostBreakdown(month),
     fetchProductMonth(month),
+    // Never part of `failed` below: an unreachable central bank must not turn
+    // the finance page into an error state.
+    fetchFxRates(),
   ]);
+
+  const drift = shopRateDrift(fx.eur);
+  const driftTone = driftVerdictTone(drift.verdict);
+  const consequence = driftConsequence(drift, uk);
 
   const failed = months === null || breakdown === null || products === null;
   const selected = (months ?? []).find((m) => m.month === month) ?? null;
@@ -94,6 +114,74 @@ export default async function AdminFinancePage({
             </a>
           </div>
         </header>
+
+        {/* FX — a reading, never a lever (plan §5 gives Finance the FX view) */}
+        <section
+          className="rounded-lg px-5 py-4 mb-6"
+          style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
+        >
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+            <div>
+              <div className="console-label">{uk ? "НБУ, євро" : "NBU, euro"}</div>
+              <div className="text-[17px] font-semibold tabular-nums" style={{ color: "var(--console-text)" }}>
+                {fx.eur === null ? <Dash /> : `₴${fx.eur.rateUah.toFixed(2)}`}
+              </div>
+            </div>
+            <div>
+              <div className="console-label">{uk ? "НБУ, долар" : "NBU, dollar"}</div>
+              <div className="text-[17px] font-semibold tabular-nums" style={{ color: "var(--console-text)" }}>
+                {fx.usd === null ? <Dash /> : `₴${fx.usd.rateUah.toFixed(2)}`}
+              </div>
+            </div>
+            <div>
+              <div className="console-label">{uk ? "Курс магазину" : "Shop rate"}</div>
+              <div className="text-[17px] font-semibold tabular-nums" style={{ color: "var(--console-text)" }}>
+                ₴{drift.shopRateUah.toFixed(2)}
+              </div>
+            </div>
+            <div>
+              <div className="console-label">{uk ? "Розходження" : "Drift"}</div>
+              <div className="flex items-center gap-2">
+                <span className="text-[17px] font-semibold tabular-nums" style={{ color: "var(--console-text)" }}>
+                  {drift.driftPct === null
+                    ? <Dash />
+                    : `${drift.driftPct > 0 ? "+" : ""}${drift.driftPct.toFixed(1)}%`}
+                </span>
+                <span
+                  className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
+                  style={{ background: driftTone.bg, color: driftTone.fg }}
+                >
+                  {driftVerdictLabel(drift.verdict, uk)}
+                </span>
+              </div>
+            </div>
+            {fx.eur !== null && (
+              <div className="text-[12.5px]" style={{ color: "var(--console-faint)" }}>
+                {uk ? "станом на" : "as of"} {fx.eur.asOf}
+              </div>
+            )}
+          </div>
+
+          {consequence && (
+            <p className="text-[13px] mt-3" style={{ color: "var(--console-muted)" }}>
+              {consequence}
+            </p>
+          )}
+
+          <p className="text-[13px] mt-2" style={{ color: "var(--console-muted)" }}>
+            {uk
+              ? "Курс магазину перераховує лише доплати та підсумки кошика; ціни каталогу задані вручну в обох валютах. Нічого тут не змінює жодну ціну — щоб зрушити курс, відредагуйте UAH_PER_EUR у lib/currency.ts."
+              : "The shop rate converts add-ons and cart subtotals only; catalogue prices are set by hand in both currencies. Nothing here changes any price — to move the rate, edit UAH_PER_EUR in lib/currency.ts."}
+          </p>
+
+          {fx.eur === null && fx.usd === null && (
+            <p className="text-[13px] mt-2" style={{ color: "var(--console-warn)" }}>
+              {uk
+                ? "Курс НБУ зараз недоступний. Решта сторінки від цього не залежить."
+                : "The NBU rate is unavailable right now. Nothing else on this page depends on it."}
+            </p>
+          )}
+        </section>
 
         {failed && (
           <div

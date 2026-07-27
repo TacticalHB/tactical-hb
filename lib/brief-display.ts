@@ -8,6 +8,9 @@
    lib/weekly-brief.ts builds it; this half only says what it is.
 --------------------------------------------------------------------------- */
 
+import type { MarketingChannel } from "@/lib/marketing-display";
+import type { CoachVerdict } from "@/lib/projects-display";
+
 export type BriefStockLine = { sku: string; nameEn: string; nameUk: string; onHand: number };
 
 export type BriefSuggestion = {
@@ -71,6 +74,26 @@ export type BriefData = {
     dueFollowUps: number;
     /** Quiet partners (the Follow-up Agent's list), quietest first. */
     quiet: { company: string; daysQuiet: number; status: string }[];
+  };
+
+  /** Phase D — project savings progress (§6.5's long-promised read). OPTIONAL
+      twice over: absent on runs stored before Phase D, and absent when 0021
+      isn't run yet — the guard below deliberately doesn't require it, so old
+      photographs keep rendering. */
+  projects?: {
+    name: string;
+    savedUah: number;
+    targetBudgetUah: number | null;
+    progressPct: number | null;
+    neededPerMonthUah: number | null;
+    verdict: CoachVerdict;
+  }[];
+
+  /** Phase D — the running month's entered ad spend, same optionality. */
+  adSpend?: {
+    month: string;
+    totalUah: number;
+    byChannel: { channel: MarketingChannel; amountUah: number }[];
   };
 };
 

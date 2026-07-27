@@ -10,6 +10,10 @@ import { quietPartners, type FollowUpCandidate } from "@/lib/followup-display";
 import { logAgentRun, type AgentTrigger } from "@/lib/agent-runs";
 import { briefUah, weekDelta, type BriefData } from "@/lib/brief-display";
 import type { AdvisorRow } from "@/lib/advisor-display";
+import { fetchProjects } from "@/lib/projects-admin";
+import { coachProject, coachedProjects } from "@/lib/projects-display";
+import { fetchAdSpend } from "@/lib/marketing-admin";
+import { spendTotals } from "@/lib/marketing-display";
 
 /* ---------------------------------------------------------------------------
    The Weekly Commander Brief — the plan's one-page situation report (§6.5),
@@ -35,6 +39,7 @@ const COUNTABLE = ["paid", "processing", "shipped", "delivered"];
 const TOP_PRODUCTS = 5;
 const MAX_SUGGESTIONS = 8;
 const MAX_QUIET = 8;
+const MAX_PROJECTS = 6;
 
 export type BriefBuild = {
   brief: BriefData;
@@ -42,6 +47,9 @@ export type BriefBuild = {
   advisorRows: AdvisorRow[];
   /** The full quiet list, for the wholesale_followup audit row. */
   quiet: FollowUpCandidate[];
+  /** The coach's full portfolio view, for the savings_coach audit row.
+      Null when 0021 isn't run yet — the row is then simply not logged. */
+  coachOutput: { projects: NonNullable<BriefData["projects"]>; totalNeededPerMonthUah: number } | null;
 };
 
 export async function buildBrief(): Promise<BriefBuild | null> {
@@ -55,20 +63,26 @@ export async function buildBrief(): Promise<BriefBuild | null> {
     // 15 UTC days reaches every order the 14 Kyiv days could contain.
     const sinceUtc = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [ordersRes, advisorRows, months, partnersRead, linesRes] = await Promise.all([
-      admin
-        .from("orders")
-        .select("created_at, amount_uah, status")
-        .in("status", COUNTABLE)
-        .gte("created_at", sinceUtc),
-      fetchAdvisorRows(),
-      fetchFinanceMonths(3),
-      fetchPartners(),
-      admin
-        .from("order_line_finance")
-        .select("sku, product_name, qty, line_revenue_uah, ordered_on")
-        .gte("ordered_on", weekFrom),
-    ]);
+    const [ordersRes, advisorRows, months, partnersRead, linesRes, projectsRead, adSpendRows] =
+      await Promise.all([
+        admin
+          .from("orders")
+          .select("created_at, amount_uah, status")
+          .in("status", COUNTABLE)
+          .gte("created_at", sinceUtc),
+        fetchAdvisorRows(),
+        fetchFinanceMonths(3),
+        fetchPartners(),
+        admin
+          .from("order_line_finance")
+          .select("sku, product_name, qty, line_revenue_uah, ordered_on")
+          .gte("ordered_on", weekFrom),
+        // Phase D reads. NOT part of the all-or-nothing gate below: these
+        // sections are additive, and a pending 0020/0021 migration must not
+        // silence the stock and money briefing that already worked.
+        fetchProjects(),
+        fetchAdSpend(),
+      ]);
 
     if (ordersRes.error || advisorRows === null || months === null || partnersRead === null || linesRes.error) {
       if (ordersRes.error) console.error("[brief] orders read failed:", ordersRes.error.message);
@@ -132,6 +146,37 @@ export async function buildBrief(): Promise<BriefBuild | null> {
 
     const thisMonth = months.find((m) => m.month === today.slice(0, 7)) ?? null;
 
+    // --- Phase D: savings progress and the month's ad spend ---------------
+    if (projectsRead === null) console.error("[brief] projects unreadable — section omitted");
+    if (adSpendRows === null) console.error("[brief] ad spend unreadable — section omitted");
+
+    const coachOutput =
+      projectsRead === null
+        ? null
+        : (() => {
+            const paced = coachedProjects(projectsRead.projects).map((p) => {
+              const advice = coachProject(p, today);
+              return {
+                name: p.name,
+                savedUah: p.savedUah,
+                targetBudgetUah: p.targetBudgetUah,
+                progressPct: advice.progressPct,
+                neededPerMonthUah: advice.neededPerMonthUah,
+                verdict: advice.verdict,
+              };
+            });
+            return {
+              projects: paced,
+              totalNeededPerMonthUah: paced.reduce(
+                (a, p) => a + (p.neededPerMonthUah ?? 0),
+                0
+              ),
+            };
+          })();
+
+    const monthSpend =
+      adSpendRows === null ? undefined : spendTotals(adSpendRows, today.slice(0, 7));
+
     const brief: BriefData = {
       generatedOn: today,
       week: {
@@ -166,9 +211,21 @@ export async function buildBrief(): Promise<BriefBuild | null> {
           .slice(0, MAX_QUIET)
           .map((c) => ({ company: c.partner.company, daysQuiet: c.daysQuiet, status: c.partner.status })),
       },
+      ...(coachOutput !== null && coachOutput.projects.length > 0
+        ? { projects: coachOutput.projects.slice(0, MAX_PROJECTS) }
+        : {}),
+      ...(monthSpend !== undefined
+        ? {
+            adSpend: {
+              month: today.slice(0, 7),
+              totalUah: monthSpend.totalUah,
+              byChannel: monthSpend.byChannel,
+            },
+          }
+        : {}),
     };
 
-    return { brief, advisorRows, quiet };
+    return { brief, advisorRows, quiet, coachOutput };
   } catch (e) {
     console.error("[brief] build threw:", e);
     return null;
@@ -200,15 +257,16 @@ export async function runWeeklyBrief(opts: {
     return { ok: false, logged: 0, emailed: false, error: "A core input was unreadable." };
   }
 
-  const { brief, advisorRows, quiet } = built;
+  const { brief, advisorRows, quiet, coachOutput } = built;
   const meta = { trigger: opts.trigger, createdBy: opts.createdBy };
 
-  let logged = 0;
-  const logs = await Promise.all([
-    logAgentRun({ ...meta, agent: "stock_advisor", output: { rows: advisorRows } }),
+  // Three Phase C rows, plus the Savings Coach's when its table exists —
+  // each agent's history keeps reading on its own (§6.7).
+  const writes = [
+    logAgentRun({ ...meta, agent: "stock_advisor" as const, output: { rows: advisorRows } }),
     logAgentRun({
       ...meta,
-      agent: "wholesale_followup",
+      agent: "wholesale_followup" as const,
       output: {
         candidates: quiet.map((c) => ({
           company: c.partner.company,
@@ -218,8 +276,14 @@ export async function runWeeklyBrief(opts: {
         })),
       },
     }),
-    logAgentRun({ ...meta, agent: "weekly_brief", output: brief }),
-  ]);
+    logAgentRun({ ...meta, agent: "weekly_brief" as const, output: brief }),
+  ];
+  if (coachOutput !== null) {
+    writes.push(logAgentRun({ ...meta, agent: "savings_coach" as const, output: coachOutput }));
+  }
+
+  let logged = 0;
+  const logs = await Promise.all(writes);
   for (const l of logs) if (l.ok) logged += 1;
 
   let emailed = false;
@@ -231,7 +295,10 @@ export async function runWeeklyBrief(opts: {
     ok: true,
     logged,
     emailed,
-    error: logged < 3 ? "Some runs were not logged — has migration 0019 been run?" : undefined,
+    error:
+      logged < writes.length
+        ? "Some runs were not logged — have migrations 0019 and 0020 been run?"
+        : undefined,
   };
 }
 
@@ -250,6 +317,22 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
   const productLines = brief.topProducts.map(
     (p) => `${p.name}: ${p.units} pcs${p.revenueUah !== null ? `, ${briefUah(p.revenueUah)}` : ""}`
   );
+  const savingsLines = (brief.projects ?? []).map(
+    (p) =>
+      `${p.name}: ${briefUah(p.savedUah)}${
+        p.targetBudgetUah !== null ? ` / ${briefUah(p.targetBudgetUah)} (${p.progressPct ?? 0}%)` : ""
+      }${p.neededPerMonthUah !== null ? ` — needs ${briefUah(p.neededPerMonthUah)}/mo` : ""}`
+  );
+  const adSpendLines =
+    brief.adSpend === undefined
+      ? []
+      : brief.adSpend.byChannel.length === 0
+        ? [`${brief.adSpend.month}: nothing recorded yet`]
+        : [
+            `${brief.adSpend.month}: ${briefUah(brief.adSpend.totalUah)} — ${brief.adSpend.byChannel
+              .map((c) => `${c.channel} ${briefUah(c.amountUah)}`)
+              .join(", ")}`,
+          ];
 
   const textBlock = (title: string, lines: string[]) =>
     lines.length ? [``, `${title}:`, ...lines.map((l) => `  ${l}`)] : [];
@@ -264,6 +347,8 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
     ...textBlock("Advisor suggests", suggestionLines),
     ...textBlock("Top products", productLines),
     ...textBlock("Wholesale gone quiet", quietLines),
+    ...textBlock("Project savings", savingsLines),
+    ...textBlock("Ad spend", adSpendLines),
     ``,
     `Follow-ups due: ${brief.wholesale.dueFollowUps}`,
     ``,
@@ -301,6 +386,8 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
         ${htmlList("Advisor suggests", suggestionLines)}
         ${htmlList("Top products", productLines)}
         ${htmlList("Wholesale gone quiet", quietLines)}
+        ${htmlList("Project savings", savingsLines)}
+        ${htmlList("Ad spend", adSpendLines)}
         <p style="margin:14px 0 0">Follow-ups due: <strong>${brief.wholesale.dueFollowUps}</strong></p>
         <p style="margin:14px 0 0"><a href="${siteUrl}/uk/admin/brief" style="color:#111">Open the brief</a></p>
       </div>

@@ -12,7 +12,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
    "unavailable", not to a crash — the same manner as every admin read.
 --------------------------------------------------------------------------- */
 
-export type AgentName = "stock_advisor" | "wholesale_followup" | "weekly_brief";
+export type AgentName =
+  | "stock_advisor"
+  | "wholesale_followup"
+  | "weekly_brief"
+  | "marketing_strategist"
+  | "savings_coach";
 export type AgentTrigger = "cron" | "manual";
 
 export type AgentRun = {

@@ -3,6 +3,8 @@ import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchAgentRuns } from "@/lib/agent-runs";
 import { isBriefData, briefUah, weekDelta, type BriefData } from "@/lib/brief-display";
 import { advisorStatusLabel } from "@/lib/advisor-display";
+import { channelLabel } from "@/lib/marketing-display";
+import { verdictLabel, verdictTone } from "@/lib/projects-display";
 import GenerateBriefButton from "@/components/admin/GenerateBriefButton";
 
 /* ---------------------------------------------------------------------------
@@ -187,6 +189,79 @@ function Brief({ data, uk, locale }: { data: BriefData; uk: boolean; locale: str
             </ul>
           </Section>
         </div>
+      )}
+
+      {/* Phase D sections — optional: older stored runs simply lack them. */}
+      {data.projects !== undefined && data.projects.length > 0 && (
+        <Section title={uk ? "Накопичення на проєкти" : "Project savings"}>
+          <ul className="text-[14px]" style={{ color: "#3a3a3c" }}>
+            {data.projects.map((p) => {
+              const tone = verdictTone(p.verdict);
+              return (
+                <li key={p.name} className="py-1 flex flex-wrap items-baseline gap-x-3">
+                  <span style={{ color: "#111" }}>{p.name}</span>
+                  <span className="tabular-nums">
+                    {briefUah(p.savedUah)}
+                    {p.targetBudgetUah !== null && (
+                      <span style={{ color: "#a3a3a6" }}>
+                        {" "}
+                        / {briefUah(p.targetBudgetUah)}
+                        {p.progressPct !== null && ` · ${p.progressPct}%`}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
+                    style={{ background: tone.bg, color: tone.fg }}
+                  >
+                    {verdictLabel(p.verdict, uk)}
+                  </span>
+                  {p.neededPerMonthUah !== null && (
+                    <span className="text-[13px] tabular-nums" style={{ color: "#707072" }}>
+                      {uk ? "потрібно" : "needs"} {briefUah(p.neededPerMonthUah)}/{uk ? "міс" : "mo"}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+            <Link href={`/${locale}/admin/projects`} className="underline underline-offset-2">
+              {uk ? "Проєкти та виставки" : "Projects & exhibitions"}
+            </Link>
+          </p>
+        </Section>
+      )}
+
+      {data.adSpend !== undefined && (
+        <Section title={uk ? "Реклама цього місяця" : "This month's ad spend"}>
+          {data.adSpend.byChannel.length === 0 ? (
+            <p className="text-[14px]" style={{ color: "#707072" }}>
+              {uk
+                ? `За ${data.adSpend.month} ще нічого не записано.`
+                : `Nothing recorded for ${data.adSpend.month} yet.`}
+            </p>
+          ) : (
+            <>
+              <div className="text-[22px] font-semibold mb-1" style={{ color: "#111" }}>
+                {briefUah(data.adSpend.totalUah)}
+                <span className="text-[14px] font-normal ml-2" style={{ color: "#707072" }}>
+                  {data.adSpend.month}
+                </span>
+              </div>
+              <p className="text-[14px]" style={{ color: "#3a3a3c" }}>
+                {data.adSpend.byChannel
+                  .map((c) => `${channelLabel(c.channel, uk)} ${briefUah(c.amountUah)}`)
+                  .join(" · ")}
+              </p>
+            </>
+          )}
+          <p className="text-[13px] mt-3" style={{ color: "#8a8a8d" }}>
+            <Link href={`/${locale}/admin/strategist`} className="underline underline-offset-2">
+              {uk ? "План стратега" : "Strategist's plan"}
+            </Link>
+          </p>
+        </Section>
       )}
     </div>
   );

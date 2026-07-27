@@ -56,7 +56,7 @@ export default async function AdminFinancePage({
   const csvBase = "/api/admin/finance/export";
 
   return (
-    <div className="min-h-screen pt-28 pb-24" style={{ background: "#f7f6f4" }}>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
       <div className="page-container">
         <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthContext";
 
 function PersonIcon() {
@@ -18,12 +18,33 @@ export default function AccountMenu({ locale }: { locale: string }) {
   const uk = locale === "uk";
   const { user, profile, loading, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  // Holds the user id admin status was confirmed FOR, so a sign-out or a
+  // switch to another account can never leave a stale "yes" behind.
+  const [adminFor, setAdminFor] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  // Phase E: an admin's person icon opens the console, not the dropdown.
+  // ADMIN_EMAILS lives server-side, so ask /api/admin/me once per sign-in.
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.id;
+    let cancelled = false;
+    fetch("/api/admin/me")
+      .then((r) => (r.ok ? r.json() : { admin: false }))
+      .then((d) => !cancelled && setAdminFor(d.admin === true ? uid : null))
+      .catch(() => !cancelled && setAdminFor(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const isAdmin = !!user && adminFor === user.id;
 
   useEffect(() => {
     if (!open) return;
@@ -64,10 +85,10 @@ export default function AccountMenu({ locale }: { locale: string }) {
   return (
     <div className="relative flex items-center" ref={wrapRef}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (isAdmin ? router.push(`/${locale}/admin`) : setOpen((o) => !o))}
         className="nav-link flex items-center justify-center gap-2"
-        aria-label={L.account}
-        aria-expanded={open}
+        aria-label={isAdmin ? (uk ? "Командний центр" : "Command centre") : L.account}
+        aria-expanded={isAdmin ? undefined : open}
       >
         <PersonIcon />
         {!loading && user && (

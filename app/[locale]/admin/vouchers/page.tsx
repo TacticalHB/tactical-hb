@@ -1,18 +1,18 @@
-import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/supabase/require-user";
-import { isAdminEmail } from "@/lib/admin";
+import { requireAdminPage } from "@/lib/admin-guard";
 import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
 import VoucherRedeemForm from "@/components/account/VoucherRedeemForm";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /* ---------------------------------------------------------------------------
-   Admin: redeem a voucher.
+   Admin: redeem a voucher. Lived at /account/admin/vouchers until Phase E
+   moved it into the console with the rest of the OS; the old URL redirects.
 
-   Guarded twice over. This page 404s for non-admins — notFound() rather than a
-   "forbidden" page, so its existence isn't advertised to customers poking at
-   URLs. The action it calls re-checks independently, because that's the real
-   boundary; this check only keeps the UI honest.
+   Guarded twice over: this page redirects/404s for non-admins, and the action
+   it calls re-checks independently, because that's the real boundary; this
+   check only keeps the UI honest.
 --------------------------------------------------------------------------- */
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminVouchersPage({
   params,
@@ -20,8 +20,7 @@ export default async function AdminVouchersPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const { user } = await requireUser(locale);
-  if (!isAdminEmail(user.email)) notFound();
+  await requireAdminPage(locale, "/admin/vouchers");
 
   const uk = locale === "uk";
 
@@ -53,7 +52,8 @@ export default async function AdminVouchersPage({
   const { activeVouchers, usedVouchers } = splitVouchers(recent);
 
   return (
-    <div>
+    <div className="min-h-screen pt-10 pb-24" style={{ background: "#f7f6f4" }}>
+      <div className="page-container max-w-3xl">
       <h1 className="text-3xl font-semibold mb-2" style={{ color: "#111" }}>
         {uk ? "Погашення ваучерів" : "Redeem a voucher"}
       </h1>
@@ -106,6 +106,7 @@ export default async function AdminVouchersPage({
           </ul>
         </div>
       )}
+      </div>
     </div>
   );
 }

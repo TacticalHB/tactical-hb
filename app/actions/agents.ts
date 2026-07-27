@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminActor } from "@/lib/admin-guard";
 import { saveSupplySettings } from "@/lib/advisor-admin";
 import { runWeeklyBrief } from "@/lib/weekly-brief";
+import { runStrategist } from "@/lib/strategist-admin";
 
 /* ---------------------------------------------------------------------------
    Admin: the Phase C agent actions — and the complete list of what agents can
@@ -79,4 +80,23 @@ export async function generateBrief(): Promise<
 
   revalidatePath("/[locale]/admin/brief", "page");
   return { ok: true, warning: res.error ?? null };
+}
+
+/**
+ * Draft next month's campaign plan, on demand (§6.4). Reads stock, finance,
+ * spend and the creative library; writes exactly one agent_runs row — the
+ * plan the founder is about to read. Sends nothing, spends nothing, and has
+ * no ad platform to talk to even if it wanted one.
+ */
+export async function generateCampaignPlan(): Promise<
+  { ok: true; warning: string | null } | { ok: false; error: string }
+> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "Not authorised." };
+
+  const res = await runStrategist({ trigger: "manual", createdBy: actor });
+  if (!res.ok) return res;
+
+  revalidatePath("/[locale]/admin/strategist", "page");
+  return { ok: true, warning: res.warning };
 }

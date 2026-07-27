@@ -59,6 +59,18 @@ export default function AccountNav({ locale, isAdmin = false }: { locale: string
       href: `/${locale}/admin/brief`,
       label: uk ? "Тижневий бриф (адмін)" : "Weekly Brief (admin)",
     });
+    items.push({
+      href: `/${locale}/admin/marketing`,
+      label: uk ? "Маркетинг (адмін)" : "Marketing (admin)",
+    });
+    items.push({
+      href: `/${locale}/admin/strategist`,
+      label: uk ? "Маркетинг-стратег (адмін)" : "Strategist (admin)",
+    });
+    items.push({
+      href: `/${locale}/admin/projects`,
+      label: uk ? "Проєкти (адмін)" : "Projects (admin)",
+    });
   }
 
   const isActive = (href: string) =>

@@ -8,6 +8,10 @@ import { followUpDue } from "@/lib/partners-display";
 import { currentPeriod } from "@/lib/costs-display";
 import { quietPartners } from "@/lib/followup-display";
 import { fetchAgentRuns } from "@/lib/agent-runs";
+import { fetchAdSpend } from "@/lib/marketing-admin";
+import { spendTotals } from "@/lib/marketing-display";
+import { fetchProjects } from "@/lib/projects-admin";
+import { coachSummary } from "@/lib/projects-display";
 
 /* ---------------------------------------------------------------------------
    Admin home.
@@ -61,12 +65,16 @@ export default async function AdminHomePage({
   await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
-  const [items, months, partnersRead, briefRuns] = await Promise.all([
-    fetchStock(),
-    fetchFinanceMonths(1),
-    fetchPartners(),
-    fetchAgentRuns("weekly_brief", 1),
-  ]);
+  const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead] =
+    await Promise.all([
+      fetchStock(),
+      fetchFinanceMonths(1),
+      fetchPartners(),
+      fetchAgentRuns("weekly_brief", 1),
+      fetchAdSpend(),
+      fetchAgentRuns("marketing_strategist", 1),
+      fetchProjects(),
+    ]);
 
   const needsAttention =
     items === null ? null : items.filter((i) => stockLevel(i) !== "ok").length;
@@ -144,6 +152,47 @@ export default async function AdminHomePage({
           ? `${needsAttention} ${needsAttention === 1 ? "позиція потребує" : "позицій потребують"} уваги`
           : `${needsAttention} ${needsAttention === 1 ? "line needs" : "lines need"} attention`;
 
+  const monthSpend = adSpendRows === null ? null : spendTotals(adSpendRows, currentPeriod());
+  const marketingDetail =
+    monthSpend === null
+      ? uk
+        ? "Креативи та витрати на рекламу"
+        : "Creatives and ad spend"
+      : monthSpend.totalUah === 0
+        ? uk
+          ? "Цього місяця витрат ще немає"
+          : "No spend recorded this month"
+        : `${uk ? "Реклама цього місяця" : "This month's ads"}: ${formatUah(monthSpend.totalUah)}`;
+
+  const latestPlan = planRuns?.[0] ?? null;
+  const strategistDetail =
+    planRuns === null
+      ? uk
+        ? "Журнал недоступний"
+        : "Log unavailable"
+      : latestPlan === null
+        ? uk
+          ? "Ще жодного плану"
+          : "No plans yet"
+        : `${uk ? "Останній" : "Latest"}: ${new Date(latestPlan.createdAt).toLocaleDateString(
+            uk ? "uk-UA" : "en-GB",
+            { timeZone: "Europe/Kyiv", day: "numeric", month: "short" }
+          )}`;
+
+  const savings = projectsRead === null ? null : coachSummary(projectsRead.projects, today, null);
+  const projectsDetail =
+    savings === null
+      ? uk
+        ? "Проєкти недоступні"
+        : "Projects unavailable"
+      : savings.projectsCounted === 0
+        ? uk
+          ? "Майбутні продукти й виставки"
+          : "Future products and fairs"
+        : uk
+          ? `Потрібно ≈ ${formatUah(savings.totalNeededPerMonthUah)}/міс на ${savings.projectsCounted} проєкти`
+          : `Needs ≈ ${formatUah(savings.totalNeededPerMonthUah)}/mo across ${savings.projectsCounted}`;
+
   return (
     <div className="min-h-screen pt-28 pb-24" style={{ background: "#f7f6f4" }}>
       <div className="page-container">
@@ -200,6 +249,21 @@ export default async function AdminHomePage({
             href={`/${locale}/admin/brief`}
             title={uk ? "Тижневий бриф" : "Weekly Brief"}
             detail={briefDetail}
+          />
+          <Card
+            href={`/${locale}/admin/marketing`}
+            title={uk ? "Маркетинг" : "Marketing"}
+            detail={marketingDetail}
+          />
+          <Card
+            href={`/${locale}/admin/strategist`}
+            title={uk ? "Маркетинг-стратег" : "Marketing Strategist"}
+            detail={strategistDetail}
+          />
+          <Card
+            href={`/${locale}/admin/projects`}
+            title={uk ? "Проєкти та виставки" : "Projects & Exhibitions"}
+            detail={projectsDetail}
           />
         </div>
       </div>

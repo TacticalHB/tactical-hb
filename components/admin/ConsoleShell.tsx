@@ -137,6 +137,12 @@ export default function ConsoleShell({
         <Link href={`/${locale}`} onClick={() => setOpen(false)} className="console-nav-link">
           {uk ? "↗ До магазину" : "↗ View shop"}
         </Link>
+        {/* The founder is a customer too. Phase E pointed the shop's person
+            icon at this console, which left his own orders, loyalty and
+            favourites with no doorway at all — this is it. */}
+        <Link href={`/${locale}/account`} onClick={() => setOpen(false)} className="console-nav-link">
+          {uk ? "↗ Мій акаунт" : "↗ My account"}
+        </Link>
         <button onClick={doSignOut} className="console-nav-link w-full text-left cursor-pointer">
           {uk ? "Вийти" : "Sign out"}
         </button>

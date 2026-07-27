@@ -433,3 +433,48 @@ export function salesChannelLabel(c: "retail" | "wholesale", uk: boolean): strin
   if (c === "retail") return uk ? "Роздріб" : "Retail";
   return uk ? "Опт" : "Wholesale";
 }
+
+/**
+ * One alert, in words.
+ *
+ * Lives here rather than in the margin page because the Weekly Brief carries
+ * the same alerts, and two renderings of one alert are two chances to word
+ * the same fact differently — which is how a founder ends up believing the
+ * page and the email disagree.
+ */
+export function marginAlertText(a: MarginAlert, uk: boolean): string {
+  const money = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
+  const pct = (n: number) => `${n.toFixed(1)}%`;
+
+  switch (a.type) {
+    case "below_cost":
+      return uk
+        ? `${a.nameUk} продається нижче собівартості — ${money(a.grossUah)} (${pct(a.grossPct)}).`
+        : `${a.nameEn} is selling below cost — ${money(a.grossUah)} (${pct(a.grossPct)}).`;
+    case "thin":
+      return uk
+        ? `${a.nameUk}: маржа ${pct(a.grossPct)} на ${a.units} шт.`
+        : `${a.nameEn}: ${pct(a.grossPct)} margin on ${a.units} units.`;
+    case "collapse":
+      return uk
+        ? `${a.nameUk}: маржа впала з ${pct(a.trailingPct)} до ${pct(a.grossPct)} — на ${a.dropPoints} п., ${a.units} шт.`
+        : `${a.nameEn}: margin fell from ${pct(a.trailingPct)} to ${pct(a.grossPct)} — ${a.dropPoints} points, on ${a.units} units.`;
+    case "channel_below_cost":
+      return uk
+        ? `Канал «${salesChannelLabel(a.channel, uk)}» у мінусі: ${money(a.grossUah)}.`
+        : `${salesChannelLabel(a.channel, uk)} is under water: ${money(a.grossUah)}.`;
+    case "month_loss":
+      return uk
+        ? `Місяць закрито зі збитком ${money(a.marginUah)} після всіх витрат.`
+        : `The month closed at a loss of ${money(a.marginUah)} after all costs.`;
+    case "ads_exceed_gross":
+      return uk
+        ? `Реклама (${money(a.adSpendUah)}) перевищує валову маржу (${money(a.grossUah)}).`
+        : `Ad spend (${money(a.adSpendUah)}) exceeds gross margin (${money(a.grossUah)}).`;
+  }
+}
+
+/** Alerts that mean money is actually being lost, not merely thin. */
+export function isCriticalAlert(a: MarginAlert): boolean {
+  return a.type === "below_cost" || a.type === "channel_below_cost" || a.type === "month_loss";
+}

@@ -74,34 +74,33 @@ export async function GET(request: NextRequest) {
   }).format(new Date());
   const isMonday = kyivWeekday === "Mon";
 
+  // The Cost & Margin Guard checks the last full month (plan §6.2). It writes
+  // one agent_runs row and sends nothing on its own.
+  //
+  // BEFORE the brief, and the order is a real dependency now rather than a
+  // preference: the brief QUOTES the Guard's latest stored report, so running
+  // it second would put last Monday's margin in tonight's email — a figure
+  // that is stale in exactly the way an alert must never be. It was the other
+  // way round until the brief grew its margin section, for the timeout reason
+  // below; the dependency outranks it.
+  //
+  // The cost of this order: maxDuration is 60s and Hobby will not allow more,
+  // so on a slow Nova Poshta Monday the brief is now what gets cut rather than
+  // the margin row. The Guard is a handful of view reads and one insert —
+  // well under a second — so it buys that risk cheaply, but it is a real
+  // trade and this comment is where it is recorded.
+  //
+  // Re-reporting the same month every Monday is the point rather than a flaw:
+  // unit costs and supplier invoices arrive late, so each rerun is a truer
+  // picture than the last, and every run is timestamped.
+  const margin = isMonday
+    ? await runMarginGuard({ trigger: "cron", createdBy: "system" })
+    : null;
+
   // The Commander Brief writes itself on Kyiv Mondays (plan §6.5). Internal
   // mail to the shop's own address — the founder's briefing, nobody else's.
   const brief = isMonday
     ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
-    : null;
-
-  // The Cost & Margin Guard checks the last full month (plan §6.2). It writes
-  // one agent_runs row and sends nothing — the report is read on /admin/margin.
-  //
-  // AFTER the brief, and the order is the whole decision. maxDuration is 60s
-  // and the Hobby plan will not allow more, so on a slow Nova Poshta Monday
-  // something could be cut off; whatever runs last is what gets cut. A missed
-  // brief is a missed EMAIL — the one artefact here that actually reaches the
-  // founder, and it will not retry until next Monday. A missed margin row is
-  // recoverable in two clicks on /admin/margin, and re-runs by itself next
-  // week. So the email is protected and the report takes the risk.
-  //
-  // If the brief ever grows a margin line it will read whatever row exists,
-  // which under this order is LAST Monday's. That is the moment to flip these
-  // two back — not before, because today there is no data dependency, only a
-  // hypothetical one.
-  //
-  // Re-reporting the same month every Monday is the point rather than a flaw:
-  // unit costs and supplier invoices arrive late, so each rerun is a truer
-  // picture than the last, and the page timestamps every run so a figure that
-  // moved is visible as having moved.
-  const margin = isMonday
-    ? await runMarginGuard({ trigger: "cron", createdBy: "system" })
     : null;
 
   return NextResponse.json({ ok: true, ...tracking, stock, margin, brief });

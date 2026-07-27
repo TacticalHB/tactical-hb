@@ -5,6 +5,7 @@ import { formatUah } from "@/lib/stock-display";
 import { monthLabel } from "@/lib/finance-display";
 import {
   isMarginReport,
+  marginAlertText,
   marginNoteLabel,
   marginVerdictLabel,
   marginVerdictTone,
@@ -42,35 +43,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function alertText(a: MarginAlert, uk: boolean): string {
-  switch (a.type) {
-    case "below_cost":
-      return uk
-        ? `${a.nameUk} продається нижче собівартості — ${formatUah(a.grossUah)} (${pct(a.grossPct)}).`
-        : `${a.nameEn} is selling below cost — ${formatUah(a.grossUah)} (${pct(a.grossPct)}).`;
-    case "thin":
-      return uk
-        ? `${a.nameUk}: маржа ${pct(a.grossPct)} на ${a.units} шт.`
-        : `${a.nameEn}: ${pct(a.grossPct)} margin on ${a.units} units.`;
-    case "collapse":
-      return uk
-        ? `${a.nameUk}: маржа впала з ${pct(a.trailingPct)} до ${pct(a.grossPct)} — на ${a.dropPoints} п., ${a.units} шт.`
-        : `${a.nameEn}: margin fell from ${pct(a.trailingPct)} to ${pct(a.grossPct)} — ${a.dropPoints} points, on ${a.units} units.`;
-    case "channel_below_cost":
-      return uk
-        ? `Канал «${salesChannelLabel(a.channel, uk)}» у мінусі: ${formatUah(a.grossUah)}.`
-        : `${salesChannelLabel(a.channel, uk)} is under water: ${formatUah(a.grossUah)}.`;
-    case "month_loss":
-      return uk
-        ? `Місяць закрито зі збитком ${formatUah(a.marginUah)} після всіх витрат.`
-        : `The month closed at a loss of ${formatUah(a.marginUah)} after all costs.`;
-    case "ads_exceed_gross":
-      return uk
-        ? `Реклама (${formatUah(a.adSpendUah)}) перевищує валову маржу (${formatUah(a.grossUah)}).`
-        : `Ad spend (${formatUah(a.adSpendUah)}) exceeds gross margin (${formatUah(a.grossUah)}).`;
-  }
-}
-
 function alertTone(a: MarginAlert): { bg: string; fg: string } {
   switch (a.type) {
     case "below_cost":
@@ -105,7 +77,7 @@ function Report({ data, uk, locale }: { data: MarginReport; uk: boolean; locale:
                   className="rounded px-3 py-2 text-[13.5px]"
                   style={{ background: tone.bg, color: tone.fg }}
                 >
-                  {alertText(a, uk)}
+                  {marginAlertText(a, uk)}
                 </li>
               );
             })}

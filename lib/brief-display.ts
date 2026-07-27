@@ -10,6 +10,7 @@
 
 import type { MarketingChannel } from "@/lib/marketing-display";
 import type { CoachVerdict } from "@/lib/projects-display";
+import { isCriticalAlert, type MarginAlert, type MarginReport } from "@/lib/margin-display";
 
 export type BriefStockLine = { sku: string; nameEn: string; nameUk: string; onHand: number };
 
@@ -95,7 +96,64 @@ export type BriefData = {
     totalUah: number;
     byChannel: { channel: MarketingChannel; amountUah: number }[];
   };
+
+  /** Phase F — what the Cost & Margin Guard last said (§6.2), same optionality
+      again: absent on runs stored before Phase F, and absent until the Guard
+      has run at least once.
+
+      This is a QUOTATION, not a recalculation. The brief does not compute a
+      margin of its own; it repeats the Guard's stored report and stamps it
+      with `checkedAt` so a figure from last Monday is visibly from last
+      Monday. Two modules computing "the margin" separately is how a founder
+      ends up with two numbers and no idea which to believe. */
+  margin?: {
+    /** The month the Guard reported on — the last FULL month, not this one. */
+    month: string;
+    /** When that run was made, so staleness is visible rather than implied. */
+    checkedAt: string;
+    marginUah: number;
+    revenueUah: number | null;
+    shippingChargedUah: number;
+    /** True when the Guard found no orders and no costs in that month. */
+    empty: boolean;
+    alertCount: number;
+    criticalCount: number;
+    /** The worst few, stored whole so the page and the email word them
+        identically via marginAlertText(). */
+    alerts: MarginAlert[];
+  };
 };
+
+/** The worst few margin alerts. A briefing points; the page enumerates. */
+const MAX_MARGIN_ALERTS = 4;
+
+/**
+ * The Guard's report, reduced to a brief-sized quotation.
+ *
+ * Pure, and separate from the read in lib/weekly-brief.ts, because this is
+ * where the judgement lives: which alerts survive the cut, and what "empty"
+ * means. Critical alerts are ranked first so a four-item cut never drops
+ * "selling below cost" to make room for "margin is a bit thin".
+ */
+export function marginSectionFromReport(
+  report: MarginReport,
+  checkedAt: string
+): NonNullable<BriefData["margin"]> {
+  const ranked = [...report.alerts].sort(
+    (a, b) => Number(isCriticalAlert(b)) - Number(isCriticalAlert(a))
+  );
+  return {
+    month: report.month,
+    checkedAt,
+    marginUah: report.totals.marginUah,
+    revenueUah: report.totals.revenueUah,
+    shippingChargedUah: report.totals.shippingChargedUah,
+    empty: report.notes.includes("no_month_data"),
+    alertCount: report.alerts.length,
+    criticalCount: report.alerts.filter(isCriticalAlert).length,
+    alerts: ranked.slice(0, MAX_MARGIN_ALERTS),
+  };
+}
 
 /**
  * Is this stored agent_runs.output a brief this code can render? Old runs

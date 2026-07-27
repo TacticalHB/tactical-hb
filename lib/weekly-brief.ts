@@ -7,8 +7,15 @@ import { fetchFinanceMonths } from "@/lib/finance-admin";
 import { fetchPartners } from "@/lib/partners-admin";
 import { followUpDue } from "@/lib/partners-display";
 import { quietPartners, type FollowUpCandidate } from "@/lib/followup-display";
-import { logAgentRun, type AgentTrigger } from "@/lib/agent-runs";
-import { briefUah, weekDelta, type BriefData } from "@/lib/brief-display";
+import { fetchAgentRuns, logAgentRun, type AgentTrigger } from "@/lib/agent-runs";
+import { isMarginReport } from "@/lib/margin-display";
+import {
+  briefUah,
+  marginSectionFromReport,
+  weekDelta,
+  type BriefData,
+} from "@/lib/brief-display";
+import { marginAlertText } from "@/lib/margin-display";
 import type { AdvisorRow } from "@/lib/advisor-display";
 import { fetchProjects } from "@/lib/projects-admin";
 import { coachProject, coachedProjects } from "@/lib/projects-display";
@@ -83,6 +90,12 @@ export async function buildBrief(): Promise<BriefBuild | null> {
         fetchProjects(),
         fetchAdSpend(),
       ]);
+
+    // Phase F: the Margin Guard's latest stored report, QUOTED rather than
+    // recomputed. Additive like the Phase D reads — a brief that refused to
+    // build because the Guard had never run would be a regression for the
+    // sake of a section that did not exist last week.
+    const marginRuns = await fetchAgentRuns("cost_margin_guard", 1);
 
     if (ordersRes.error || advisorRows === null || months === null || partnersRead === null || linesRes.error) {
       if (ordersRes.error) console.error("[brief] orders read failed:", ordersRes.error.message);
@@ -177,6 +190,15 @@ export async function buildBrief(): Promise<BriefBuild | null> {
     const monthSpend =
       adSpendRows === null ? undefined : spendTotals(adSpendRows, today.slice(0, 7));
 
+    // --- Phase F: the Guard's last word on margin -------------------------
+    if (marginRuns === null) console.error("[brief] margin runs unreadable — section omitted");
+
+    const latestMargin = marginRuns?.[0] ?? null;
+    const marginSection =
+      latestMargin !== null && isMarginReport(latestMargin.output)
+        ? marginSectionFromReport(latestMargin.output, latestMargin.createdAt)
+        : undefined;
+
     const brief: BriefData = {
       generatedOn: today,
       week: {
@@ -223,6 +245,7 @@ export async function buildBrief(): Promise<BriefBuild | null> {
             },
           }
         : {}),
+      ...(marginSection !== undefined ? { margin: marginSection } : {}),
     };
 
     return { brief, advisorRows, quiet, coachOutput };
@@ -334,6 +357,21 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
               .join(", ")}`,
           ];
 
+  // English labels, like the rest of this mail and the stock alert. The
+  // alerts themselves come from marginAlertText so the email and the page
+  // cannot word the same finding two ways.
+  const marginLines = (() => {
+    const m = brief.margin;
+    if (m === undefined) return [];
+    if (m.empty) return [`${m.month}: no orders and no costs — nothing to judge`];
+    const head = `${m.month}: margin ${briefUah(m.marginUah)}${
+      m.alertCount === 0
+        ? " — nothing flagged"
+        : ` — ${m.alertCount} flagged${m.criticalCount > 0 ? `, ${m.criticalCount} losing money` : ""}`
+    }`;
+    return [head, ...m.alerts.map((a) => marginAlertText(a, false))];
+  })();
+
   const textBlock = (title: string, lines: string[]) =>
     lines.length ? [``, `${title}:`, ...lines.map((l) => `  ${l}`)] : [];
 
@@ -344,6 +382,7 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
       ? `Month so far: revenue ${briefUah(brief.monthToDate.revenueUah)}, margin ${briefUah(brief.monthToDate.marginUah)}`
       : `Month so far: nothing recorded yet`,
     ...textBlock("Critical stock", criticalNames),
+    ...textBlock("Margin, last full month", marginLines),
     ...textBlock("Advisor suggests", suggestionLines),
     ...textBlock("Top products", productLines),
     ...textBlock("Wholesale gone quiet", quietLines),
@@ -383,6 +422,11 @@ async function sendBriefMail(brief: BriefData): Promise<boolean> {
           }
         </p>
         ${htmlList("Critical stock", criticalNames, "#96322c")}
+        ${htmlList(
+          "Margin, last full month",
+          marginLines,
+          (brief.margin?.criticalCount ?? 0) > 0 ? "#96322c" : undefined
+        )}
         ${htmlList("Advisor suggests", suggestionLines)}
         ${htmlList("Top products", productLines)}
         ${htmlList("Wholesale gone quiet", quietLines)}

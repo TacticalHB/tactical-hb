@@ -658,3 +658,32 @@ body {
   filter: invert(0.7);
   cursor: pointer;
 }
+
+/* ---------------------------------------------------------------------------
+   The ops map keeps its own skin.
+
+   Mario preferred the Phase E map to the command-deck restyle of it, and he is
+   right: the deck's calm is correct for tables and forms, but it drained the
+   one screen whose job is to look alive. Muting the core glow and the data
+   lines cost the map its centre of gravity — the hexagon stopped reading as
+   the thing every department feeds into.
+
+   So the map carries Phase E's palette, scoped here and nowhere else. It is
+   the deliberate exception to the deck's colour rule: the cyan data lines and
+   the brighter agent greens live inside .thb-map and cannot leak into a
+   module page, a chip, or a button.
+--------------------------------------------------------------------------- */
+.thb-map {
+  --console-bg: #0b0e13;
+  --console-panel: #10141b;
+  --console-panel-2: #161b24;
+  --console-border: #222a36;
+  --console-text: #e8e6df;
+  --console-muted: #8b93a1;
+  --console-faint: #5d6572;
+  --console-accent: #d4b15e;
+  --console-accent-dim: rgba(212, 177, 94, 0.14);
+  --console-alert: #e2574f;
+  --console-ok: #4cd48b;
+  --console-data: #58c4dd;
+}

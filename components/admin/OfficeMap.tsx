@@ -66,7 +66,7 @@ const CORE = { x: 600, y: 380, r: 78 };
 
 const TONE_COLOR: Record<RoomTone, string> = {
   ok: "var(--console-ok)",
-  warn: "var(--console-warn)",
+  warn: "var(--console-accent)",
   alert: "var(--console-alert)",
   idle: "var(--console-faint)",
 };
@@ -101,7 +101,7 @@ function AgentFigure({ color }: { color: string }) {
       <ellipse cx="0" cy="13" rx="8" ry="2.6" fill="rgba(0,0,0,0.45)" />
       <rect x="-6" y="-3" width="12" height="15" rx="5" fill={color} />
       <circle cx="0" cy="-9" r="6" fill={color} />
-      <rect x="-4.5" y="-11" width="9" height="4.6" rx="2.2" fill="var(--console-bg)" opacity="0.85" />
+      <rect x="-4.5" y="-11" width="9" height="4.6" rx="2.2" fill="#0b0e13" opacity="0.85" />
     </g>
   );
 }
@@ -194,10 +194,10 @@ export default function OfficeMap({
     >
       <defs>
         <pattern id="thb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M40 0H0V40" fill="none" stroke="var(--console-border)" strokeOpacity="0.18" strokeWidth="1" />
+          <path d="M40 0H0V40" fill="none" stroke="var(--console-border)" strokeOpacity="0.35" strokeWidth="1" />
         </pattern>
         <radialGradient id="thb-core-halo">
-          <stop offset="0%" stopColor="var(--console-accent)" stopOpacity="0.34" />
+          <stop offset="0%" stopColor="var(--console-accent)" stopOpacity="0.5" />
           <stop offset="100%" stopColor="var(--console-accent)" stopOpacity="0" />
         </radialGradient>
       </defs>
@@ -216,9 +216,9 @@ export default function OfficeMap({
             x2={b[0]}
             y2={b[1]}
             className="thb-data-line"
-            stroke="var(--console-info)"
-            strokeOpacity="0.32"
-            strokeWidth="1.25"
+            stroke="var(--console-data)"
+            strokeOpacity="0.5"
+            strokeWidth="1.5"
           />
         );
       })}

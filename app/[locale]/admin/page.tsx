@@ -202,13 +202,13 @@ export default async function AdminHomePage({
     {
       id: "advisor",
       roomId: "stock",
-      color: "var(--console-ok)",
+      color: "#4cd48b",
       label: `${uk ? "Радник" : "Advisor"} · ${stockStat.text}`,
     },
     {
       id: "followup",
       roomId: "wholesale",
-      color: "var(--console-info)",
+      color: "#58c4dd",
       label: `${uk ? "Листи" : "Follow-up"} · ${
         quietCount === null ? "?" : quietCount === 0 ? "OK" : uk ? `${quietCount} мовчать` : `${quietCount} quiet`
       }`,
@@ -216,19 +216,19 @@ export default async function AdminHomePage({
     {
       id: "strategist",
       roomId: "marketing",
-      color: "var(--console-accent)",
+      color: "#d4b15e",
       label: `${uk ? "Стратег" : "Strategist"} · ${latestPlan ? shortDate(latestPlan.createdAt) : "—"}`,
     },
     {
       id: "coach",
       roomId: "projects",
-      color: "var(--console-marketing)",
+      color: "#b48ce8",
       label: `${uk ? "Коуч" : "Coach"} · ${projectsStat.text}`,
     },
     {
       id: "brief",
       roomId: "command",
-      color: "var(--console-text)",
+      color: "#e8e6df",
       label: `${uk ? "Бриф" : "Brief"} · ${latestBrief ? shortDate(latestBrief.createdAt) : "—"}`,
     },
   ];
@@ -358,7 +358,9 @@ export default async function AdminHomePage({
         </p>
       </header>
 
-      <div className="console-card overflow-hidden" style={{ background: "var(--console-bg)" }}>
+      {/* thb-map swaps in the Phase E palette for this block alone — see the
+          note in globals.css. The map is the one screen allowed to be loud. */}
+      <div className="thb-map console-card overflow-hidden" style={{ background: "var(--console-bg)" }}>
         <OfficeMap
           rooms={rooms}
           agents={agents}

@@ -121,6 +121,7 @@ export type MarginAlert =
 /** Things that make the report less than complete. Rendered as caveats,
     never as failures — an incomplete answer is still worth reading. */
 export type MarginNote =
+  | "no_month_data"
   | "no_costs_at_all"
   | "some_uncosted"
   | "no_fees_logged"
@@ -130,6 +131,10 @@ export type MarginNote =
 
 export function marginNoteLabel(n: MarginNote, uk: boolean): string {
   const labels: Record<MarginNote, [en: string, uk: string]> = {
+    no_month_data: [
+      "There were no orders and no costs in this month at all, so there is nothing to judge — an empty report, not a clean bill of health.",
+      "Цього місяця не було ані замовлень, ані витрат — оцінювати нічого. Це порожній звіт, а не підтвердження, що все гаразд.",
+    ],
     no_costs_at_all: [
       "No unit costs are entered, so no margin here is real yet. Enter them in Costs, dated on or before the orders.",
       "Собівартість не внесена — жодна маржа тут поки не справжня. Внесіть її у «Витрати» з датою не пізнішою за замовлення.",
@@ -381,12 +386,24 @@ export function buildMarginReport(input: {
   const notes: MarginNote[] = [];
   const uncostedLines = products.reduce((a, p) => a + p.uncostedLines, 0);
   const costedAny = products.some((p) => p.cogsUah !== null);
-  if (products.length > 0 && !costedAny) notes.push("no_costs_at_all");
-  else if (uncostedLines > 0) notes.push("some_uncosted");
-  if (input.feesUah === null || input.feesUah === 0) notes.push("no_fees_logged");
-  if (!channelMargins.some((c) => c.channel === "wholesale")) notes.push("no_wholesale");
-  if (trailingPctBySku.size === 0) notes.push("short_history");
-  if ((monthTotals?.unpricedOrders ?? 0) > 0) notes.push("unpriced_orders");
+
+  // A month with nothing in it gets ONE note and no others. "No fees logged"
+  // and "no wholesale orders" are true of an empty month and useless about it,
+  // and a stack of caveats would read as a list of problems where the only
+  // fact is that the month is empty — which an empty alerts panel would
+  // otherwise let pass as a clean bill of health.
+  const emptyMonth = monthTotals === null && products.length === 0;
+
+  if (emptyMonth) {
+    notes.push("no_month_data");
+  } else {
+    if (products.length > 0 && !costedAny) notes.push("no_costs_at_all");
+    else if (uncostedLines > 0) notes.push("some_uncosted");
+    if (input.feesUah === null || input.feesUah === 0) notes.push("no_fees_logged");
+    if (!channelMargins.some((c) => c.channel === "wholesale")) notes.push("no_wholesale");
+    if (trailingPctBySku.size === 0) notes.push("short_history");
+    if ((monthTotals?.unpricedOrders ?? 0) > 0) notes.push("unpriced_orders");
+  }
 
   return {
     month,

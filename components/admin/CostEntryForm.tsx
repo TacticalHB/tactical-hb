@@ -21,10 +21,15 @@ import { COST_CATEGORIES, categoryLabel, type CostCategory } from "@/lib/costs-d
 export default function CostEntryForm({
   today,
   skus,
+  suppliers,
   uk,
 }: {
   today: string;
   skus: { sku: string; name: string }[];
+  /** Known suppliers (0022). Empty until the first one is added, and the
+      free-text box below never goes away — a one-off vendor should not need
+      a record before a cost can be entered. */
+  suppliers: { id: string; name: string }[];
   uk: boolean;
 }) {
   const router = useRouter();
@@ -34,6 +39,7 @@ export default function CostEntryForm({
   const [amountEur, setAmountEur] = useState("");
   const [incurredOn, setIncurredOn] = useState(today);
   const [recurring, setRecurring] = useState(false);
+  const [supplierId, setSupplierId] = useState("");
   const [supplier, setSupplier] = useState("");
   const [sku, setSku] = useState("");
   const [note, setNote] = useState("");
@@ -49,6 +55,8 @@ export default function CostEntryForm({
     date: uk ? "Дата" : "Date",
     recurring: uk ? "Щомісячна" : "Recurring monthly",
     supplier: uk ? "Постачальник" : "Supplier",
+    supplierOther: uk ? "Або впишіть" : "Or type one",
+    supplierNone: uk ? "Не обрано" : "Not from a record",
     product: uk ? "Товар (необов'язково)" : "Product (optional)",
     general: uk ? "Загальні витрати" : "General overhead",
     note: uk ? "Примітка" : "Note",
@@ -75,6 +83,7 @@ export default function CostEntryForm({
       incurredOn,
       recurring,
       supplier,
+      supplierId,
       sku,
       note,
     });
@@ -83,6 +92,7 @@ export default function CostEntryForm({
       setAmountUah("");
       setAmountEur("");
       setSupplier("");
+      setSupplierId("");
       setNote("");
       // The list is rendered on the server, so ask for it again rather than
       // splicing an optimistic row that might not match what was stored.
@@ -164,13 +174,45 @@ export default function CostEntryForm({
           <label className="text-[11px] tracking-[0.12em] uppercase block mb-1" style={{ color: "var(--console-muted)" }}>
             {L.supplier}
           </label>
-          <input
-            value={supplier}
-            onChange={(e) => setSupplier(e.target.value)}
-            autoComplete="off"
-            className={cls}
-            style={inputStyle}
-          />
+          {suppliers.length > 0 ? (
+            <div className="grid gap-1.5">
+              <select
+                value={supplierId}
+                onChange={(e) => setSupplierId(e.target.value)}
+                aria-label={L.supplier}
+                className={cls}
+                style={inputStyle}
+              >
+                <option value="">{L.supplierNone}</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              {/* The free-text box stays even with a picker: one-off vendors
+                  are real, and forcing a record for a single courier fee
+                  would just get the field filled with junk records. */}
+              <input
+                value={supplier}
+                onChange={(e) => setSupplier(e.target.value)}
+                placeholder={L.supplierOther}
+                autoComplete="off"
+                aria-label={L.supplierOther}
+                className={cls}
+                style={inputStyle}
+              />
+            </div>
+          ) : (
+            <input
+              value={supplier}
+              onChange={(e) => setSupplier(e.target.value)}
+              autoComplete="off"
+              aria-label={L.supplier}
+              className={cls}
+              style={inputStyle}
+            />
+          )}
         </div>
 
         <div>

@@ -17,7 +17,8 @@ export type AgentName =
   | "wholesale_followup"
   | "weekly_brief"
   | "marketing_strategist"
-  | "savings_coach";
+  | "savings_coach"
+  | "cost_margin_guard";
 export type AgentTrigger = "cron" | "manual";
 
 export type AgentRun = {

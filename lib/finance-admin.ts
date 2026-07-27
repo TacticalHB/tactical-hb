@@ -1,6 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { CostMonth, FinanceMonth, ProductMonth } from "@/lib/finance-display";
+import type { ChannelMonth, CostMonth, FinanceMonth, ProductMonth } from "@/lib/finance-display";
 
 /* ---------------------------------------------------------------------------
    Reading the finance views (0018) for /admin/finance.
@@ -45,10 +45,54 @@ export async function fetchFinanceMonths(limit = 12): Promise<FinanceMonth[] | n
         uncostedLines: num(row.uncosted_lines) ?? 0,
         opexUah: num(row.opex_uah),
         marginUah: num(row.margin_uah) ?? 0,
+        shippingChargedUah: num(row.shipping_charged_uah) ?? 0,
       };
     });
   } catch (e) {
     console.error("[admin/finance] monthly read threw:", e);
+    return null;
+  }
+}
+
+/**
+ * Retail against wholesale for one month (0022 §9).
+ *
+ * Read rather than assembled from orders in TypeScript: the view applies the
+ * same status allowlist and the same Kyiv-month boundary as finance_monthly,
+ * and two revenue figures that disagree are worse than one that is late.
+ */
+export async function fetchChannelMonth(month: string): Promise<ChannelMonth[] | null> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("finance_channel_monthly")
+      .select("*")
+      .eq("month", month)
+      .order("channel", { ascending: true });
+
+    if (error) {
+      console.error("[admin/finance] channel read failed:", error.code, error.message);
+      return null;
+    }
+
+    return (data ?? []).map((r) => {
+      const row = r as Record<string, unknown>;
+      return {
+        month: String(row.month),
+        channel: row.channel === "wholesale" ? ("wholesale" as const) : ("retail" as const),
+        ordersCount: num(row.orders_count) ?? 0,
+        revenueUah: num(row.revenue_uah),
+        unpricedOrders: num(row.unpriced_orders) ?? 0,
+        shippingChargedUah: num(row.shipping_charged_uah) ?? 0,
+        units: num(row.units) ?? 0,
+        lineRevenueUah: num(row.line_revenue_uah),
+        cogsUah: num(row.cogs_uah),
+        uncostedLines: num(row.uncosted_lines) ?? 0,
+        grossMarginUah: num(row.gross_margin_uah),
+      };
+    });
+  } catch (e) {
+    console.error("[admin/finance] channel read threw:", e);
     return null;
   }
 }

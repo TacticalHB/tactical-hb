@@ -45,12 +45,23 @@ const SECTIONS: NavSection[] = [
   {
     en: "Suppliers & Costs",
     uk: "Постачання і витрати",
-    items: [{ href: "/costs", en: "Costs", uk: "Витрати" }],
+    items: [
+      { href: "/costs", en: "Costs", uk: "Витрати" },
+      { href: "/suppliers", en: "Suppliers", uk: "Постачальники" },
+    ],
+  },
+  {
+    en: "Workshop",
+    uk: "Майстерня",
+    items: [{ href: "/workshop", en: "Machines", uk: "Машини" }],
   },
   {
     en: "Finance",
     uk: "Фінанси",
-    items: [{ href: "/finance", en: "Finance", uk: "Фінанси" }],
+    items: [
+      { href: "/finance", en: "Finance", uk: "Фінанси" },
+      { href: "/margin", en: "Cost & Margin Guard", uk: "Вартість і маржа" },
+    ],
   },
   {
     en: "Wholesale CRM",

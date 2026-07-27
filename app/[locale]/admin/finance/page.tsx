@@ -124,7 +124,10 @@ export default async function AdminFinancePage({
                   >
                     <th className="px-5 py-3 font-medium">{uk ? "Місяць" : "Month"}</th>
                     <th className="px-3 py-3 font-medium text-right">{uk ? "Зам." : "Orders"}</th>
-                    <th className="px-3 py-3 font-medium text-right">{uk ? "Виручка" : "Revenue"}</th>
+                    <th className="px-3 py-3 font-medium text-right">{uk ? "Товари" : "Goods"}</th>
+                    <th className="px-3 py-3 font-medium text-right">
+                      {uk ? "Доставка" : "Shipping"}
+                    </th>
                     <th className="px-3 py-3 font-medium text-right">
                       {uk ? "Собівартість" : "COGS"}
                     </th>
@@ -159,6 +162,9 @@ export default async function AdminFinancePage({
                       <td className="px-3 py-3 text-right tabular-nums" style={{ color: "var(--console-text)" }}>
                         {m.revenueUah === null ? <Dash /> : formatUah(m.revenueUah)}
                       </td>
+                      <td className="px-3 py-3 text-right tabular-nums" style={{ color: "var(--console-text)" }}>
+                        {formatUah(m.shippingChargedUah)}
+                      </td>
                       <td className="px-3 py-3 text-right tabular-nums" style={{ color: "var(--console-muted)" }}>
                         {m.cogsUah === null ? <Dash /> : formatUah(m.cogsUah)}
                       </td>
@@ -176,6 +182,11 @@ export default async function AdminFinancePage({
                 </tbody>
               </table>
             </div>
+            <p className="mt-2 text-[12px]" style={{ color: "var(--console-muted)" }}>
+              {uk
+                ? "«Товари» — це orders.amount_uah, доставка завжди виставлялася окремо. Маржа = товари + доставка − собівартість − витрати."
+                : "“Goods” is orders.amount_uah; delivery has always been charged on top. Margin = goods + shipping − COGS − opex."}
+            </p>
             {anyGaps && (
               <p className="mt-2 text-[12px]" style={{ color: "var(--console-warn)" }}>
                 {uk

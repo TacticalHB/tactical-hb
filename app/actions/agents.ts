@@ -5,6 +5,7 @@ import { requireAdminActor } from "@/lib/admin-guard";
 import { saveSupplySettings } from "@/lib/advisor-admin";
 import { runWeeklyBrief } from "@/lib/weekly-brief";
 import { runStrategist } from "@/lib/strategist-admin";
+import { runMarginGuard } from "@/lib/margin-admin";
 
 /* ---------------------------------------------------------------------------
    Admin: the Phase C agent actions — and the complete list of what agents can
@@ -98,5 +99,24 @@ export async function generateCampaignPlan(): Promise<
   if (!res.ok) return res;
 
   revalidatePath("/[locale]/admin/strategist", "page");
+  return { ok: true, warning: res.warning };
+}
+
+/**
+ * Run the Cost & Margin Guard on the last full month (§6.2). Reads the finance
+ * views; writes exactly one agent_runs row — the report the founder is about to
+ * read. It changes no price and enters no cost: §6.2 says it "flags issues for
+ * human decision", and flagging is the entire mechanism.
+ */
+export async function generateMarginReport(): Promise<
+  { ok: true; warning: string | null } | { ok: false; error: string }
+> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "Not authorised." };
+
+  const res = await runMarginGuard({ trigger: "manual", createdBy: actor });
+  if (!res.ok) return res;
+
+  revalidatePath("/[locale]/admin/margin", "page");
   return { ok: true, warning: res.warning };
 }

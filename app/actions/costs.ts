@@ -41,7 +41,10 @@ export async function createCostEntry(form: {
   amountEur: string;
   incurredOn: string;
   recurring: boolean;
+  /** Free text, for a one-off vendor with no record. */
   supplier: string;
+  /** A picked supplier, when there is one. Empty string means none. */
+  supplierId: string;
   sku: string;
   note: string;
 }): Promise<CostResult> {
@@ -70,6 +73,7 @@ export async function createCostEntry(form: {
     // repeat. One-offs stay null.
     period: form.recurring ? incurredOn.slice(0, 7) : null,
     supplier: form.supplier?.trim() || null,
+    supplierId: form.supplierId?.trim() || null,
     sku: form.sku?.trim() || null,
     note: form.note?.trim() || null,
     createdBy: actor,
@@ -91,7 +95,8 @@ export async function saveUnitCost(
   sku: string,
   unitCostUah: string,
   effectiveFrom: string,
-  note: string
+  note: string,
+  supplierId?: string
 ): Promise<CostResult> {
   const actor = await requireAdminActor();
   if (!actor) return { ok: false, error: "Not authorised." };
@@ -110,11 +115,14 @@ export async function saveUnitCost(
     unitCostUah: cost,
     effectiveFrom: from,
     note: note?.trim() || null,
+    supplierId: supplierId?.trim() || null,
     createdBy: actor,
   });
 
   if (!res.ok) return res;
   revalidatePath("/[locale]/admin/costs", "page");
   revalidatePath("/[locale]/admin/stock", "page");
+  // The workshop compares entered unit costs against machine time.
+  revalidatePath("/[locale]/admin/workshop", "page");
   return { ok: true };
 }

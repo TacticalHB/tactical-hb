@@ -174,9 +174,10 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
         />
       </div>
 
-      {/* Caption rail. UKRAINE survives from the poster this replaced — it was
-          the one true thing on it, and the reference's GPS readout pointed at
-          Washington DC, which this brand is not. */}
+      {/* Caption rail. The coordinate readout is Mario's call, made after being
+          told the figures resolve to Washington DC — it is set dressing for the
+          instrument look, not a claim about where anything is. Not localised:
+          a decimal coordinate reads the same in both languages. */}
       <div className="flex items-center justify-between px-1.5 pt-3">
         <span
           className="font-display text-[13px] tracking-[0.24em] uppercase"
@@ -185,10 +186,10 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           Mr.HB
         </span>
         <span
-          className="font-mono text-[9px] tracking-[0.14em] uppercase"
+          className="font-mono text-[9px] tracking-[0.14em]"
           style={{ color: "#5c6167" }}
         >
-          {uk ? "Україна" : "Ukraine"}
+          38.8977 N · 77.0365 W
         </span>
       </div>
     </div>

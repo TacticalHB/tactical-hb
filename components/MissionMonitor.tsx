@@ -97,18 +97,51 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     let inView = false;
 
     const start = () => {
-      video.currentTime = 0;
-      video.play().catch(fallBackToPoster);
-
-      /* A resolved play() is not proof of playback — battery savers accept the
-         call and stop the video anyway, with nothing to catch. If time has not
-         moved by now, show the poster rather than leave a dead black screen.
-         Generous, so it cannot beat a slow first decode to the punch. */
+      /* ARM THE SAFETY NET FIRST. This used to sit at the bottom, after a
+         currentTime assignment that can throw, and the throw took the whole
+         function with it — no play, no fallback, a black screen for good.
+         Nothing below may be able to skip this. */
       window.clearTimeout(stall);
       stall = window.setTimeout(() => {
-        if (video.paused && video.currentTime === 0) fallBackToPoster();
+        /* Distinguish REFUSED from still-loading. With data buffered and the
+           clock still at zero, playback was declined and the poster is right.
+           With no data yet we are merely early — canPlay below will start it,
+           and showing the closing frame here would give the ending away on a
+           slow connection, which is the bug this whole file keeps relearning. */
+        if (video.paused && video.currentTime === 0 && video.readyState >= 2) {
+          fallBackToPoster();
+        }
       }, 1800);
+
+      /* Only rewind when there is something to rewind. A video that has never
+         played is already at zero, and assigning currentTime before metadata
+         exists throws InvalidStateError in Safari — which is precisely how the
+         first visit ended up blank while a cached second visit worked. */
+      if (video.readyState >= 1 && video.currentTime > 0) {
+        try {
+          video.currentTime = 0;
+        } catch {
+          /* Not seekable yet; it will start from the top regardless. */
+        }
+      }
+
+      video.play().catch(fallBackToPoster);
     };
+
+    /* If the observer fired before a single byte had arrived, the play() above
+       had nothing to work with. Start it the moment there is something to
+       play — without this, a cold load silently loses its one attempt. */
+    const onCanPlay = () => {
+      if (inView && video.paused && !video.ended) {
+        video.play().catch(fallBackToPoster);
+      }
+    };
+
+    /* Last resort for a video that never becomes playable at all — a dead
+       screen must not outlive this. */
+    const backstop = window.setTimeout(() => {
+      if (video.paused && video.currentTime === 0) fallBackToPoster();
+    }, 8000);
 
     /* The hold. There is deliberately no loop attribute: a native loop restarts
        instantly, which is exactly what we are trying not to do. */
@@ -133,6 +166,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           video.pause();
           window.clearTimeout(restart);
           window.clearTimeout(stall);
+          window.clearTimeout(backstop);
         }
       },
       /* Low, so it fires as soon as the section is reached rather than once it
@@ -142,13 +176,16 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     );
 
     video.addEventListener("ended", onEnded);
+    video.addEventListener("canplay", onCanPlay);
     observer.observe(video);
 
     return () => {
       observer.disconnect();
       video.removeEventListener("ended", onEnded);
+      video.removeEventListener("canplay", onCanPlay);
       window.clearTimeout(restart);
       window.clearTimeout(stall);
+      window.clearTimeout(backstop);
     };
   }, []);
 

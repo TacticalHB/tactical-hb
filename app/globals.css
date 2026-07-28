@@ -95,9 +95,19 @@ body {
 }
 .float { animation: float 5.5s ease-in-out infinite; }
 
+/* ---- Field monitor power light ----
+   Long on, short off: a device that is running, not one that is alarming. */
+@keyframes monitorLed {
+  0%, 60%   { opacity: 1; }
+  70%, 100% { opacity: 0.15; }
+}
+.monitor-led { animation: monitorLed 1.6s infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero-glow, .scroll-cue-dot, .float { animation: none; }
+  /* The light stays lit rather than going dark — the monitor is still on. */
+  .monitor-led { animation: none; opacity: 1; }
   html { scroll-behavior: auto; }
 }
 

@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import Bestsellers from "@/components/Bestsellers";
 import Countdown from "@/components/Countdown";
 import NotifyForm from "@/components/NotifyForm";
+import MissionMonitor from "@/components/MissionMonitor";
 import Reveal from "@/components/Reveal";
 
 export default async function HomePage() {
@@ -192,31 +193,11 @@ function HomeContent({ locale }: { locale: string }) {
             </div>
           </Reveal>
 
+          {/* Mr.HB, running on a field monitor. Replaced a flat grey poster
+              carrying a watermark of the logo — the section's right half now
+              shows the brand's own character instead of a placeholder. */}
           <Reveal delay={160}>
-            <div
-              className="aspect-square relative overflow-hidden rounded-[20px] flex items-center justify-center"
-              style={{ background: "var(--bg-soft)" }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/tct-logo.svg"
-                alt=""
-                aria-hidden="true"
-                className="w-[46%] max-w-[220px]"
-                style={{ opacity: 0.07, filter: "invert(1)" }}
-              />
-              <div className="absolute bottom-8 left-8">
-                <div
-                  className="text-[0.58rem] tracking-[0.3em] uppercase mb-2"
-                  style={{ color: "var(--text-faint)" }}
-                >
-                  {uk ? "Україна" : "Ukraine"}
-                </div>
-                <div className="font-display text-2xl" style={{ color: "var(--text)" }}>
-                  {uk ? "Преміальна майстерність" : "Premium Craft"}
-                </div>
-              </div>
-            </div>
+            <MissionMonitor uk={uk} />
           </Reveal>
           </div>
         </div>

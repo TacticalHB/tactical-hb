@@ -31,11 +31,12 @@ import { useEffect, useRef } from "react";
    video is parked on its closing frame, so the same composition lands with no
    movement rather than the section going empty.
 
-   IT CANNOT SHOW BLACK. The video carries a poster cut from its own closing
-   frame, and a poster is painted whether or not playback is permitted. That is
-   what finally fixed the dead screen on Mario's Safari: every earlier attempt
-   still depended on the video decoding something, and a refused video decodes
-   nothing.
+   IT STARTS FROM THE BEGINNING. The animation opens on black, so black is the
+   correct opening image and the clip is never pre-empted by a still. There is
+   a poster — cut from the animation's own closing frame — but it is a FAILURE
+   state, attached only once playback is known to have failed, because a
+   browser that refuses video still paints a poster. Setting it up front, which
+   is where it began, showed the ending before the beginning.
 
    SCALE, NOT A CROP. Mr.HB is composed small — measured across the animation
    he never fills more than 61.6% of the frame's width or 39.6% of its height,
@@ -57,6 +58,21 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
        looks up still catches movement. */
     const HOLD_MS = 2500;
 
+    /* THE POSTER IS A FAILURE STATE, NOT A STARTING STATE, and it is attached
+       here rather than in the JSX for exactly that reason. It is the animation's
+       CLOSING frame, so rendering it up front showed the ending before the
+       thing had run — Mario arrived at a finished lockup and had to navigate
+       away and back to see the animation at all. On a cold cache it sat there
+       for the whole decode.
+
+       The animation opens on black, so no poster IS the correct opening image.
+       This gets set only once playback is known to have failed, which is the
+       one case where a black rectangle would be wrong. */
+    const POSTER = "/images/mr-hb-poster.jpg";
+    const fallBackToPoster = () => {
+      video.poster = POSTER;
+    };
+
     /* Park on the closing frame. Nudged just inside the duration because
        seeking exactly to the end is not obliged to paint anything. */
     const showFinalFrame = () => {
@@ -67,21 +83,31 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       else video.addEventListener("loadedmetadata", settle, { once: true });
     };
 
+    /* Reduced motion never plays, so here the closing frame is the intended
+       image rather than a fallback — set the poster immediately. */
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      fallBackToPoster();
       video.pause();
       showFinalFrame();
       return;
     }
 
     let restart = 0;
+    let stall = 0;
     let inView = false;
 
     const start = () => {
       video.currentTime = 0;
-      video.play().catch(() => {
-        /* Refused. The poster is already on screen, so this costs the motion
-           and nothing else — no black rectangle, no error worth surfacing. */
-      });
+      video.play().catch(fallBackToPoster);
+
+      /* A resolved play() is not proof of playback — battery savers accept the
+         call and stop the video anyway, with nothing to catch. If time has not
+         moved by now, show the poster rather than leave a dead black screen.
+         Generous, so it cannot beat a slow first decode to the punch. */
+      window.clearTimeout(stall);
+      stall = window.setTimeout(() => {
+        if (video.paused && video.currentTime === 0) fallBackToPoster();
+      }, 1800);
     };
 
     /* The hold. There is deliberately no loop attribute: a native loop restarts
@@ -97,12 +123,16 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       ([entry]) => {
         inView = entry.isIntersecting;
         if (inView) {
-          // Finished while nobody was looking — begin a fresh cycle.
-          if (video.ended) start();
-          else if (video.paused) video.play().catch(() => {});
+          /* From the top for the first run and for a clip that finished while
+             nobody was looking; a mid-clip pause just resumes where it was.
+             Routing the first play through start() is what arms the stall
+             watchdog — a bare play() here would skip the poster fallback. */
+          if (video.ended || video.currentTime === 0) start();
+          else if (video.paused) video.play().catch(fallBackToPoster);
         } else {
           video.pause();
           window.clearTimeout(restart);
+          window.clearTimeout(stall);
         }
       },
       /* Low, so it fires as soon as the section is reached rather than once it
@@ -118,6 +148,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       observer.disconnect();
       video.removeEventListener("ended", onEnded);
       window.clearTimeout(restart);
+      window.clearTimeout(stall);
     };
   }, []);
 
@@ -192,18 +223,16 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
             Costs no sharpness. Showing 71% of a 1080-wide source across a
             372px screen is still a ~2x downscale, so it stays oversampled even
             on a retina display. */}
-        {/* The poster is the closing frame of this same video, pulled out at
-            native 1080x1920. It is what makes the black screen impossible: a
-            browser that refuses playback still paints a poster, so the monitor
-            shows Mr.HB whether or not it is allowed to move. It inherits the
-            object-fit and the scale below, so the still and the video are
-            framed identically and the swap between them is invisible. */}
+        {/* NO poster attribute here, deliberately — public/images/mr-hb-poster.jpg
+            is the animation's CLOSING frame, and as a starting image it gave the
+            ending away before the clip had run. The effect attaches it only when
+            playback is known to have failed. See fallBackToPoster above before
+            moving it back into the markup. */}
         <video
           ref={videoRef}
           className="w-full h-full object-cover block"
           style={{ transform: "scale(1.4)", transformOrigin: "center" }}
           src="/videos/mr-hb-animation.mp4"
-          poster="/images/mr-hb-poster.jpg"
           muted
           playsInline
           preload="auto"

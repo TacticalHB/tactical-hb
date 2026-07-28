@@ -12,24 +12,24 @@ import { useEffect, useRef } from "react";
    the shadow is the one .hero-screen uses — the monitor is a new object on the
    page but not a new visual language.
 
-   IT LOOPS. Mario's call, replacing an earlier play-once-and-hold rule: the
-   screen should always be running, so whenever anyone arrives at this section
-   there is something moving in it rather than a still they cannot tell is a
-   still.
+   IT RUNS ON A CYCLE: play through, hold the closing frame for a beat, start
+   again. The hold is the point — the animation resolves into the composed
+   Mr.HB lockup, and snapping straight back to black threw that away before
+   anyone could read it.
 
-   PLAYBACK IS NATIVE — autoPlay + loop on the element, with no scripted
-   play() anywhere. That is deliberate and it is the second reason for this
-   change. The previous version waited for an IntersectionObserver and then
-   called play(), which was necessary only because a once-through animation
-   had to be witnessed; a loop removes that need entirely. It also removes a
-   real failure: Safari treats a scripted play() more strictly than the
-   autoplay attribute, and on Mario's machine the monitor was rendering with a
-   dead black screen — the JS trigger was the prime suspect. Native autoplay is
-   both simpler and the better-supported path, so it is now the only path.
+   PLAYBACK IS TIED TO VISIBILITY, NOT TO PAGE LOAD, and this is the fix for
+   the monitor arriving with a play button on it. The autoplay attribute fires
+   the moment the page loads, which is four screens before this section is
+   reached; Safari suspends video that is off-screen and does NOT resume it on
+   scroll, so the visitor scrolled down to a parked video and had to press
+   play. Starting playback when the monitor actually comes into view avoids
+   that entirely, and has the side benefit of asking permission at the one
+   moment the browser is most willing to grant it — while the element is on
+   screen. Scrolling away pauses it again rather than letting it spin unseen.
 
-   Reduced motion is the one case that must not move: the loop is switched off
-   and the video parked on its closing frame, so the same composition lands
-   with no movement rather than the section going empty.
+   Reduced motion is the one case that must not move: nothing is played and the
+   video is parked on its closing frame, so the same composition lands with no
+   movement rather than the section going empty.
 
    IT CANNOT SHOW BLACK. The video carries a poster cut from its own closing
    frame, and a poster is painted whether or not playback is permitted. That is
@@ -52,7 +52,10 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     const video = videoRef.current;
     if (!video) return;
 
-    let watchdog = 0;
+    /* How long the finished animation sits on its closing frame before running
+       again. Long enough to read the lockup, short enough that a visitor who
+       looks up still catches movement. */
+    const HOLD_MS = 2500;
 
     /* Park on the closing frame. Nudged just inside the duration because
        seeking exactly to the end is not obliged to paint anything. */
@@ -64,25 +67,58 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       else video.addEventListener("loadedmetadata", settle, { once: true });
     };
 
-    /* Reduced motion overrides the loop. The attribute has to come off the
-       element too — pausing a looping video is not enough, it would resume at
-       the next opportunity. */
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      video.loop = false;
       video.pause();
       showFinalFrame();
       return;
     }
 
-    /* Best effort only. Native autoplay needs no help, but if a browser
-       refuses it there is no poster to fall back on, so try to leave SOMETHING
-       on the screen rather than a black rectangle. Generous delay: this must
-       not race a slow first decode and freeze a video that was about to run. */
-    watchdog = window.setTimeout(() => {
-      if (video.paused && video.currentTime === 0) showFinalFrame();
-    }, 2500);
+    let restart = 0;
+    let inView = false;
 
-    return () => window.clearTimeout(watchdog);
+    const start = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {
+        /* Refused. The poster is already on screen, so this costs the motion
+           and nothing else — no black rectangle, no error worth surfacing. */
+      });
+    };
+
+    /* The hold. There is deliberately no loop attribute: a native loop restarts
+       instantly, which is exactly what we are trying not to do. */
+    const onEnded = () => {
+      window.clearTimeout(restart);
+      restart = window.setTimeout(() => {
+        if (inView) start();
+      }, HOLD_MS);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) {
+          // Finished while nobody was looking — begin a fresh cycle.
+          if (video.ended) start();
+          else if (video.paused) video.play().catch(() => {});
+        } else {
+          video.pause();
+          window.clearTimeout(restart);
+        }
+      },
+      /* Low, so it fires as soon as the section is reached rather than once it
+         dominates the viewport — the monitor is ~750px tall and a demanding
+         threshold is hard to satisfy on a short screen. */
+      { threshold: 0.1 }
+    );
+
+    video.addEventListener("ended", onEnded);
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+      video.removeEventListener("ended", onEnded);
+      window.clearTimeout(restart);
+    };
   }, []);
 
   return (
@@ -168,8 +204,6 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           style={{ transform: "scale(1.4)", transformOrigin: "center" }}
           src="/videos/mr-hb-animation.mp4"
           poster="/images/mr-hb-poster.jpg"
-          autoPlay
-          loop
           muted
           playsInline
           preload="auto"

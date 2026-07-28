@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ---------------------------------------------------------------------------
    Mr.HB on a field monitor — the right-hand half of the mission section.
@@ -49,6 +49,18 @@ import { useEffect, useRef } from "react";
 export default function MissionMonitor({ uk }: { uk: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  /* THE FALLBACK IS A REAL <img>, NOT THE POSTER ATTRIBUTE, and that is the
+     whole fix for the black screen. A poster assigned from script AFTER the
+     element has begun loading is honoured by Chromium and ignored by Safari,
+     so every refusal here fell through to nothing and the monitor stayed dead.
+     An <img> renders unconditionally in every browser and answers to no media
+     policy whatsoever.
+
+     It shows the animation's CLOSING frame, so it must never be the opening
+     image — it appears only once playback is known to have failed, and hides
+     again the moment anything actually plays. */
+  const [showStill, setShowStill] = useState(false);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -58,20 +70,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
        looks up still catches movement. */
     const HOLD_MS = 2500;
 
-    /* THE POSTER IS A FAILURE STATE, NOT A STARTING STATE, and it is attached
-       here rather than in the JSX for exactly that reason. It is the animation's
-       CLOSING frame, so rendering it up front showed the ending before the
-       thing had run — Mario arrived at a finished lockup and had to navigate
-       away and back to see the animation at all. On a cold cache it sat there
-       for the whole decode.
-
-       The animation opens on black, so no poster IS the correct opening image.
-       This gets set only once playback is known to have failed, which is the
-       one case where a black rectangle would be wrong. */
-    const POSTER = "/images/mr-hb-poster.jpg";
-    const fallBackToPoster = () => {
-      video.poster = POSTER;
-    };
+    const fallBackToPoster = () => setShowStill(true);
 
     /* Park on the closing frame. Nudged just inside the duration because
        seeking exactly to the end is not obliged to paint anything. */
@@ -84,7 +83,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     };
 
     /* Reduced motion never plays, so here the closing frame is the intended
-       image rather than a fallback — set the poster immediately. */
+       image rather than a fallback — show the still immediately. */
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       fallBackToPoster();
       video.pause();
@@ -137,6 +136,26 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       }
     };
 
+    /* Once anything actually plays, the still has no business being there. */
+    const onPlaying = () => setShowStill(false);
+
+    /* SAFARI WANTS A GESTURE. Muted autoplay is normally permitted, but Low
+       Power Mode withdraws that and refuses every scripted play() until the
+       page has been interacted with — which is exactly why a click through to
+       Products and back "fixed" it: the click granted activation the fresh
+       load never had. So retry on the first real interaction anywhere on the
+       page. Passive and once-only; if playback is already running these do
+       nothing at all. */
+    const onFirstGesture = () => {
+      if (inView && video.paused && !video.ended) {
+        video.play().catch(() => {});
+      }
+    };
+    const GESTURES = ["pointerdown", "touchstart", "keydown"] as const;
+    GESTURES.forEach((g) =>
+      document.addEventListener(g, onFirstGesture, { once: true, passive: true })
+    );
+
     /* Last resort for a video that never becomes playable at all — a dead
        screen must not outlive this. */
     const backstop = window.setTimeout(() => {
@@ -177,12 +196,15 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
 
     video.addEventListener("ended", onEnded);
     video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("playing", onPlaying);
     observer.observe(video);
 
     return () => {
       observer.disconnect();
       video.removeEventListener("ended", onEnded);
       video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("playing", onPlaying);
+      GESTURES.forEach((g) => document.removeEventListener(g, onFirstGesture));
       window.clearTimeout(restart);
       window.clearTimeout(stall);
       window.clearTimeout(backstop);
@@ -260,11 +282,10 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
             Costs no sharpness. Showing 71% of a 1080-wide source across a
             372px screen is still a ~2x downscale, so it stays oversampled even
             on a retina display. */}
-        {/* NO poster attribute here, deliberately — public/images/mr-hb-poster.jpg
-            is the animation's CLOSING frame, and as a starting image it gave the
-            ending away before the clip had run. The effect attaches it only when
-            playback is known to have failed. See fallBackToPoster above before
-            moving it back into the markup. */}
+        {/* NO poster attribute, deliberately, and it must not come back: it is
+            the CLOSING frame, so as a starting image it gives the ending away,
+            and Safari ignores a poster assigned from script anyway. The failure
+            still is the <img> below instead. */}
         <video
           ref={videoRef}
           className="w-full h-full object-cover block"
@@ -275,6 +296,25 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           preload="auto"
           aria-label={uk ? "Анімація Mr.HB" : "Mr.HB animation"}
         />
+
+        {/* The failure still. Same framing as the video — identical object-fit
+            and scale — so if it ever swaps to live playback nothing shifts.
+            Rendered only when playback has actually failed, and torn down again
+            the instant anything plays.
+            eslint-disable-next-line @next/next/no-img-element: next/image would
+            add a loader and layout machinery for one fixed local still that is
+            already sized to this box. */}
+        {showStill && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/images/mr-hb-poster.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover block"
+            style={{ transform: "scale(1.4)", transformOrigin: "center" }}
+          />
+        )}
+
         <div
           aria-hidden="true"
           className="absolute inset-0 pointer-events-none"

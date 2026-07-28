@@ -163,9 +163,17 @@ function HomeContent({ locale }: { locale: string }) {
           {/* Subtle inset divider — same 1px var(--border) as the one before the
               countdown, contained rather than a full-bleed edge-to-edge line. */}
           <div className="h-px w-full mb-24 md:mb-32" style={{ background: "var(--border)" }} />
-          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+          {/* Capped and centred rather than spanning the full 1680px container.
+              At container width the two columns sat ~780px apart with the copy
+              pinned to the far left and the monitor adrift on the right, and
+              the space between them read as a hole rather than as air. The
+              divider above still spans the full width — it is the section's
+              edge, not part of this composition. */}
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center max-w-6xl mx-auto">
           <Reveal>
-            <div className="max-w-md">
+            {/* ml-auto pulls the copy to the inner edge of its column, so it
+                leans towards the monitor instead of the page gutter. */}
+            <div className="max-w-md md:ml-auto">
               <div className="flex items-center gap-4 mb-6">
                 <span className="w-10 h-px" style={{ background: "var(--border-strong)" }} />
                 <span

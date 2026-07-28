@@ -27,6 +27,11 @@ import { useEffect, useRef } from "react";
    Reduced motion gets the ending without the journey — the video is seeked to
    its last frame and never played, so the same composition lands with no
    movement at all rather than the section going empty.
+
+   AND IT NEVER SHOWS BLACK. Every path that cannot play — reduced motion, a
+   refused autoplay, a battery saver that suppresses playback silently — ends
+   on the closing frame instead. See showFinalFrame below for why that matters
+   more than it sounds.
 --------------------------------------------------------------------------- */
 
 export default function MissionMonitor({ uk }: { uk: boolean }) {
@@ -36,18 +41,29 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     const video = videoRef.current;
     if (!video) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let watchdog = 0;
 
-    if (reduced) {
-      // Land on the final frame without ever animating. Nudged just inside the
-      // duration because seeking exactly to the end is not required to paint a
-      // frame, and a black screen is a worse failure than a 50ms-early one.
+    /* THE FALLBACK, and the most important thing in this file: land on the
+       closing frame. The animation's first frame is black, so "autoplay was
+       refused" and "the screen is off" look identical to a visitor — the
+       section just shows a dead rectangle. Seeking to the end instead means a
+       refusal degrades to the composed Mr.HB lockup, which is where the
+       animation was going to finish anyway. Worst case we lose the movement,
+       never the picture.
+
+       Nudged just inside the duration because seeking exactly to the end is
+       not obliged to paint anything. */
+    const showFinalFrame = () => {
       const settle = () => {
         video.currentTime = Math.max(0, video.duration - 0.05);
       };
       if (video.readyState >= 1) settle();
       else video.addEventListener("loadedmetadata", settle, { once: true });
-      return () => video.removeEventListener("loadedmetadata", settle);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      showFinalFrame();
+      return;
     }
 
     // Play when the monitor is genuinely in view, once, then never again.
@@ -56,21 +72,37 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           observer.disconnect();
-          // A blocked autoplay is not an error worth surfacing — the first
-          // frame simply stays put, which is a reasonable still.
-          void video.play().catch(() => {});
+
+          video
+            .play()
+            .then(() => {
+              /* A resolved play() is not proof of playback. Safari in Low
+                 Power Mode — and other battery savers — accept the call and
+                 then stop the video anyway, with no rejection to catch. So
+                 check that time actually moved, and fall back if it did not. */
+              watchdog = window.setTimeout(() => {
+                if (video.paused && video.currentTime === 0) showFinalFrame();
+              }, 700);
+            })
+            .catch(showFinalFrame);
         }
       },
-      // Enough of it showing that the opening frames aren't spent off-screen.
-      { threshold: 0.4 }
+      /* Matched to Reveal's own thresholds, which are known to fire correctly
+         on this site. The previous 0.4 asked for 40% of a very tall element,
+         which is a harder condition than it looks on a short viewport. */
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
     );
     observer.observe(video);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(watchdog);
+    };
   }, []);
 
   return (
     <div
-      className="relative w-full max-w-[320px] mx-auto rounded-[18px] p-3.5"
+      className="relative w-full max-w-[400px] mx-auto rounded-[18px] p-3.5"
       style={{
         background: "var(--fog)",
         boxShadow:

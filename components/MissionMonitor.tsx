@@ -12,26 +12,37 @@ import { useEffect, useRef } from "react";
    the shadow is the one .hero-screen uses — the monitor is a new object on the
    page but not a new visual language.
 
-   PLAYBACK STARTS ON SCROLL, NOT ON LOAD, and this is the whole reason the
-   component is a client one. The mission section is four screens down the
-   page; a plain autoPlay would run the 4.8s animation out while the visitor
-   was still reading the hero, and every person who scrolled here would find a
-   still image and never know it moved. So it waits for the monitor to be
-   actually on screen, plays once, and then holds — which is the brief.
+   IT LOOPS. Mario's call, replacing an earlier play-once-and-hold rule: the
+   screen should always be running, so whenever anyone arrives at this section
+   there is something moving in it rather than a still they cannot tell is a
+   still.
 
-   It plays ONCE. There is no loop attribute, and none should be added: the
-   animation ends on the composed Mr.HB lockup with HB and TCT in the brand
-   orange, and that final frame is the thing the section wants to leave on the
-   page. A loop would throw it away every five seconds.
+   PLAYBACK IS NATIVE — autoPlay + loop on the element, with no scripted
+   play() anywhere. That is deliberate and it is the second reason for this
+   change. The previous version waited for an IntersectionObserver and then
+   called play(), which was necessary only because a once-through animation
+   had to be witnessed; a loop removes that need entirely. It also removes a
+   real failure: Safari treats a scripted play() more strictly than the
+   autoplay attribute, and on Mario's machine the monitor was rendering with a
+   dead black screen — the JS trigger was the prime suspect. Native autoplay is
+   both simpler and the better-supported path, so it is now the only path.
 
-   Reduced motion gets the ending without the journey — the video is seeked to
-   its last frame and never played, so the same composition lands with no
-   movement at all rather than the section going empty.
+   Reduced motion is the one case that must not move: the loop is switched off
+   and the video parked on its closing frame, so the same composition lands
+   with no movement rather than the section going empty.
 
-   AND IT NEVER SHOWS BLACK. Every path that cannot play — reduced motion, a
-   refused autoplay, a battery saver that suppresses playback silently — ends
-   on the closing frame instead. See showFinalFrame below for why that matters
-   more than it sounds.
+   IT CANNOT SHOW BLACK. The video carries a poster cut from its own closing
+   frame, and a poster is painted whether or not playback is permitted. That is
+   what finally fixed the dead screen on Mario's Safari: every earlier attempt
+   still depended on the video decoding something, and a refused video decodes
+   nothing.
+
+   SCALE, NOT A CROP. Mr.HB is composed small — measured across the animation
+   he never fills more than 61.6% of the frame's width or 39.6% of its height,
+   and everything around him is flat black. Scaling the element therefore
+   enlarges HIM: there is no border, background or framing detail for anyone to
+   see cropped, and at 1.4 no content reaches an edge. Re-rendering the mp4 at
+   a larger size would produce the same pixels for a great deal more work.
 --------------------------------------------------------------------------- */
 
 export default function MissionMonitor({ uk }: { uk: boolean }) {
@@ -43,16 +54,8 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
 
     let watchdog = 0;
 
-    /* THE FALLBACK, and the most important thing in this file: land on the
-       closing frame. The animation's first frame is black, so "autoplay was
-       refused" and "the screen is off" look identical to a visitor — the
-       section just shows a dead rectangle. Seeking to the end instead means a
-       refusal degrades to the composed Mr.HB lockup, which is where the
-       animation was going to finish anyway. Worst case we lose the movement,
-       never the picture.
-
-       Nudged just inside the duration because seeking exactly to the end is
-       not obliged to paint anything. */
+    /* Park on the closing frame. Nudged just inside the duration because
+       seeking exactly to the end is not obliged to paint anything. */
     const showFinalFrame = () => {
       const settle = () => {
         video.currentTime = Math.max(0, video.duration - 0.05);
@@ -61,43 +64,25 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       else video.addEventListener("loadedmetadata", settle, { once: true });
     };
 
+    /* Reduced motion overrides the loop. The attribute has to come off the
+       element too — pausing a looping video is not enough, it would resume at
+       the next opportunity. */
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      video.loop = false;
+      video.pause();
       showFinalFrame();
       return;
     }
 
-    // Play when the monitor is genuinely in view, once, then never again.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          observer.disconnect();
+    /* Best effort only. Native autoplay needs no help, but if a browser
+       refuses it there is no poster to fall back on, so try to leave SOMETHING
+       on the screen rather than a black rectangle. Generous delay: this must
+       not race a slow first decode and freeze a video that was about to run. */
+    watchdog = window.setTimeout(() => {
+      if (video.paused && video.currentTime === 0) showFinalFrame();
+    }, 2500);
 
-          video
-            .play()
-            .then(() => {
-              /* A resolved play() is not proof of playback. Safari in Low
-                 Power Mode — and other battery savers — accept the call and
-                 then stop the video anyway, with no rejection to catch. So
-                 check that time actually moved, and fall back if it did not. */
-              watchdog = window.setTimeout(() => {
-                if (video.paused && video.currentTime === 0) showFinalFrame();
-              }, 700);
-            })
-            .catch(showFinalFrame);
-        }
-      },
-      /* Matched to Reveal's own thresholds, which are known to fire correctly
-         on this site. The previous 0.4 asked for 40% of a very tall element,
-         which is a harder condition than it looks on a short viewport. */
-      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
-    );
-    observer.observe(video);
-
-    return () => {
-      observer.disconnect();
-      window.clearTimeout(watchdog);
-    };
+    return () => window.clearTimeout(watchdog);
   }, []);
 
   return (
@@ -150,15 +135,41 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
       </div>
 
       {/* Screen. The frame is 9:16 and so is the source, so object-cover fills
-          it edge to edge without cropping a pixel off Mr.HB. */}
+          it edge to edge — the scale below is the only thing that crops, and it
+          crops black rather than Mr.HB. */}
       <div
         className="relative w-full aspect-[9/16] rounded-[6px] overflow-hidden"
         style={{ background: "#000", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)" }}
       >
+        {/* Punch in on the subject. The artwork is composed with a lot of air:
+            sampled across the whole animation, the non-black content never
+            exceeds 61.6% of the frame's width or 39.6% of its height, so at 1:1
+            Mr.HB sits small in a mostly empty rectangle.
+
+            1.59 is where the widest frame's content touches the left edge —
+            width is the binding constraint, not height, which has room to about
+            2.5. 1.4 takes most of the available gain and still leaves ~6% of
+            the frame as margin, which the vignette then softens. Do not chase
+            the last 0.19: the measurement comes from a downscaled probe, so the
+            true limit is a little tighter than the number suggests.
+
+            Costs no sharpness. Showing 71% of a 1080-wide source across a
+            372px screen is still a ~2x downscale, so it stays oversampled even
+            on a retina display. */}
+        {/* The poster is the closing frame of this same video, pulled out at
+            native 1080x1920. It is what makes the black screen impossible: a
+            browser that refuses playback still paints a poster, so the monitor
+            shows Mr.HB whether or not it is allowed to move. It inherits the
+            object-fit and the scale below, so the still and the video are
+            framed identically and the swap between them is invisible. */}
         <video
           ref={videoRef}
           className="w-full h-full object-cover block"
+          style={{ transform: "scale(1.4)", transformOrigin: "center" }}
           src="/videos/mr-hb-animation.mp4"
+          poster="/images/mr-hb-poster.jpg"
+          autoPlay
+          loop
           muted
           playsInline
           preload="auto"

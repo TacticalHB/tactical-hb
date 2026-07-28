@@ -11,7 +11,7 @@ import { useState } from "react";
  * handleSubmit fakes a 700ms delay and shows the success copy ("You'll be the
  * first to know"), then discards the address. The site is publicly reachable,
  * so real visitors can and will submit real emails into nothing, and there is
- * no launch list being built for August 2026.
+ * no launch list being built for September 2026.
  *
  * To make it real: create a `launch_signups` table (email, locale, created_at)
  * with RLS + explicit grants — remember raw-SQL tables inherit no grants, see

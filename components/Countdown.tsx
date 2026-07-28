@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-const LAUNCH = new Date("2026-08-01T00:00:00Z").getTime();
+/* Moved out 40 days from 1 August on 28 July 2026. UTC on purpose: the date is
+   a fixed instant worldwide, not midnight in whichever zone the reader is in.
+   The flagship.eyebrow string in messages/{en,uk}.json names the launch MONTH
+   and sits directly above this timer — move one without the other and the page
+   contradicts itself. */
+const LAUNCH = new Date("2026-09-10T00:00:00Z").getTime();
 
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
 

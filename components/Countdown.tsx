@@ -28,12 +28,11 @@ function getTimeLeft(): TimeLeft {
  * dividers instead of colons, no glow, no boxes. This should look like a stated
  * fact, not a sales timer.
  *
- * The seconds are the accent, at Mario's request. Worth knowing what it trades:
- * they were previously the MUTED unit, on the reasoning that seconds are what
- * manufactures urgency and urgency reads as cheap. The accent now sits on the
- * one number that never stops moving and the one that matters least at 43 days
- * out. Putting it on days instead would hold still and point at the figure that
- * carries the message — the swap is one line in the units array below.
+ * Days carry the brand accent; seconds stay muted, because seconds are what
+ * manufactures urgency and urgency reads as cheap. The accent went on the
+ * seconds briefly and came straight back off — on the page it read as a colour
+ * that would not sit still, which is the argument for putting it where it now
+ * is: days change once a day and are the number the section is actually about.
  *
  * Renders "––" until mounted: the server has no clock the client will agree
  * with, so this sidesteps a hydration mismatch. tabular-nums stops the digits
@@ -53,14 +52,18 @@ export default function Countdown({ locale }: { locale: string }) {
       ? { days: "Днів", hours: "Годин", minutes: "Хвилин", seconds: "Секунд" }
       : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
-  /* The seconds carry the accent. Note --accent-ink, not --accent: this sits on
-     the page's off-white, where the bright orange lands around 2.3:1 and fails
-     even the relaxed bar for large text. The deep tone clears 4.9:1. */
+  /* Days carry the accent — the figure that actually says something, and one
+     that changes once a day rather than flickering. Seconds are back to
+     --text-faint, the tone they had before the accent moved through here.
+
+     Note --accent-ink, not --accent: this sits on the page's off-white, where
+     the bright orange lands around 2.3:1 and fails even the relaxed bar for
+     large text. The deep tone clears 4.9:1. */
   const units = [
-    { value: time?.days, label: labels.days, color: "var(--text)" },
+    { value: time?.days, label: labels.days, color: "var(--accent-ink)" },
     { value: time?.hours, label: labels.hours, color: "var(--text)" },
     { value: time?.minutes, label: labels.minutes, color: "var(--text)" },
-    { value: time?.seconds, label: labels.seconds, color: "var(--accent-ink)" },
+    { value: time?.seconds, label: labels.seconds, color: "var(--text-faint)" },
   ];
 
   return (

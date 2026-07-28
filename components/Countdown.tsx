@@ -25,9 +25,15 @@ function getTimeLeft(): TimeLeft {
  * Launch countdown, light treatment.
  *
  * Restraint is the design: ink numerals on the page's own background, hairline
- * dividers instead of colons, no glow, no boxes, no accent colour. Seconds are
- * deliberately muted — they're the part that manufactures urgency, and urgency
- * reads as cheap. This should look like a stated fact, not a sales timer.
+ * dividers instead of colons, no glow, no boxes. This should look like a stated
+ * fact, not a sales timer.
+ *
+ * The seconds are the accent, at Mario's request. Worth knowing what it trades:
+ * they were previously the MUTED unit, on the reasoning that seconds are what
+ * manufactures urgency and urgency reads as cheap. The accent now sits on the
+ * one number that never stops moving and the one that matters least at 43 days
+ * out. Putting it on days instead would hold still and point at the figure that
+ * carries the message — the swap is one line in the units array below.
  *
  * Renders "––" until mounted: the server has no clock the client will agree
  * with, so this sidesteps a hydration mismatch. tabular-nums stops the digits
@@ -47,11 +53,14 @@ export default function Countdown({ locale }: { locale: string }) {
       ? { days: "Днів", hours: "Годин", minutes: "Хвилин", seconds: "Секунд" }
       : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
+  /* The seconds carry the accent. Note --accent-ink, not --accent: this sits on
+     the page's off-white, where the bright orange lands around 2.3:1 and fails
+     even the relaxed bar for large text. The deep tone clears 4.9:1. */
   const units = [
-    { value: time?.days, label: labels.days, muted: false },
-    { value: time?.hours, label: labels.hours, muted: false },
-    { value: time?.minutes, label: labels.minutes, muted: false },
-    { value: time?.seconds, label: labels.seconds, muted: true },
+    { value: time?.days, label: labels.days, color: "var(--text)" },
+    { value: time?.hours, label: labels.hours, color: "var(--text)" },
+    { value: time?.minutes, label: labels.minutes, color: "var(--text)" },
+    { value: time?.seconds, label: labels.seconds, color: "var(--accent-ink)" },
   ];
 
   return (
@@ -69,7 +78,7 @@ export default function Countdown({ locale }: { locale: string }) {
             <div
               className="font-display leading-none tabular-nums"
               style={{
-                color: unit.muted ? "var(--text-faint)" : "var(--text)",
+                color: unit.color,
                 fontSize: "clamp(1.9rem, 4vw, 2.9rem)",
               }}
             >

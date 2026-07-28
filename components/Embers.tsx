@@ -39,8 +39,8 @@ export default function Embers({
     let running = true;
 
     const root = getComputedStyle(document.documentElement);
-    const accentRgb = root.getPropertyValue("--accent-rgb").trim() || "196, 163, 90";
-    const accentBrightRgb = root.getPropertyValue("--accent-ember-bright-rgb").trim() || "228, 210, 160";
+    const accentRgb = root.getPropertyValue("--accent-rgb").trim() || "250, 130, 70";
+    const accentBrightRgb = root.getPropertyValue("--accent-ember-bright-rgb").trim() || "255, 176, 132";
 
     const spawn = (initial: boolean): Particle => {
       const ember = Math.random() < 0.7;

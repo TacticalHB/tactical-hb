@@ -32,14 +32,17 @@ export default async function UnlockPage({
           />
           <button
             type="submit"
-            className="btn-gold font-display text-lg tracking-widest py-3"
+            className="btn-accent font-display text-lg tracking-widest py-3"
           >
             Enter
           </button>
         </form>
 
+        {/* Red, not the salmon this used to be. The wordmark and the submit
+            button are both the brand orange now, and a warm near-orange
+            failure sitting between them stopped reading as a failure. */}
         {error && (
-          <p className="text-xs mt-4" style={{ color: "#e07a5f" }}>
+          <p className="text-xs mt-4" style={{ color: "#C45C5C" }}>
             Incorrect password. Please try again.
           </p>
         )}

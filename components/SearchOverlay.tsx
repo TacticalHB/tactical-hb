@@ -104,7 +104,7 @@ export default function SearchOverlay({
                             <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>
                             <div className="text-xs tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>{p.category}</div>
                           </div>
-                          <span className="font-display text-lg" style={{ color: "var(--gold)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></span>
+                          <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></span>
                         </button>
                       </li>
                     );

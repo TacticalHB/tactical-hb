@@ -1,6 +1,6 @@
 import "server-only";
 import { esc } from "@/lib/email";
-import { CARD, INK, MUTED, FAINT, ACCENT, FONT, emailShell } from "@/lib/email-theme";
+import { CARD, INK, MUTED, FAINT, ACCENT_FILL, FONT, emailShell } from "@/lib/email-theme";
 import { trackingUrl } from "@/lib/nova-poshta-tracking";
 
 /* ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ export function buildShippedEmail(o: ShippedEmailInput): { subject: string; html
             </td></tr>
             <tr><td align="center">
               <a href="${esc(url)}"
-                 style="display:inline-block;font-family:${FONT};font-size:15px;font-weight:600;color:#111114;background:${ACCENT};text-decoration:none;padding:13px 30px;border-radius:999px">
+                 style="display:inline-block;font-family:${FONT};font-size:15px;font-weight:600;color:#111114;background:${ACCENT_FILL};text-decoration:none;padding:13px 30px;border-radius:999px">
                 ${esc(t.track)}
               </a>
             </td></tr>

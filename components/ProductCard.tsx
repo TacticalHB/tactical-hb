@@ -32,7 +32,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
       </div>
 
       {/* Name + price */}
-      <h3 className="text-sm font-medium tracking-wide mb-1 transition-colors group-hover:text-[color:var(--gold)]"
+      <h3 className="text-sm font-medium tracking-wide mb-1 transition-colors group-hover:text-[color:var(--accent-ink)]"
         style={{ color: "var(--text)" }}>
         {name}
       </h3>
@@ -40,7 +40,7 @@ export default function ProductCard({ product, locale }: { product: Product; loc
         <span className="text-xs tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>
           {product.category}
         </span>
-        <span className="font-display text-lg" style={{ color: "var(--gold)" }}>
+        <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}>
           €{product.price.toFixed(2)}
         </span>
       </div>

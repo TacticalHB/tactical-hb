@@ -40,13 +40,13 @@ function WholesaleContent() {
       {/* We collaborate with */}
       <section className="page-container py-20 md:py-24">
         <Reveal>
-          <span className="text-xs tracking-[0.35em] uppercase block mb-10" style={{ color: "var(--gold)" }}>{t("collab_title")}</span>
+          <span className="text-xs tracking-[0.35em] uppercase block mb-10" style={{ color: "var(--accent-ink)" }}>{t("collab_title")}</span>
         </Reveal>
         <div className="grid sm:grid-cols-3 gap-8 mb-20">
           {collaborators.map((c, i) => (
             <Reveal key={c} delay={i * 90}>
-              <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--gold)" }}>
-                <div className="font-display text-4xl mb-4" style={{ color: "var(--gold)", opacity: 0.3 }}>0{i + 1}</div>
+              <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--accent-ink)" }}>
+                <div className="font-display text-4xl mb-4" style={{ color: "var(--accent-ink)", opacity: 0.3 }}>0{i + 1}</div>
                 <p className="text-sm md:text-base leading-relaxed" style={{ color: "var(--text)" }}>{c}</p>
               </div>
             </Reveal>

@@ -34,7 +34,7 @@ export default function ProductGallery({ photos, name }: { photos: string[]; nam
               className="aspect-square relative overflow-hidden transition-colors"
               style={{
                 background: "var(--ink)",
-                border: `1px solid ${i === selected ? "var(--gold)" : "var(--border)"}`,
+                border: `1px solid ${i === selected ? "var(--accent-ink)" : "var(--border)"}`,
               }}
               aria-label={`View image ${i + 1}`}
             >

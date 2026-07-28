@@ -33,7 +33,7 @@ function AboutContent() {
         </div>
         <div className="page-container relative">
           <Reveal>
-            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("story_tag")}</span>
+            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("story_tag")}</span>
             <h1 className="font-display text-5xl md:text-7xl max-w-3xl" style={{ color: "var(--text)" }}>{t("story_title")}</h1>
           </Reveal>
         </div>
@@ -64,14 +64,14 @@ function AboutContent() {
       <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
         <div className="page-container">
           <Reveal>
-            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("values_tag")}</span>
+            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("values_tag")}</span>
             <h2 className="font-display text-5xl md:text-6xl mb-14" style={{ color: "var(--text)" }}>{t("values_title")}</h2>
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((v, i) => (
               <Reveal key={v.title} delay={i * 90}>
-                <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--gold)" }}>
-                  <div className="font-display text-5xl mb-5" style={{ color: "var(--gold)", opacity: 0.35 }}>0{i + 1}</div>
+                <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--accent-ink)" }}>
+                  <div className="font-display text-5xl mb-5" style={{ color: "var(--accent-ink)", opacity: 0.35 }}>0{i + 1}</div>
                   <h3 className="font-medium text-sm mb-3 tracking-wide" style={{ color: "var(--text)" }}>{v.title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{v.text}</p>
                 </div>
@@ -84,7 +84,7 @@ function AboutContent() {
       {/* Payment */}
       <section className="page-container py-24">
         <Reveal>
-          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("payment_tag")}</span>
+          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("payment_tag")}</span>
           <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("payment_title")}</h2>
         </Reveal>
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-start">
@@ -115,7 +115,7 @@ function AboutContent() {
       <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>
         <div className="page-container">
           <Reveal>
-            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("delivery_tag")}</span>
+            <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("delivery_tag")}</span>
             <h2 className="font-display text-4xl md:text-5xl mb-12" style={{ color: "var(--text)" }}>{t("delivery_title")}</h2>
           </Reveal>
           <Reveal delay={100}>
@@ -130,15 +130,15 @@ function AboutContent() {
       {/* Returns & refunds */}
       <section className="page-container py-24">
         <Reveal>
-          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--gold)" }}>{t("returns_tag")}</span>
+          <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("returns_tag")}</span>
           <h2 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{t("returns_title")}</h2>
           <p className="text-sm md:text-base leading-relaxed max-w-2xl mb-14" style={{ color: "var(--text-muted)" }}>{t("returns_intro")}</p>
         </Reveal>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {returnTerms.map((r, i) => (
             <Reveal key={r.title} delay={i * 80}>
-              <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--gold)" }}>
-                <div className="font-display text-5xl mb-5" style={{ color: "var(--gold)", opacity: 0.35 }}>0{i + 1}</div>
+              <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--accent-ink)" }}>
+                <div className="font-display text-5xl mb-5" style={{ color: "var(--accent-ink)", opacity: 0.35 }}>0{i + 1}</div>
                 <h3 className="font-medium text-sm mb-3 tracking-wide" style={{ color: "var(--text)" }}>{r.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{r.text}</p>
               </div>

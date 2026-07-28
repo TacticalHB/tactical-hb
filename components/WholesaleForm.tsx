@@ -78,8 +78,8 @@ export default function WholesaleForm() {
   if (submitted) {
     return (
       <div className="flex items-center justify-center h-64 border"
-        style={{ borderColor: "var(--gold)", background: "var(--bg-soft)" }}>
-        <p className="text-sm tracking-wider" style={{ color: "var(--gold)" }}>{t("form_success")}</p>
+        style={{ borderColor: "var(--accent-ink)", background: "var(--bg-soft)" }}>
+        <p className="text-sm tracking-wider" style={{ color: "var(--accent-ink)" }}>{t("form_success")}</p>
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function WholesaleForm() {
 
       {/* Business type — a bordered panel of full-width rows, following the
           list-selector pattern used elsewhere on the site. Single-select; the
-          chosen row fills with ink and shows a brass check. */}
+          chosen row fills with ink and shows an accent check. */}
       <div>
         <label className={label} style={labelStyle}>{t("form_business_type")}</label>
         <div
@@ -189,7 +189,7 @@ export default function WholesaleForm() {
         </p>
       )}
 
-      <button type="submit" disabled={loading} className="btn-gold font-display text-lg tracking-widest py-4 disabled:opacity-60">
+      <button type="submit" disabled={loading} className="btn-accent font-display text-lg tracking-widest py-4 disabled:opacity-60">
         {loading ? "..." : t("form_submit")}
       </button>
     </form>

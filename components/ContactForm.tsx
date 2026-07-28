@@ -62,8 +62,8 @@ export default function ContactForm() {
   if (submitted) {
     return (
       <div className="flex items-center justify-center h-48 border"
-        style={{ borderColor: "var(--gold)", background: "var(--bg-soft)" }}>
-        <p className="text-sm tracking-wider" style={{ color: "var(--gold)" }}>{t("form_success")}</p>
+        style={{ borderColor: "var(--accent-ink)", background: "var(--bg-soft)" }}>
+        <p className="text-sm tracking-wider" style={{ color: "var(--accent-ink)" }}>{t("form_success")}</p>
       </div>
     );
   }
@@ -75,8 +75,8 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <HoneypotField />
 
-      {/* Enquiry type — refined pills. Selected fills with ink and shows a brass
-          check; brass stays reserved for the accent so selection reads clearly. */}
+      {/* Enquiry type — refined pills. Selected fills with ink and shows an
+          accent check; the accent stays reserved so selection reads clearly. */}
       <div>
         <label className={labelClass} style={labelStyle}>{t("form_type_label")}</label>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("form_type_label")}>
@@ -96,7 +96,7 @@ export default function ContactForm() {
                 style={{
                   background: active ? "var(--ink)" : "var(--field-bg)",
                   color: active ? "#f4f3f0" : "var(--text)",
-                  border: `1px solid ${active ? "var(--ink)" : hovered ? "var(--gold)" : "var(--border-strong)"}`,
+                  border: `1px solid ${active ? "var(--ink)" : hovered ? "var(--accent-ink)" : "var(--border-strong)"}`,
                   fontWeight: active ? 500 : 400,
                 }}
               >
@@ -130,7 +130,7 @@ export default function ContactForm() {
           {t("form_error")}
         </p>
       )}
-      <button type="submit" disabled={loading} className="btn-gold font-display text-lg tracking-widest py-4 disabled:opacity-60">
+      <button type="submit" disabled={loading} className="btn-accent font-display text-lg tracking-widest py-4 disabled:opacity-60">
         {loading ? "..." : t("form_submit")}
       </button>
     </form>

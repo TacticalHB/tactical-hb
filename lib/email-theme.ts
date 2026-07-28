@@ -22,7 +22,14 @@ export const INK = "#17160f";
 export const MUTED = "#6c6860";
 export const FAINT = "#a39d92";
 export const LINE = "#e4e0d8";
-export const ACCENT = "#C4A35A";
+/* The packaging orange, in the same two weights the site uses — email clients
+   have no custom properties, so the values are literals of --accent-ink and
+   --accent from globals.css and must be changed together with them.
+   ACCENT is the deep tone: it is only ever ink on this white card, where the
+   bright tone is too light to read. ACCENT_FILL is the bright tone, for the
+   one place a block of orange carries dark text. */
+export const ACCENT = "#C45A1A";
+export const ACCENT_FILL = "#FA8246";
 export const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 
 /** Hryvnia, formatted the way every customer-facing total is. */

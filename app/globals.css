@@ -11,14 +11,18 @@
   --ink-2: #1a1a1d;
   /* Header/footer atmosphere — a soft dark gradient, not pure black */
   --fog: linear-gradient(to bottom, #2a2d33, #1c1f24);
-  /* Brand accent — burnished brass (dark surfaces + fills).
-     On light surfaces, pale brass is illegible as text, so --gold maps
-     to dark ink; accents on light backgrounds render dark for legibility. */
-  --gold: #111114;           /* accent on light surfaces -> dark ink */
-  --accent: #C4A35A;         /* burnished brass: on dark + button/badge fills */
-  --accent-hover: #B08F4A;
-  --accent-rgb: 196, 163, 90;
-  --accent-ember-bright-rgb: 228, 210, 160;
+  /* Brand accent — the packaging orange, one hue across shop and admin.
+     TWO WEIGHTS, because one orange cannot serve both grounds: the bright
+     tone carries dark surfaces and fills, while text and hairlines on white
+     need the deeper tone to stay legible. Reach for --accent on dark,
+     --accent-ink on light. */
+  --accent: #FA8246;         /* bright: dark surfaces, fills, buttons, badges */
+  --accent-hover: #E56B2E;   /* hover / pressed */
+  --accent-ink: #C45A1A;     /* on light surfaces: links, labels, focus rings */
+  --accent-soft: rgba(250, 130, 70, 0.12);   /* tints, selection, washes */
+  --accent-line: rgba(250, 130, 70, 0.45);   /* accent hairlines */
+  --accent-rgb: 250, 130, 70;
+  --accent-ember-bright-rgb: 255, 176, 132;
   /* Layout */
   --container-max: 1680px;
   --page-padding: clamp(1.25rem, 3vw, 3.5rem);
@@ -155,7 +159,7 @@ body {
   position: relative;
   transform-origin: 75% 48%;
   animation: tct-pullback 8s cubic-bezier(0.3, 0, 0.12, 1) infinite;
-  /* Matte black metal, lit from upper-left, with brass catching two edges.
+  /* Matte black metal, lit from upper-left, with the accent catching two edges.
      The dark stops bottom out around #24242a rather than true black: the card
      behind is #000, and anything darker than this simply dissolves into it and
      the mark loses its shape. */
@@ -330,12 +334,12 @@ body {
 }
 .btn-dark:hover { background: #000; letter-spacing: 0.12em; }
 
-.btn-gold {
+.btn-accent {
   background: var(--accent);
   color: var(--ink);
   transition: background 0.25s ease, letter-spacing 0.25s ease;
 }
-.btn-gold:hover { background: var(--accent-hover); letter-spacing: 0.12em; }
+.btn-accent:hover { background: var(--accent-hover); letter-spacing: 0.12em; }
 
 /* ---- Nav (dark) ---- */
 .nav-link { color: #9a978f; transition: color 0.22s ease; }
@@ -354,7 +358,7 @@ body {
   outline: none;
   transition: border-color 0.22s ease;
 }
-.field:focus { border-color: var(--gold); }
+.field:focus { border-color: var(--accent-ink); }
 .field::placeholder { color: var(--text-faint); }
 
 /* ---- Form field (on dark) ---- */
@@ -372,14 +376,14 @@ body {
 .field-dark::placeholder { color: #6a665e; }
 
 /* ---- Links ---- */
-.link-gold { color: var(--gold); border-color: var(--gold); transition: opacity 0.22s ease; }
-.link-gold:hover { opacity: 0.6; }
-.link-gold-bright { color: var(--accent); border-color: var(--accent); transition: opacity 0.22s ease; }
-.link-gold-bright:hover { opacity: 0.7; }
+.link-accent { color: var(--accent-ink); border-color: var(--accent-ink); transition: opacity 0.22s ease; }
+.link-accent:hover { opacity: 0.6; }
+.link-accent-bright { color: var(--accent); border-color: var(--accent); transition: opacity 0.22s ease; }
+.link-accent-bright:hover { opacity: 0.7; }
 
 /* ---- Contact card ---- */
 .card-link { transition: border-color 0.25s ease, background 0.25s ease; }
-.card-link:hover { border-color: var(--gold) !important; background: var(--bg-soft) !important; }
+.card-link:hover { border-color: var(--accent-ink) !important; background: var(--bg-soft) !important; }
 
 /* ---- Product card (light, dark-on-hover image) ---- */
 .product-card-img {
@@ -402,7 +406,7 @@ body {
    premium, the OS reads as an instrument panel.
 
    Colour discipline, and it is the whole system:
-     gold   = brand and system (shared memory, active nav, primary action)
+     orange = brand and system (shared memory, active nav, primary action)
      green / amber / red = health, and NOTHING else
      everything else stays quiet grey
    A colour that means "status" must never be spent on decoration, or the
@@ -417,10 +421,11 @@ body {
   --console-border: #2a2b33;
   --console-border-soft: #23242b;
 
-  /* Brand / system */
-  --console-accent: #C4A35A;
-  --console-accent-soft: rgba(196, 163, 90, 0.12);
-  --console-accent-line: rgba(196, 163, 90, 0.45);
+  /* Brand / system — the same packaging orange the shop uses. The console is
+     dark throughout, so it takes the bright weight everywhere. */
+  --console-accent: #FA8246;
+  --console-accent-soft: rgba(250, 130, 70, 0.12);
+  --console-accent-line: rgba(250, 130, 70, 0.45);
 
   /* Text */
   --console-text: #E8E8EA;
@@ -456,7 +461,7 @@ body {
 }
 .console-nav-link:hover { color: var(--console-text); background: var(--console-panel-2); }
 
-/* Active = a gold marker and gold text, not a filled slab. The sidebar should
+/* Active = an accent marker and accent text, not a filled slab. The sidebar should
    read as an index with one line lit, not as a stack of buttons. */
 .console-nav-link.active { color: var(--console-accent); background: transparent; }
 .console-nav-link.active::before {
@@ -681,8 +686,8 @@ body {
   --console-text: #e8e6df;
   --console-muted: #8b93a1;
   --console-faint: #5d6572;
-  --console-accent: #d4b15e;
-  --console-accent-dim: rgba(212, 177, 94, 0.14);
+  --console-accent: #FA8246;
+  --console-accent-dim: rgba(250, 130, 70, 0.14);
   --console-alert: #e2574f;
   --console-ok: #4cd48b;
   --console-data: #58c4dd;

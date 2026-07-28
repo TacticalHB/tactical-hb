@@ -56,7 +56,7 @@ function ContactContent() {
                   <div className="text-xs tracking-[0.25em] uppercase mb-1" style={{ color: "var(--text-faint)" }}>{m.label}</div>
                   <div className="text-sm font-medium" style={{ color: "var(--text)" }}>{m.handle}</div>
                 </div>
-                <span style={{ color: "var(--gold)" }}>→</span>
+                <span style={{ color: "var(--accent-ink)" }}>→</span>
               </a>
             ))}
             <p className="text-sm leading-relaxed mt-2" style={{ color: "var(--text-muted)" }}>{t("response_note")}</p>

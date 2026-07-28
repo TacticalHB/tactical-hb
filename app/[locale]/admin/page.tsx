@@ -30,8 +30,9 @@ export const dynamic = "force-dynamic";
 
 type TermLine = { tag: string; level: string; tone: RoomTone; text: string };
 
-/* Gold is reserved for brand and system. Health reads green / amber / red, so
-   "needs attention" takes the amber light rather than borrowing the accent. */
+/* The accent orange is reserved for brand and system. Health reads green /
+   amber / red, so "needs attention" takes the amber light rather than
+   borrowing the accent. */
 const TONE_COLOR: Record<RoomTone, string> = {
   ok: "var(--console-ok)",
   warn: "var(--console-warn)",
@@ -228,7 +229,10 @@ export default async function AdminHomePage({
     {
       id: "strategist",
       roomId: "marketing",
-      color: "#d4b15e",
+      // Dusty rose, not the old brass. These dots are agent identities, so this
+      // one has to sit clear of the brand orange as well as of the status
+      // lights — a warm tone next to the accent would read as a system marker.
+      color: "#D18FA6",
       label: `${uk ? "Стратег" : "Strategist"} · ${latestPlan ? shortDate(latestPlan.createdAt) : "—"}`,
     },
     {
@@ -248,7 +252,7 @@ export default async function AdminHomePage({
       id: "margin",
       roomId: "finance",
       // Quiet grey-blue on purpose: this figure reports on health, so it must
-      // not BE a health colour, and gold belongs to brand and system.
+      // not BE a health colour, and the accent belongs to brand and system.
       color: "#9aa7b8",
       label: `${uk ? "Маржа" : "Margin"} · ${latestMargin ? shortDate(latestMargin.createdAt) : "—"}`,
     },

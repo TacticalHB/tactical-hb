@@ -17,9 +17,13 @@ Dark accents:
 - Ink `#111114` (nav, footer, dark tiles, hero panel)
 - Ink-2 `#1a1a1d`
 
-Gold:
-- Gold `#a87f2c` (accent on light surfaces)
-- Gold-bright `#d4b15e` (accent on dark surfaces)
+Brand accent — the packaging orange, one hue across shop and admin. Two weights,
+because one orange cannot serve both grounds:
+- `--accent` `#FA8246` (bright: dark surfaces, fills, buttons, badges)
+- `--accent-hover` `#E56B2E` (hover / pressed)
+- `--accent-ink` `#C45A1A` (on light surfaces: links, labels, focus rings)
+- `--accent-soft` `rgba(250, 130, 70, 0.12)` (tints, selection, washes)
+- `--accent-line` `rgba(250, 130, 70, 0.45)` (accent hairlines)
 
 Text:
 - Primary `#17160f`, Muted `#6c6860`, Faint `#a39d92`
@@ -34,14 +38,14 @@ Borders: `#e4e0d8` (light), `#2a2a2e` (dark). White dividers/frame: `#ffffff`.
 
 ## Layout & signature devices
 - **10px pure-white gutters/frame** everywhere (Apple-style): a fixed white border frames the whole viewport on every page; 10px white lines between all sections; a 10px white vertical line splits the hero.
-- **Split hero**: left = light column (TACTICAL HB wordmark, HB in gold, subtitle, CTAs); right = dark panel with the faint TCT target logo (~15% opacity) centred, drifting embers, gold glow.
-- **Flagship section = Apple-style 2×2 tile grid**: big tiles, alternating dark(ink)/light(sea-salt), each with product name (Bebas), a short tagline, gold **View** (filled pill) + **Buy** (outline pill), and either an enlarged cut-out product on a flat colour fill (see HMD TCT OP tile, studio grey) or a faint logo placeholder.
+- **Split hero**: left = light column (TACTICAL HB wordmark, HB in accent, subtitle, CTAs); right = dark panel with the faint TCT target logo (~15% opacity) centred, drifting embers, accent glow.
+- **Flagship section = Apple-style 2×2 tile grid**: big tiles, alternating dark(ink)/light(sea-salt), each with product name (Bebas), a short tagline, accent **View** (filled pill) + **Buy** (outline pill), and either an enlarged cut-out product on a flat colour fill (see HMD TCT OP tile, studio grey) or a faint logo placeholder.
 - **Video band**: full-width 16:9, silent autoplay loop, between hero and tiles.
 - Sharp corners site-wide (tactical), except product image tiles have a subtle radius and the tile buttons are full pills.
 
 ## Motion (subtle, ~600–800ms, respects reduced-motion)
 - Scroll reveal: fade + drift-up
-- Hero: ambient gold glow pulse, drifting ash/ember particles (canvas), scroll cue
+- Hero: ambient accent glow pulse, drifting ash/ember particles (canvas), scroll cue
 - Flagship countdown digits: amber LED glow
 - Product hover: image zoom / tile lift
 

@@ -30,9 +30,22 @@ export type Money = { eur: number; uah: number };
 /** UAH is quoted in whole hryvnia; round so add-ons stay tidy (€2.50 → ₴129). */
 export const eurToUah = (eur: number): number => Math.round(eur * UAH_PER_EUR);
 
+/** EUR keeps cents. For amounts that arrive quoted in UAH (carrier rates). */
+export const uahToEur = (uah: number): number => Math.round((uah / UAH_PER_EUR) * 100) / 100;
+
 /** Build a Money. Pass an explicit `uah` for catalogue prices; omit it to convert. */
 export function money(eur: number, uah?: number): Money {
   return { eur, uah: uah ?? eurToUah(eur) };
+}
+
+/**
+ * Build a Money from a UAH-quoted amount — shipping, chiefly: both carriers
+ * quote in hryvnia, but an EN-locale summary must still show one currency and
+ * a total that includes it. Same display rate as every other derived amount,
+ * and the same arithmetic the order email uses, so page and receipt agree.
+ */
+export function moneyFromUah(uah: number): Money {
+  return { eur: uahToEur(uah), uah: Math.round(uah) };
 }
 
 export const addMoney = (a: Money, b: Money): Money => ({ eur: a.eur + b.eur, uah: a.uah + b.uah });

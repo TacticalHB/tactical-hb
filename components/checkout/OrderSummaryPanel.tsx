@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
-import { subtractMoney, type Money } from "@/lib/currency";
+import { addMoney, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
    The order summary rail shown beside every checkout step, so what's being
@@ -30,9 +30,13 @@ export default function OrderSummaryPanel({
   const { lines, subtotal, count } = useCart();
   const uk = locale === "uk";
   const goods = discount ? subtractMoney(subtotal, discount) : subtotal;
-  // Shipping is quoted in UAH only, and only added to the UAH side. The EUR
-  // figure stays the merchandise value, which is what loyalty is based on.
-  const total: Money = { eur: goods.eur, uah: goods.uah + (shippingUah ?? 0) };
+  // Carriers quote shipping in UAH; the summary shows ONE currency, so the
+  // quote is converted at the display rate and the total includes it on BOTH
+  // sides — the "includes shipping" line under the total must be true in
+  // whichever currency the page is showing. (Loyalty is unaffected: it reads
+  // the goods value the server stores, never this display figure.)
+  const shipping: Money | null = shippingUah != null ? moneyFromUah(shippingUah) : null;
+  const total: Money = shipping ? addMoney(goods, shipping) : goods;
 
   const L = {
     title: uk ? "Підсумок замовлення" : "Order Summary",
@@ -103,12 +107,16 @@ export default function OrderSummaryPanel({
         )}
         <div className="flex items-center justify-between">
           <span style={{ color: "var(--text-muted)" }}>{L.shipping}</span>
-          <span style={{ color: shippingUah != null ? "var(--text)" : "var(--text-muted)" }}>
-            {shippingUah != null
-              ? `₴${shippingUah.toLocaleString("uk-UA")}`
-              : shippingPending
-              ? L.shippingAfter
-              : L.shippingNote}
+          <span style={{ color: shipping ? "var(--text)" : "var(--text-muted)" }}>
+            {/* Through <Price>, like every other figure — a ₴ quote on a €
+                page was exactly the bug this row used to have. */}
+            {shipping ? (
+              <Price money={shipping} locale={locale} />
+            ) : shippingPending ? (
+              L.shippingAfter
+            ) : (
+              L.shippingNote
+            )}
           </span>
         </div>
       </div>
@@ -123,7 +131,7 @@ export default function OrderSummaryPanel({
           shown: quoted shipping → "includes shipping"; international → the
           email-confirmation note; not yet quoted → "excludes delivery". */}
       <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>
-        {shippingUah != null ? L.totalIncludes : shippingPending ? L.totalIntl : L.totalNote}
+        {shipping ? L.totalIncludes : shippingPending ? L.totalIntl : L.totalNote}
       </p>
     </aside>
   );

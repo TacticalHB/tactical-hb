@@ -1,7 +1,7 @@
 import "server-only";
 import { products } from "@/lib/products";
 import { esc } from "@/lib/email";
-import { eurToUah, UAH_PER_EUR } from "@/lib/currency";
+import { eurToUah, uahToEur } from "@/lib/currency";
 import { BG, CARD, INK, MUTED, FAINT, LINE, ACCENT, FONT, uah, emailShell } from "@/lib/email-theme";
 import type { PaymentRow } from "@/lib/fulfilment";
 
@@ -139,7 +139,9 @@ export function buildOrderEmail(
      arithmetic; shipping, quoted by Nova Poshta in UAH, is converted for the
      euro view at the documented rate. */
   const inEur = p.locale !== "uk";
-  const shipEur = p.shipping_uah / UAH_PER_EUR;
+  // Same helper the checkout summary uses, so page and receipt agree to the
+  // cent — two independent conversions of the same quote once disagreed.
+  const shipEur = uahToEur(p.shipping_uah);
 
   const fmt = (eur: number, uahValue: number) =>
     inEur ? `€${eur.toFixed(2)}` : uah(uahValue);

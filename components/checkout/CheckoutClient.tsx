@@ -78,13 +78,11 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const discount = voucher ? money(voucher.amountEur) : money(0, 0);
   const goods = subtractMoney(subtotal, discount);
 
-  /* Shipping is UAH-only — both carriers quote in hryvnia and it joins the one
-     order total. International is priced by Nova Post's cross-border API where
-     it carries; where it does not, there is no rate to show and the exact total
-     is confirmed by email before any payment instead. */
-  const shippingUah =
-    destination === "ukraine" ? np?.costUah ?? 0 : intl.costUah ?? 0;
-  const total = { eur: goods.eur, uah: goods.uah + shippingUah };
+  /* Both carriers quote shipping in hryvnia; OrderSummaryPanel converts the
+     quote to the display currency and folds it into the one order total.
+     International is priced by Nova Post's cross-border API where it carries;
+     where it does not, there is no rate to show and the exact total is
+     confirmed by email before any payment instead. */
 
   /** True when this order will be emailed a total rather than paid for now. */
   const isIntlRequest = destination === "international" && (intl.unsupported || intl.costUah == null);

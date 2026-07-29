@@ -31,7 +31,11 @@ export default function CartPageClient({ locale }: { locale: string }) {
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується далі" : "Calculated at checkout",
     total: uk ? "Разом" : "Total",
-    totalNote: uk ? "Без вартості доставки" : "Excludes delivery",
+    // True at this stage — and the second half says where it stops being so:
+    // delivery joins the ONE order total at checkout, per the FOP-2 model.
+    totalNote: uk
+      ? "Доставку буде розраховано на оформленні та включено до суми замовлення."
+      : "Delivery is calculated at checkout and included in your order total.",
     checkout: uk ? "Перейти до оформлення" : "Proceed to checkout",
     remove: uk ? "Видалити" : "Remove",
     colour: uk ? "Колір" : "Colour",

@@ -41,9 +41,18 @@ export default function OrderSummaryPanel({
     discount: uk ? "Ваучер" : "Voucher",
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується згодом" : "Calculated later",
-    shippingAfter: uk ? "Після оформлення" : "After your order",
+    shippingAfter: uk ? "Підтвердимо листом" : "Confirmed by email",
     total: uk ? "Разом" : "Total",
     totalNote: uk ? "Без вартості доставки" : "Excludes delivery",
+    // The FOP-2 brief's checkout microcopy, verbatim (§4). Shown once shipping
+    // is actually inside the figure above it — never sooner.
+    totalIncludes: uk
+      ? "До суми замовлення включено доставку до обраного напрямку."
+      : "Order total includes shipping to your destination.",
+    // International: nothing is charged at this step; one total follows by email.
+    totalIntl: uk
+      ? "Точну суму замовлення з доставкою підтвердимо листом — оплата одним платежем."
+      : "We'll confirm your order total including delivery by email — one single payment.",
     qty: uk ? "К-сть" : "Qty",
   };
 
@@ -110,9 +119,12 @@ export default function OrderSummaryPanel({
           <Price money={total} locale={locale} />
         </span>
       </div>
-      {shippingUah == null && (
-        <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>{L.totalNote}</p>
-      )}
+      {/* One line under the total, and it must always be TRUE of the figure
+          shown: quoted shipping → "includes shipping"; international → the
+          email-confirmation note; not yet quoted → "excludes delivery". */}
+      <p className="text-[11px] mt-1.5" style={{ color: "var(--text-faint)" }}>
+        {shippingUah != null ? L.totalIncludes : shippingPending ? L.totalIntl : L.totalNote}
+      </p>
     </aside>
   );
 }

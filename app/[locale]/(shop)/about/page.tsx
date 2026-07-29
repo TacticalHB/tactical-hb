@@ -127,8 +127,9 @@ function AboutContent() {
         </div>
       </section>
 
-      {/* Returns & refunds */}
-      <section className="page-container py-24">
+      {/* Returns & refunds. The id is a public anchor — the Payment & Delivery
+          page links straight here rather than restating the policy. */}
+      <section id="returns" className="page-container py-24 scroll-mt-24">
         <Reveal>
           <span className="text-xs tracking-[0.35em] uppercase block mb-4" style={{ color: "var(--accent-ink)" }}>{t("returns_tag")}</span>
           <h2 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{t("returns_title")}</h2>

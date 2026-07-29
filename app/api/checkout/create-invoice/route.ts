@@ -8,6 +8,7 @@ import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
+import { Resend } from "resend";
 
 /* ---------------------------------------------------------------------------
    Create a Monobank invoice and hand back the page to pay on.
@@ -191,30 +192,36 @@ export async function POST(request: NextRequest) {
   const reference = makeReference();
 
   // A basket is sent only when it reconciles EXACTLY with the amount charged.
-  // Shipping is included as its own line so it still adds up. A voucher cannot
-  // be expressed as a basket line, so the discounted case sends no basket at
-  // all rather than risk Monobank rejecting a mismatched invoice.
+  // A voucher cannot be expressed as a basket line, so the discounted case
+  // sends no basket rather than risk Monobank rejecting a mismatched invoice —
+  // and NEITHER CAN SHIPPING, any more. Under the FOP-2 model (brief of
+  // 29 July 2026) the customer buys goods delivered to a destination, not
+  // goods plus a delivery service, so a "Доставка" line on the payment page is
+  // exactly the presentation the model exists to avoid. When shipping is in
+  // the total the itemised basket is omitted and the payment page shows one
+  // order amount with an order-purpose description. Internal records keep the
+  // split (shipping_uah below); only the customer-facing presentation folds it.
   const basket: BasketItem[] | undefined =
-    discount.eur > 0
+    discount.eur > 0 || shippingUah > 0
       ? undefined
-      : [
-          ...priced.lines.map((l) => ({
-            name: l.name,
-            qty: l.qty,
-            sum: toKopiyky(l.total.uah),
-            unit: locale === "uk" ? "шт." : "pcs",
-            code: l.slug,
-          })),
-          ...(shippingUah > 0
-            ? [{
-                name: locale === "uk" ? "Доставка — Нова Пошта" : "Delivery — Nova Poshta",
-                qty: 1,
-                sum: toKopiyky(shippingUah),
-                unit: locale === "uk" ? "шт." : "pcs",
-                code: "shipping-np",
-              }]
-            : []),
-        ];
+      : priced.lines.map((l) => ({
+          name: l.name,
+          qty: l.qty,
+          sum: toKopiyky(l.total.uah),
+          unit: locale === "uk" ? "шт." : "pcs",
+          code: l.slug,
+        }));
+
+  // INTERNATIONAL IS A REQUEST, NOT A CHARGE. There is no live rate source for
+  // destinations outside Ukraine (and scraping one is explicitly off the
+  // table), so the one-total rule cannot be met by charging now: the old flow
+  // took the goods money immediately and invoiced delivery separately later —
+  // exactly the second-invoice-for-delivery pattern the FOP-2 model forbids.
+  // Instead the order is recorded, the shop is notified, and ONE payment
+  // request for the full total (goods delivered to the destination, order
+  // purpose) follows by email once shipping is known. Status "request" keeps
+  // these rows distinct from "pending", which means a live Monobank invoice.
+  const isRequest = shippingMethod === "international";
 
   // ---- Record the intent BEFORE sending anyone to pay ---------------------
   // If this insert fails we must not create an invoice: a customer could pay
@@ -222,7 +229,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
   const { error: insErr } = await admin.from("payments").insert({
     reference,
-    status: "pending",
+    status: isRequest ? "request" : "pending",
     amount_kop: amountKop,
     user_id: userId,
     email,
@@ -294,12 +301,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "server_error" }, { status: 500 });
   }
 
+  // ---- International: notify the shop and stop — no invoice yet -----------
+  if (isRequest) {
+    // The email is how these orders reach a human today: "request" rows carry
+    // no invoice, so no webhook will ever fire for them, and the admin orders
+    // page lists only paid orders. If the send fails the row still exists —
+    // log loudly rather than refuse the order.
+    await sendOrderRequestEmail({
+      reference,
+      email,
+      locale,
+      delivery,
+      lines: priced.lines.map((l) => `${l.qty} × ${l.name}`),
+      goodsEur: goods.eur,
+      voucherCode,
+    }).catch((e) => console.error("[invoice] order-request email failed:", e));
+
+    return NextResponse.json({ ok: true, requested: true, reference });
+  }
+
   // ---- Ask Monobank for a payment page ------------------------------------
   try {
     const invoice = await createInvoice({
       amountKop,
       reference,
-      destination: `Tactical HB — ${reference}`,
+      // Order-purpose wording, per the FOP-2 brief: this is payment FOR THE
+      // ORDER — never "delivery services" / "оплата за доставку" in any form.
+      destination:
+        locale === "uk"
+          ? `Оплата замовлення ${reference} — Tactical HB`
+          : `Payment for order ${reference} — Tactical HB`,
       webHookUrl: `${siteUrl()}/api/monobank/webhook`,
       // Monobank returns the customer here after payment (confirmed by their
       // support). Locale-prefixed so they come back to the language they
@@ -323,4 +354,76 @@ export async function POST(request: NextRequest) {
     console.error("[invoice] Monobank rejected the invoice:", e);
     return NextResponse.json({ ok: false, error: "gateway_error" }, { status: 502 });
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Internal notification for an international order request.
+
+   Plain operational mail to the shop's own inbox — same Resend pattern as the
+   contact form. It exists because "request" rows fire no webhook and appear on
+   no admin page yet; without this email the order would sit unseen.
+
+   THE INSTRUCTION IN THE EMAIL IS PART OF THE COMPLIANCE MODEL: the manual
+   payment request Mario sends must be ONE amount for the whole order with an
+   order-purpose description, never a separate delivery invoice.
+--------------------------------------------------------------------------- */
+
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+async function sendOrderRequestEmail(p: {
+  reference: string;
+  email: string;
+  locale: string;
+  delivery: Record<string, unknown>;
+  lines: string[];
+  goodsEur: number;
+  voucherCode: string | null;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("[invoice] RESEND_API_KEY missing — order request", p.reference, "recorded but not emailed");
+    return;
+  }
+
+  const d = p.delivery;
+  const s = (k: string) => String(d[k] ?? "").trim();
+  const rows: Array<[string, string]> = [
+    ["Reference", p.reference],
+    ["Name", `${s("firstName")} ${s("surname")}`.trim() || "—"],
+    ["Email", p.email],
+    ["Phone", s("phone") || "—"],
+    ["Country", s("country") || "—"],
+    ["City", s("city") || "—"],
+    ["Address", [s("address"), s("apartment")].filter(Boolean).join(", ") || "—"],
+    ["Postcode", s("postcode") || "—"],
+    ["Items", p.lines.join("; ")],
+    ["Goods total", `€${p.goodsEur.toFixed(2)}${p.voucherCode ? ` (voucher ${p.voucherCode} applied)` : ""}`],
+    ["Locale", p.locale],
+  ];
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from: process.env.CONTACT_FROM_EMAIL || "Tactical HB <contact@tactical-hb.com>",
+    to: "admin@tactical-hb.com",
+    replyTo: p.email,
+    subject: `International order request ${p.reference}`,
+    html: `
+      <h2 style="font-family:sans-serif">International order request</h2>
+      <table style="font-family:sans-serif;font-size:14px;border-collapse:collapse">
+        ${rows
+          .map(
+            ([k, v]) =>
+              `<tr><td style="padding:3px 16px 3px 0;color:#707072;vertical-align:top">${k}</td><td>${esc(v)}</td></tr>`
+          )
+          .join("")}
+      </table>
+      <p style="font-family:sans-serif;font-size:14px;max-width:560px">
+        Quote delivery to this destination, then send <b>one</b> Monobank payment
+        request for the <b>full order total</b> (goods + delivery), with the
+        purpose <b>«Оплата замовлення ${esc(p.reference)}»</b>. Do not invoice
+        delivery as a separate service.
+      </p>`,
+  });
+  if (error) console.error("[invoice] Resend rejected order-request email:", error);
 }

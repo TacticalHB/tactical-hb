@@ -9,7 +9,9 @@ import { money, subtractMoney } from "@/lib/currency";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
 import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/lib/countries";
-import { type DeliveryDetails } from "@/lib/checkout";
+import { saveOrder, type DeliveryDetails, type OrderLine } from "@/lib/checkout";
+import { describeLine } from "@/lib/cart-display";
+import { priceCart } from "@/lib/pricing";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
 import AccountCreatingScreen from "./AccountCreatingScreen";
@@ -66,9 +68,9 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const discount = voucher ? money(voucher.amountEur) : money(0, 0);
   const goods = subtractMoney(subtotal, discount);
 
-  // Shipping is UAH-only — Nova Poshta quotes in hryvnia and it is charged on
-  // top of the goods. International shipping is billed after the order, so it
-  // adds nothing here.
+  // Shipping is UAH-only — Nova Poshta quotes in hryvnia and it joins the one
+  // order total. International has no rate at this step: the exact total is
+  // confirmed by email before any payment, so it adds nothing here.
   const shippingUah = destination === "ukraine" ? np?.costUah ?? 0 : 0;
   const total = { eur: goods.eur, uah: goods.uah + shippingUah };
 
@@ -129,9 +131,12 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     destIntlNote: uk
       ? "Доставка за адресою за межі України."
       : "Address delivery outside Ukraine.",
+    // The one-total model: nothing is charged now; the exact order total —
+    // goods delivered to the destination — is confirmed by email, then paid in
+    // ONE payment. Never reintroduce "invoice delivery separately" here.
     intlNotice: uk
-      ? "Вартість доставки буде розрахована після оформлення замовлення — ми зв'яжемося з вами й виставимо рахунок окремо. Зараз ви сплачуєте лише за товар."
-      : "Shipping cost will be calculated after your order is placed — we'll contact you and invoice it separately. You're paying for the goods only at this stage.",
+      ? "Зараз оплата не знімається. Ми підтвердимо точну суму замовлення — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем."
+      : "Nothing is charged yet. We'll confirm your exact order total — goods including delivery to your destination — by email, and you'll pay it in a single payment.",
     needCity: uk ? "Оберіть місто доставки." : "Please choose a delivery city.",
     needBranch: uk ? "Оберіть відділення Нової Пошти." : "Please choose a Nova Poshta branch.",
     needAddress: uk ? "Вкажіть вулицю та будинок для кур'єрської доставки." : "Please enter the street and building for courier delivery.",
@@ -161,6 +166,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
       ? "Оплата карткою через захищену сторінку Monobank."
       : "Pay by card through Monobank's secure page.",
     place: uk ? "Перейти до оплати" : "Continue to payment",
+    placeRequest: uk ? "Оформити замовлення" : "Place order",
     notLive: uk
       ? "Ви перейдете на захищену сторінку Monobank, щоб завершити оплату карткою."
       : "You'll be taken to Monobank's secure page to complete your card payment.",
@@ -277,17 +283,81 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),
       });
-      const data = (await res.json()) as { ok?: boolean; pageUrl?: string; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        pageUrl?: string;
+        requested?: boolean;
+        reference?: string;
+        error?: string;
+      };
 
-      if (!res.ok || !data.ok || !data.pageUrl) {
+      if (!res.ok || !data.ok || (!data.pageUrl && !data.requested)) {
         setPlacing(false);
         setError(data.error === "not_configured" ? L.payUnavailable : L.payFailed);
         console.error("[pay] invoice creation failed:", res.status, data.error);
         return;
       }
 
+      // International: no charge yet. The order is recorded and the exact
+      // total — goods delivered to the destination — is confirmed by email
+      // before any payment, so there is one payment and one total. Snapshot
+      // the order for the confirmation page, then clear the basket: the order
+      // exists server-side now, and keeping the lines would invite a second
+      // submission of the same request.
+      if (data.requested) {
+        // Freeze names, images and unit prices into the snapshot the same way
+        // the server does — the confirmation page must not restate the order
+        // from whatever the catalogue says on a later refresh.
+        const priced = priceCart(
+          lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
+          locale
+        );
+        const orderLines: OrderLine[] = priced.lines.map((pl) => {
+          const d = describeLine(
+            {
+              slug: pl.slug,
+              qty: pl.qty,
+              // Validated options, reshaped: describeLine takes the cart's
+              // optional form, priceCart returns the nullable one.
+              options: {
+                variant: pl.options.variant ?? undefined,
+                lid: pl.options.lid,
+                rubber: pl.options.rubber,
+              },
+            },
+            locale
+          );
+          return {
+            slug: pl.slug,
+            qty: pl.qty,
+            name: d?.name ?? pl.name,
+            image: d?.image ?? "",
+            colour: d?.colour ?? null,
+            material: d?.material ?? null,
+            addons: d?.addons ?? null,
+            unitPrice: pl.unit,
+          };
+        });
+        saveOrder({
+          orderNo: data.reference ?? "TCT-ORDER",
+          createdAt: new Date().toISOString(),
+          locale,
+          delivery: form,
+          lines: orderLines,
+          subtotal,
+          discount: voucher ? money(voucher.amountEur) : undefined,
+          total: goods,
+          voucherCode: voucher?.code ?? null,
+          paymentMethod: "card_on_confirmation",
+          accountCreated,
+        });
+        clearCart();
+        router.push(`/${locale}/checkout/confirmation`);
+        return;
+      }
+
       // Off to Monobank's hosted page. The webhook fulfils the order.
-      window.location.href = data.pageUrl;
+      window.location.href = data.pageUrl as string;
     } catch (err) {
       setPlacing(false);
       setError(L.payFailed);
@@ -597,8 +667,10 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 />
               </div>
 
+              {/* International is a request, not a charge — the hand-off copy
+                  and the button must not promise a payment page. */}
               <p className="text-[13px] leading-relaxed p-4 mb-6 mt-6" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
-                {L.notLive}
+                {destination === "international" ? L.intlNotice : L.notLive}
               </p>
 
               <button
@@ -607,7 +679,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 className="w-full sm:w-auto sm:min-w-[280px] h-12 px-8 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 disabled:opacity-50"
                 style={{ background: "var(--accent)", color: "#111114" }}
               >
-                {placing ? "…" : L.place}
+                {placing ? "…" : destination === "international" ? L.placeRequest : L.place}
               </button>
               <div className="mt-5">
                 <button

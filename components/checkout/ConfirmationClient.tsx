@@ -28,24 +28,28 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
   }, []);
 
   const L = {
-    thanks: uk ? "Дякуємо за покупку в Tactical HB." : "Thank you for shopping with Tactical HB.",
+    thanks: uk ? "Дякуємо за замовлення в Tactical HB." : "Thank you for your Tactical HB order.",
     great: uk ? "Ви зробили чудовий вибір." : "You've made a great choice.",
-    // NOTE: this promises an email that is not wired up yet — the order
-    // notification lands with the Monobank/Supabase work. Kept deliberately so
-    // the copy is final, but it is a promise the site cannot keep until then.
+    // This page now serves the INTERNATIONAL request flow: the order is
+    // recorded, nothing is charged yet, and the promise below is the one-total
+    // model in a sentence. No "invoice delivery separately" wording — ever.
     emailed: uk
-      ? "Ми надіслали підтвердження на вашу пошту з деталями замовлення."
-      : "A confirmation email has been sent to you with your order details.",
+      ? "Ми напишемо вам на пошту, щойно підтвердимо суму замовлення."
+      : "We'll email you as soon as your order total is confirmed.",
     hello: uk ? "Вітаємо," : "Hello,",
     body: uk
-      ? "Ваше замовлення успішно оформлено. Ми зв'яжемося з вами найближчим часом, щоб узгодити оплату та доставку Новою Поштою або Укрпоштою. Дякуємо, що обрали Tactical HB."
-      : "Your order has been placed successfully. We'll be in touch shortly to arrange payment and delivery with Nova Poshta or Ukrposhta. Thank you for choosing Tactical HB.",
+      ? "Ваше замовлення прийнято. Ми підтвердимо точну суму — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем. Дякуємо, що обрали Tactical HB."
+      : "Your order has been received. We'll confirm your exact total — goods including delivery to your destination — by email, and you'll pay it in a single payment. Thank you for choosing Tactical HB.",
     sign: "Tactical HB.",
     back: uk ? "Повернутися до магазину" : "Back to store",
     summary: uk ? "Підсумок замовлення" : "Order Summary",
     orderNo: uk ? "Номер замовлення" : "Order No",
     shipping: uk ? "Дані доставки" : "Shipping details",
     total: uk ? "Разом" : "Total",
+    goodsTotal: uk ? "Товари" : "Goods",
+    goodsTotalNote: uk
+      ? "Доставку буде включено до підтвердженої суми замовлення."
+      : "Delivery will be included in your confirmed order total.",
     discount: uk ? "Ваучер" : "Voucher",
     qty: uk ? "К-сть" : "Qty",
     none: uk ? "Замовлення не знайдено." : "No recent order found.",
@@ -157,12 +161,18 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
           className="flex items-center justify-between py-5 mb-2"
           style={{ borderTop: order.discount && order.discount.eur > 0 ? "none" : "1px solid var(--border-strong)" }}
         >
-          <span className="text-[15px]" style={{ color: "var(--text)" }}>{L.total}</span>
+          <span className="text-[15px]" style={{ color: "var(--text)" }}>{L.goodsTotal}</span>
           <span className="text-[19px] font-medium" style={{ color: "var(--text)" }}>
             {/* Older snapshots have no `total`; fall back to the subtotal. */}
             {formatMoney(order.total ?? order.subtotal, currency)}
           </span>
         </div>
+        {/* This figure is goods only — delivery joins it in the confirmed
+            total. The label above and this line keep the page from calling
+            something a "total" that the very next email will exceed. */}
+        <p className="text-[12px] -mt-1 mb-4" style={{ color: "var(--text-faint)" }}>
+          {L.goodsTotalNote}
+        </p>
 
         <ul className="flex flex-col">
           {order.lines.map((l, i) => (

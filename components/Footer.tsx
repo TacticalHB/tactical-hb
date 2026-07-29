@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import CookieSettingsButton from "./CookieSettingsButton";
 import NewsletterPromo from "./NewsletterPromo";
@@ -26,6 +27,11 @@ export default function Footer() {
           className="text-sm tracking-[0.2em] uppercase nav-link">
           {t("follow")} <span style={{ color: "var(--accent)" }}>@tactical_hb</span>
         </a>
+
+        {/* Store policies. One link for now; siblings join it as they exist. */}
+        <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link">
+          {t("link_delivery")}
+        </Link>
 
         {/* Contact addresses — site-wide, so neither inbox is more than a
             scroll away from any page. */}

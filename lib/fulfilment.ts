@@ -250,9 +250,12 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
   const rows: [string, string][] = [
     ["Order", p.reference],
     ["Paid", `₴${totalUah.toLocaleString("uk-UA")}  (goods ₴${Math.round(p.amount_uah).toLocaleString("uk-UA")} / €${p.amount_eur.toFixed(2)})`],
+    // Internal breakdown only — the customer-facing documents state one order
+    // total. An international row reaching this point was paid via a manual
+    // one-total request, so its delivery is already inside the amount.
     ["Shipping", np
       ? `Nova Poshta ${courier ? "courier" : "branch"} — ₴${Math.round(p.shipping_uah).toLocaleString("uk-UA")}`
-      : "International — invoice separately"],
+      : "International — included in the paid total"],
     ["Customer", name],
     ["Email", p.email],
     ["Telephone", d.phone ?? ""],

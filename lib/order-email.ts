@@ -40,9 +40,10 @@ type Copy = {
   orderDate: string;
   qty: string;
   subtotal: string;
-  shipping: string;
-  shippingAfter: string;
   total: string;
+  /** Says in words that delivery is inside the total — the receipt carries no
+      priced delivery row, per the FOP-2 model. */
+  totalIncludes: string;
   voucher: string;
   shipTo: string;
   closing: string;
@@ -60,9 +61,8 @@ const COPY: Record<"uk" | "en", Copy> = {
     orderDate: "Order date",
     qty: "Qty",
     subtotal: "Subtotal",
-    shipping: "Shipping",
-    shippingAfter: "Invoiced separately",
     total: "Total",
+    totalIncludes: "Order total includes shipping to your destination.",
     voucher: "Voucher",
     shipTo: "Shipping address",
     closing: "Thank you for choosing Tactical HB.",
@@ -78,9 +78,8 @@ const COPY: Record<"uk" | "en", Copy> = {
     orderDate: "Дата замовлення",
     qty: "К-сть",
     subtotal: "Проміжний підсумок",
-    shipping: "Доставка",
-    shippingAfter: "Рахунок надійде окремо",
     total: "Разом",
+    totalIncludes: "До суми замовлення включено доставку до обраного напрямку.",
     voucher: "Ваучер",
     shipTo: "Адреса доставки",
     closing: "Дякуємо, що обрали Tactical HB.",
@@ -242,9 +241,19 @@ export function buildOrderEmail(
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${summaryRow(t.subtotal, amounts.subtotal)}
                 ${discountUah > 0 ? summaryRow(`${t.voucher} · ${p.voucher_code}`, `−${amounts.discount}`, { muted: true }) : ""}
-                ${summaryRow(t.shipping, np ? amounts.shipping : t.shippingAfter, np ? undefined : { muted: true })}
                 <tr><td colspan="2" style="border-top:1px solid ${ACCENT};opacity:0.4;font-size:0;line-height:0;padding-top:12px">&nbsp;</td></tr>
                 ${summaryRow(t.total, amounts.total, { strong: true })}
+                ${
+                  /* NO priced "Доставка" row — under the FOP-2 model the
+                     customer buys goods delivered to a destination, so the
+                     receipt states one order total and says in words that
+                     delivery is inside it. The subtotal→total gap is the
+                     shipping; the note is what makes that gap read as
+                     intended rather than as an error. */
+                  shipUah > 0
+                    ? `<tr><td colspan="2" style="font-family:${FONT};font-size:12px;color:${FAINT};padding-top:2px">${esc(t.totalIncludes)}</td></tr>`
+                    : ""
+                }
                 ${inEur ? `<tr><td colspan="2" style="font-family:${FONT};font-size:12px;color:${FAINT};padding-top:2px">${esc(t.chargedNote)} ${uah(totalUah)}</td></tr>` : ""}
               </table>
             </td></tr>
@@ -286,8 +295,8 @@ export function buildOrderEmail(
     "",
     `${t.subtotal}: ${amounts.subtotal}`,
     ...(discountUah > 0 ? [`${t.voucher} ${p.voucher_code}: −${amounts.discount}`] : []),
-    `${t.shipping}: ${np ? amounts.shipping : t.shippingAfter}`,
     `${t.total}: ${amounts.total}`,
+    ...(shipUah > 0 ? [t.totalIncludes] : []),
     ...(inEur ? [`${t.chargedNote} ${uah(totalUah)}`] : []),
     "",
     `${t.shipTo}:`,

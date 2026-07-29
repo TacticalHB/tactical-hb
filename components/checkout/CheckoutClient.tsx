@@ -64,15 +64,30 @@ export default function CheckoutClient({ locale }: { locale: string }) {
   const [countryCode, setCountryCode] = useState("");
   const countries = useMemo(() => countryOptions(locale), [locale]);
 
+  /* What Nova Post will charge to carry this basket to the chosen country.
+     null cost + unsupported=false means "not asked yet or still asking";
+     unsupported=true means Nova Post will not carry there, and the order
+     becomes a request priced by hand instead of a payment taken now. */
+  const [intl, setIntl] = useState<{ costUah: number | null; unsupported: boolean; loading: boolean }>({
+    costUah: null,
+    unsupported: false,
+    loading: false,
+  });
+
   // A voucher is denominated in EUR; money() converts it for the UAH side.
   const discount = voucher ? money(voucher.amountEur) : money(0, 0);
   const goods = subtractMoney(subtotal, discount);
 
-  // Shipping is UAH-only — Nova Poshta quotes in hryvnia and it joins the one
-  // order total. International has no rate at this step: the exact total is
-  // confirmed by email before any payment, so it adds nothing here.
-  const shippingUah = destination === "ukraine" ? np?.costUah ?? 0 : 0;
+  /* Shipping is UAH-only — both carriers quote in hryvnia and it joins the one
+     order total. International is priced by Nova Post's cross-border API where
+     it carries; where it does not, there is no rate to show and the exact total
+     is confirmed by email before any payment instead. */
+  const shippingUah =
+    destination === "ukraine" ? np?.costUah ?? 0 : intl.costUah ?? 0;
   const total = { eur: goods.eur, uah: goods.uah + shippingUah };
+
+  /** True when this order will be emailed a total rather than paid for now. */
+  const isIntlRequest = destination === "international" && (intl.unsupported || intl.costUah == null);
 
   // A voucher applied to one basket must not survive a change to that basket —
   // its minimum-order rule was checked against the old contents.
@@ -80,6 +95,58 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     if (voucher) setVoucher(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines]);
+
+  /* Price the international leg whenever the destination country or the basket
+     changes. Display only — create-invoice re-quotes server-side, so a figure
+     tampered with here cannot become the amount charged.
+
+     "OTHER" is the free-text country, which has no ISO code to price by, so it
+     stays on the request path. A stale response is discarded: switching country
+     twice quickly must not let the first answer overwrite the second. */
+  useEffect(() => {
+    let live = true;
+
+    /* Every state update sits inside this async body on purpose. Setting state
+       synchronously in an effect makes React render twice before paint, and the
+       lint rule that catches it is worth keeping clean rather than adding to. */
+    (async () => {
+      if (destination !== "international" || !countryCode || countryCode === OTHER) {
+        if (live) setIntl({ costUah: null, unsupported: false, loading: false });
+        return;
+      }
+
+      if (live) setIntl({ costUah: null, unsupported: false, loading: true });
+
+      try {
+        const res = await fetch("/api/shipping/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            countryCode,
+            city: form.city,
+            lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
+          }),
+        });
+        const data = (await res.json()) as { ok?: boolean; costUah?: number; unsupported?: boolean };
+        if (!live) return;
+        if (data.ok && typeof data.costUah === "number") {
+          setIntl({ costUah: data.costUah, unsupported: false, loading: false });
+        } else {
+          setIntl({ costUah: null, unsupported: true, loading: false });
+        }
+      } catch {
+        // Treated as unquotable — the order still goes through, by email.
+        if (live) setIntl({ costUah: null, unsupported: true, loading: false });
+      }
+    })();
+
+    return () => {
+      live = false;
+    };
+    // form.city is deliberately absent: it does not affect a cross-border rate,
+    // and re-quoting on every keystroke would be a request per character.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination, countryCode, lines]);
 
   // When checkout opened, so the order endpoint can tell a person from a script.
   const mountedAt = useRef(Date.now());
@@ -137,6 +204,12 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     intlNotice: uk
       ? "Зараз оплата не знімається. Ми підтвердимо точну суму замовлення — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем."
       : "Nothing is charged yet. We'll confirm your exact order total — goods including delivery to your destination — by email, and you'll pay it in a single payment.",
+    /* Shown once Nova Post HAS priced the destination: this order is paid for
+       now, like a domestic one, and the total already contains the delivery. */
+    intlPriced: uk
+      ? "Доставку до вашої країни розраховано та вже включено до суми замовлення. Ви сплачуєте одну суму — товар із доставкою."
+      : "Delivery to your country has been calculated and is already included in your order total. You pay one amount — goods including delivery.",
+    calculating: uk ? "Розрахунок…" : "Calculating…",
     needCity: uk ? "Оберіть місто доставки." : "Please choose a delivery city.",
     needBranch: uk ? "Оберіть відділення Нової Пошти." : "Please choose a Nova Poshta branch.",
     needAddress: uk ? "Вкажіть вулицю та будинок для кур'єрської доставки." : "Please enter the street and building for courier delivery.",
@@ -279,7 +352,14 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                     warehouseRef: np.warehouseRef,
                     warehouseName: np.warehouseName,
                   }
-              : { method: "international" },
+              : {
+                  method: "international",
+                  // The country is what Nova Post prices a cross-border parcel
+                  // by; the city is sent for completeness and does not affect
+                  // the rate. Still only a destination — never a cost.
+                  countryCode: countryCode === OTHER ? "" : countryCode,
+                  city: form.city,
+                },
           lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),
       });
@@ -621,7 +701,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                         </div>
                       </div>
                       <p className="text-[13px] leading-relaxed p-4 mb-8" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
-                        {L.intlNotice}
+                        {intl.loading ? L.calculating : isIntlRequest ? L.intlNotice : L.intlPriced}
                       </p>
                     </>
                   )}
@@ -667,19 +747,20 @@ export default function CheckoutClient({ locale }: { locale: string }) {
                 />
               </div>
 
-              {/* International is a request, not a charge — the hand-off copy
-                  and the button must not promise a payment page. */}
+              {/* A priced international order pays like any other and must not
+                  be told it is a request; only an unquotable one gets the
+                  hand-off copy. */}
               <p className="text-[13px] leading-relaxed p-4 mb-6 mt-6" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
-                {destination === "international" ? L.intlNotice : L.notLive}
+                {isIntlRequest ? L.intlNotice : L.notLive}
               </p>
 
               <button
                 onClick={payWithMonobank}
-                disabled={placing}
+                disabled={placing || intl.loading}
                 className="w-full sm:w-auto sm:min-w-[280px] h-12 px-8 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 disabled:opacity-50"
                 style={{ background: "var(--accent)", color: "#111114" }}
               >
-                {placing ? "…" : destination === "international" ? L.placeRequest : L.place}
+                {placing ? "…" : intl.loading ? L.calculating : isIntlRequest ? L.placeRequest : L.place}
               </button>
               <div className="mt-5">
                 <button
@@ -700,8 +781,8 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           locale={locale}
           discount={discount}
           voucherCode={voucher?.code ?? null}
-          shippingUah={destination === "ukraine" ? np?.costUah ?? null : null}
-          shippingPending={destination === "international"}
+          shippingUah={destination === "ukraine" ? np?.costUah ?? null : intl.costUah}
+          shippingPending={isIntlRequest}
         />
       </div>
     </div>

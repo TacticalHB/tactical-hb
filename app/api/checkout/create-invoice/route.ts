@@ -5,6 +5,7 @@ import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money } from "@/lib/currency";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
+import { quoteInternational } from "@/lib/novapost";
 import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
@@ -132,6 +133,9 @@ export async function POST(request: NextRequest) {
   let npStreet: string | null = null;
   let npBuilding: string | null = null;
   let npFlat: string | null = null;
+  /** Destination country for international, and whether Nova Post priced it. */
+  let intlCountry: string | null = null;
+  let intlQuoted = false;
 
   if (shippingMethod === "nova_poshta") {
     npDeliveryType = shipReq.deliveryType === "courier" ? "courier" : "warehouse";
@@ -180,6 +184,36 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  /* ---- International: quote it, and charge if Nova Post will carry ----------
+     Re-quoted here for the same reason the domestic branch is — the browser's
+     figure is for display and must never become the amount charged.
+
+     A country Nova Post cannot serve leaves shippingUah at zero and falls
+     through to the request flow below, which is what intlQuoted decides. Both
+     paths satisfy the one-total rule; only this one can be automated. */
+  if (shippingMethod === "international") {
+    intlCountry = String(shipReq.countryCode ?? "").trim().toUpperCase().slice(0, 2) || null;
+    if (intlCountry) {
+      try {
+        const parcel = parcelFor(priced.lines);
+        const quote = await quoteInternational({
+          countryCode: intlCountry,
+          weightKg: parcel.weightKg,
+          dims: parcel.dims,
+          declaredValueUah: goods.uah,
+          city: String(shipReq.city ?? "").trim() || undefined,
+        });
+        if (quote.ok) {
+          shippingUah = quote.costUah;
+          intlQuoted = true;
+        }
+      } catch (e) {
+        // An outage must not block the sale — fall back to the request flow.
+        console.error("[invoice] international quote failed, falling back to request:", e);
+      }
+    }
+  }
+
   // Goods in both currencies; shipping is UAH-only and charged on top.
   const total = { eur: goods.eur, uah: goods.uah + shippingUah };
   if (total.uah <= 0) {
@@ -212,16 +246,20 @@ export async function POST(request: NextRequest) {
           code: l.slug,
         }));
 
-  // INTERNATIONAL IS A REQUEST, NOT A CHARGE. There is no live rate source for
-  // destinations outside Ukraine (and scraping one is explicitly off the
-  // table), so the one-total rule cannot be met by charging now: the old flow
-  // took the goods money immediately and invoiced delivery separately later —
-  // exactly the second-invoice-for-delivery pattern the FOP-2 model forbids.
-  // Instead the order is recorded, the shop is notified, and ONE payment
-  // request for the full total (goods delivered to the destination, order
-  // purpose) follows by email once shipping is known. Status "request" keeps
-  // these rows distinct from "pending", which means a live Monobank invoice.
-  const isRequest = shippingMethod === "international";
+  /* INTERNATIONAL IS A REQUEST ONLY WHEN IT COULD NOT BE PRICED. Nova Post's
+     cross-border API quotes most of the world, and where it does, an
+     international order is charged exactly like a domestic one: shipping in the
+     total, one Monobank amount, one webhook, an order in admin.
+
+     Where it does not — a country Nova Post will not carry to, or an outage —
+     there is nothing to include and the one-total rule cannot be met by
+     charging now. The old flow took the goods money immediately and invoiced
+     delivery separately later, which is the second-invoice pattern the FOP-2
+     model forbids. So the order is recorded, the shop notified, and ONE payment
+     request for the full total follows by email once shipping is priced by
+     hand. Status "request" keeps those rows distinct from "pending", which
+     means a live Monobank invoice is waiting. */
+  const isRequest = shippingMethod === "international" && !intlQuoted;
 
   // ---- Record the intent BEFORE sending anyone to pay ---------------------
   // If this insert fails we must not create an invoice: a customer could pay

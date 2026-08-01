@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
-import { subtractMoney, money } from "@/lib/currency";
+import { subtractMoney, money, eurToUahFixed } from "@/lib/currency";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational } from "@/lib/novapost";
@@ -214,8 +214,32 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Goods in both currencies; shipping is UAH-only and charged on top.
-  const total = { eur: goods.eur, uah: goods.uah + shippingUah };
+  /* WHICH PRICE LIST THE CARD IS BILLED FROM.
+
+     Monobank issues invoices in hryvnia only, so a euro-storefront order has to
+     be converted somewhere. It used to be charged goods.uah — the catalogue's
+     hand-set hryvnia price — which quietly billed euro customers from the
+     cheaper of two independent lists: A.Craft is €24 against ₴900, an implied
+     37.5 rather than 51. A basket displaying €53.83 was charged ₴2425, which
+     came back to roughly €47 on the customer's statement. Nobody was
+     overcharged, but the figure on the page was not the figure on the card.
+
+     Mario's decision (29 July 2026): the euro list is authoritative for euro
+     customers. Goods convert at the same fixed 51 the summary shows shipping
+     at, so page and invoice reconcile. The Ukrainian storefront is untouched
+     and still pays its own hryvnia prices.
+
+     amount_uah below stores THIS figure rather than the catalogue one, which is
+     what keeps amount_uah + shipping_uah equal to the amount actually charged —
+     admin order totals, the finance report, partner revenue and the waybill's
+     declared value all read that sum and would otherwise understate every euro
+     order.
+
+     Rounding: goods and shipping convert separately and land on whole hryvnia,
+     so the invoice can sit up to ~1 ₴ from displayed_eur × 51. That is a
+     fraction of a cent and cannot be avoided while the invoice is an integer. */
+  const goodsUahCharged = locale === "uk" ? goods.uah : eurToUahFixed(goods.eur);
+  const total = { eur: goods.eur, uah: goodsUahCharged + shippingUah };
   if (total.uah <= 0) {
     // A voucher covering the whole basket leaves nothing to charge. Monobank
     // cannot create a zero invoice, and this needs a different flow.
@@ -275,7 +299,9 @@ export async function POST(request: NextRequest) {
     // Merchandise only — this is the loyalty basis. Shipping is stored apart
     // so postage never earns XP.
     amount_eur: goods.eur,
-    amount_uah: goods.uah,
+    // The goods figure actually billed — see the note above the total. On the
+    // Ukrainian storefront this is the catalogue price unchanged.
+    amount_uah: goodsUahCharged,
     discount_eur: discount.eur,
     voucher_code: voucherCode,
     shipping_method: shippingMethod,

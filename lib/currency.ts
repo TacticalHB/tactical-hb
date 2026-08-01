@@ -25,17 +25,20 @@ export type Currency = "EUR" | "UAH";
 export const UAH_PER_EUR = 51.5;
 
 /**
- * The rate carrier shipping is shown at, fixed by Mario at 51 on 29 July 2026.
+ * The fixed commercial rate, set by Mario at 51 on 29 July 2026. Two jobs, and
+ * they must use the same number or the page stops matching the invoice:
+ *
+ *   • showing a carrier's hryvnia shipping quote on a euro storefront, and
+ *   • converting a euro-list order into the hryvnia Monobank invoice, since
+ *     Monobank issues invoices in hryvnia only (ccy 980).
  *
  * DELIBERATELY ITS OWN CONSTANT rather than a change to UAH_PER_EUR above. That
  * one also prices the HMD add-ons, so moving it to 51 would quietly reprice the
- * lid on the Ukrainian storefront (₴129 → ₴128) — and the brief for this change
- * said to touch shipping conversion only, nothing about product pricing. Two
- * rates is the lesser evil; the catalogue already carries a third implied rate
- * of its own (A.Craft is €24 / ₴900, about 37.5), so a single true rate was
- * never the model here.
+ * lid on the Ukrainian storefront (₴129 → ₴128), which was never asked for. The
+ * catalogue carries a third implied rate of its own (A.Craft is €24 / ₴900,
+ * about 37.5), so a single true rate was never the model here.
  */
-export const UAH_PER_EUR_SHIPPING = 51;
+export const UAH_PER_EUR_FIXED = 51;
 
 /** A price expressed in both currencies. */
 export type Money = { eur: number; uah: number };
@@ -62,10 +65,19 @@ export function money(eur: number, uah?: number): Money {
  */
 export function moneyFromUah(uah: number): Money {
   return {
-    eur: Math.round((uah / UAH_PER_EUR_SHIPPING) * 100) / 100,
+    eur: Math.round((uah / UAH_PER_EUR_FIXED) * 100) / 100,
     uah: Math.round(uah),
   };
 }
+
+/**
+ * A euro amount as the hryvnia that will actually be charged for it.
+ *
+ * Only for the invoice: Monobank cannot bill euro, so a euro-storefront order
+ * is converted here at the same fixed rate the customer was shown. Whole
+ * hryvnia, because that is how the invoice is denominated.
+ */
+export const eurToUahFixed = (eur: number): number => Math.round(eur * UAH_PER_EUR_FIXED);
 
 export const addMoney = (a: Money, b: Money): Money => ({ eur: a.eur + b.eur, uah: a.uah + b.uah });
 

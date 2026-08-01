@@ -92,7 +92,7 @@
     "delivery_tag": "Delivery",
     "delivery_title": "Across Ukraine and worldwide",
     "delivery_text_1": "Within Ukraine we ship with Nova Poshta and Ukrposhta — to a branch, a parcel locker, or by courier to your door. Delivery is calculated at checkout and included in your order total, so there is nothing to pay on collection.",
-    "delivery_text_2": "For international orders we confirm the exact order total — goods and delivery to your destination — by email before you pay. One payment, one total; dispatch follows as soon as it clears.",
+    "delivery_text_2": "International orders work the same way: delivery to your country is calculated at checkout and included in the order total, so you pay once, on the site. If a destination can't be quoted automatically, we confirm the full total by email first — still one payment, still one total.",
     "returns_tag": "Returns",
     "returns_title": "Thirty days to change your mind",
     "returns_intro": "If something isn't right, we'll make it right. Any order can be returned within 30 days — no excluded categories, no awkward questions.",
@@ -140,7 +140,8 @@
     "rights": "All rights reserved.",
     "email_general": "General",
     "email_sales": "Wholesale",
-    "payment_methods": "Payment methods"
+    "payment_methods": "Payment methods",
+    "link_offer": "Terms of Sale"
   },
   "newsletter": {
     "title": "Sign up to get news from Tactical HB",
@@ -196,5 +197,29 @@
     "returns_tag": "Returns",
     "returns_1": "Please see our Returns policy. Return shipping terms depend on the reason for return and the destination.",
     "returns_link": "Returns policy"
+  },
+  "offer": {
+    "title": "Terms of Sale",
+    "intro": "These terms govern the sale of goods through tactical-hb.com. By placing an order, you accept them.",
+    "updated": "Last updated 1 August 2026",
+    "seller_tag": "The seller",
+    "seller_1": "Goods on this site are sold by Tactical HB, a private entrepreneur registered in Ukraine, operating from Kharkiv.",
+    "seller_2": "Questions about an order, these terms, or a return can be sent to",
+    "total_tag": "Order total and delivery",
+    "total_1": "The total price of the order is the price of the goods for the selected delivery destination.",
+    "total_2": "Where delivery is arranged by us through postal or courier partners, the applicable delivery amount is calculated at checkout and included in the order total.",
+    "total_3": "The customer pays a single amount for the order. A separate delivery service is not sold to the customer.",
+    "payment_tag": "Payment",
+    "payment_1": "Payment is made online by card at checkout, as one transaction for the full order total. You are not asked for a second payment once the order is placed.",
+    "payment_2": "Card payments are processed by Monobank and charged in Ukrainian hryvnia. Where prices are displayed in euro, the amount is converted at a fixed rate of 51 UAH to €1; your bank may apply its own rate when converting the hryvnia charge back to your currency.",
+    "delivery_tag": "Delivery",
+    "delivery_1": "Orders are dispatched through established postal and courier partners. Delivery is arranged after payment is confirmed, and tracking is sent once the parcel is on its way.",
+    "delivery_2": "For international orders, the customs rules of the destination country apply to the recipient where required. Any duties or taxes charged on import are not included in the order total.",
+    "returns_tag": "Returns",
+    "returns_1": "Any order may be returned within 30 days of receipt, unused and in its original packaging. Return shipping terms depend on the reason for return and the destination.",
+    "returns_link": "Full returns policy",
+    "more_tag": "More detail",
+    "more_1": "How payment and delivery work in practice is set out on the Payment & Delivery page.",
+    "more_link": "Payment & Delivery"
   }
 }

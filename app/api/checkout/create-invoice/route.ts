@@ -389,12 +389,16 @@ export async function POST(request: NextRequest) {
     const invoice = await createInvoice({
       amountKop,
       reference,
-      // Order-purpose wording, per the FOP-2 brief: this is payment FOR THE
-      // ORDER — never "delivery services" / "оплата за доставку" in any form.
+      /* VERBATIM from docs/fiscal-payment-wording.md §2 — these two strings are
+         a standard, not a phrasing choice, and the accountant still has to sign
+         them off (§8.3). Do not reword, and do not reinstate the em-dash that
+         used to sit before the brand: the document specifies a plain space.
+         Never "delivery services" / "оплата за доставку" / "courier" in any
+         form — that is the presentation the whole FOP-2 model exists to avoid. */
       destination:
         locale === "uk"
-          ? `Оплата замовлення ${reference} — Tactical HB`
-          : `Payment for order ${reference} — Tactical HB`,
+          ? `Оплата замовлення ${reference} Tactical HB`
+          : `Order ${reference} payment Tactical HB`,
       webHookUrl: `${siteUrl()}/api/monobank/webhook`,
       // Monobank returns the customer here after payment (confirmed by their
       // support). Locale-prefixed so they come back to the language they
@@ -485,8 +489,9 @@ async function sendOrderRequestEmail(p: {
       <p style="font-family:sans-serif;font-size:14px;max-width:560px">
         Quote delivery to this destination, then send <b>one</b> Monobank payment
         request for the <b>full order total</b> (goods + delivery), with the
-        purpose <b>«Оплата замовлення ${esc(p.reference)}»</b>. Do not invoice
-        delivery as a separate service.
+        purpose <b>«Оплата замовлення ${esc(p.reference)} Tactical HB»</b> — the
+        standard string from docs/fiscal-payment-wording.md §2, the same one the
+        site sends automatically. Do not invoice delivery as a separate service.
       </p>`,
   });
   if (error) console.error("[invoice] Resend rejected order-request email:", error);

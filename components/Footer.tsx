@@ -28,10 +28,16 @@ export default function Footer() {
           {t("follow")} <span style={{ color: "var(--accent)" }}>@tactical_hb</span>
         </a>
 
-        {/* Store policies. One link for now; siblings join it as they exist. */}
-        <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link">
-          {t("link_delivery")}
-        </Link>
+        {/* Store policies, side by side. The offer is the legal document; the
+            delivery page is the plain-language version of the same model. */}
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link">
+            {t("link_delivery")}
+          </Link>
+          <Link href={`/${locale}/offer`} className="text-sm tracking-[0.2em] uppercase nav-link">
+            {t("link_offer")}
+          </Link>
+        </div>
 
         {/* Contact addresses — site-wide, so neither inbox is more than a
             scroll away from any page. */}

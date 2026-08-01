@@ -119,11 +119,15 @@ export default function CartInfoSections({ locale }: { locale: string }) {
             доставки розраховується під час оформлення та сплачується на сайті разом із замовленням —
             оплатити її при отриманні неможливо.
           </p>
+          {/* NO SEPARATE DELIVERY INVOICE. This used to promise «окремий лист
+              із запитом на оплату доставки» — a second payment for shipping —
+              which is precisely what the FOP-2 model forbids. See
+              docs/fiscal-payment-wording.md §1. */}
           <p className="mb-4">
-            <strong style={{ color: "var(--text)" }}>Міжнародна доставка.</strong>{" "}Доставку можна
-            сплатити на сайті під час оформлення. Якщо цього не зробити, ми надішлемо окремий лист із
-            запитом на оплату доставки, і замовлення буде остаточно підтверджено лише після її
-            отримання.
+            <strong style={{ color: "var(--text)" }}>Міжнародна доставка.</strong>{" "}Вартість доставки до
+            вашої країни розраховується під час оформлення і входить до загальної суми замовлення — ви
+            сплачуєте одну суму на сайті. Якщо напрямок неможливо прорахувати автоматично, ми спершу
+            підтвердимо повну суму листом; платіж усе одно буде один.
           </p>
           <p style={{ color: "var(--text-faint)" }}>
             Посилку передаємо перевізникові протягом 1–2 робочих днів після підтвердження оплати, а
@@ -141,11 +145,12 @@ export default function CartInfoSections({ locale }: { locale: string }) {
             cost is calculated at checkout and paid on the website together with your order — it
             cannot be paid on collection.
           </p>
+          {/* NO SEPARATE DELIVERY INVOICE — see the Ukrainian note above. */}
           <p className="mb-4">
-            <strong style={{ color: "var(--text)" }}>International delivery.</strong>{" "}Delivery can be
-            paid on the website at checkout. If it isn&apos;t, we&apos;ll email you a separate payment
-            request for shipping, and your order is only fully confirmed once that delivery payment is
-            received.
+            <strong style={{ color: "var(--text)" }}>International delivery.</strong>{" "}Delivery to your
+            country is calculated at checkout and included in the order total — you pay one amount, on
+            the site. If a destination can&apos;t be quoted automatically, we&apos;ll confirm the full
+            total by email first; it is still a single payment.
           </p>
           <p style={{ color: "var(--text-faint)" }}>
             Orders are handed to the carrier within 1–2 business days of payment confirmation, and a

@@ -51,6 +51,13 @@ export type AdminOrder = {
   deliveryDetail: string | null;
   deliveryNotes: string | null;
   ttn: string | null;
+
+  /* PRRO. A receipt id means a fiscal document exists; an error means one is
+     owed and nobody has issued it. Both null on orders predating migration 0024
+     and on orders that were never attempted. */
+  fiscalReceiptId: string | null;
+  fiscalisedAt: string | null;
+  fiscalError: string | null;
 };
 
 function num(v: unknown): number | null {
@@ -144,6 +151,10 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
     deliveryDetail: detail,
     deliveryNotes: text(row.np_notes),
     ttn: text(row.np_ttn),
+
+    fiscalReceiptId: text(row.checkbox_receipt_id),
+    fiscalisedAt: text(row.checkbox_fiscalised_at),
+    fiscalError: text(row.checkbox_error),
   };
 }
 

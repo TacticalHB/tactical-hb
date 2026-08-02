@@ -157,6 +157,39 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         </div>
       )}
 
+      {/* PRRO status. A paid order with no fiscal receipt is a tax exposure, so
+          it reads as an alert rather than a quiet absence. */}
+      <div
+        className="px-5 py-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px]"
+        style={{ borderTop: "1px solid var(--console-border)" }}
+      >
+        <span className="text-[11px] tracking-[0.12em] uppercase" style={{ color: "var(--console-muted)" }}>
+          {uk ? "ПРРО" : "Fiscal"}
+        </span>
+        {order.fiscalReceiptId ? (
+          <>
+            <span style={{ color: "var(--console-ok)" }}>{uk ? "Чек видано" : "Receipt issued"}</span>
+            <span className="font-mono text-[11.5px]" style={{ color: "var(--console-muted)" }}>
+              {order.fiscalReceiptId}
+            </span>
+            {order.fiscalisedAt && (
+              <span style={{ color: "var(--console-faint)" }}>{formatWhen(order.fiscalisedAt, uk)}</span>
+            )}
+          </>
+        ) : order.fiscalError ? (
+          <>
+            <span style={{ color: "var(--console-alert)" }}>
+              {uk ? "ЧЕК НЕ ВИДАНО" : "NO RECEIPT"}
+            </span>
+            <span style={{ color: "var(--console-muted)" }}>{order.fiscalError}</span>
+          </>
+        ) : (
+          <span style={{ color: "var(--console-warn)" }}>
+            {uk ? "Не фіскалізовано" : "Not fiscalised"}
+          </span>
+        )}
+      </div>
+
       <footer className="px-5 py-4" style={{ borderTop: "1px solid var(--console-border)" }}>
         <OrderTtnForm orderId={order.id} initial={order.ttn} locale={locale} />
       </footer>

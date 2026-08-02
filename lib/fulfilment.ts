@@ -4,6 +4,8 @@ import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { esc, rowsHtml, sendMail } from "@/lib/email";
 import { buildOrderEmail } from "@/lib/order-email";
 import { createTtnForOrder } from "@/lib/order-ttn";
+import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
+import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
 
 /* ---------------------------------------------------------------------------
    Turning a confirmed payment into an order.
@@ -69,6 +71,113 @@ export type PaymentRow = {
 export type FulfilResult =
   | { ok: true; orderId: string }
   | { ok: false; reason: "already_fulfilled" | "error" };
+
+/* ---------------------------------------------------------------------------
+   Fiscalisation — the PRRO receipt for an order that has already been paid.
+
+   IDEMPOTENT TWICE OVER. The order row is checked first, so a webhook retry
+   normally never reaches Checkbox at all; and the receipt UUID is derived from
+   the order reference, so if it does reach them, Checkbox refuses the duplicate
+   and we treat that refusal as success. Neither path can produce a second
+   fiscal document, which would be false turnover.
+
+   THE RECEIPT MUST EQUAL THE CARD. amountKop is read back from the payment row
+   — the exact figure Monobank was asked for — never recomputed from the lines,
+   because the lines are the thing being adjusted to absorb shipping.
+--------------------------------------------------------------------------- */
+export async function fiscaliseOrderRow(orderId: string, payment: PaymentRow): Promise<void> {
+  const admin = createAdminClient();
+
+  try {
+    const { data: existing } = await admin
+      .from("orders")
+      .select("checkbox_receipt_id")
+      .eq("id", orderId)
+      .maybeSingle();
+    if (existing?.checkbox_receipt_id) {
+      console.log("[fiscal] already fiscalised, skipping:", payment.reference);
+      return;
+    }
+
+    // A product with no Checkbox code cannot be put on a receipt honestly, and
+    // inventing one is worse than leaving the order for a human.
+    const missing = unmappedSlugs(payment.lines.map((l) => ({ slug: l.slug, variant: l.variant })));
+    if (missing.length > 0) {
+      const err = `no Checkbox product for: ${missing.join(", ")} — fiscalise by hand`;
+      console.error("[fiscal]", payment.reference, err);
+      await admin.from("orders").update({ checkbox_error: err }).eq("id", orderId);
+      await alertFiscalFailure(payment.reference, err);
+      return;
+    }
+
+    const lines: FiscalLine[] = payment.lines.map((l) => ({
+      code: checkboxCode(l.slug, l.variant)!,
+      name: l.name,
+      qty: l.qty,
+      unitKop: Math.round(l.unit_uah * 100),
+    }));
+
+    const result = await fiscaliseOrder({
+      reference: payment.reference,
+      // What the card was actually charged: goods after discount, plus shipping.
+      amountKop: Math.round((payment.amount_uah + payment.shipping_uah) * 100),
+      lines,
+      email: payment.email || null,
+    });
+
+    if (result.ok) {
+      await admin
+        .from("orders")
+        .update({
+          checkbox_receipt_id: result.receiptId,
+          checkbox_fiscalised_at: new Date().toISOString(),
+          checkbox_error: null,
+        })
+        .eq("id", orderId);
+      console.log(
+        "[fiscal] receipt", result.receiptId, "for", payment.reference,
+        result.alreadyExisted ? "(already existed — retry)" : ""
+      );
+      return;
+    }
+
+    console.error("[fiscal] FAILED for", payment.reference, ":", result.error);
+    await admin.from("orders").update({ checkbox_error: result.error }).eq("id", orderId);
+    await alertFiscalFailure(payment.reference, result.error);
+  } catch (e) {
+    // Fiscalisation must never be able to break fulfilment. The payment is real
+    // and the order exists; this only means the receipt needs issuing by hand.
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[fiscal] unexpected failure for", payment.reference, msg);
+    await admin.from("orders").update({ checkbox_error: msg.slice(0, 500) }).eq("id", orderId).then(
+      () => {},
+      () => {}
+    );
+    await alertFiscalFailure(payment.reference, msg).catch(() => {});
+  }
+}
+
+/** Tell a human. A missing fiscal receipt is a tax problem, not a log line. */
+async function alertFiscalFailure(reference: string, error: string): Promise<void> {
+  await sendMail({
+    to: ADMIN_EMAIL,
+    subject: `PRRO: fiscal receipt NOT issued — ${reference}`,
+    text:
+      `Order ${reference} was paid but NO fiscal receipt was created.\n\n${error}\n\n` +
+      `The payment is valid and the order stands — only the PRRO step failed. ` +
+      `Issue the receipt from the Checkbox app for the full amount charged, as a ` +
+      `sale of goods, with no separate delivery line.`,
+    html: `<p style="font-family:sans-serif;font-size:15px">
+        Order <b>${esc(reference)}</b> was paid but <b>no fiscal receipt was created</b>.
+      </p>
+      <p style="font-family:sans-serif;font-size:14px;color:#96322c">${esc(error)}</p>
+      <p style="font-family:sans-serif;font-size:14px;max-width:560px">
+        The payment is valid and the order stands — only the PRRO step failed.
+        Issue the receipt from the Checkbox app for the full amount charged, as a
+        sale of goods, with no separate delivery line.
+      </p>`,
+  }).catch((e) => console.error("[fiscal] alert email failed:", e));
+}
 
 /**
  * Claim a pending payment. Returns the row only to the caller that won the
@@ -217,6 +326,13 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     //    important should wait behind a courier API. Never throws — a failure
     //    leaves the order 'paid', which is the manual-waybill queue.
     await createTtnForOrder(order.id, payment);
+
+    // 7. Fiscalise with Checkbox. After the waybill because a fiscal receipt is
+    //    a legal record of a sale that HAS happened — it must never gate the
+    //    money, the confirmation, or the parcel. Never throws; a failure is
+    //    written to the order for the admin queue and alerted, and the payment
+    //    stands regardless (brief rule 10).
+    await fiscaliseOrderRow(order.id, payment);
 
     console.log("[fulfil] order created:", order.id, "ref", payment.reference);
     return { ok: true, orderId: order.id };

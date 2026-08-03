@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { products as ALL, Product } from "@/lib/products";
-import { currencyForLocale, type Currency } from "@/lib/currency";
+import { currencyForLocale, formatMoney, type Currency } from "@/lib/currency";
+import { ADDONS } from "@/lib/addons";
 import NikeProductCard from "./NikeProductCard";
 
-type CatKey = "all" | "hmd" | "bowl" | "accessory";
+type CatKey = "all" | "hmd" | "bowl" | "windcover" | "accessory";
 
 /**
  * Price bands, held in BOTH currencies so the filter matches the prices the
@@ -65,23 +67,49 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       all: uk ? "Усі продукти" : "All Products",
       hmd: uk ? "Пристрої для нагріву" : "Heat Devices",
       bowl: uk ? "Чаші" : "Bowls",
+      windcover: uk ? "Вітрозахист" : "Windcovers",
       accessory: uk ? "Аксесуари" : "Accessories",
     } as Record<CatKey, string>,
+    incoming: uk ? "Скоро" : "Incoming",
   };
 
+  /* ACCESSORIES ARE NOT PRODUCTS HERE. The category now holds the three add-ons
+     — lid, rubber, timer — which are options on a parent, not things with a SKU
+     of their own (see lib/addons). Nothing in `products` carries the accessory
+     category any more, so the grid below renders add-on cards for this filter
+     and product cards for every other one.
+
+     They are also absent from All Products by construction rather than by an
+     exclusion rule: they were never in the product list. Search reaches them
+     through lib/addons separately. */
+  const showingAddons = cat === "accessory";
+
   const list = useMemo(() => {
+    if (showingAddons) return [];
     let l = ALL.filter((p) => cat === "all" || p.category === cat);
     if (bands.length)
       l = l.filter((p) => bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
     if (sort === "price-asc") l = [...l].sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") l = [...l].sort((a, b) => b.price - a.price);
     return l;
-  }, [cat, bands, sort, currency]);
+  }, [cat, bands, sort, currency, showingAddons]);
+
+  /* The third wind-cover slot. A real third cover exists but has no name, no
+     photograph and no price, so it is shown as a tile rather than invented as a
+     product: no title, no price, nothing to add to a basket.
+
+     Hidden when a price filter is on — it has no price to match, and a tile
+     that ignored the filter would look like a bug. */
+  const showIncoming = (cat === "all" || cat === "windcover") && bands.length === 0;
+
+  /** What the heading counts. The Incoming tile is not a product and is not
+      counted; the add-on cards are what the Accessories view actually shows. */
+  const shownCount = showingAddons ? ADDONS.length : list.length;
 
   const toggleBand = (k: string) =>
     setBands((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
 
-  const catKeys: CatKey[] = ["all", "hmd", "bowl", "accessory"];
+  const catKeys: CatKey[] = ["all", "hmd", "bowl", "windcover", "accessory"];
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
@@ -90,7 +118,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
         <div className="flex items-end justify-between pb-5 border-b" style={{ borderColor: "#e5e5e5" }}>
           <h1 className="text-xl md:text-2xl font-medium">
             {cat === "all" ? L.title : L.cats[cat]}{" "}
-            <span style={{ color: "#8a8a8e" }}>({list.length})</span>
+            <span style={{ color: "#8a8a8e" }}>({shownCount})</span>
           </h1>
           <div className="flex items-center gap-5 md:gap-8">
             <button
@@ -159,6 +187,60 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
               {list.map((p) => (
                 <NikeProductCard key={p.id} product={p} locale={locale} />
               ))}
+
+              {/* The add-ons, in the catalogue's card language but deliberately
+                  not purchasable here: each one is an option on a parent, so the
+                  card carries the price and sends the customer to the page where
+                  it is actually chosen. */}
+              {showingAddons &&
+                ADDONS.map((a) => (
+                  <Link key={a.key} href={`/${locale}/products/${a.parentSlug}`} className="block group">
+                    <div
+                      className="relative aspect-square overflow-hidden rounded-[20px] grid place-items-center"
+                      style={{ background: "#f5f5f5" }}
+                    >
+                      <span
+                        className="text-sm tracking-[0.2em] uppercase"
+                        style={{ color: "#c7c7c9" }}
+                      >
+                        {uk ? a.nameUk : a.nameEn}
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <div className="text-[15px] font-medium leading-snug" style={{ color: "#111111" }}>
+                        {uk ? a.nameUk : a.nameEn}
+                      </div>
+                      <div className="text-[15px] leading-snug" style={{ color: "#707072" }}>
+                        {uk ? a.taglineUk : a.taglineEn}
+                      </div>
+                      <div className="text-[15px] mt-1" style={{ color: "#111111" }}>
+                        +{formatMoney(a.price, currency)}
+                      </div>
+                      <div className="text-[13px] mt-1" style={{ color: "#8a8a8e" }}>
+                        {uk ? a.parentUk : a.parentEn}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+
+              {/* Incoming — a tile, not a product. No title, no price, nothing
+                  to click: there is no page to send anyone to yet. */}
+              {showIncoming && (
+                <div>
+                  <div
+                    className="relative aspect-square overflow-hidden rounded-[20px] grid place-items-center"
+                    style={{ background: "#f5f5f5" }}
+                    aria-label={L.incoming}
+                  >
+                    <span
+                      className="text-sm tracking-[0.2em] uppercase"
+                      style={{ color: "#c7c7c9" }}
+                    >
+                      {L.incoming}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -77,9 +77,9 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       unit = addMoney(unit, materialUpcharge(material));
       weightG += materialWeightG(material);
     }
-    // The timer belongs to the wind covers, which are the accessories carrying
-    // the `windcover` tag — not every accessory.
-    const isWindcover = product.category === "accessory" && product.tags.includes("windcover");
+    // The timer belongs to the wind covers, which are their own category now
+    // rather than tagged accessories.
+    const isWindcover = product.category === "windcover";
     const windcover = { timer: isWindcover && !!l.options?.timer };
     if (isWindcover) {
       unit = addMoney(unit, timerUpcharge(windcover));

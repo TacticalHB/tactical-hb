@@ -61,7 +61,10 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Newsletter prompt — footer and cart page only. */}
+        {/* Newsletter prompt — footer and cart page only. The wrapper only
+            centres; the promo itself is inline-flex, so the mark and the
+            sentence size to their content and read as one block instead of the
+            logo floating at the left edge of a 560px row. */}
         <div className="w-full max-w-[560px] flex justify-center pt-2">
           <NewsletterPromo locale={locale} variant="dark" />
         </div>

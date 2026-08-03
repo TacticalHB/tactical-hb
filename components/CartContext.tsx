@@ -33,7 +33,7 @@ export function linePrice(line: CartLine): Money {
   if (p.category === "hmd") {
     return addMoney(base, materialUpcharge({ lid: !!line.options?.lid, rubber: !!line.options?.rubber }));
   }
-  if (p.category === "accessory" && p.tags.includes("windcover")) {
+  if (p.category === "windcover") {
     return addMoney(base, timerUpcharge({ timer: !!line.options?.timer }));
   }
   return base;

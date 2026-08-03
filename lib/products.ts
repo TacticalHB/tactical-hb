@@ -20,7 +20,7 @@ export type Product = {
   /** Packed carton size in millimetres. Used both on the page and to keep the
       Nova Poshta volumetric weight honest. */
   dims: { l: number; w: number; h: number };
-  category: "hmd" | "bowl" | "accessory";
+  category: "hmd" | "bowl" | "accessory" | "windcover";
   featured: boolean;
   image: string;
   photos?: string[];
@@ -450,7 +450,7 @@ export const products: Product[] = [
     currency: "EUR",
     weightG: 470,
     dims: { l: 210, w: 108, h: 108 },
-    category: "accessory",
+    category: "windcover",
     featured: true,
     image: "/images/windcover-hero-cut.png",
     tileImage: "/images/windcover-tile.png",
@@ -513,26 +513,7 @@ export const products: Product[] = [
     currency: "EUR",
     weightG: 470,
     dims: { l: 210, w: 108, h: 108 },
-    category: "accessory",
-    featured: false,
-    image: "",
-    tags: ["windcover"],
-  },
-  {
-    id: "windcover-three",
-    slug: "windcover-three",
-    nameUk: "Windcover",
-    nameEn: "Windcover",
-    taglineUk: "Металевий вітрозахист у тактичному стилі.",
-    taglineEn: "Metal wind cover in tactical style.",
-    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
-    descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
-    price: 23,
-    priceUah: 850,
-    currency: "EUR",
-    weightG: 470,
-    dims: { l: 210, w: 108, h: 108 },
-    category: "accessory",
+    category: "windcover",
     featured: false,
     image: "",
     tags: ["windcover"],

@@ -161,7 +161,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      PRE-SELECTED here, base price on the card. Opening the page offers the
      complete thing and lets them opt out — ₴1700 / €45 with the timer, ₴850 /
      €23 without. */
-  const isWindcover = product.category === "accessory" && product.tags.includes("windcover");
+  const isWindcover = product.category === "windcover";
   const [windcover, setWindcover] = useState<WindcoverOptions>({ timer: true });
 
   const basePrice = variants
@@ -207,8 +207,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     tips: uk ? "Поради з використання" : "Tips for Use",
     delivery: uk ? "Доставка та повернення" : "Delivery & Returns",
     deliveryText: uk
-      ? "Міжнародна доставка по Європі та Близькому Сходу — умови на сторінці Опт."
-      : "International shipping across Europe & the Middle East — see Wholesale for terms.",
+      /* One string for the whole catalogue, which is the point: it used to
+         promise "Europe & the Middle East" while the shop ships worldwide, and
+         a per-product string would have had to be corrected eight times and
+         missed on the ninth. Fourteen days matches the offer and the returns
+         policy — do not change it here alone. */
+      ? "Доставляємо по всьому світу. Повернення — протягом 14 днів з обґрунтованої причини."
+      : "We ship worldwide. Returns accepted within 14 days where the reason is justified.",
     benefits: uk ? "Ключові переваги" : "Key Benefits",
   };
 

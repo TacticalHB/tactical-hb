@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { products } from "@/lib/products";
+import { searchAddons } from "@/lib/addons";
 import Price from "./Price";
 import { money } from "@/lib/currency";
 
@@ -43,6 +44,11 @@ export default function SearchOverlay({
       return hay.includes(term);
     });
   }, [q]);
+
+  /* The add-ons are searchable even though they are deliberately absent from
+     the catalogue — someone hunting for "lid" should find it. Each row lands on
+     the product where the option is chosen; they have no page of their own. */
+  const addonResults = useMemo(() => searchAddons(q), [q]);
 
   const go = (slug: string) => {
     onClose();
@@ -85,12 +91,40 @@ export default function SearchOverlay({
 
           {q.trim() && (
             <div className="py-3">
-              {results.length === 0 ? (
+              {results.length === 0 && addonResults.length === 0 ? (
                 <p className="text-sm py-4" style={{ color: "var(--text-muted)" }}>
                   {locale === "uk" ? "Нічого не знайдено" : "No results"}
                 </p>
               ) : (
                 <ul className="flex flex-col">
+                  {addonResults.map((a) => (
+                    <li key={a.key}>
+                      <button
+                        onClick={() => go(a.parentSlug)}
+                        className="w-full flex items-center gap-4 py-3 text-left hover:opacity-70 transition-opacity"
+                      >
+                        <div
+                          className="relative w-12 h-12 shrink-0 grid place-items-center"
+                          style={{ background: "var(--bg-soft)", borderRadius: 6 }}
+                        >
+                          <span className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>
+                            {locale === "uk" ? "Опція" : "Add-on"}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>
+                            {locale === "uk" ? a.nameUk : a.nameEn}
+                          </div>
+                          <div className="text-xs tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>
+                            {locale === "uk" ? a.parentUk : a.parentEn}
+                          </div>
+                        </div>
+                        <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}>
+                          +<Price money={a.price} locale={locale} />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
                   {results.map((p) => {
                     const name = p.tileTitle || (locale === "uk" ? p.nameUk : p.nameEn);
                     const thumb = p.tileImage || p.image;

@@ -61,7 +61,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       id: "returns",
       icon: <BoxIcon />,
       title: uk ? "Повернення та обмін" : "Returns & Exchanges",
-      sub: uk ? "30 днів, без винятків" : "30 days, no excluded items",
+      sub: uk ? "14 днів, без винятків" : "14 days, no excluded items",
     },
   ];
 
@@ -165,10 +165,10 @@ export default function CartInfoSections({ locale }: { locale: string }) {
         <>
           <p className="mb-5">
             Якщо щось не підійшло — ми це виправимо. Будь-яке замовлення можна повернути протягом
-            30 днів: без винятків за категоріями та зайвих запитань.
+            14 днів з дати отримання за обґрунтованої причини — без винятків за категоріями.
           </p>
           <ul className="flex flex-col gap-2.5 mb-5 list-disc pl-5">
-            <li>Повернути замовлення можна протягом 30 днів з дати отримання.</li>
+            <li>Повернути замовлення можна протягом 14 днів з дати отримання, вказавши причину.</li>
             <li>Виріб має бути невикористаним і повернутися у повній комплектації, в упаковці, в якій надійшов.</li>
             <li>У нас немає переліку товарів, що не підлягають поверненню.</li>
             <li>Витрати на пересилання товару до нас покриває покупець.</li>
@@ -188,11 +188,11 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       ) : (
         <>
           <p className="mb-5">
-            If something isn&apos;t right, we&apos;ll make it right. Any order can be returned within 30 days —
-            no excluded categories, no awkward questions.
+            If something isn&apos;t right, we&apos;ll make it right. Any order can be returned within 14 days
+            of receipt where the reason is justified — no excluded categories.
           </p>
           <ul className="flex flex-col gap-2.5 mb-5 list-disc pl-5">
-            <li>Return any order within 30 days of the date you received it.</li>
+            <li>Return any order within 14 days of the date you received it, giving the reason.</li>
             <li>The item should be unused and returned complete, in the packaging it arrived in.</li>
             <li>We keep no list of non-returnable products.</li>
             <li>The cost of sending the item back to us is covered by the customer.</li>

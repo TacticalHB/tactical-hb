@@ -30,7 +30,22 @@ export default function NewsletterPromo({
   return (
     <Link
       href={`/${locale}/newsletter`}
-      className="group flex items-center gap-5 transition-opacity hover:opacity-80"
+      /* ONE GROUP, NOT A MARK AND SOME TEXT NEAR IT. On the footer this row used
+         to stretch the full 560px column, leaving the logo stranded at the far
+         left of a sentence that ended well short of it.
+
+         w-fit, NOT inline-flex: a flex item's display is blockified, so
+         inline-flex silently computes back to flex and changes nothing. Sizing
+         to fit-content is what actually makes the pair hug, and the parent's
+         justify-center then centres them as one object. The text is capped so
+         it wraps into a tidy block beside the mark rather than running the full
+         width; items-center keeps the logo on the optical centre of however
+         many lines that turns out to be. */
+      className={
+        dark
+          ? "group flex w-fit items-center gap-4 text-left transition-opacity hover:opacity-80"
+          : "group flex items-center gap-5 transition-opacity hover:opacity-80"
+      }
       style={
         dark
           ? { padding: "0" }
@@ -40,7 +55,14 @@ export default function NewsletterPromo({
       {/* The mark. tct-logo.svg is white artwork, so it needs the black tile on
           light surfaces and nothing at all on dark ones. */}
       {dark ? (
-        <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-9 h-9 shrink-0" />
+        <>
+          <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
+          <span
+            aria-hidden="true"
+            className="w-px self-stretch shrink-0"
+            style={{ background: "var(--border-dark)" }}
+          />
+        </>
       ) : (
         <span
           className="w-[68px] h-[68px] shrink-0 grid place-items-center self-stretch"
@@ -50,7 +72,7 @@ export default function NewsletterPromo({
         </span>
       )}
 
-      <span className={dark ? "text-[13.5px] leading-relaxed" : "text-[13.5px] leading-relaxed py-4 pr-5"}>
+      <span className={dark ? "text-[13.5px] leading-relaxed max-w-[24rem]" : "text-[13.5px] leading-relaxed py-4 pr-5"}>
         <span
           className="underline underline-offset-4"
           style={{ color: dark ? "#f4f3f0" : "var(--text)" }}

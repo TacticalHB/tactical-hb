@@ -1,52 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import { currencyForLocale, formatMoney } from "@/lib/currency";
+import { currencyForLocale, formatMoney, type Money } from "@/lib/currency";
 import { MATERIAL_PRICE, type HmdMaterial } from "@/lib/hmd-options";
+import { TIMER_PRICE } from "@/lib/windcover-options";
 
 /* ---------------------------------------------------------------------------
-   HMD material add-ons, in two presentations:
+   Configurable add-ons, in two presentations:
 
    • "pdp"  — Rimowa's list selector: a bordered panel of full-width rows, name
               on the left and price on the right, selected rows filled.
    • "card" — compact square swatches for the products grid, where a full-width
               list would swamp the tile. Told apart by a minimal glyph: a filled
-              disc for the lid (a solid cover), a ring for the rubber (an O-ring).
+              disc for the lid (a solid cover), a ring for the rubber (an O-ring),
+              a clock for the wind cover's timer.
 
    ADDITIVE, not mutually exclusive: each option is an independent toggle, so
-   none / one / both can be on. Pricing lives in lib/hmd-options so the cart can
-   price a line without importing a component. Controlled — the parent holds the
-   state so the price and the selector can never disagree.
+   none / one / all can be on. Pricing lives in lib/hmd-options and
+   lib/windcover-options so the cart can price a line without importing a
+   component. Controlled — the parent holds the state so the price and the
+   selector can never disagree.
+
+   ONE COMPONENT, TWO PRODUCT FAMILIES. The wind cover's timer row is not a
+   copy of this markup, it IS this markup with a different option set — which
+   is the only way "pixel-consistent with the HMD control" stays true after
+   someone edits one of them. The option list is data; everything below is
+   shared.
 --------------------------------------------------------------------------- */
 
-const OPTIONS = [
-  { key: "lid" as const, en: "With Lid", uk: "З кришкою", glyph: "disc" as const },
-  { key: "rubber" as const, en: "With Rubber", uk: "З гумкою", glyph: "ring" as const },
+export type OptionSpec = {
+  key: string;
+  en: string;
+  uk: string;
+  glyph: "disc" | "ring" | "clock";
+  price: Money;
+};
+
+export const HMD_OPTIONS: OptionSpec[] = [
+  { key: "lid", en: "With Lid", uk: "З кришкою", glyph: "disc", price: MATERIAL_PRICE.lid },
+  { key: "rubber", en: "With Rubber", uk: "З гумкою", glyph: "ring", price: MATERIAL_PRICE.rubber },
 ];
 
-function Glyph({ kind, size = 14 }: { kind: "disc" | "ring"; size?: number }) {
+export const WINDCOVER_OPTIONS: OptionSpec[] = [
+  { key: "timer", en: "With Timer", uk: "З таймером", glyph: "clock", price: TIMER_PRICE },
+];
+
+function Glyph({ kind, size = 14 }: { kind: "disc" | "ring" | "clock"; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 14 14" aria-hidden="true">
       {kind === "disc" ? (
         <circle cx="7" cy="7" r="5" fill="currentColor" />
-      ) : (
+      ) : kind === "ring" ? (
         <circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      ) : (
+        <>
+          <circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+          <path d="M7 4.4V7l1.9 1.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </>
       )}
     </svg>
   );
 }
 
-export default function HmdMaterialSelector({
+/** Toggle state for an arbitrary option set — `{ lid: true }`, `{ timer: true }`. */
+export type OptionState = Record<string, boolean>;
+
+export function ConfigSelector({
+  options,
   value,
   onToggle,
   locale,
   variant = "card",
 }: {
-  value: HmdMaterial;
+  options: OptionSpec[];
+  value: OptionState;
   /** Reports WHICH option was toggled, so the parent can use a functional
       state update. Passing a whole object here would let two toggles clicked
       in the same React batch clobber each other. */
-  onToggle: (key: keyof HmdMaterial) => void;
+  onToggle: (key: string) => void;
   locale: string;
   /** "card" = compact swatches for the products grid.
       "pdp"  = Rimowa's list selector: a bordered panel of full-width rows,
@@ -57,6 +88,7 @@ export default function HmdMaterialSelector({
   const isPdp = variant === "pdp";
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const label = uk ? "Комплектація" : "Configuration";
+  const OPTIONS = options;
   const names = OPTIONS.filter((o) => value[o.key]).map((o) => (uk ? o.uk : o.en));
   const summary = names.length ? names.join(" + ") : uk ? "Базова" : "Base";
 
@@ -80,7 +112,7 @@ export default function HmdMaterialSelector({
           {OPTIONS.map((o, i) => {
             const active = value[o.key];
             const name = uk ? o.uk : o.en;
-            const price = formatMoney(MATERIAL_PRICE[o.key], currencyForLocale(locale));
+            const price = formatMoney(o.price, currencyForLocale(locale));
             const hovered = hoverKey === o.key;
             return (
               <button
@@ -134,7 +166,7 @@ export default function HmdMaterialSelector({
         {OPTIONS.map((o) => {
           const active = value[o.key];
           const name = uk ? o.uk : o.en;
-          const price = formatMoney(MATERIAL_PRICE[o.key], currencyForLocale(locale));
+          const price = formatMoney(o.price, currencyForLocale(locale));
           return (
             <button
               key={o.key}
@@ -166,5 +198,32 @@ export default function HmdMaterialSelector({
         })}
       </div>
     </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   The HMD's own selector, kept as the default export so its call sites read the
+   same as before and stay typed to HmdMaterial rather than a loose string map.
+--------------------------------------------------------------------------- */
+
+export default function HmdMaterialSelector({
+  value,
+  onToggle,
+  locale,
+  variant = "card",
+}: {
+  value: HmdMaterial;
+  onToggle: (key: keyof HmdMaterial) => void;
+  locale: string;
+  variant?: "card" | "pdp";
+}) {
+  return (
+    <ConfigSelector
+      options={HMD_OPTIONS}
+      value={value as unknown as OptionState}
+      onToggle={(k) => onToggle(k as keyof HmdMaterial)}
+      locale={locale}
+      variant={variant}
+    />
   );
 }

@@ -4,9 +4,10 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { products, Product } from "@/lib/products";
 import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
 import { materialUpcharge } from "@/lib/hmd-options";
+import { timerUpcharge } from "@/lib/windcover-options";
 
 /** What the shopper chose. Absent fields = the base configuration. */
-export type CartOptions = { variant?: string; lid?: boolean; rubber?: boolean };
+export type CartOptions = { variant?: string; lid?: boolean; rubber?: boolean; timer?: boolean };
 
 export type CartLine = { slug: string; qty: number; options?: CartOptions };
 
@@ -16,7 +17,7 @@ export type CartLine = { slug: string; qty: number; options?: CartOptions };
  * this used to) silently merged "Purple + lid" into "Black".
  */
 export function lineKey(slug: string, o?: CartOptions): string {
-  return [slug, o?.variant ?? "", o?.lid ? "lid" : "", o?.rubber ? "rubber" : ""].join("|");
+  return [slug, o?.variant ?? "", o?.lid ? "lid" : "", o?.rubber ? "rubber" : "", o?.timer ? "timer" : ""].join("|");
 }
 
 /** Price of one unit of a line: variant price + any add-ons. */
@@ -27,9 +28,15 @@ export function linePrice(line: CartLine): Money {
     ? p.variants?.find((x) => x.name === line.options!.variant)
     : undefined;
   const base = money(v?.price ?? p.price, v?.priceUah ?? p.priceUah);
-  // Add-ons only exist on heat devices; ignore stray flags on anything else.
-  if (p.category !== "hmd") return base;
-  return addMoney(base, materialUpcharge({ lid: !!line.options?.lid, rubber: !!line.options?.rubber }));
+  // Add-ons are per-family; ignore stray flags on anything else. Mirrors
+  // priceCart, which is the authority — this one only has to agree with it.
+  if (p.category === "hmd") {
+    return addMoney(base, materialUpcharge({ lid: !!line.options?.lid, rubber: !!line.options?.rubber }));
+  }
+  if (p.category === "accessory" && p.tags.includes("windcover")) {
+    return addMoney(base, timerUpcharge({ timer: !!line.options?.timer }));
+  }
+  return base;
 }
 
 type CartCtx = {

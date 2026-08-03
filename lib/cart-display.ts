@@ -49,6 +49,7 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
   const addons: string[] = [];
   if (line.options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
   if (line.options?.rubber) addons.push(uk ? "З гумкою" : "With Rubber");
+  if (line.options?.timer) addons.push(uk ? "З таймером" : "With Timer");
 
   return {
     product,

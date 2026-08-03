@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
-import HmdMaterialSelector from "./HmdMaterialSelector";
+import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
 import { materialUpcharge, LID_WEIGHT_G, type HmdMaterial } from "@/lib/hmd-options";
+import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 
@@ -156,10 +157,21 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const isHmd = product.category === "hmd";
   const [material, setMaterial] = useState<HmdMaterial>({ lid: true, rubber: true });
 
+  /* The wind cover's timer follows the same rule as the HMD add-ons above:
+     PRE-SELECTED here, base price on the card. Opening the page offers the
+     complete thing and lets them opt out — ₴1700 / €45 with the timer, ₴850 /
+     €23 without. */
+  const isWindcover = product.category === "accessory" && product.tags.includes("windcover");
+  const [windcover, setWindcover] = useState<WindcoverOptions>({ timer: true });
+
   const basePrice = variants
     ? money(variants[variantIdx].price ?? product.price, variants[variantIdx].priceUah ?? product.priceUah)
     : money(product.price, product.priceUah);
-  const price = isHmd ? addMoney(basePrice, materialUpcharge(material)) : basePrice;
+  const price = isHmd
+    ? addMoney(basePrice, materialUpcharge(material))
+    : isWindcover
+      ? addMoney(basePrice, timerUpcharge(windcover))
+      : basePrice;
 
   const selectVariant = (i: number) => {
     setVariantIdx(i);
@@ -322,6 +334,20 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               </div>
             )}
 
+            {/* Wind cover timer — the same control as the HMD's, literally the
+                same component with a different option set. */}
+            {isWindcover && (
+              <div className="mt-6">
+                <ConfigSelector
+                  options={WINDCOVER_OPTIONS}
+                  value={windcover as unknown as Record<string, boolean>}
+                  onToggle={() => setWindcover((prev) => ({ timer: !prev.timer }))}
+                  locale={locale}
+                  variant="pdp"
+                />
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex flex-col gap-3 mt-8">
               {/* The slide-over replaces the fly-to-cart animation here (passing
@@ -335,6 +361,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                       variant: variants?.[variantIdx]?.name,
                       lid: isHmd ? material.lid : undefined,
                       rubber: isHmd ? material.rubber : undefined,
+                      timer: isWindcover ? windcover.timer : undefined,
                     },
                     true
                   )

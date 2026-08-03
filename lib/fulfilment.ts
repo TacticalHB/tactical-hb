@@ -56,7 +56,7 @@ export type PaymentRow = {
         back to a product; these can, which is what stock is decremented from.
         Absent on orders placed before migration 0015 — those resolve to the
         bare slug, which is all that can honestly be said about them. */
-    variant?: string | null; lid?: boolean; rubber?: boolean;
+    variant?: string | null; lid?: boolean; rubber?: boolean; timer?: boolean;
     /** Per-unit packed weight in grams, add-ons included. Absent on orders
         placed before weights existed — the waybill falls back to catalogue
         weights, then the default. */

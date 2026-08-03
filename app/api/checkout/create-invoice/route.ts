@@ -330,6 +330,7 @@ export async function POST(request: NextRequest) {
             variant: l.options.variant ?? undefined,
             lid: l.options.lid,
             rubber: l.options.rubber,
+            timer: l.options.timer,
           },
         },
         locale
@@ -350,6 +351,7 @@ export async function POST(request: NextRequest) {
         variant: l.options.variant,
         lid: l.options.lid,
         rubber: l.options.rubber,
+        timer: l.options.timer,
         // Frozen with the line (add-ons included) so the waybill weighs the
         // parcel from what was actually bought, not the catalogue default.
         weight_g: l.weightG,

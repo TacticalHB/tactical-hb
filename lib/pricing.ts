@@ -1,5 +1,6 @@
 import { products } from "@/lib/products";
 import { materialUpcharge, materialWeightG } from "@/lib/hmd-options";
+import { timerUpcharge, timerWeightG } from "@/lib/windcover-options";
 import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
 import type { Dims } from "@/lib/parcel";
 
@@ -18,7 +19,7 @@ import type { Dims } from "@/lib/parcel";
 export type PricedLineInput = {
   slug: string;
   qty: number;
-  options?: { variant?: string; lid?: boolean; rubber?: boolean };
+  options?: { variant?: string; lid?: boolean; rubber?: boolean; timer?: boolean };
 };
 
 export type PricedLine = {
@@ -37,7 +38,7 @@ export type PricedLine = {
       place the chosen finish and add-ons survive, and stock is decremented
       from it. Trusting the raw request here instead would let a caller name a
       variant it never paid for. */
-  options: { variant: string | null; lid: boolean; rubber: boolean };
+  options: { variant: string | null; lid: boolean; rubber: boolean; timer: boolean };
 };
 
 export type PricedCart = { lines: PricedLine[]; subtotal: Money };
@@ -66,13 +67,23 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
 
     let unit = money(variant?.price ?? product.price, variant?.priceUah ?? product.priceUah);
     let weightG = product.weightG;
-    // Add-ons exist only on heat devices; ignore stray flags on anything else.
+    // Add-ons are per-family; ignore stray flags on anything else. A `timer` on
+    // an HMD or a `lid` on a wind cover is priced at nothing and recorded as
+    // absent, so a crafted request cannot conjure an upcharge or a discount.
     const material = product.category === "hmd"
       ? { lid: !!l.options?.lid, rubber: !!l.options?.rubber }
       : { lid: false, rubber: false };
     if (product.category === "hmd") {
       unit = addMoney(unit, materialUpcharge(material));
       weightG += materialWeightG(material);
+    }
+    // The timer belongs to the wind covers, which are the accessories carrying
+    // the `windcover` tag — not every accessory.
+    const isWindcover = product.category === "accessory" && product.tags.includes("windcover");
+    const windcover = { timer: isWindcover && !!l.options?.timer };
+    if (isWindcover) {
+      unit = addMoney(unit, timerUpcharge(windcover));
+      weightG += timerWeightG(windcover);
     }
 
     lines.push({
@@ -85,7 +96,7 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       dims: product.dims,
       // `variant?.name`, not the requested string: an unknown variant was not
       // priced, so it must not be recorded as sold either.
-      options: { variant: variant?.name ?? null, lid: material.lid, rubber: material.rubber },
+      options: { variant: variant?.name ?? null, lid: material.lid, rubber: material.rubber, timer: windcover.timer },
     });
   }
 

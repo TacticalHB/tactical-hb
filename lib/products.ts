@@ -436,10 +436,15 @@ export const products: Product[] = [
     slug: "windcover-bomb-cap",
     nameUk: "TCT Windcover «Bomb Cap»",
     nameEn: "TCT Windcover «Bomb Cap»",
-    taglineUk: "Вітрозахист із перезаряджуваним таймером.",
-    taglineEn: "Rechargeable timer windcover.",
-    descriptionUk: "Type-C зарядка. Вбудований таймер з налаштуванням хвилин та секунд. Час нагріву 6 хвилин під вітрозахистом.",
-    descriptionEn: "Type-C rechargeable. Built-in timer with minute and second settings. Heating time 6 min under wind cover.",
+    taglineUk: "Металевий вітрозахист у тактичному стилі.",
+    taglineEn: "Metal wind cover in tactical style.",
+    /* THE CATALOGUE PRICE IS THE COVER WITHOUT THE TIMER. The timer is an
+       add-on selected on the product page (see lib/windcover-options), which is
+       why the description no longer promises one — a card quoting ₴850 while
+       describing a built-in timer would be selling the ₴1700 configuration at
+       the bare price. */
+    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
+    descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
     price: 23,
     priceUah: 850,
     currency: "EUR",
@@ -453,7 +458,84 @@ export const products: Product[] = [
     tileScale: 1.18,
     tileBleed: true,
     gridImage: "/images/windcover-tile.png",
+    pdp: {
+      shortEn:
+        "A precision-engineered metal wind cover designed in a bold tactical style. Made from solid metal with a durable powder-coated finish and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
+      shortUk:
+        "Металевий вітрозахист точного виготовлення у виразному тактичному стилі. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
+      benefitsEn: [
+        "Solid metal construction with powder coating for heat and scratch resistance, finished with permanent laser engraving",
+        "Effective wind protection that maintains proper airflow for consistent heat and longer sessions",
+        "Optional USB Type-C rechargeable countdown timer with LED display and bomb-style sound — set the time when placing coals to track the ideal heat-up window",
+        "Magnetic attachment for quick and secure connection of the timer unit",
+        "Ideal for busy lounges: the timer and sound help staff and customers easily identify which shisha is ready",
+        "Available in two versions: standard wind cover or wind cover with magnetically attached timer",
+      ],
+      benefitsUk: [
+        "Суцільнометалева конструкція з порошковим покриттям — стійка до нагріву та подряпин, із незмивним лазерним гравіюванням",
+        "Ефективний захист від вітру зі збереженням правильного потоку повітря: рівний жар і довші сесії",
+        "Опційний таймер зі зворотним відліком, LED-дисплеєм і звуком у стилі бомби, заряджається через USB Type-C — виставте час, коли кладете вугілля, і контролюйте розпал",
+        "Магнітне кріплення — таймер приєднується швидко та надійно",
+        "Зручно для завантажених кальянних: таймер і звук допомагають персоналу та гостям одразу зрозуміти, який кальян готовий",
+        "Дві версії: стандартний вітрозахист або вітрозахист із таймером на магнітному кріпленні",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання" },
+        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", valueEn: "USB Type-C", valueUk: "USB Type-C" },
+        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", valueEn: "Magnetic", valueUk: "Магнітне" },
+      ],
+      statementEn: "Never miss the perfect heat-up window — and never wonder which bowl is ready.",
+      statementUk: "Не пропустіть ідеальний момент розпалу — і більше не гадайте, який кальян готовий.",
+    },
     tags: ["timer", "Type-C", "windcover"],
+  },
+  /* ---- Wind covers #2 and #3 -----------------------------------------------
+     PLACEHOLDERS. Names and photographs are still to come; both carry the same
+     price and timer option as the Bomb Cap so the range prices consistently
+     from day one.
+
+     NO gridImage ON PURPOSE — NikeProductCard already falls back to the soft
+     panel with the name centred, which is the intended empty state. Pointing
+     these at the Bomb Cap's photograph would put the wrong object on the card,
+     and pointing them at a missing file would render broken. When the real
+     shots land, add `image` / `gridImage` and swap the names. */
+  {
+    id: "windcover-two",
+    slug: "windcover-two",
+    nameUk: "Windcover",
+    nameEn: "Windcover",
+    taglineUk: "Металевий вітрозахист у тактичному стилі.",
+    taglineEn: "Metal wind cover in tactical style.",
+    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
+    descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
+    price: 23,
+    priceUah: 850,
+    currency: "EUR",
+    weightG: 470,
+    dims: { l: 210, w: 108, h: 108 },
+    category: "accessory",
+    featured: false,
+    image: "",
+    tags: ["windcover"],
+  },
+  {
+    id: "windcover-three",
+    slug: "windcover-three",
+    nameUk: "Windcover",
+    nameEn: "Windcover",
+    taglineUk: "Металевий вітрозахист у тактичному стилі.",
+    taglineEn: "Metal wind cover in tactical style.",
+    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
+    descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
+    price: 23,
+    priceUah: 850,
+    currency: "EUR",
+    weightG: 470,
+    dims: { l: 210, w: 108, h: 108 },
+    category: "accessory",
+    featured: false,
+    image: "",
+    tags: ["windcover"],
   },
 ];
 

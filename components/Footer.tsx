@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import CookieSettingsButton from "./CookieSettingsButton";
 import NewsletterPromo from "./NewsletterPromo";
 import PaymentMethods from "./PaymentMethods";
+import SocialLinks from "./SocialLinks";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 
 export default function Footer() {
@@ -23,10 +24,22 @@ export default function Footer() {
           TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
         </div>
 
-        <a href="https://instagram.com/tactical_hb" target="_blank" rel="noopener noreferrer"
-          className="text-sm tracking-[0.2em] uppercase nav-link">
-          {t("follow")} <span style={{ color: "var(--accent)" }}>@tactical_hb</span>
-        </a>
+        {/* Social — ONE cluster, label above the marks.
+
+            This replaced a plain "Follow us @tactical_hb" link to Instagram.
+            Keeping both would have said the same thing twice and named only one
+            of the three accounts; all three are @tactical_hb, so the handle now
+            lives in the icons' aria-labels and titles instead of on screen.
+
+            Column, not a row, so the label owns the marks the way the payment
+            label owns its brands further down — the same fix the newsletter
+            mark needed. */}
+        <div className="flex flex-col items-center gap-3.5">
+          <span className="text-sm tracking-[0.2em] uppercase" style={{ color: "#9a978f" }}>
+            {t("follow")}
+          </span>
+          <SocialLinks />
+        </div>
 
         {/* Store policies, side by side. The offer is the legal document; the
             delivery page is the plain-language version of the same model. */}

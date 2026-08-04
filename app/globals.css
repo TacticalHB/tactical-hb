@@ -354,6 +354,12 @@ body {
 /* ---- Nav (dark) ---- */
 .nav-link { color: #9a978f; transition: color 0.22s ease; }
 .nav-link:hover { color: var(--accent); }
+/* Social marks in the dark footer. Brighter at rest than .nav-link — these are
+   glyphs rather than words, and at 18px the nav grey reads as switched off.
+   Focus is styled with hover so keyboard users get the same signal. */
+.social-link { color: rgba(244, 243, 240, 0.85); transition: color 0.22s ease; }
+.social-link:hover,
+.social-link:focus-visible { color: var(--accent); }
 .nav-lang { color: #9a978f; border-color: var(--border-dark); transition: color 0.22s ease, border-color 0.22s ease; }
 .nav-lang:hover { color: var(--accent); border-color: var(--accent); }
 

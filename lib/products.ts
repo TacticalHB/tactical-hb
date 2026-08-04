@@ -432,10 +432,10 @@ export const products: Product[] = [
     tags: ["phunnel", "handmade"],
   },
   {
-    id: "windcover-bomb-cap",
-    slug: "windcover-bomb-cap",
-    nameUk: "TCT Windcover «Bomb Cap»",
-    nameEn: "TCT Windcover «Bomb Cap»",
+    id: "windcover-detonator",
+    slug: "windcover-detonator",
+    nameUk: "Windcover Detonator",
+    nameEn: "Windcover Detonator",
     taglineUk: "Металевий вітрозахист у тактичному стилі.",
     taglineEn: "Metal wind cover in tactical style.",
     /* THE CATALOGUE PRICE IS THE COVER WITHOUT THE TIMER. The timer is an
@@ -452,13 +452,23 @@ export const products: Product[] = [
     dims: { l: 210, w: 108, h: 108 },
     category: "windcover",
     featured: true,
-    image: "/images/windcover-hero-cut.png",
+    image: "/images/windcover-detonator-1.jpg",
+    /* The flagship 2x2 tile keeps the older cut-out: it is the SAME physical
+       cover, only the name changed, and a cut-out is what that tile needs —
+       the new studio shots carry their own backdrop. */
     tileImage: "/images/windcover-tile.png",
     tileBg: "linear-gradient(180deg, #c9e6f6 0%, #e9f5fb 55%, #ffffff 100%)",
     tileScale: 1.18,
     tileBleed: true,
-    gridImage: "/images/windcover-tile.png",
+    gridImage: "/images/windcover-detonator-1.jpg",
     pdp: {
+      /* MAIN FIRST, ALWAYS. -1 is the shot the card shows and the first frame
+         of the gallery; a secondary angle must never be promoted ahead of it. */
+      photos: [
+        "/images/windcover-detonator-1.jpg",
+        "/images/windcover-detonator-2.jpg",
+        "/images/windcover-detonator-3.jpg",
+      ],
       shortEn:
         "A precision-engineered metal wind cover designed in a bold tactical style. Made from solid metal with a durable powder-coated finish and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
@@ -489,25 +499,19 @@ export const products: Product[] = [
     },
     tags: ["timer", "Type-C", "windcover"],
   },
-  /* ---- Wind covers #2 and #3 -----------------------------------------------
-     PLACEHOLDERS. Names and photographs are still to come; both carry the same
-     price and timer option as the Bomb Cap so the range prices consistently
-     from day one.
-
-     NO gridImage ON PURPOSE — NikeProductCard already falls back to the soft
-     panel with the name centred, which is the intended empty state. Pointing
-     these at the Bomb Cap's photograph would put the wrong object on the card,
-     and pointing them at a missing file would render broken. When the real
-     shots land, add `image` / `gridImage` and swap the names. */
+  /* ---- KH ------------------------------------------------------------------
+     The camouflage-faced cover. Same body, price and timer option as the
+     Detonator — the finish is what differs, so the copy below is the family
+     copy with the pattern called out rather than a second set of claims. */
   {
-    id: "windcover-two",
-    slug: "windcover-two",
-    nameUk: "Windcover",
-    nameEn: "Windcover",
-    taglineUk: "Металевий вітрозахист у тактичному стилі.",
-    taglineEn: "Metal wind cover in tactical style.",
-    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
-    descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
+    id: "windcover-kh",
+    slug: "windcover-kh",
+    nameUk: "Windcover KH",
+    nameEn: "Windcover KH",
+    taglineUk: "Металевий вітрозахист із камуфляжем.",
+    taglineEn: "Metal wind cover with camo finish.",
+    descriptionUk: "Суцільнометалевий вітрозахист із камуфляжним принтом і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
+    descriptionEn: "Solid metal wind cover with a camouflage finish and laser engraving. Timer optional, attaches magnetically.",
     price: 23,
     priceUah: 850,
     currency: "EUR",
@@ -515,8 +519,45 @@ export const products: Product[] = [
     dims: { l: 210, w: 108, h: 108 },
     category: "windcover",
     featured: false,
-    image: "",
-    tags: ["windcover"],
+    image: "/images/windcover-kh-1.jpg",
+    gridImage: "/images/windcover-kh-1.jpg",
+    pdp: {
+      /* MAIN FIRST — see the note on the Detonator above. */
+      photos: [
+        "/images/windcover-kh-1.jpg",
+        "/images/windcover-kh-2.jpg",
+        "/images/windcover-kh-3.jpg",
+      ],
+      shortEn:
+        "A precision-engineered metal wind cover in a camouflage finish. Made from solid metal with a durable powder-coated body and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
+      shortUk:
+        "Металевий вітрозахист точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
+      benefitsEn: [
+        "Solid metal construction with powder coating for heat and scratch resistance, finished with permanent laser engraving",
+        "Camouflage face panel with the TCT roundel on the reverse",
+        "Effective wind protection that maintains proper airflow for consistent heat and longer sessions",
+        "Optional USB Type-C rechargeable countdown timer with LED display and bomb-style sound — set the time when placing coals to track the ideal heat-up window",
+        "Magnetic attachment for quick and secure connection of the timer unit",
+        "Available in two versions: standard wind cover or wind cover with magnetically attached timer",
+      ],
+      benefitsUk: [
+        "Суцільнометалева конструкція з порошковим покриттям — стійка до нагріву та подряпин, із незмивним лазерним гравіюванням",
+        "Камуфляжна лицьова панель і знак TCT на звороті",
+        "Ефективний захист від вітру зі збереженням правильного потоку повітря: рівний жар і довші сесії",
+        "Опційний таймер зі зворотним відліком, LED-дисплеєм і звуком у стилі бомби, заряджається через USB Type-C — виставте час, коли кладете вугілля, і контролюйте розпал",
+        "Магнітне кріплення — таймер приєднується швидко та надійно",
+        "Дві версії: стандартний вітрозахист або вітрозахист із таймером на магнітному кріпленні",
+      ],
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання" },
+        { labelEn: "Finish", labelUk: "Оздоблення", valueEn: "Camouflage face panel", valueUk: "Камуфляжна лицьова панель" },
+        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", valueEn: "USB Type-C", valueUk: "USB Type-C" },
+        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", valueEn: "Magnetic", valueUk: "Магнітне" },
+      ],
+      statementEn: "Never miss the perfect heat-up window — and never wonder which bowl is ready.",
+      statementUk: "Не пропустіть ідеальний момент розпалу — і більше не гадайте, який кальян готовий.",
+    },
+    tags: ["timer", "Type-C", "windcover", "camo"],
   },
 ];
 
@@ -527,5 +568,5 @@ export const featuredProducts = [
   bySlug("bowl-phunnel"),        // FTP BOWL — sky blue
   bySlug("bowl-killer"),         // KILLER BOWL — grey
   bySlug("hmd-tct-op"),          // HMD TCT OP — grey
-  bySlug("windcover-bomb-cap"),  // Windcover — sky blue
+  bySlug("windcover-detonator"), // Windcover Detonator — sky blue
 ];

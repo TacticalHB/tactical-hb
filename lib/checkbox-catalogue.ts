@@ -13,7 +13,7 @@ import "server-only";
    colour choice; Checkbox holds two goods at two prices (Black ₴1150, Purple
    ₴1200), so the mapping is keyed by variant where one exists.
 
-   ONE GAP, AND IT IS DELIBERATE: TCT Windcover «Bomb Cap» (₴850) has no product
+   THE GAPS ARE DELIBERATE: neither wind cover (₴850) has a product
    in Checkbox. Rather than invent a code or quietly fold it into another line,
    an order containing it is not auto-fiscalised — it is left for a human with
    the reason recorded. Add the product in the Checkbox cabinet and put its code
@@ -29,7 +29,8 @@ const CODES: Record<string, string> = {
   "bowl-killer": "1785681730534", // KILLER BOWL         42000 kop = ₴420
   "bowl-livanka": "1785681777131", // Tactical Livanka    37000 kop = ₴370
   "bowl-phunnel": "1785681837923", // FTP BOWL            50000 kop = ₴500
-  // "windcover-bomb-cap": MISSING IN CHECKBOX — see the note above.
+  // "windcover-detonator": MISSING IN CHECKBOX — see the note above.
+  // "windcover-kh":        MISSING IN CHECKBOX — see the note above.
 };
 
 /** The Checkbox code for a sold line, or null when the product is not in the till. */

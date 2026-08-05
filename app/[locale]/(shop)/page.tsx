@@ -6,6 +6,7 @@ import Countdown from "@/components/Countdown";
 import NotifyForm from "@/components/NotifyForm";
 import MissionMonitor from "@/components/MissionMonitor";
 import Reveal from "@/components/Reveal";
+import SearchlightHero from "@/components/SearchlightHero";
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -117,40 +118,17 @@ function HomeContent({ locale }: { locale: string }) {
 
       {/* ================= PROMO VIDEO =================
           Inset as a rounded panel with air around it, so the one dark block on
-          the page reads as a deliberate object rather than a slab. */}
+          the page reads as a deliberate object rather than a slab.
+
+          The stage now belongs to SearchlightHero, which carries the panel's
+          own dimensions with it — the section here keeps only the container and
+          its spacing. The pair of stacked <video> elements this replaced were a
+          portrait clip letterboxed into a 16:9 frame plus a blurred copy of
+          itself to fill the gaps; the new film is natively 16:9 and needs
+          neither. */}
       <section className="page-container py-10 md:py-16">
         <Reveal>
-          {/* Capped back to an inset panel with air around it — full-container
-              width made it read as a full-bleed slab rather than an object. */}
-          <div
-            className="max-w-6xl mx-auto relative overflow-hidden rounded-[20px] aspect-video"
-            style={{ background: "#000000" }}
-          >
-            {/* blurred ambient fill (same video, scaled + blurred behind) */}
-            <video
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: "blur(48px) brightness(0.75)", transform: "scale(1.35)" }}
-              src="/videos/promo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
-              tabIndex={-1}
-            />
-            {/* sharp foreground video, full animation visible */}
-            <video
-              className="absolute inset-0 w-full h-full object-contain"
-              src="/videos/promo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              aria-label="Tactical HB promo video"
-            />
-          </div>
+          <SearchlightHero uk={uk} />
         </Reveal>
       </section>
 

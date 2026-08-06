@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { formatVoucher, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import type { Voucher } from "@/lib/loyalty/vouchers";
+import { COLONEL_DISCOUNT_RATE, RANKS, TOP_RANK as TOP, type RankProgress } from "@/lib/loyalty/ranks";
+import RankBadge from "./RankBadge";
 import VoucherCard from "./VoucherCard";
 
 type PointRow = { xp: number; reason: string; created_at: string };
@@ -35,6 +37,7 @@ export default function LoyaltyDashboard({
   points,
   activeVouchers,
   usedVouchers,
+  rank,
 }: {
   locale: string;
   cfg: LoyaltyConfig;
@@ -45,6 +48,8 @@ export default function LoyaltyDashboard({
   next: Milestone | null;
   progress: number;
   points: PointRow[];
+  /** Derived on the server from the same lifetime spend the vouchers use. */
+  rank: RankProgress;
   /** used_at IS NULL — spendable (or expired) */
   activeVouchers: Voucher[];
   /** used_at IS NOT NULL — already redeemed */
@@ -62,13 +67,40 @@ export default function LoyaltyDashboard({
   const toNext = next ? next.spend_eur - totalSpend : 0;
   const dateFmt = (d: string) => new Date(d).toLocaleDateString(uk ? "uk-UA" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
 
+  const pct = Math.round(COLONEL_DISCOUNT_RATE * 100);
+  const rankName = (r: { en: string; uk: string }) => (uk ? r.uk : r.en);
+
+  /* Rank thresholds are NOT run through money(). That helper converts a euro
+     figure at the loyalty rate, which is exactly the shortcut that once put
+     Colonel ₴13 000 early: each rank carries its own hryvnia number and the
+     Ukrainian page has to show that one, not a conversion of the euro one. */
+  const rankGate = (r: { thresholdEur: number; thresholdUah: number }) =>
+    uk ? `${r.thresholdUah.toLocaleString("uk-UA")} UAH` : `€${r.thresholdEur}`;
+  const rankRemaining = uk
+    ? `${rank.remainingUah.toLocaleString("uk-UA")} UAH`
+    : `€${rank.remainingEur}`;
+
   const L = {
     title: uk ? "Бонуси Tactical HB" : "Tactical HB Rewards",
     xp: "XP",
     maxTier: uk ? "Максимальний рівень" : "Max tier complete",
     toNext: uk ? "до наступного ваучера" : "to your next voucher",
     voucherWorth: (v: string) => (uk ? `Ваучер на ${v}` : `${v} voucher`),
-    earnRate: uk ? `${cfg.xp_per_eur} XP за кожен €1` : `${cfg.xp_per_eur} XP for every €1 spent`,
+    /* The Ukrainian storefront must never quote the rate in euro. `money(1)`
+       renders one euro of spend as the hryvnia the loyalty rate calls it, so
+       the sentence follows loyalty_config instead of hardcoding "50". */
+    earnRate: uk
+      ? `${cfg.xp_per_eur} XP за кожні ${money(1)}`
+      : `${cfg.xp_per_eur} XP for every €1 spent`,
+    /* Rank line under the badge: where you are going, or that you have
+       arrived and what it is worth. */
+    nextRank: rank.next
+      ? uk
+        ? `Наступне звання: ${rankName(rank.next)} · ще ${rankRemaining}`
+        : `Next rank: ${rankName(rank.next)} · ${rankRemaining} to go`
+      : uk
+        ? `Найвище звання · –${pct}% на продукцію назавжди`
+        : `Top rank · ${pct}% permanent discount on products`,
     vouchers: uk ? "Ваші ваучери" : "Your vouchers",
     noVouchers: uk ? "Ще немає активних ваучерів — витрачайте, щоб відкрити." : "No active vouchers — spend to unlock your first.",
     usedVouchers: uk ? "Використані ваучери" : "Used vouchers",
@@ -77,8 +109,13 @@ export default function LoyaltyDashboard({
     reasonOrder: uk ? "Покупка" : "Purchase",
     howTitle: uk ? "Як це працює" : "How it works",
     how: uk
-      ? `Отримуйте ${cfg.xp_per_eur} XP за кожен €1. Досягайте етапів витрат, щоб відкривати ваучери. Ваучери діють ${cfg.voucher_expiry_months} міс. і застосовуються до майбутнього замовлення від ${money(cfg.min_order_eur)}.`
+      ? `Отримуйте ${cfg.xp_per_eur} XP за кожні ${money(1)}. Досягайте етапів витрат, щоб відкривати ваучери. Ваучери діють ${cfg.voucher_expiry_months} міс. і застосовуються до майбутнього замовлення від ${money(cfg.min_order_eur)}.`
       : `Earn ${cfg.xp_per_eur} XP for every €1 you spend. Hit spend milestones to unlock vouchers. Vouchers last ${cfg.voucher_expiry_months} months and apply to a future order over ${money(cfg.min_order_eur)}.`,
+    /* The ranks paragraph, and the one rule people will actually ask about:
+       the 7% and a voucher do not add together. */
+    howRanks: uk
+      ? `Звання відкриваються за сумою всіх покупок: ${RANKS.map((r) => `${r.uk} (${rankGate(r)})`).join(", ")}. Звання лише зростає. ${TOP.uk} дає –${pct}% на продукцію в кожному замовленні — постійно, окрім доставки. Знижка за звання й ваучер не додаються: застосовується те, що вигідніше для вас.`
+      : `Ranks unlock on your lifetime spend: ${RANKS.map((r) => `${r.en} (${rankGate(r)})`).join(", ")}. Rank only goes up. ${TOP.en} takes ${pct}% off the products on every order, permanently — shipping excluded. The rank discount and a voucher never add together: whichever is worth more is the one applied.`,
   };
 
   return (
@@ -88,6 +125,20 @@ export default function LoyaltyDashboard({
       {/* Hero card (dark + yellow, Gymshark-style) */}
       <div className="rounded-3xl px-7 py-9 sm:px-10 sm:py-12 text-center" style={{ background: "var(--ink)" }}>
         <div className="text-[11px] tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>{L.title}</div>
+
+        {/* Rank — badge and name as one group, sitting above the XP figure so
+            the number stays the hero of the card. The insignia is drawn for
+            black, so it needs no plate of its own here. */}
+        <div className="flex flex-col items-center gap-2 mb-5">
+          <RankBadge rank={rank.rank} size={72} locale={locale} />
+          <div className="font-display text-lg tracking-[0.22em] uppercase" style={{ color: "#fff" }}>
+            {rankName(rank.rank)}
+          </div>
+          <div className="text-xs" style={{ color: rank.next ? "rgba(255,255,255,0.55)" : "var(--accent)" }}>
+            {L.nextRank}
+          </div>
+        </div>
+
         <div className="font-display leading-none tabular-nums" style={{ color: "var(--accent)", fontSize: "clamp(3.5rem,12vw,6rem)" }}>
           {xp.toLocaleString(uk ? "uk-UA" : "en-GB")}
           <span className="text-[0.28em] align-top ml-2" style={{ color: "rgba(255,255,255,0.6)" }}>{L.xp}</span>
@@ -128,6 +179,31 @@ export default function LoyaltyDashboard({
               color: done ? "#fff" : "var(--text-muted)",
             }}>
               {done ? "✓ " : ""}{money(m.spend_eur)} → {money(m.voucher_eur)}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* The ladder, in order. Reached ranks are lit and named; the rest are
+          the same artwork turned down, so it reads as one row of objects with
+          some still to earn rather than two different things. Deliberately
+          quiet — the card above is the headline, this is the map. */}
+      <div className="flex items-start justify-between gap-1 mt-5 max-w-lg">
+        {RANKS.map((r) => {
+          const reached = r.order <= rank.rank.order;
+          const current = r.order === rank.rank.order;
+          return (
+            <div key={r.key} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+              <RankBadge rank={r} size={36} locale={locale} dim={!reached} />
+              <div
+                className="text-[9px] tracking-[0.12em] uppercase text-center leading-tight truncate w-full"
+                style={{
+                  color: current ? "var(--accent)" : reached ? "var(--ink)" : "var(--text-faint)",
+                  fontWeight: current ? 600 : 400,
+                }}
+              >
+                {rankName(r)}
+              </div>
             </div>
           );
         })}
@@ -181,6 +257,7 @@ export default function LoyaltyDashboard({
       <div className="mt-12 rounded-2xl p-6" style={{ background: "var(--bg-soft)" }}>
         <div className="text-sm font-semibold mb-1" style={{ color: "#111" }}>{L.howTitle}</div>
         <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{L.how}</p>
+        <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--text-muted)" }}>{L.howRanks}</p>
       </div>
     </div>
   );

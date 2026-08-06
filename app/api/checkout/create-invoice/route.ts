@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money, eurToUahFixed } from "@/lib/currency";
+import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
+import { rankForUser } from "@/lib/loyalty/rank-server";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational } from "@/lib/novapost";
@@ -107,6 +109,38 @@ export async function POST(request: NextRequest) {
         // customer pays full price rather than being blocked from paying.
         console.warn("[invoice] voucher no longer valid, ignored:", requestedCode);
       }
+    }
+  }
+
+  /* ---- The rank discount ---------------------------------------------------
+     Read here rather than taken from the request: the browser is never asked
+     what rank it thinks it is, for the same reason it is never asked what the
+     basket costs. Lifetime spend comes out of the orders table under the
+     signed-in user's own id, and the rank falls out of that.
+
+     It does NOT stack with a voucher. chooseDiscount picks whichever is worth
+     more and leaves the other alone, so a voucher that loses is not spent —
+     voucherCode is cleared with it, or the order would record a code it never
+     charged for. */
+  let discountSource: "voucher" | "rank" | "none" = voucherCode ? "voucher" : "none";
+  if (user && supabase) {
+    const { rank, lifetime } = await rankForUser(supabase, user.id);
+    const perk = permanentDiscount(rank.discountRate, priced.subtotal);
+
+    const chosen = chooseDiscount(voucherCode ? discount : null, perk);
+    discount = chosen.amount;
+    discountSource = chosen.source;
+    if (chosen.source !== "voucher") voucherCode = null;
+
+    /* No new column for the source: the payments row already distinguishes the
+       two without one. A discount_eur above zero with voucher_code NULL is a
+       rank discount and nothing else can produce that combination. Logged as
+       well, so support can see which perk won without reading the arithmetic
+       back out of two numbers. */
+    if (discountSource !== "none") {
+      console.info(
+        `[invoice] ${discountSource} discount €${discount.eur} / ₴${discount.uah} (rank ${rank.key}, lifetime €${lifetime.eur} / ₴${lifetime.uah})`
+      );
     }
   }
 

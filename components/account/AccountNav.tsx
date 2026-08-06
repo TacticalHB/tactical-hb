@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
+import RankBadge from "./RankBadge";
+import type { Rank } from "@/lib/loyalty/ranks";
 
-export default function AccountNav({ locale }: { locale: string }) {
+export default function AccountNav({ locale, rank }: { locale: string; rank?: Rank | null }) {
   const uk = locale === "uk";
   const pathname = usePathname();
   const router = useRouter();
@@ -15,7 +17,7 @@ export default function AccountNav({ locale }: { locale: string }) {
     { href: base, label: uk ? "Профіль" : "Profile" },
     { href: `${base}/orders`, label: uk ? "Замовлення" : "Orders" },
     { href: `${base}/favourites`, label: uk ? "Обране" : "Favourites" },
-    { href: `${base}/loyalty`, label: uk ? "Бонуси" : "Loyalty" },
+    { href: `${base}/loyalty`, label: uk ? "Бонуси" : "Loyalty", badge: true },
     { href: `${base}/settings`, label: uk ? "Налаштування" : "Account Settings" },
   ];
 
@@ -45,7 +47,17 @@ export default function AccountNav({ locale }: { locale: string }) {
                   : { color: "var(--ink)" }
               }
             >
-              {it.label}
+              {/* Icon only at this size — the insignia carries its own
+                  wordmark, which is illegible at 22px and is not needed
+                  beside a link already labelled "Loyalty". */}
+              {it.badge && rank ? (
+                <span className="inline-flex items-center gap-2">
+                  <RankBadge rank={rank} size={22} locale={locale} />
+                  {it.label}
+                </span>
+              ) : (
+                it.label
+              )}
             </Link>
           </li>
         ))}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
 import { money, subtractMoney } from "@/lib/currency";
+import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
 import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/lib/countries";
@@ -34,7 +35,15 @@ import AccountCreatingScreen from "./AccountCreatingScreen";
 type Identity = "guest" | "account";
 type Destination = "ukraine" | "international";
 
-export default function CheckoutClient({ locale }: { locale: string }) {
+export default function CheckoutClient({
+  locale,
+  rankDiscountRate = 0,
+}: {
+  locale: string;
+  /** The signed-in customer's permanent rank discount — 0.07 for Colonel, 0
+      for everyone else. Display only; the server prices it independently. */
+  rankDiscountRate?: number;
+}) {
   const uk = locale === "uk";
   const router = useRouter();
   const { lines, subtotal, clearCart, hydrated } = useCart();
@@ -74,8 +83,15 @@ export default function CheckoutClient({ locale }: { locale: string }) {
     loading: false,
   });
 
-  // A voucher is denominated in EUR; money() converts it for the UAH side.
-  const discount = voucher ? money(voucher.amountEur) : money(0, 0);
+  /* A voucher is denominated in EUR; money() converts it for the UAH side.
+     The rank perk is worked out from the live basket, and the two are put
+     through the SAME chooseDiscount the invoice route uses — so the figure on
+     screen is arrived at by the same rule that will charge the card, rather
+     than by a second implementation that could drift from it. */
+  const perk = permanentDiscount(rankDiscountRate, subtotal);
+  const chosen = chooseDiscount(voucher ? money(voucher.amountEur) : null, perk);
+  const discount = chosen.amount;
+  const discountSource = chosen.source;
   const goods = subtractMoney(subtotal, discount);
 
   /* Both carriers quote shipping in hryvnia; OrderSummaryPanel converts the
@@ -423,7 +439,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           delivery: form,
           lines: orderLines,
           subtotal,
-          discount: voucher ? money(voucher.amountEur) : undefined,
+          discount: discount.eur > 0 ? discount : undefined,
           total: goods,
           voucherCode: voucher?.code ?? null,
           paymentMethod: "card_on_confirmation",
@@ -779,6 +795,7 @@ export default function CheckoutClient({ locale }: { locale: string }) {
           locale={locale}
           discount={discount}
           voucherCode={voucher?.code ?? null}
+          discountSource={discountSource}
           shippingUah={destination === "ukraine" ? np?.costUah ?? null : intl.costUah}
           shippingPending={isIntlRequest}
         />

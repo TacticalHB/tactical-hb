@@ -5,6 +5,7 @@ import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
 import { addMoney, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
+import { COLONEL_DISCOUNT_RATE } from "@/lib/loyalty/ranks";
 
 /* ---------------------------------------------------------------------------
    The order summary rail shown beside every checkout step, so what's being
@@ -15,6 +16,7 @@ export default function OrderSummaryPanel({
   locale,
   discount,
   voucherCode,
+  discountSource,
   shippingUah,
   shippingPending,
 }: {
@@ -22,6 +24,9 @@ export default function OrderSummaryPanel({
   /** Applied voucher value, in both currencies. Omitted when none is applied. */
   discount?: Money;
   voucherCode?: string | null;
+  /** Which perk produced `discount` — they never stack, so exactly one wins
+      and the row has to name the right one. */
+  discountSource?: "voucher" | "rank" | "none";
   /** Quoted Nova Poshta cost, or null when no branch is chosen yet. */
   shippingUah?: number | null;
   /** International: shipping is invoiced after the order, not now. */
@@ -43,6 +48,7 @@ export default function OrderSummaryPanel({
     items: uk ? "товарів" : "items",
     subtotal: uk ? "Проміжний підсумок" : "Subtotal",
     discount: uk ? "Ваучер" : "Voucher",
+    rankDiscount: uk ? `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%` : `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується згодом" : "Calculated later",
     shippingAfter: uk ? "Підтвердимо листом" : "Confirmed by email",
@@ -97,7 +103,7 @@ export default function OrderSummaryPanel({
         {discount && discount.eur > 0 && (
           <div className="flex items-center justify-between">
             <span style={{ color: "var(--text-muted)" }}>
-              {L.discount}
+              {discountSource === "rank" ? L.rankDiscount : L.discount}
               {voucherCode && <span className="font-mono tracking-wider"> · {voucherCode}</span>}
             </span>
             <span style={{ color: "var(--accent-hover)" }}>

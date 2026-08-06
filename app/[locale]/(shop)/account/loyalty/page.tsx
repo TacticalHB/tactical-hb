@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/supabase/require-user";
 import { DEFAULT_LOYALTY_CONFIG, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
+import { rankProgress } from "@/lib/loyalty/ranks";
+import { sumSpend, SPEND_COLUMNS } from "@/lib/loyalty/rank-server";
 import LoyaltyDashboard from "@/components/account/LoyaltyDashboard";
 
 export default async function LoyaltyPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -10,7 +12,7 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
 
   const [{ data: cfgRow }, { data: orders }, { data: points }, { data: vouchers }] = await Promise.all([
     supabase.from("loyalty_config").select("*").eq("id", 1).single(),
-    supabase.from("orders").select("amount_eur").eq("user_id", uid),
+    supabase.from("orders").select(SPEND_COLUMNS).eq("user_id", uid),
     supabase.from("points_transactions").select("xp, reason, created_at, order_id").eq("user_id", uid).order("created_at", { ascending: false }),
     supabase.from("vouchers").select(VOUCHER_COLUMNS).eq("user_id", uid).order("issued_at", { ascending: false }),
   ]);
@@ -29,7 +31,11 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
     : DEFAULT_LOYALTY_CONFIG;
 
   const totalXP = (points ?? []).reduce((s, p) => s + Number(p.xp), 0);
-  const totalSpend = (orders ?? []).reduce((s, o) => s + Number(o.amount_eur), 0);
+  /* Both currencies: a rank is judged on each scale against its own
+     threshold, so summing only euro would put Colonel ₴13 000 early on the
+     Ukrainian storefront. */
+  const lifetime = sumSpend(orders ?? []);
+  const totalSpend = lifetime.eur;
 
   const milestones = [...cfg.milestones].sort((a, b) => a.spend_eur - b.spend_eur);
   const reached = milestones.filter((m) => totalSpend >= m.spend_eur);
@@ -65,6 +71,9 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
       points={(points ?? []).map((p) => ({ xp: Number(p.xp), reason: String(p.reason), created_at: String(p.created_at) }))}
       activeVouchers={activeVouchers}
       usedVouchers={usedVouchers}
+      /* Same lifetime spend the voucher milestones run on — one ledger, read
+         twice, rather than a rank column that could drift away from it. */
+      rank={rankProgress(lifetime)}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "@/components/account/AccountNav";
+import { rankForUser } from "@/lib/loyalty/rank-server";
 
 /**
  * Account shell.
@@ -21,10 +22,15 @@ export default async function AccountLayout({
   const supabase = await createClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
 
+  /* The nav shows the rank as a small mark beside Loyalty. Resolved here
+     because this layout already holds both the client and the user — the
+     alternative was a second round trip from a client component. */
+  const rank = user && supabase ? (await rankForUser(supabase, user.id)).rank : null;
+
   return (
     <div className="min-h-screen pt-24 pb-20 page-container" style={{ background: "#ffffff" }}>
       <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-        {user && <AccountNav locale={locale} />}
+        {user && <AccountNav locale={locale} rank={rank} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>

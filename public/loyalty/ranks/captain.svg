@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+          <defs><linearGradient id="g-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#474c55"></stop><stop offset="0.55" stop-color="#23262c"></stop><stop offset="1" stop-color="#121418"></stop></linearGradient><radialGradient id="g-face" cx="50%" cy="42%" r="68%"><stop offset="0" stop-color="#262a30"></stop><stop offset="0.7" stop-color="#15171b"></stop><stop offset="1" stop-color="#0e1013"></stop></radialGradient><linearGradient id="g-met" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#767d86"></stop><stop offset="0.5" stop-color="#4a5058"></stop><stop offset="1" stop-color="#343a41"></stop></linearGradient><linearGradient id="g-org" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7995f"></stop><stop offset="1" stop-color="#e6712c"></stop></linearGradient></defs>
+          <g id="r4-all">
+            <circle cx="512" cy="512" r="478" fill="url(#g-rim)"></circle>
+            <circle cx="512" cy="512" r="452" fill="none" stroke="#17191d" stroke-width="16" pathLength="600" stroke-dasharray="2.4 7.6"></circle>
+            <circle cx="512" cy="512" r="428" fill="url(#g-face)" stroke="#0a0b0d" stroke-width="3"></circle>
+            <circle cx="512" cy="512" r="414" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"></circle>
+            <rect x="506" y="98" width="12" height="30" rx="2" fill="#F48140"></rect>
+            <polygon points="0,-78 19,-27 74,-24 31,10 46,63 0,33 -46,63 -31,10 -74,-24 -19,-27" transform="translate(512 290) scale(0.88)" fill="url(#g-met)" stroke="#0a0b0d" stroke-width="4"></polygon>
+            <path d="M -170 42 L 0 -72 L 170 42 L 170 112 L 0 -2 L -170 112 Z" transform="translate(512 432)" fill="url(#g-org)" stroke="#0a0b0d" stroke-width="4"></path>
+            <path d="M -170 42 L 0 -72 L 170 42 L 170 112 L 0 -2 L -170 112 Z" transform="translate(512 528)" fill="url(#g-met)" stroke="#0a0b0d" stroke-width="4"></path>
+            <path d="M -170 42 L 0 -72 L 170 42 L 170 112 L 0 -2 L -170 112 Z" transform="translate(512 624)" fill="url(#g-met)" stroke="#0a0b0d" stroke-width="4"></path>
+            <rect x="-9" y="-9" width="18" height="18" transform="translate(252 786) rotate(45)" fill="#4a5058"></rect>
+            <rect x="-9" y="-9" width="18" height="18" transform="translate(772 786) rotate(45)" fill="#4a5058"></rect>
+            <text x="512" y="806" text-anchor="middle" font-family="Rajdhani" font-weight="700" font-size="66" letter-spacing="16" fill="#c6cad0">CAPTAIN</text>
+          </g>
+        </svg>

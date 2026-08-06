@@ -8,6 +8,8 @@ import { describeLine } from "@/lib/cart-display";
 import CartInfoSections from "./CartInfoSections";
 import NewsletterPromo from "@/components/NewsletterPromo";
 import Price from "@/components/Price";
+import { subtractMoney } from "@/lib/currency";
+import { COLONEL_DISCOUNT_RATE, permanentDiscount } from "@/lib/loyalty/ranks";
 
 /* ---------------------------------------------------------------------------
    Full shopping bag.
@@ -17,8 +19,20 @@ import Price from "@/components/Price";
    reads as the merchandise total, and says so.
 --------------------------------------------------------------------------- */
 
-export default function CartPageClient({ locale }: { locale: string }) {
+export default function CartPageClient({
+  locale,
+  rankDiscountRate = 0,
+}: {
+  locale: string;
+  /** Colonel's permanent share off the products, 0 for every other rank. */
+  rankDiscountRate?: number;
+}) {
   const { lines, subtotal, changeQty, removeLine, count, hydrated } = useCart();
+  /* A voucher is not applied in the basket — it is entered at checkout — so
+     there is nothing to weigh the rank perk against here and it always shows.
+     Checkout is where the two are compared and only one survives. */
+  const rankPerk = permanentDiscount(rankDiscountRate, subtotal);
+  const goods = subtractMoney(subtotal, rankPerk);
   const router = useRouter();
   const uk = locale === "uk";
 
@@ -28,6 +42,9 @@ export default function CartPageClient({ locale }: { locale: string }) {
     browse: uk ? "Перейти до товарів" : "Continue shopping",
     summary: uk ? "Підсумок замовлення" : "Order Summary",
     subtotal: uk ? "Проміжний підсумок" : "Subtotal",
+    rankDiscount: uk
+      ? `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`
+      : `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
     shipping: uk ? "Доставка" : "Shipping",
     shippingNote: uk ? "Розраховується далі" : "Calculated at checkout",
     total: uk ? "Разом" : "Total",
@@ -167,6 +184,14 @@ export default function CartPageClient({ locale }: { locale: string }) {
               <span style={{ color: "var(--text-muted)" }}>{L.subtotal}</span>
               <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
             </div>
+            {rankPerk.eur > 0 && (
+              <div className="flex items-center justify-between">
+                <span style={{ color: "var(--text-muted)" }}>{L.rankDiscount}</span>
+                <span style={{ color: "var(--accent-hover)" }}>
+                  −<Price money={rankPerk} locale={locale} />
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span style={{ color: "var(--text-muted)" }}>{L.shipping}</span>
               <span style={{ color: "var(--text-muted)" }}>{L.shippingNote}</span>
@@ -179,7 +204,7 @@ export default function CartPageClient({ locale }: { locale: string }) {
           >
             <span className="text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.total}</span>
             <span className="text-[20px] font-medium" style={{ color: "var(--text)" }}>
-              <Price money={subtotal} locale={locale} />
+              <Price money={goods} locale={locale} />
             </span>
           </div>
           <p className="text-[12px] mt-1.5" style={{ color: "var(--text-faint)" }}>{L.totalNote}</p>

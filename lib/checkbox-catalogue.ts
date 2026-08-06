@@ -13,11 +13,22 @@ import "server-only";
    colour choice; Checkbox holds two goods at two prices (Black ₴1150, Purple
    ₴1200), so the mapping is keyed by variant where one exists.
 
-   THE GAPS ARE DELIBERATE: neither wind cover (₴850) has a product
-   in Checkbox. Rather than invent a code or quietly fold it into another line,
-   an order containing it is not auto-fiscalised — it is left for a human with
-   the reason recorded. Add the product in the Checkbox cabinet and put its code
-   here to close that hole.
+   THE WIND COVERS WERE THE ONE GAP, and it is closed. Both were created in the
+   cabinet on 6 August 2026, in the "TCT Windcover" group that was already there
+   waiting for them, at ₴850 with tax code 8 (Без ПДВ) like everything else.
+   Every catalogue slug now has a code and no order is skipped for want of one.
+
+   ONE PRODUCT PER COVER, NOT ONE PER CONFIGURATION. A wind cover with the timer
+   sells for ₴1700, but that does not need a second good: buildGoods sends the
+   price WITH each receipt line rather than reading the cabinet's, so the stored
+   ₴850 is a reference figure and the line carries whatever was actually
+   charged. It is the same reason HMD Classic sits at ₴1080 while happily
+   fiscalising an order that added a lid.
+
+   If a future product genuinely has no code, leave it out rather than guessing:
+   the null is what stops an order being fiscalised against the wrong good, and
+   a skipped receipt with a recorded reason is recoverable in a way a wrong one
+   is not.
 --------------------------------------------------------------------------- */
 
 /** Checkbox codes, verified against the cabinet. Keyed `slug` or `slug:variant`. */
@@ -29,8 +40,8 @@ const CODES: Record<string, string> = {
   "bowl-killer": "1785681730534", // KILLER BOWL         42000 kop = ₴420
   "bowl-livanka": "1785681777131", // Tactical Livanka    37000 kop = ₴370
   "bowl-phunnel": "1785681837923", // FTP BOWL            50000 kop = ₴500
-  // "windcover-detonator": MISSING IN CHECKBOX — see the note above.
-  // "windcover-kh":        MISSING IN CHECKBOX — see the note above.
+  "windcover-detonator": "1786029853412", // Windcover Detonator 85000 kop = ₴850
+  "windcover-kh": "1786029854778", // Windcover KH        85000 kop = ₴850
 };
 
 /** The Checkbox code for a sold line, or null when the product is not in the till. */

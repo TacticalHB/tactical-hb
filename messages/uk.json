@@ -125,7 +125,6 @@
     "method_email": "Пошта",
     "method_instagram": "Instagram",
     "email_value": "admin@tactical-hb.com",
-    "instagram_handle": "@tactical_hb",
     "response_note": "Ми намагаємося відповісти протягом 24 годин у робочі дні.",
     "form_heading": "Надішліть нам повідомлення",
     "form_type_label": "Тип звернення",
@@ -139,7 +138,9 @@
     "form_submit": "Надіслати",
     "form_success": "Дякуємо! Ми відповімо найближчим часом.",
     "form_error": "Щось пішло не так. Спробуйте ще раз або напишіть нам напряму.",
-    "method_sales": "Опт та продажі"
+    "method_sales": "Опт та продажі",
+    "method_tiktok": "TikTok",
+    "method_linkedin": "LinkedIn"
   },
   "footer": {
     "follow": "Слідкуйте за нами",

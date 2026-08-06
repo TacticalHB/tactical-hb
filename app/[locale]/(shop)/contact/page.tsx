@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import ContactForm from "@/components/ContactForm";
 import Reveal from "@/components/Reveal";
-import { SALES_EMAIL } from "@/lib/contact-info";
+import { SALES_EMAIL, SOCIAL_HANDLE, SOCIAL_URLS, LINKEDIN_NAME } from "@/lib/contact-info";
 
 export default function ContactPage() {
   return <ContactContent />;
@@ -22,10 +22,29 @@ function ContactContent() {
       handle: SALES_EMAIL,
       href: `mailto:${SALES_EMAIL}`,
     },
+    /* The three social rows. Same shape as the two above them, so they inherit
+       the row's height, type and arrow rather than introducing a second visual
+       language for links that happen to be social.
+
+       Handles come from lib/contact-info, not from the message files: they are
+       proper nouns, identical in both locales, and keeping them beside the
+       footer's marks is what stops the two drifting to different spellings of
+       the same account — which had already happened to Instagram. */
     {
       label: t("method_instagram"),
-      handle: t("instagram_handle"),
-      href: "https://instagram.com/tactical_hb",
+      handle: SOCIAL_HANDLE,
+      href: SOCIAL_URLS.instagram,
+    },
+    {
+      label: t("method_tiktok"),
+      handle: SOCIAL_HANDLE,
+      href: SOCIAL_URLS.tiktok,
+    },
+    {
+      // LinkedIn has no @handle — the company page carries a name instead.
+      label: t("method_linkedin"),
+      handle: LINKEDIN_NAME,
+      href: SOCIAL_URLS.linkedin,
     },
   ];
 

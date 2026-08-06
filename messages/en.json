@@ -125,7 +125,6 @@
     "method_email": "Email",
     "method_instagram": "Instagram",
     "email_value": "admin@tactical-hb.com",
-    "instagram_handle": "@tactical_hb",
     "response_note": "We aim to reply within 24 hours on business days.",
     "form_heading": "Send us a message",
     "form_type_label": "Type of enquiry",
@@ -139,7 +138,9 @@
     "form_submit": "Send",
     "form_success": "Thank you! We'll reply shortly.",
     "form_error": "Something went wrong. Please try again or email us directly.",
-    "method_sales": "Sales & Wholesale"
+    "method_sales": "Sales & Wholesale",
+    "method_tiktok": "TikTok",
+    "method_linkedin": "LinkedIn"
   },
   "footer": {
     "follow": "Follow us",

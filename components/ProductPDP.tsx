@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
@@ -15,54 +16,61 @@ import { addMoney, money } from "@/lib/currency";
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
 
-/* ---------- Sliding announcement banner (Nike-style horizontal glide) ---------- */
-function Banner({ locale }: { locale: string }) {
-  const messages =
-    locale === "uk"
-      ? ["Перегляньте наші новинки"]
-      : ["Check out our new arrivals"];
-  // Clone the first message onto the end so the wrap-around keeps gliding left
-  // seamlessly instead of snapping backwards.
-  const slides = [...messages, messages[0]];
+/* ---------- Announcement banner — four lines on a cross-fade ----------
+
+   It used to carry one line on a Nike-style horizontal glide, with a cloned
+   slide on the end and an animation-off frame to hide the wrap. All of that
+   machinery existed to make a track of slides loop seamlessly; a cross-fade
+   has no track and no seam, so it is gone. The lines simply stack and the
+   current one is the opaque one.
+
+   THE LINES ARE STACKED, NOT SWAPPED, and that is what keeps the bar still.
+   Every line is rendered absolutely inside the same 40px box, so the tallest
+   and the widest never move each other, and the band cannot resize mid-fade —
+   which a single element having its text content replaced would do.
+
+   Screen readers get the lines ONCE, as ordinary static text, and are never
+   told about a change: no aria-live anywhere. This is decorative marketing
+   copy on a four-second timer, and announcing it on a loop would talk over
+   whatever the visitor was actually reading. aria-hidden is deliberately NOT
+   used either — the words are real content, they just are not news.
+------------------------------------------------------------------------- */
+function Banner() {
+  const t = useTranslations("pdp");
+  const lines = t.raw("banner_lines") as string[];
+
   const [i, setI] = useState(0);
-  const [animate, setAnimate] = useState(true);
 
   useEffect(() => {
-    const id = setInterval(() => setI((v) => v + 1), 4500);
+    /* Reduced motion holds line one and never starts a timer — the interval is
+       the motion here, so not scheduling it IS the accommodation. */
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const id = setInterval(() => setI((v) => (v + 1) % lines.length), 3500);
     return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (i === messages.length) {
-      // The cloned slide is showing — after the glide finishes, jump back to the
-      // real first slide with animation off so the reset is invisible.
-      const t = setTimeout(() => {
-        setAnimate(false);
-        setI(0);
-      }, 850);
-      return () => clearTimeout(t);
-    }
-    if (!animate) {
-      const r = requestAnimationFrame(() => setAnimate(true));
-      return () => cancelAnimationFrame(r);
-    }
-  }, [i, animate, messages.length]);
+  }, [lines.length]);
 
   return (
-    <div className="h-10 overflow-hidden" style={{ background: "#f5f5f5" }}>
-      <div
-        className="flex h-full"
-        style={{
-          transform: `translateX(-${i * 100}%)`,
-          transition: animate ? "transform 800ms cubic-bezier(0.16, 1, 0.3, 1)" : "none",
-        }}
-      >
-        {slides.map((m, k) => (
-          <div key={k} className="w-full shrink-0 flex items-center justify-center">
-            <p className="text-xs font-medium" style={{ color: "#111" }}>{m}</p>
-          </div>
-        ))}
-      </div>
+    <div className="h-10 relative overflow-hidden" style={{ background: "#f5f5f5" }}>
+      {lines.map((line, k) => (
+        <p
+          key={line}
+          className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium"
+          style={{
+            color: "#111",
+            opacity: k === i ? 1 : 0,
+            /* 250ms, inside the 200-300ms the brief asks for. The line leaving
+               and the line arriving cross over rather than one waiting for the
+               other, so the bar is never empty. */
+            transition: "opacity 250ms ease-in-out",
+            /* Only the visible line may take the pointer, or the stack would
+               put three invisible paragraphs over the top one. */
+            pointerEvents: k === i ? undefined : "none",
+          }}
+        >
+          {line}
+        </p>
+      ))}
     </div>
   );
 }
@@ -224,7 +232,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
-      <Banner locale={locale} />
+      <Banner />
 
       {/* ---- Main PDP grid ---- */}
       <div className="page-container pt-8 md:pt-12 pb-16">

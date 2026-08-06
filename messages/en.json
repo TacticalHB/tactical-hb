@@ -32,6 +32,14 @@
     "price_from": "from",
     "enquire": "Enquire"
   },
+  "pdp": {
+    "banner_lines": [
+      "Check out our new arrivals",
+      "Precision. Built to last.",
+      "Premium accessories. Zero compromise.",
+      "Something new is incoming"
+    ]
+  },
   "wholesale": {
     "title": "Wholesale",
     "intro": "Tactical HB works with selected partners who value precision, quality, and distinctive design.",

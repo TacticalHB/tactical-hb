@@ -510,8 +510,8 @@ export const products: Product[] = [
     nameEn: "Windcover KH",
     taglineUk: "Металевий вітрозахист із камуфляжем.",
     taglineEn: "Metal wind cover with camo finish.",
-    descriptionUk: "Суцільнометалевий вітрозахист із камуфляжним принтом і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
-    descriptionEn: "Solid metal wind cover with a camouflage finish and laser engraving. Timer optional, attaches magnetically.",
+    descriptionUk: "Суцільнометалевий вітрозахист із камуфляжним принтом і UV-друком. Таймер — опційно, кріпиться магнітом.",
+    descriptionEn: "Solid metal wind cover with a camouflage finish and UV print. Timer optional, attaches magnetically.",
     price: 23,
     priceUah: 850,
     currency: "EUR",
@@ -529,11 +529,11 @@ export const products: Product[] = [
         "/images/windcover-kh-3.jpg",
       ],
       shortEn:
-        "A precision-engineered metal wind cover in a camouflage finish. Made from solid metal with a durable powder-coated body and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
+        "A precision-engineered metal wind cover in a camouflage finish. Made from solid metal with a durable powder-coated body and a crisp UV print, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
-        "Металевий вітрозахист точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
+        "Металевий вітрозахист точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чіткий UV-друк — надійний захист від вітру, який водночас робить сетап помітним.",
       benefitsEn: [
-        "Solid metal construction with powder coating for heat and scratch resistance, finished with permanent laser engraving",
+        "Solid metal construction with powder coating for heat and scratch resistance, finished with a permanent UV print",
         "Camouflage face panel with the TCT roundel on the reverse",
         "Effective wind protection that maintains proper airflow for consistent heat and longer sessions",
         "Optional USB Type-C rechargeable countdown timer with LED display and bomb-style sound — set the time when placing coals to track the ideal heat-up window",
@@ -541,7 +541,7 @@ export const products: Product[] = [
         "Available in two versions: standard wind cover or wind cover with magnetically attached timer",
       ],
       benefitsUk: [
-        "Суцільнометалева конструкція з порошковим покриттям — стійка до нагріву та подряпин, із незмивним лазерним гравіюванням",
+        "Суцільнометалева конструкція з порошковим покриттям — стійка до нагріву та подряпин, із незмивним UV-друком",
         "Камуфляжна лицьова панель і знак TCT на звороті",
         "Ефективний захист від вітру зі збереженням правильного потоку повітря: рівний жар і довші сесії",
         "Опційний таймер зі зворотним відліком, LED-дисплеєм і звуком у стилі бомби, заряджається через USB Type-C — виставте час, коли кладете вугілля, і контролюйте розпал",
@@ -549,7 +549,7 @@ export const products: Product[] = [
         "Дві версії: стандартний вітрозахист або вітрозахист із таймером на магнітному кріпленні",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + UV print", valueUk: "Метал + порошкове покриття + UV-друк" },
         { labelEn: "Finish", labelUk: "Оздоблення", valueEn: "Camouflage face panel", valueUk: "Камуфляжна лицьова панель" },
         { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", valueEn: "USB Type-C", valueUk: "USB Type-C" },
         { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", valueEn: "Magnetic", valueUk: "Магнітне" },

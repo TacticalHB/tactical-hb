@@ -708,3 +708,69 @@ body {
   --console-ok: #4cd48b;
   --console-data: #58c4dd;
 }
+
+/* ---- Mr HB dossier ----
+   The file tab on the field monitor, and the modal it opens.
+
+   The tab hangs off the BOTTOM edge of the device rather than the side, which
+   is the one placement that survives a 375px screen: a side tab on a monitor
+   already capped at 400px and centred in the page gutters has nowhere to
+   overhang to, and would either clip or squeeze the frame. Hanging low also
+   keeps it clear of Mr HB's face, which a right-edge tab at mid-height would
+   sit level with. */
+.dossier-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* 44px tall so it is a real touch target, not a decorative sliver. */
+  min-height: 44px;
+  padding: 0 1.05rem;
+  background: var(--fog);
+  color: #c9ccd0;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 10px 22px -10px rgba(17, 17, 20, 0.5),
+              inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  transition: color 0.22s ease, transform 0.22s ease;
+}
+.dossier-tab:hover,
+.dossier-tab:focus-visible { color: #f4f3f0; transform: translateY(2px); }
+/* The hairline is the whole orange allowance here — no filled panel. */
+.dossier-tab-rule {
+  width: 18px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.75;
+  transition: opacity 0.22s ease, width 0.22s ease;
+}
+.dossier-tab:hover .dossier-tab-rule,
+.dossier-tab:focus-visible .dossier-tab-rule { opacity: 1; width: 26px; }
+
+.dossier-close {
+  color: rgba(244, 243, 240, 0.72);
+  background: rgba(20, 20, 24, 0.72);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.dossier-close:hover,
+.dossier-close:focus-visible { color: var(--accent); background: rgba(20, 20, 24, 0.95); }
+
+.dossier-envelope { cursor: pointer; transition: transform 0.3s ease; }
+.dossier-envelope:hover { transform: translateY(-3px); }
+.dossier-cue { color: rgba(244, 243, 240, 0.62); transition: color 0.22s ease; }
+.dossier-envelope:hover .dossier-cue,
+.dossier-envelope:focus-visible .dossier-cue { color: #f4f3f0; }
+.dossier-rule { width: 26px; height: 1px; background: var(--accent); opacity: 0.8; }
+
+/* The letter arrives rather than appearing — a short lift, no page-turn
+   theatrics. */
+.dossier-letter { animation: dossierLetter 380ms ease-out both; }
+@keyframes dossierLetter {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dossier-tab:hover,
+  .dossier-tab:focus-visible { transform: none; }
+  .dossier-envelope:hover { transform: none; }
+  .dossier-letter { animation: none; }
+}

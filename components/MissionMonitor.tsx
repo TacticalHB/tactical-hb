@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MrHbDossier from "./MrHbDossier";
 
 /* ---------------------------------------------------------------------------
    Mr.HB on a field monitor — the right-hand half of the mission section.
@@ -48,6 +49,17 @@ import { useEffect, useRef, useState } from "react";
 
 export default function MissionMonitor({ uk }: { uk: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  /* The dossier hangs off this device. State lives here rather than inside the
+     modal so the tab can hand focus back to itself on close — a modal that
+     closes and drops focus at the top of the document loses a keyboard user
+     their place on the page. */
+  const [dossierOpen, setDossierOpen] = useState(false);
+  const tabRef = useRef<HTMLButtonElement>(null);
+  const closeDossier = useCallback(() => {
+    setDossierOpen(false);
+    tabRef.current?.focus();
+  }, []);
 
   /* THE FALLBACK IS A REAL <img>, NOT THE POSTER ATTRIBUTE, and that is the
      whole fix for the black screen. A poster assigned from script AFTER the
@@ -343,6 +355,27 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           38.8977 N · 77.0365 W
         </span>
       </div>
+
+      {/* The file tab. Hangs off the bottom edge of the bezel, pulled to the
+          right — a folder tab sticking out of the device rather than a button
+          laid over it. Deliberately below the screen: at mid-height on the
+          right edge it would sit level with Mr HB's face, and on a 375px
+          screen a side tab has no gutter left to overhang into. */}
+      <div className="absolute left-0 right-0 -bottom-[42px] flex justify-end pr-5 pointer-events-none">
+        <button
+          ref={tabRef}
+          type="button"
+          onClick={() => setDossierOpen(true)}
+          className="dossier-tab pointer-events-auto font-mono text-[10px] font-semibold tracking-[0.22em] uppercase"
+          aria-haspopup="dialog"
+          aria-expanded={dossierOpen}
+        >
+          <span className="dossier-tab-rule" aria-hidden="true" />
+          OPEN FILE
+        </button>
+      </div>
+
+      <MrHbDossier uk={uk} open={dossierOpen} onClose={closeDossier} />
     </div>
   );
 }

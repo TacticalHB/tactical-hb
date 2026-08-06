@@ -16,61 +16,121 @@ import { addMoney, money } from "@/lib/currency";
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
 
-/* ---------- Announcement banner — four lines on a cross-fade ----------
+/* ---------- Announcement banner — four lines, each flying through ----------
 
-   It used to carry one line on a Nike-style horizontal glide, with a cloned
-   slide on the end and an animation-off frame to hide the wrap. All of that
-   machinery existed to make a track of slides loop seamlessly; a cross-fade
-   has no track and no seam, so it is gone. The lines simply stack and the
-   current one is the opaque one.
+   The line holds, leaves to the right, and the next one arrives from the left.
+   It replaced a straight cross-fade, which had no travel in it at all: both
+   lines sat at half opacity in the same spot for the length of the fade, which
+   reads as the text hanging rather than leaving.
 
-   THE LINES ARE STACKED, NOT SWAPPED, and that is what keeps the bar still.
-   Every line is rendered absolutely inside the same 40px box, so the tallest
-   and the widest never move each other, and the band cannot resize mid-fade —
-   which a single element having its text content replaced would do.
+   NOTHING EVER UNMOUNTS, so there is no exit animation to lose. The usual bug
+   here is a keyed swap tearing the outgoing node out of the DOM the moment the
+   state changes, leaving the exit to play on an element nobody can see. All
+   four lines are mounted for the life of the component and only their phase
+   changes, so an exit is just a style the element already has time to reach.
+
+   THREE PHASES, and the third is the one that matters:
+
+     active   centred and opaque, transitioned  — on stage
+     exiting  pushed right, transparent, transitioned  — leaving
+     parked   pushed LEFT, transparent, NO TRANSITION  — waiting in the wings
+
+   Parked has transitions off on purpose. A line that has just flown off to the
+   right has to get back to the left to be ready for its next turn, and if that
+   reset were transitioned it would slide backwards across the bar in full view
+   of everyone. Untransitioned, it snaps home while already invisible.
+
+   OUT FINISHES BEFORE IN BEGINS. The stage is deliberately empty for a beat
+   between the two rather than crossing them over, which is what keeps it from
+   reading as two lines fighting for the same spot.
+
+   THE BAR CANNOT RESIZE. Every line is absolutely positioned in the same 40px
+   box, so the longest never pushes the shortest around, and overflow-hidden
+   keeps the travel from spilling into the page.
 
    Screen readers get the lines ONCE, as ordinary static text, and are never
    told about a change: no aria-live anywhere. This is decorative marketing
-   copy on a four-second timer, and announcing it on a loop would talk over
-   whatever the visitor was actually reading. aria-hidden is deliberately NOT
-   used either — the words are real content, they just are not news.
+   copy on a timer, and announcing it on a loop would talk over whatever the
+   visitor was actually reading. aria-hidden is deliberately NOT used either —
+   the words are real content, they just are not news.
 ------------------------------------------------------------------------- */
+const BANNER_IN_MS = 380;
+const BANNER_HOLD_MS = 3500;
+const BANNER_OUT_MS = 380;
+/* How far a line travels. Enough to read as leaving at 12px text, short enough
+   that it never looks flung. */
+const BANNER_SHIFT_PX = 36;
+
 function Banner() {
   const t = useTranslations("pdp");
   const lines = t.raw("banner_lines") as string[];
 
+  /* Which line owns the stage, and whether it is still on it. Together these
+     are the whole state machine: onStage true means arriving-then-holding,
+     false means leaving, and the index only advances once it has left. */
   const [i, setI] = useState(0);
+  const [onStage, setOnStage] = useState(true);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    /* Reduced motion holds line one and never starts a timer — the interval is
-       the motion here, so not scheduling it IS the accommodation. */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReduced(true);
+    }
+  }, []);
 
-    const id = setInterval(() => setI((v) => (v + 1) % lines.length), 3500);
-    return () => clearInterval(id);
-  }, [lines.length]);
+  useEffect(() => {
+    /* Reduced motion never schedules anything and holds line one. The timer is
+       the motion here, so declining to start it is the accommodation. */
+    if (reduced) return;
+
+    if (onStage) {
+      /* Arrive, then stand still. The hold is measured from the end of the
+         entrance, so 3.5s is time fully visible rather than time on screen. */
+      const t = setTimeout(() => setOnStage(false), BANNER_IN_MS + BANNER_HOLD_MS);
+      return () => clearTimeout(t);
+    }
+
+    /* Off it goes. Only once it is gone does the next line take its place —
+       swapping the index any earlier would put two lines on stage together. */
+    const t = setTimeout(() => {
+      setI((v) => (v + 1) % lines.length);
+      setOnStage(true);
+    }, BANNER_OUT_MS);
+    return () => clearTimeout(t);
+  }, [onStage, reduced, lines.length]);
 
   return (
     <div className="h-10 relative overflow-hidden" style={{ background: "#f5f5f5" }}>
-      {lines.map((line, k) => (
-        <p
-          key={line}
-          className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium"
-          style={{
-            color: "#111",
-            opacity: k === i ? 1 : 0,
-            /* 250ms, inside the 200-300ms the brief asks for. The line leaving
-               and the line arriving cross over rather than one waiting for the
-               other, so the bar is never empty. */
-            transition: "opacity 250ms ease-in-out",
-            /* Only the visible line may take the pointer, or the stack would
-               put three invisible paragraphs over the top one. */
-            pointerEvents: k === i ? undefined : "none",
-          }}
-        >
-          {line}
-        </p>
-      ))}
+      {lines.map((line, k) => {
+        const isActive = k === i && onStage;
+        const isExiting = k === i && !onStage;
+
+        /* Parked lines wait on the LEFT so they enter from the side opposite
+           the one the previous line left by. */
+        const x = isActive ? 0 : isExiting ? BANNER_SHIFT_PX : -BANNER_SHIFT_PX;
+
+        return (
+          <p
+            key={line}
+            className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium"
+            style={{
+              color: "#111",
+              opacity: isActive ? 1 : 0,
+              transform: `translate3d(${x}px, 0, 0)`,
+              transition:
+                reduced || (!isActive && !isExiting)
+                  ? "none"
+                  : `opacity ${isActive ? BANNER_IN_MS : BANNER_OUT_MS}ms ease-out, ` +
+                    `transform ${isActive ? BANNER_IN_MS : BANNER_OUT_MS}ms ease-out`,
+              /* Only the line on stage may take the pointer, or the stack would
+                 put three invisible paragraphs over the top of it. */
+              pointerEvents: isActive ? undefined : "none",
+            }}
+          >
+            {line}
+          </p>
+        );
+      })}
     </div>
   );
 }

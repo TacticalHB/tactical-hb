@@ -50,6 +50,18 @@ const EMPTY: Record<SlotKey, Selection> = {
 
 const SLOT_ORDER: SlotKey[] = ["bowl", "hmd", "windcover"];
 
+/* Hairline ghosts from the design export, normalised on extract to
+   public/setup/ghost-<slot>-hairline.png. The fill variants and the lineup /
+   stack / connector reference sheets are not shipped: the connectors are drawn
+   in CSS below, and the rest were reference only. Their white point was remapped
+   255 -> 245 so an empty slot sits on the same studio plate as a real photo
+   instead of showing a brighter square next to one. */
+const GHOST: Record<SlotKey, string> = {
+  bowl: "/setup/ghost-bowl-hairline.png",
+  hmd: "/setup/ghost-hmd-hairline.png",
+  windcover: "/setup/ghost-windcover-hairline.png",
+};
+
 export default function KitBuilder({ locale }: { locale: string }) {
   const uk = locale === "uk";
   const { addToCart, setCartOpen } = useCart();
@@ -143,12 +155,23 @@ export default function KitBuilder({ locale }: { locale: string }) {
       </header>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-12 lg:gap-16 items-start">
-        <div className="flex flex-col gap-12">
+        <div className="kit-steps flex flex-col gap-12">
           {SLOT_ORDER.map((slot, idx) => {
             const list = byCategory[slot];
             const current = sel[slot];
             return (
-              <section key={slot} aria-labelledby={`kit-${slot}`}>
+              <section key={slot} aria-labelledby={`kit-${slot}`} className="kit-step">
+                {/* The connector rail: a hairline dropping to the next step with
+                    a node at this one, lit once the step has a choice. Purely
+                    decorative and hidden from assistive tech — the numbered
+                    headings already say what order these come in. The last step
+                    draws no segment, or the line would run off into nothing. */}
+                <span
+                  className="kit-rail"
+                  data-last={idx === SLOT_ORDER.length - 1 ? "true" : undefined}
+                  data-on={current.slug ? "true" : undefined}
+                  aria-hidden="true"
+                />
                 <div className="flex items-baseline gap-3 mb-5">
                   <span
                     className="font-mono text-[11px] tracking-[0.2em]"
@@ -254,6 +277,50 @@ export default function KitBuilder({ locale }: { locale: string }) {
             the choice that changes it. */}
         <aside className="lg:sticky lg:top-28 p-7" style={{ background: "var(--bg-soft)" }}>
           <h2 className="text-[15px] font-medium mb-5" style={{ color: "var(--text)" }}>{L.summary}</h2>
+
+          {/* ---- The stack ----
+              Assembled the way the thing actually sits: cover on top, device
+              under it, bowl at the bottom — so the panel reads as the setup
+              rather than as a list that happens to be vertical. SLOT_ORDER is
+              selection order, so it is reversed here and only here.
+
+              A slot with nothing in it shows its hairline ghost, which is the
+              only place on the page a ghost earns its keep: the step grids
+              already show what is chosen by the tile border, and an empty slot
+              in the stack is the one thing that says "you still need a bowl".
+              Once a real photograph exists the ghost gives way to it — the two
+              are never stacked.
+
+              Keyed on the slug so choosing a different piece remounts the
+              image and replays the settle. */}
+          <div className="kit-stack mb-6" aria-hidden="true">
+            {[...SLOT_ORDER].reverse().map((slot) => {
+              const slug = sel[slot].slug;
+              const product = slug ? products.find((p) => p.slug === slug) : null;
+              return (
+                <div key={slot} className="kit-stack-slot">
+                  {product ? (
+                    <Image
+                      key={product.slug}
+                      src={product.gridImage ?? product.image}
+                      alt=""
+                      fill
+                      sizes="120px"
+                      className="kit-stack-img object-contain p-1.5"
+                    />
+                  ) : (
+                    <Image
+                      src={GHOST[slot]}
+                      alt=""
+                      fill
+                      sizes="120px"
+                      className="object-contain p-1.5"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
           <ul className="flex flex-col gap-3 text-[14px]">
             {SLOT_ORDER.map((slot) => {

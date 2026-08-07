@@ -875,3 +875,81 @@ body {
    promotion sitting on top of them. */
 .setup-link { color: #111111; transition: color 0.22s ease; }
 .setup-link:hover, .setup-link:focus-visible { color: var(--accent-ink); }
+
+/* ---- Setup: connectors and the stack ----
+   Weight and node style follow the design export's connector sheet: a hairline
+   segment, a small hollow node, and the node filling with accent once its step
+   has a choice. Drawn here rather than sliced from the sheet — it is two
+   rectangles and a circle, and a PNG could not follow the accent on selection. */
+.kit-steps { position: relative; }
+.kit-step { position: relative; padding-left: 30px; }
+
+/* The rail: node at the step, segment running down to the next one. */
+.kit-rail {
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: -3rem;              /* into the gap, meeting the next node */
+  width: 9px;
+  pointer-events: none;
+}
+/* Segment */
+.kit-rail::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 13px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border-strong);
+}
+/* Node — hollow by default, accent once the step is answered */
+.kit-rail::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.kit-rail[data-on="true"]::after { border-color: var(--accent); background: var(--accent); }
+/* The last step has a node but nothing below it to reach. */
+.kit-rail[data-last="true"]::before { display: none; }
+
+/* Mobile keeps the nodes and drops the run between them — a long absolute line
+   beside a stacked layout is where these break. */
+@media (max-width: 639px) {
+  .kit-step { padding-left: 22px; }
+  .kit-rail::before { display: none; }
+}
+
+/* ---- The stack preview ---- */
+.kit-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 0;
+  background: #f5f5f5;         /* the catalogue plate, as everywhere else */
+  border-radius: 12px;
+}
+.kit-stack-slot {
+  position: relative;
+  width: 108px;
+  height: 62px;                /* fixed, so ghost -> photo never shifts the panel */
+}
+/* The settle: a short drop into place, ease-out, nothing springy. */
+.kit-stack-img { animation: kitSettle 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes kitSettle {
+  from { opacity: 0; transform: translateY(-9px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-stack-img { animation: none; }
+  .kit-rail::after { transition: none; }
+}

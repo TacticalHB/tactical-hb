@@ -177,7 +177,20 @@ export default function KitBuilder({ locale }: { locale: string }) {
                         className="kit-tile text-left"
                         data-active={active ? "true" : undefined}
                       >
-                        <div className="relative aspect-square overflow-hidden" style={{ background: "var(--bg-card)" }}>
+                        {/* #f5f5f5, the catalogue's studio plate — the same
+                            literal the products grid, the PDP gallery and the
+                            favourites list all set behind a product photo.
+
+                            NOT var(--bg-card). That is the page's warm cream
+                            (#f1eee8), and behind a product it splits the shelf
+                            in two: photos with a baked-in plate (the bowls, the
+                            Classic, the A.Craft) showed a cool 245 square
+                            floating on cream, while the cut-outs with a
+                            transparent background (the OP, both wind covers)
+                            took the cream directly and read as a different
+                            studio. The plate has to match what the photos were
+                            cut against, and that is 245. */}
+                        <div className="relative aspect-square overflow-hidden" style={{ background: "#f5f5f5" }}>
                           <Image
                             src={p.gridImage ?? p.image}
                             alt=""

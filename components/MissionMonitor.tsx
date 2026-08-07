@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import MrHbDossier from "./MrHbDossier";
+import MrHbDossier, { dossierCopy } from "./MrHbDossier";
 
 /* ---------------------------------------------------------------------------
    Mr.HB on a field monitor — the right-hand half of the mission section.
@@ -60,6 +60,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     setDossierOpen(false);
     tabRef.current?.focus();
   }, []);
+  const dossier = dossierCopy(uk);
 
   /* THE FALLBACK IS A REAL <img>, NOT THE POSTER ATTRIBUTE, and that is the
      whole fix for the black screen. A poster assigned from script AFTER the
@@ -366,12 +367,13 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           ref={tabRef}
           type="button"
           onClick={() => setDossierOpen(true)}
-          className="dossier-tab pointer-events-auto font-mono text-[10px] font-semibold tracking-[0.22em] uppercase"
+          className="dossier-tab pointer-events-auto font-mono text-[10px] font-semibold uppercase whitespace-nowrap"
+          style={{ letterSpacing: dossier.tracking }}
           aria-haspopup="dialog"
           aria-expanded={dossierOpen}
         >
           <span className="dossier-tab-rule" aria-hidden="true" />
-          OPEN FILE
+          {dossier.openFile}
         </button>
       </div>
 

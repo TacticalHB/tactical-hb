@@ -54,12 +54,11 @@ const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
    visitor was actually reading. aria-hidden is deliberately NOT used either —
    the words are real content, they just are not news.
 ------------------------------------------------------------------------- */
-const BANNER_IN_MS = 380;
+/* Kept in step with the keyframe durations in globals.css (.promo-in/.promo-out
+   are 360ms each). The travel distance lives there too. */
+const BANNER_IN_MS = 360;
 const BANNER_HOLD_MS = 3500;
-const BANNER_OUT_MS = 380;
-/* How far a line travels. Enough to read as leaving at 12px text, short enough
-   that it never looks flung. */
-const BANNER_SHIFT_PX = 36;
+const BANNER_OUT_MS = 360;
 
 function Banner() {
   const t = useTranslations("pdp");
@@ -105,23 +104,18 @@ function Banner() {
         const isActive = k === i && onStage;
         const isExiting = k === i && !onStage;
 
-        /* Parked lines wait on the LEFT so they enter from the side opposite
-           the one the previous line left by. */
-        const x = isActive ? 0 : isExiting ? BANNER_SHIFT_PX : -BANNER_SHIFT_PX;
+        /* One class does the whole job. An idle line is simply invisible and
+           carries no animation, so it holds no position that would have to be
+           reset behind the scenes — which is what the old transform parking
+           was for, and what made the arrival unreliable. */
+        const motion = isActive ? "promo-in" : isExiting ? "promo-out" : "";
 
         return (
           <p
             key={line}
-            className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium"
+            className={`promo-line ${motion} absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium`}
             style={{
               color: "#111",
-              opacity: isActive ? 1 : 0,
-              transform: `translate3d(${x}px, 0, 0)`,
-              transition:
-                reduced || (!isActive && !isExiting)
-                  ? "none"
-                  : `opacity ${isActive ? BANNER_IN_MS : BANNER_OUT_MS}ms ease-out, ` +
-                    `transform ${isActive ? BANNER_IN_MS : BANNER_OUT_MS}ms ease-out`,
               /* Only the line on stage may take the pointer, or the stack would
                  put three invisible paragraphs over the top of it. */
               pointerEvents: isActive ? undefined : "none",

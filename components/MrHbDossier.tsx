@@ -28,6 +28,27 @@ import { createPortal } from "react-dom";
 
 type Stage = "closed" | "breaking" | "letter";
 
+/* ---------------------------------------------------------------------------
+   The dossier's words, in one place.
+
+   Both entry points — the tab on the homepage monitor and the strip on About —
+   read from here, so the control cannot say one thing in one place and
+   something else in the other. The Ukrainian label is sentence case because
+   every surface that shows it applies `uppercase`; writing it in caps here
+   would double up with the CSS and defeat any future lower-case use.
+--------------------------------------------------------------------------- */
+export function dossierCopy(uk: boolean) {
+  return {
+    /* "ВІДКРИТИ СПРАВУ" is a good deal longer than "OPEN FILE", so the tab
+       tightens its tracking on Ukrainian rather than growing or wrapping. */
+    openFile: uk ? "Відкрити справу" : "Open file",
+    tracking: uk ? "0.12em" : "0.22em",
+    close: uk ? "Закрити" : "Close",
+    title: uk ? "Справа: Mr HB" : "File: Mr HB",
+    strip: uk ? "TCT-01 · MR HB · ВНУТРІШНЄ" : "TCT-01 · MR HB · INTERNAL",
+  };
+}
+
 /** Held between the seal cracking and the letter arriving. */
 const BREAK_MS = 520;
 
@@ -119,10 +140,11 @@ export default function MrHbDossier({
 
   if (!mounted || !open) return null;
 
+  const C = dossierCopy(uk);
   const L = {
-    title: uk ? "Справа: Mr HB" : "File: Mr HB",
-    openFile: uk ? "Відкрити справу" : "Open file",
-    close: uk ? "Закрити" : "Close",
+    title: C.title,
+    openFile: C.openFile,
+    close: C.close,
     envelopeAlt: uk
       ? "Запечатаний конверт із печаткою TCT"
       : "A sealed envelope bearing the TCT seal",

@@ -774,3 +774,44 @@ body {
   .dossier-envelope:hover { transform: none; }
   .dossier-letter { animation: none; }
 }
+
+/* ---- Promo strip: lines that actually leave ----
+   ANIMATIONS, NOT TRANSITIONS, and that is the fix rather than a preference.
+   The previous version parked a waiting line with `transition: none` (so its
+   reset across the bar could not be seen) and switched transitions back on in
+   the same commit that moved it to centre. A transition whose before-style had
+   none is not reliably honoured, so the arrival could land as an instant jump
+   while only the exit animated — which reads exactly as text swapping in
+   place. A keyframe animation does not care what the element looked like a
+   frame ago; it runs from its own `from`.
+
+   The travel is also far bigger than it was. At 36px a 12px line barely
+   shifted before the fade finished, so the motion registered as a fade and
+   nothing more; at 110px it visibly leaves the frame it was sitting in. */
+.promo-line { opacity: 0; }
+.promo-in  { animation: promoIn  360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.promo-out { animation: promoOut 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes promoIn {
+  from { opacity: 0; transform: translate3d(-110px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes promoOut {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translate3d(110px, 0, 0); }
+}
+
+/* Reduced motion keeps the first line and never moves anything. */
+@media (prefers-reduced-motion: reduce) {
+  .promo-in, .promo-out { animation: none; }
+  .promo-in { opacity: 1; }
+}
+
+/* The About entry. Same words and same orange hairline as the monitor's tab,
+   but flat on the dark panel rather than a tab hanging off a bezel — it is a
+   line of text on a surface, not an object stuck to one. */
+.dossier-open-link { color: #c9ccd0; transition: color 0.22s ease; }
+.dossier-open-link:hover,
+.dossier-open-link:focus-visible { color: #f4f3f0; }
+.dossier-open-link:hover .dossier-tab-rule,
+.dossier-open-link:focus-visible .dossier-tab-rule { opacity: 1; width: 26px; }

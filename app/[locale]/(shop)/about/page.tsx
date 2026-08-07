@@ -1,5 +1,6 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Reveal from "@/components/Reveal";
+import AboutDossier from "@/components/AboutDossier";
 
 export default function AboutPage() {
   return <AboutContent />;
@@ -7,6 +8,7 @@ export default function AboutPage() {
 
 function AboutContent() {
   const t = useTranslations("about");
+  const uk = useLocale() === "uk";
 
   const values = [
     { title: t("value_1_title"), text: t("value_1_text") },
@@ -56,6 +58,10 @@ function AboutContent() {
                 <div className="text-xs tracking-[0.3em] uppercase mb-2" style={{ color: "var(--accent)" }}>Ukraine</div>
                 <div className="font-display text-3xl" style={{ color: "#f4f3f0" }}>Premium Craft</div>
               </div>
+              {/* The file, reachable from here as well as the homepage monitor.
+                  Opposite corner to the Ukraine lockup so the panel stays
+                  balanced and neither reads as an afterthought. */}
+              <AboutDossier uk={uk} />
             </div>
           </Reveal>
         </div>

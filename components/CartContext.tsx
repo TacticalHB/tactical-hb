@@ -106,6 +106,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setLines(
             parsed
               .filter((l): l is CartLine => !!l && typeof l.slug === "string" && typeof l.qty === "number")
+              /* PRUNE SLUGS THE CATALOGUE NO LONGER HAS. A saved cart outlives
+                 the products in it: the wind cover rename turned every stored
+                 `windcover-bomb-cap` into a line nothing can price. The drawer
+                 already skipped those when rendering, but the bag COUNT still
+                 included them, so the badge read one higher than the lines a
+                 customer could see — and the count is the number they trust.
+
+                 Dropping the line is the right end to fix it from. Keeping it
+                 would mean showing a product that cannot be bought, and it
+                 cannot be silently remapped either: only a human knows whether
+                 the cover someone saved is the Detonator or the KH.
+
+                 The write-back effect below persists the pruned list on the
+                 next change, so a stale entry is gone for good rather than
+                 filtered afresh on every load. */
+              .filter((l) => products.some((p) => p.slug === l.slug))
               .map((l) => ({ slug: l.slug, qty: l.qty, options: l.options }))
           );
         }

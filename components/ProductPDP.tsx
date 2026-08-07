@@ -8,10 +8,11 @@ import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
-import { materialUpcharge, LID_WEIGHT_G, type HmdMaterial } from "@/lib/hmd-options";
+import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
+import { buildFieldCard } from "@/lib/field-card";
 
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
@@ -248,6 +249,11 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     uk ? (({ Black: "Чорний", Purple: "Фіолетовий" } as Record<string, string>)[n] ?? n) : n;
 
   const name = locale === "uk" ? product.nameUk : product.nameEn;
+
+  /* The card follows the live selection, so choosing a lid or a timer moves
+     the weight and adds the configuration row rather than leaving the page
+     describing a product the customer is no longer buying. */
+  const fieldRows = buildFieldCard({ product, uk, material, windcover });
   const shortDesc = pdp ? (uk ? pdp.shortUk : pdp.shortEn) : (uk ? product.descriptionUk : product.descriptionEn);
   const benefits = pdp ? (uk ? pdp.benefitsUk : pdp.benefitsEn) ?? [] : [];
   const tips = pdp ? (uk ? pdp.tipsUk : pdp.tipsEn) ?? [] : [];
@@ -264,8 +270,6 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     colour: uk ? "Колір" : "Colour Shown",
     style: uk ? "Модель" : "Style",
     specs: uk ? "Характеристики" : "Tech Specs",
-    weight: uk ? "Вага" : "Weight",
-    dimensions: uk ? "Розміри" : "Dimensions",
     tips: uk ? "Поради з використання" : "Tips for Use",
     delivery: uk ? "Доставка та повернення" : "Delivery & Returns",
     deliveryText: uk
@@ -457,27 +461,29 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               {pdp?.styleCode && <li className="list-disc ml-5">{L.style}: {pdp.styleCode}</li>}
             </ul>
 
-            {/* Weight & dimensions — from structured data, so every product shows
-                the same clean block in both languages. */}
+            {/* ---- Field card ----
+                What the thing is, in rows, sitting where the old weight and
+                dimensions pair sat: under the description and above the
+                benefits, in front of the reader rather than behind an
+                accordion nobody opens.
+
+                Still a <dl>, so a screen reader gets term-and-definition pairs
+                rather than a table of orphaned strings. Rows are derived in
+                lib/field-card from the same catalogue entry the shop prices
+                and ships from, and the weight follows the selector because
+                that is the weight the courier is quoted on. */}
             <dl className="mt-6 pt-5 flex flex-col gap-2 text-[15px]" style={{ borderTop: "1px solid #efefef" }}>
-              <div className="flex justify-between gap-4">
-                <dt style={{ color: "#707072" }}>{L.weight}</dt>
-                <dd className="text-right" style={{ color: "#111" }}>
-                  {product.category === "hmd"
-                    ? uk
-                      ? `${product.weightG} г (${product.weightG + LID_WEIGHT_G} г з кришкою)`
-                      : `${product.weightG} g (${product.weightG + LID_WEIGHT_G} g with lid)`
-                    : uk
-                      ? `${product.weightG} г`
-                      : `${product.weightG} g`}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt style={{ color: "#707072" }}>{L.dimensions}</dt>
-                <dd className="text-right" style={{ color: "#111" }}>
-                  {`${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${uk ? "мм" : "mm"}`}
-                </dd>
-              </div>
+              {fieldRows.map((row) => (
+                <div key={row.key} className="flex justify-between gap-4">
+                  <dt
+                    className={row.key === "configuration" ? "field-row-live" : undefined}
+                    style={{ color: "#707072" }}
+                  >
+                    {row.label}
+                  </dt>
+                  <dd className="text-right" style={{ color: "#111" }}>{row.value}</dd>
+                </div>
+              ))}
             </dl>
 
             {/* Key benefits */}

@@ -30,20 +30,20 @@ export function timerUpcharge(sel: WindcoverOptions): Money {
 }
 
 /* ---------------------------------------------------------------------------
-   Weight. TODO: weigh a cover with and without the timer.
+   Weight — measured, at last.
 
-   The catalogue's 470 g was measured on the timer version — it was the only
-   version when it was recorded. Splitting the product in two leaves no figure
-   for the bare cover, so both configurations still ship at 470 g and the timer
-   adds nothing on top.
+   The catalogue's 470 g was recorded on the timer version, back when that was
+   the only version. Splitting the product in two left no figure for the bare
+   cover, so both configurations shipped at 470 g and the timer added nothing:
+   deliberately wrong in the safe direction, quoting a little high rather than
+   absorbing a shortfall.
 
-   That over-states the bare cover rather than under-stating it, which is the
-   right way round to be wrong: a shipping quote comes out a little high instead
-   of the shop absorbing a shortfall. Replace with real numbers when there are
-   some.
+   Both numbers now exist. The bare cover is 400 g and the timer version 470 g,
+   so the timer itself is the 70 g difference, and lib/products carries 400 as
+   the base weight. A bare cover is no longer declared 70 g heavier than it is.
 --------------------------------------------------------------------------- */
 
-export const TIMER_WEIGHT_G = 0;
+export const TIMER_WEIGHT_G = 70;
 
 export function timerWeightG(sel: WindcoverOptions): number {
   return sel.timer ? TIMER_WEIGHT_G : 0;

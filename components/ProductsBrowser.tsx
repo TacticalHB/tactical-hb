@@ -71,6 +71,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       accessory: uk ? "Аксесуари" : "Accessories",
     } as Record<CatKey, string>,
     incoming: uk ? "Скоро" : "Incoming",
+    buildSetup: uk ? "Зібрати сет" : "Build a setup",
   };
 
   /* ACCESSORIES ARE NOT PRODUCTS HERE. The category now holds the three add-ons
@@ -121,6 +122,16 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
             <span style={{ color: "#8a8a8e" }}>({shownCount})</span>
           </h1>
           <div className="flex items-center gap-5 md:gap-8">
+            {/* The kit builder, offered from the shelf it draws from. A quiet
+                text link rather than a button: it is a second way to shop, not
+                a louder one than the products themselves. */}
+            <Link
+              href={`/${locale}/setup`}
+              className="hidden sm:inline-flex items-center gap-2 text-[15px] setup-link"
+            >
+              {L.buildSetup}
+              <span aria-hidden="true">→</span>
+            </Link>
             <button
               onClick={() => setShowFilters((v) => !v)}
               className="hidden md:flex items-center gap-2 text-[15px]"

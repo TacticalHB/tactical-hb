@@ -815,3 +815,63 @@ body {
 .dossier-open-link:focus-visible { color: #f4f3f0; }
 .dossier-open-link:hover .dossier-tab-rule,
 .dossier-open-link:focus-visible .dossier-tab-rule { opacity: 1; width: 26px; }
+
+/* The one live row on the field card — the configuration a customer has
+   actually chosen. A hairline tick in the accent, not a filled badge: the card
+   is a specification, and the only thing on it that changes as you choose
+   deserves a mark rather than a colour block. */
+.field-row-live { position: relative; padding-left: 0.85rem; }
+.field-row-live::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 1px;
+  background: var(--accent-ink);
+}
+
+/* ---- Kit builder ----
+   A tile is a product you can pick, so it reads as a card until chosen and
+   then takes the ink border rather than an orange fill — the accent is spent
+   on the one primary action at the bottom of the summary, not on three rows
+   of selected states. */
+.kit-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: border-color 0.22s ease, transform 0.22s ease;
+}
+.kit-tile:hover { border-color: var(--border-strong); }
+.kit-tile[data-active="true"] { border-color: var(--ink); }
+.kit-tile:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.kit-tile-incoming {
+  border-style: dashed;
+  background: transparent;
+  cursor: default;
+  min-height: 100%;
+}
+
+.kit-chip {
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.kit-chip:hover { border-color: var(--border-strong); }
+.kit-chip[data-active="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.kit-chip:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kit-tile { transition: none; }
+}
+
+/* The Build-a-setup link on the products shelf. Ink by default like the
+   filters beside it, accent on hover — it is a peer of those controls, not a
+   promotion sitting on top of them. */
+.setup-link { color: #111111; transition: color 0.22s ease; }
+.setup-link:hover, .setup-link:focus-visible { color: var(--accent-ink); }

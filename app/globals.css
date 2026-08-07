@@ -953,3 +953,43 @@ body {
   .kit-stack-img { animation: none; }
   .kit-rail::after { transition: none; }
 }
+
+/* ---- Setup: the locked-in cue ----
+   One quiet confirmation when the third core piece lands. Two parts, and they
+   are deliberately different mechanisms.
+
+   THE STACK TIGHTEN IS A STATE, NOT A ONE-SHOT. Completeness is an attribute,
+   and the gap and opacity simply transition to their closed values — so it
+   cannot double-fire however often the component re-renders, and it eases back
+   open by itself when a piece is removed. A keyframe here would need a flag, a
+   timer and a reset, to end up looking the same.
+
+   Kept inside the brief's budget: 3px of travel and 320ms, ease-out, with the
+   group settling from 0.92 to full presence. Nothing scales, nothing rotates,
+   and the resting style is unchanged. */
+.kit-stack {
+  opacity: 0.92;
+  transition: gap 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.kit-stack[data-complete="true"] { gap: 3px; opacity: 1; }
+
+/* THE CTA PULSE IS THE ONE-SHOT, because a pulse has to return to where it
+   started and a state cannot express that. Applied by the completion effect
+   and taken off again after it runs, so the next completion re-triggers it.
+   Scale only, 1.02, and no colour change — the button's resting style is the
+   same before and after. Pointer events are untouched, so the kit can be added
+   mid-cue. */
+.kit-cta-pulse { animation: kitLockIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes kitLockIn {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No motion at all: the stack sits at its complete spacing and full presence
+     the moment the kit is complete, and the button never moves. */
+  .kit-stack { transition: none; opacity: 1; }
+  .kit-cta-pulse { animation: none; }
+}

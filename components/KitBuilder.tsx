@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { products, type Product } from "@/lib/products";
 import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
@@ -126,6 +126,34 @@ export default function KitBuilder({ locale }: { locale: string }) {
 
   const filled = chosen.length;
   const full = filled === SLOT_ORDER.length;
+
+  /* ---- The locked-in cue ----
+     Fired the moment the third core slot is answered, and only then.
+
+     `full` is derived from the three SKU slots alone, so a lid, a rubber or a
+     timer moving does not touch it — the effect below depends on `full`, and a
+     boolean that did not change does not re-run an effect. That is the whole
+     guard against replaying on every toggle and every render, and it is why
+     the flag is a ref rather than state: it records what the previous run saw
+     without itself causing another one.
+
+     The pulse is one-shot, so the class has to come off again or a re-entry
+     would find it already applied and animate nothing. The stack's own tighten
+     is NOT here — it is a plain state transition in CSS keyed on the same
+     completeness, which cannot double-fire by construction and eases back open
+     if a piece is removed. */
+  const [pulse, setPulse] = useState(false);
+  const wasFull = useRef(false);
+
+  useEffect(() => {
+    if (full && !wasFull.current) {
+      setPulse(true);
+      const t = window.setTimeout(() => setPulse(false), 420);
+      wasFull.current = full;
+      return () => window.clearTimeout(t);
+    }
+    wasFull.current = full;
+  }, [full]);
 
   const choose = useCallback((slot: SlotKey, slug: string | null) => {
     setSel((prev) => ({ ...prev, [slot]: { ...prev[slot], slug } }));
@@ -293,7 +321,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
 
               Keyed on the slug so choosing a different piece remounts the
               image and replays the settle. */}
-          <div className="kit-stack mb-6" aria-hidden="true">
+          <div className="kit-stack mb-6" data-complete={full ? "true" : undefined} aria-hidden="true">
             {[...SLOT_ORDER].reverse().map((slot) => {
               const slug = sel[slot].slug;
               const product = slug ? products.find((p) => p.slug === slug) : null;
@@ -361,7 +389,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
             type="button"
             onClick={addKit}
             disabled={filled === 0}
-            className="w-full h-12 rounded-full mt-6 text-[15px] font-medium transition-opacity"
+            className={`w-full h-12 rounded-full mt-6 text-[15px] font-medium transition-opacity${pulse ? " kit-cta-pulse" : ""}`}
             style={{
               background: filled === 0 ? "var(--border-strong)" : "var(--accent)",
               color: filled === 0 ? "var(--text-faint)" : "#111114",

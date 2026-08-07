@@ -1006,3 +1006,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cart-suggest { animation: none; }
 }
+
+/* The pairing card's link surface — poster and name through to the product.
+   A quiet lift on hover so it reads as clickable without turning the card
+   into a button; the real buttons below it keep their own weight. */
+.cart-suggest-link { transition: opacity 0.2s ease; }
+.cart-suggest-link:hover { opacity: 0.88; }
+.cart-suggest-link:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) {
+  .cart-suggest-link { transition: none; }
+}

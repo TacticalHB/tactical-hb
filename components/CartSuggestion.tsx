@@ -57,7 +57,7 @@ export default function CartSuggestion({
   cta?: "strong" | "quiet";
 }) {
   const t = useTranslations("cart");
-  const { lines, lastAdded, addToCart, setLineOptions } = useCart();
+  const { lines, lastAdded, addToCart, setLineOptions, setCartOpen, setAddedOpen } = useCart();
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   /* Unique per instance: the drawer and the post-add panel can both be mounted,
@@ -97,6 +97,14 @@ export default function CartSuggestion({
      actually apply, so an upgrade quotes the cover WITH its timer rather than
      the bare cover's price. */
   const price = linePrice({ slug: suggestion.slug, qty: 1, options: suggestion.options });
+
+  /* Navigating away with the overlay still up would land the customer on the
+     product page behind a drawer. Both surfaces close, because either could be
+     the one that is open. */
+  const leave = () => {
+    setCartOpen(false);
+    setAddedOpen(false);
+  };
 
   const dismiss = () => {
     try {
@@ -145,28 +153,38 @@ export default function CartSuggestion({
         {t("suggest_heading")}
       </h3>
 
-      {/* Artwork only. The heading above carries the meaning, so the poster is
-          decorative and stays out of the screen reader's way. Square and
-          intrinsically sized, so it reserves its own space and nothing below
-          it jumps as it loads. */}
-      <Image
-        src={suggestion.poster}
-        alt=""
-        width={800}
-        height={800}
-        sizes="384px"
-        className="block w-full h-auto"
-      />
+      {/* THE POSTER AND THE NAME ARE THE LINK, and the buttons sit outside it
+          rather than inside. A <button> nested in an <a> is invalid markup
+          that browsers and screen readers resolve differently, so the usual
+          fix — a full-card link with stopPropagation on every control — is
+          working around a structure that did not have to exist. Splitting them
+          means a click can only ever mean one thing, with nothing to cancel.
 
-      <div className="px-4 py-3.5">
-        <div className="flex items-baseline justify-between gap-3">
+          The artwork is decorative: the link's own text names the product, so
+          an alt would say it twice. */}
+      <Link
+        href={`/${locale}/products/${suggestion.slug}`}
+        onClick={leave}
+        className="cart-suggest-link block"
+      >
+        <Image
+          src={suggestion.poster}
+          alt=""
+          width={800}
+          height={800}
+          sizes="384px"
+          className="block w-full h-auto"
+        />
+        <div className="px-4 pt-3.5 flex items-baseline justify-between gap-3">
           <span className="text-[14px]" style={{ color: "var(--text)" }}>{name}</span>
           <span className="text-[14px] font-medium shrink-0" style={{ color: "var(--text)" }}>
             <Price money={price} locale={locale} />
           </span>
         </div>
+      </Link>
 
-        <div className="flex items-center gap-2.5 mt-3">
+      <div className="px-4 pb-3.5 pt-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={accept}
@@ -197,6 +215,7 @@ export default function CartSuggestion({
 
         <Link
           href={`/${locale}/setup`}
+          onClick={leave}
           className="inline-block mt-3 text-[12px] underline underline-offset-4"
           style={{ color: "var(--text-muted)" }}
         >

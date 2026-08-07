@@ -213,10 +213,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { slug: product.slug, qty: 1, options }];
     });
     setBump((b) => b + 1);
-    if (showPanel) {
-      setLastAdded({ slug: product.slug, qty: 1, options });
-      setAddedOpen(true);
-    }
+    /* RECORD WHAT WENT IN, whichever way it went in. This used to sit inside
+       the `showPanel` branch, so an add from the favourites list — which uses
+       the fly-to-cart animation instead of the panel — left `lastAdded` stale
+       and the cart's pairing suggestion had nothing to work from. Opening the
+       panel stays conditional; remembering does not. */
+    setLastAdded({ slug: product.slug, qty: 1, options });
+    if (showPanel) setAddedOpen(true);
   }, []);
 
   const clearCart = useCallback(() => setLines([]), []);

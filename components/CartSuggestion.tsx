@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { products } from "@/lib/products";
 import { getCartSuggestion } from "@/lib/cart-suggestion";
@@ -57,13 +57,26 @@ export default function CartSuggestion({
   cta?: "strong" | "quiet";
 }) {
   const t = useTranslations("cart");
-  const { lines, lastAdded, addToCart, setLineOptions, setCartOpen, setAddedOpen } = useCart();
+  const { lines, lastAdded, addToCart, setLineOptions, setCartOpen, setAddedOpen, hydrated } = useCart();
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [failed, setFailed] = useState(false);
   /* Unique per instance: the drawer and the post-add panel can both be mounted,
      and two elements sharing one id is invalid markup that would also point
      both aria-labelledby references at whichever heading won. */
   const headingId = useId();
+  /* The bag's composition as a string. QUANTITY IS LEFT OUT ON PURPOSE: a
+     dismissal should survive someone nudging a line from one to two, which is
+     not a new decision about what to buy — only a line appearing or leaving,
+     or its options changing, is. */
+  const composition = useMemo(
+    () =>
+      lines
+        .map((l) => `${l.slug}|${JSON.stringify(l.options ?? {})}`)
+        .sort()
+        .join(","),
+    [lines]
+  );
+  const seenComposition = useRef<string | null>(null);
 
   /* Read the session's dismissals once. Done in an effect rather than in the
      initial state so the server and the first client render agree — reading
@@ -83,6 +96,32 @@ export default function CartSuggestion({
     window.addEventListener(DISMISS_EVENT, onDismissed);
     return () => window.removeEventListener(DISMISS_EVENT, onDismissed);
   }, []);
+
+  /* A "no thanks" lasts until the bag changes, not until the tab closes.
+     Turning down a heat device beside one bowl says little about what to
+     suggest once something else has gone in, and the old behaviour meant one
+     dismissal silenced that pairing for the rest of the visit.
+
+     The first composition seen after hydration is the baseline, not a change —
+     without that, restoring a saved cart on page load would read as a change
+     and wipe dismissals on every navigation. Both mounted copies run this
+     independently and land on the same answer, so no broadcast is needed. */
+  useEffect(() => {
+    if (!hydrated) return;
+    if (seenComposition.current === null) {
+      seenComposition.current = composition;
+      return;
+    }
+    if (seenComposition.current === composition) return;
+    seenComposition.current = composition;
+
+    try {
+      Object.keys(sessionStorage)
+        .filter((k) => k.startsWith(DISMISS_PREFIX))
+        .forEach((k) => sessionStorage.removeItem(k));
+    } catch {}
+    setDismissed([]);
+  }, [composition, hydrated]);
 
   const suggestion = useMemo(() => getCartSuggestion(lines, lastAdded), [lines, lastAdded]);
 

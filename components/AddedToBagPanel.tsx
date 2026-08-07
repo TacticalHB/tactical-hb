@@ -6,6 +6,7 @@ import { useCart, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
+import CartSuggestion from "./CartSuggestion";
 
 /* ---------------------------------------------------------------------------
    "Added to Shopping Bag" — the confirmation slide-over shown after adding
@@ -39,9 +40,9 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
         <CloseButton onClick={close} label={L.close} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-7 pt-2">
+      <div className="flex-1 overflow-y-auto pt-2 pb-7">
         {d && lastAdded && (
-          <div className="flex gap-5">
+          <div className="flex gap-5 px-7">
             <div
               className="relative w-[104px] h-[104px] shrink-0"
               style={{ background: "var(--bg-soft)" }}
@@ -69,24 +70,41 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
             </div>
           </div>
         )}
-      </div>
 
-      <div className="px-7 py-7 flex flex-col gap-3 shrink-0">
+      {/* The success actions, and the pairing card beneath them.
+
+          Both moved INSIDE the scroller rather than staying pinned to the
+          bottom. The card is a tall square poster, and as a fixed block below
+          fixed actions it would have squeezed the item confirmation off a
+          phone screen entirely. Scrolling them together keeps "View your
+          shopping bag" the first thing under the item on any screen, with the
+          suggestion a flick below it — which is also the order asked for. */}
+      <div className="px-7 pt-7 pb-2 flex flex-col gap-3">
         <Link
           href={`/${locale}/cart`}
           onClick={close}
-          className="h-12 rounded-full flex items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-85"
+          className="h-12 rounded-full flex items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-85 shrink-0"
           style={{ background: "var(--accent)", color: "#111114" }}
         >
           {L.view}
         </Link>
         <button
           onClick={close}
-          className="h-12 rounded-full text-[15px] font-medium transition-colors"
+          className="h-12 rounded-full text-[15px] font-medium transition-colors shrink-0"
           style={{ background: "#ffffff", color: "#111114", border: "1px solid var(--border-strong)" }}
         >
           {L.keep}
         </button>
+
+        {/* Same component, same pairing rules, same session dismissal — turning
+            it down here clears it from the bag drawer too.
+
+            The quiet Add here and the strong one in the drawer are the same
+            button at two weights: the accent above already belongs to "View
+            your shopping bag", and two orange pills this close read as two
+            primaries competing rather than an offer inside a card. */}
+        <CartSuggestion locale={locale} cta="quiet" />
+      </div>
       </div>
     </SlideOver>
   );

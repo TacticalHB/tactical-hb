@@ -6,6 +6,7 @@ import { useCart, lineKey, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
+import CartSuggestion from "./CartSuggestion";
 
 /* ---------------------------------------------------------------------------
    Mini cart — the slide-over behind the header bag icon.
@@ -122,6 +123,11 @@ export default function CartDrawer({ locale }: { locale: string }) {
             })}
           </ul>
         )}
+
+        {/* The pairing card, inside the scroller and below the lines — it
+            scrolls away with the bag rather than sitting between the customer
+            and the checkout button, which stays pinned in the footer. */}
+        {lines.length > 0 && <CartSuggestion locale={locale} />}
       </div>
 
       {lines.length > 0 && (

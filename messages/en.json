@@ -26,6 +26,13 @@
     "notify_button": "Notify me at launch",
     "notify_success": "Thank you! You'll be the first to know."
   },
+  "cart": {
+    "suggest_heading": "Suggested next piece",
+    "suggest_add": "Add",
+    "suggest_dismiss": "No thanks",
+    "suggest_build": "Build a setup",
+    "suggest_error": "That didn't go through. Try again."
+  },
   "products": {
     "title": "Products",
     "subtitle": "Every piece is the result of precise engineering and premium materials.",

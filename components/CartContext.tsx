@@ -54,6 +54,8 @@ type CartCtx = {
     showPanel?: boolean
   ) => void;
   removeLine: (key: string) => void;
+  /** Re-configure a line already in the bag (see the timer suggestion). */
+  setLineOptions: (key: string, options: CartOptions) => void;
   changeQty: (key: string, delta: number) => void;
   clearCart: () => void;
   registerCartIcon: (el: HTMLElement | null) => void;
@@ -238,10 +240,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  /**
+   * Change the options on a line already in the bag.
+   *
+   * Exists for the cart's timer suggestion, which must UPGRADE the wind cover
+   * the customer already has rather than add a second one — adding would sell
+   * them a cover they did not ask for.
+   *
+   * Re-keying can collide: setting the timer on a cover when the identical
+   * timer configuration is already in the bag would produce two lines with one
+   * key. They are merged instead, quantities summed, which is what addToCart
+   * would have done and what the customer means.
+   */
+  const setLineOptions = useCallback((key: string, options: CartOptions) => {
+    setLines((prev) => {
+      const target = prev.find((l) => lineKey(l.slug, l.options) === key);
+      if (!target) return prev;
+      const nextKey = lineKey(target.slug, options);
+      if (nextKey === key) return prev;
+
+      const merged: CartLine[] = [];
+      for (const l of prev) {
+        const k = lineKey(l.slug, l.options);
+        if (k === key) continue;                       // dropped, re-added below
+        merged.push(l);
+      }
+      const existing = merged.find((l) => lineKey(l.slug, l.options) === nextKey);
+      if (existing) {
+        existing.qty += target.qty;
+        return [...merged];
+      }
+      return [...merged, { ...target, options }];
+    });
+  }, []);
+
   return (
     <Ctx.Provider
       value={{
-        lines, count, subtotal, cartOpen, setCartOpen, addToCart, removeLine, changeQty,
+        lines, count, subtotal, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
         clearCart, registerCartIcon, bump, lastAdded, addedOpen, setAddedOpen, hydrated,
       }}
     >

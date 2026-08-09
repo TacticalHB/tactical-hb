@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/components/CartContext";
+import CartSnapshotSync from "@/components/CartSnapshotSync";
 import { FavouritesProvider } from "@/components/FavouritesProvider";
 import { Toaster } from "sonner";
 import CookieConsent from "@/components/CookieConsent";
@@ -23,6 +24,7 @@ export default async function ShopLayout({
     <FavouritesProvider locale={locale}>
       <CartProvider>
         <Navbar locale={locale} />
+        <CartSnapshotSync locale={locale} />
         <main className="flex-1">{children}</main>
         <Footer />
         <Toaster position="bottom-center" richColors closeButton />

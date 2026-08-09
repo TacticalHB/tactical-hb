@@ -6,6 +6,7 @@ import { buildOrderEmail } from "@/lib/order-email";
 import { createTtnForOrder } from "@/lib/order-ttn";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
+import { cancelCartFlowOnPayment } from "@/lib/email/flows";
 
 /* ---------------------------------------------------------------------------
    Turning a confirmed payment into an order.
@@ -206,6 +207,18 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     console.log("[fulfil] already fulfilled or not pending:", reference);
     return { ok: false, reason: "already_fulfilled" };
   }
+
+  // 0. Disarm the abandoned-cart flow, FIRST and outside the try.
+  //
+  //    The customer has paid; "your bag is waiting" must never follow. This
+  //    runs before the order row, the waybill and the receipt because those
+  //    are the steps that can be slow or fail, and a timeout must not be able
+  //    to leave three marketing mails armed against someone who has already
+  //    bought. It never throws — a mail queue cannot be allowed to undo a paid
+  //    order — and the send path checks for a paid order independently, so
+  //    even a silent failure here degrades to a second line of defence rather
+  //    than to a wrong send.
+  await cancelCartFlowOnPayment(payment.email);
 
   const admin = createAdminClient();
 

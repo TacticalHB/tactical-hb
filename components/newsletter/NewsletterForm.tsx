@@ -3,14 +3,23 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
 /* ---------------------------------------------------------------------------
    Newsletter sign-up.
 
-   NOT WIRED UP YET — submission shows the success state and discards the
-   details. There is no list to add anyone to, so this collects a consent it
-   cannot currently honour; wiring it to Resend or a subscribers table is a
-   separate, small change. Kept in one place so that swap is a single function.
+   THE CONSENT CHECKBOX IS THE MARKETING OPT-IN, and nothing is stored without
+   it: the submit is refused before the action is called, so an address only
+   ever reaches the subscribers table attached to an explicit yes. Ticking it
+   also starts the four-part welcome series (W1 now, then +2, +5 and +9 days).
+
+   THE NAME, TITLE AND COUNTRY ARE COLLECTED AND NOT STORED. The list holds an
+   address, a language and a consent record and nothing else, because that is
+   all any of the flows read. Keeping a name we never use would be personal
+   data held for no purpose, which is the thing data-protection rules are
+   actually about. The fields stay because the form is a considered piece of
+   design and because a personalised send is a plausible next step — the day
+   one exists, the columns go in with it.
 
    Country names come from Intl.DisplayNames rather than a hand-kept bilingual
    list, so /uk shows "Німеччина" and /en shows "Germany" from the same data.
@@ -85,9 +94,19 @@ export default function NewsletterForm({ locale }: { locale: string }) {
     if (!consent) return setError(t("err_consent"));
 
     setBusy(true);
-    // TODO: POST to a newsletter endpoint. Nothing is stored today.
-    await new Promise((r) => setTimeout(r, 600));
+    const result = await subscribeToNewsletter({
+      email: email.trim(),
+      locale,
+      source: "newsletter_page",
+    });
     setBusy(false);
+
+    if (!result.ok) {
+      // The only two outcomes worth distinguishing: an address we cannot use,
+      // and everything else. Neither says whether the address was already on
+      // the list — that answer belongs to nobody but the mailbox's owner.
+      return setError(result.error === "invalid_email" ? t("err_email") : t("err_failed"));
+    }
     setDone(true);
   }
 

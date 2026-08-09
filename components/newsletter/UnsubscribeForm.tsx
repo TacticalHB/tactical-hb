@@ -2,16 +2,23 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { unsubscribeFromNewsletter } from "@/app/actions/newsletter";
 
 /* ---------------------------------------------------------------------------
-   Unsubscribe.
+   Unsubscribe, the public form — no token, so no way to prove who is asking.
 
-   NOT WIRED UP YET — like the sign-up form, this confirms and discards. It
-   deliberately gives the same answer whether or not the address is on a list,
-   so the form can never be used to test which emails are subscribed.
+   IT GIVES THE SAME ANSWER EITHER WAY, whether or not the address was ever on
+   a list. Anything else would make this a membership oracle: paste an address,
+   read the response, learn whether that person shops here. The cost is that
+   anyone can unsubscribe anyone, which is annoying rather than harmful and is
+   the standard trade for a public unsubscribe form.
+
+   The links in our mail do NOT come here. They carry a per-subscriber token
+   and land on /newsletter/preferences, where the address is known and can
+   therefore be shown.
 --------------------------------------------------------------------------- */
 
-export default function UnsubscribeForm({ locale }: { locale: string }) {
+export default function UnsubscribeForm() {
   const t = useTranslations("newsletter");
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -23,9 +30,9 @@ export default function UnsubscribeForm({ locale }: { locale: string }) {
     setError(null);
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("err_email"));
     setBusy(true);
-    // TODO: POST to a newsletter endpoint. Nothing is removed today.
-    await new Promise((r) => setTimeout(r, 500));
+    await unsubscribeFromNewsletter(email.trim());
     setBusy(false);
+    // Always the success state — see above.
     setDone(true);
   }
 

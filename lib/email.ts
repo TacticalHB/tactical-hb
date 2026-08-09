@@ -43,6 +43,15 @@ export async function sendMail(opts: {
    * fails once deployed. The URL is the same asset the site already serves.
    */
   attachments?: { filename: string; path: string }[];
+  /**
+   * Extra RFC-5322 headers.
+   *
+   * Added for List-Unsubscribe and List-Unsubscribe-Post, which Gmail and
+   * Yahoo have required of bulk senders since February 2024: without them a
+   * marketing send is throttled or binned regardless of how clean the list is.
+   * The transactional callers pass nothing and are unchanged.
+   */
+  headers?: Record<string, string>;
 }): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -60,6 +69,7 @@ export async function sendMail(opts: {
       text: opts.text,
       html: opts.html,
       ...(opts.attachments?.length ? { attachments: opts.attachments } : {}),
+      ...(opts.headers && Object.keys(opts.headers).length ? { headers: opts.headers } : {}),
     });
     if (error) {
       // Most common cause: FROM is on a domain not verified in Resend.

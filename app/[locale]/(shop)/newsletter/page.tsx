@@ -25,7 +25,7 @@ export default async function NewsletterPage({
             <NewsletterForm locale={locale} />
 
             <div className="mt-20">
-              <UnsubscribeForm locale={locale} />
+              <UnsubscribeForm />
             </div>
           </div>
 

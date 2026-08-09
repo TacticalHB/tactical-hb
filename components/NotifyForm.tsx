@@ -1,32 +1,41 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
 /**
  * Launch notification form — light treatment: an underlined field and a dark
  * pill, so it sits in the hero without shouting.
  *
- * ⚠️ TODO — THIS FORM DOES NOT STORE ANYTHING.
- * handleSubmit fakes a 700ms delay and shows the success copy ("You'll be the
- * first to know"), then discards the address. The site is publicly reachable,
- * so real visitors can and will submit real emails into nothing, and there is
- * no launch list being built for September 2026.
+ * IT WRITES TO THE SAME LIST AS THE NEWSLETTER, tagged source 'notify'. There
+ * is no separate launch table: one address, one language and one consent
+ * record is all any of the flows read, and a second list would only be a
+ * second place to forget to honour an unsubscribe.
  *
- * To make it real: create a `launch_signups` table (email, locale, created_at)
- * with RLS + explicit grants — remember raw-SQL tables inherit no grants, see
- * supabase/migrations/0002 and 0007 — and POST to a server action from here.
+ * THE FORM'S OWN PROMISE IS THE CONSENT. There is no tickbox here, and there
+ * does not need to be one: the field is labelled "be the first to know" and
+ * submitting it is an unambiguous request to be emailed. That request starts
+ * the welcome series, which is field notes and first looks — the thing the
+ * person just asked for — and every one of those carries a real unsubscribe.
+ * If that reading is ever challenged, the fix is a consent line in this form,
+ * not a silent list.
  */
 export default function NotifyForm() {
   const t = useTranslations("flagship");
+  const locale = useLocale();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get("email") ?? "");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700)); // TODO: replace with a real write
+    await subscribeToNewsletter({ email, locale, source: "notify" });
     setLoading(false);
+    // Success either way. The field is type="email" and required, so the
+    // browser has already refused the obvious mistakes, and there is nothing
+    // useful a visitor could do with "that address is already on the list".
     setSubmitted(true);
   }
 

@@ -7,16 +7,27 @@ import { runDueJobs } from "@/lib/email/flows";
    The queue's only mover. Everything else in the system writes rows with a
    future `send_after`; this route is what turns them into mail.
 
-   HOW OFTEN IT NEEDS TO RUN, AND WHAT THAT DEPENDS ON. C1 is specified at one
-   hour after the bag was last touched, so the sweep has to be at least hourly
-   for that number to mean anything — vercel.json asks for every fifteen
-   minutes. Vercel's Hobby plan interprets a cron expression but only invokes
-   it once a day, so on Hobby the first cart mail arrives on the next daily
-   run, not at +1h. Nothing breaks and nothing is lost — jobs are durable and
-   send late rather than never — but the timing in the brief is a Pro-plan
-   timing. Any external pinger (GitHub Actions, cron-job.org, Supabase pg_cron)
-   hitting this path with the bearer token gives the same result without the
-   upgrade. See docs/email-flows.md.
+   HOW OFTEN IT NEEDS TO RUN, AND WHY IT DOES NOT. C1 is specified at one hour
+   after the bag was last touched, so the sweep has to be at least hourly for
+   that number to mean anything. It is not: vercel.json asks for 07:00 daily.
+
+   THAT IS NOT A PREFERENCE, IT IS THE PLAN. Hobby allows 100 cron jobs but a
+   minimum interval of once per day, and an expression that would run more
+   often does not get quietly downgraded — it FAILS THE DEPLOYMENT with
+   "Hobby accounts are limited to daily cron jobs". An every-fifteen-minutes
+   expression here took the whole site's deploy down once; do not put a
+   sub-daily one back without checking the plan first. (Hobby precision is
+   also ±59 minutes, so even the hour is a suggestion.)
+
+   SO ON HOBBY A CART MAIL ARRIVES ON THE NEXT MORNING'S RUN, not at +1h.
+   Nothing is lost — the jobs are durable, and the +1h/+24h/+72h offsets still
+   decide the ORDER and the eligibility, only the delivery moment slips. Two
+   ways to get the real timing: Pro (once-per-minute) or any external pinger
+   with the bearer token, which costs nothing. See docs/email-flows.md.
+
+   THE BATCH IS THE OTHER SIDE OF THAT COIN: 25 sends per run is 25 mails a
+   day on Hobby. Ample now, and the number to raise first if the list grows —
+   the ceiling is maxDuration, not the queue.
 
    SAFE TO CALL AS OFTEN AS YOU LIKE, AND SAFE TO OVERLAP. Claiming happens
    inside the database with FOR UPDATE SKIP LOCKED, so a second invocation

@@ -261,13 +261,28 @@ queries and a duplicate-insert test are in the file's footer.
 
 ### Cron cadence — read this before trusting the +1h
 
-`vercel.json` asks for `*/15 * * * *`. **Vercel's Hobby plan interprets a cron
-expression but only invokes it once a day**, so on Hobby the first cart mail
-arrives on the next daily run rather than at +1h.
+`vercel.json` asks for `0 7 * * *` — **once a day, ~10:00 Kyiv.** Not a
+preference: it is the most this plan allows.
 
-Nothing breaks and nothing is lost — jobs are durable and send late rather than
-never — but **the timing in the brief is a Pro-plan timing**. Either upgrade, or
-point any external scheduler at the route:
+| Plan | Cron jobs / project | Minimum interval | Precision |
+|------|--------------------|------------------|-----------|
+| Hobby | 100 | **once per day** | per-hour (±59 min) |
+| Pro | 100 | once per minute | per-minute |
+
+**A sub-daily expression does not get downgraded — it fails the deployment.**
+`*/15 * * * *` returns *"Hobby accounts are limited to daily cron jobs"* and the
+build never ships. This happened once; the site sat on the previous commit
+until the schedule was corrected. Do not put a faster expression back without
+checking the plan first.
+
+So **on Hobby a cart mail arrives on the next morning's run, not at +1h.**
+Nothing is lost — the jobs are durable, and the +1h/+24h/+72h offsets still
+decide the order and the eligibility, only the delivery moment slips. The batch
+is the matching limit: 25 sends per run is 25 mails a day, ample now, and the
+first number to raise if the list grows.
+
+Two ways to get the timing the brief specifies — upgrade to Pro, or point any
+external scheduler at the route, which costs nothing:
 
 ```
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" \

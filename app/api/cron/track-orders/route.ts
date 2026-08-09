@@ -9,10 +9,17 @@ import { runMarginGuard } from "@/lib/margin-admin";
    notifications, the low-stock warning, and (Mondays) the margin check and
    the weekly brief.
 
-   FOUR JOBS, ONE SCHEDULE, and the path still says track-orders. The Hobby
-   plan allows a single cron run a day and this route owns it; a second entry
-   in vercel.json would never fire, which is worse than not adding one, because
-   it would look configured. Tracking runs first — a parcel the customer is
+   FOUR JOBS, ONE SCHEDULE, and the path still says track-orders. This route
+   owns the daily operations run; /api/cron/email-queue is the other entry in
+   vercel.json.
+
+   (An earlier version of this note said Hobby allows only one cron run a day
+   and that a second entry would never fire. Half right, and the wrong half
+   matters: Hobby allows 100 cron JOBS, each limited to once per day. What it
+   refuses is a sub-daily EXPRESSION, and it refuses it by failing the whole
+   deployment rather than by silently downgrading it.)
+
+   Tracking runs first — a parcel the customer is
    waiting on outranks a shelf the customer cannot see — the stock scan
    follows, and on Kyiv Mondays the Cost & Margin Guard and then the Commander
    Brief run on the same authorised request (the 21:00 Kyiv hour makes it a

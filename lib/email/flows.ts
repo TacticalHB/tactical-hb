@@ -329,6 +329,35 @@ export async function subscriberByToken(token: string): Promise<SubscriberRow | 
   }
 }
 
+/**
+ * Is this address already on the list?
+ *
+ * For the sign-up page, which should not present a subscribe form to someone
+ * who subscribed last week — it should tell them so and point at their
+ * preferences. Returns null when they are unknown OR have unsubscribed, both
+ * of which mean "show them the form".
+ */
+export async function subscriberByEmail(
+  email: string
+): Promise<{ email: string; locale: Locale; token: string } | null> {
+  const addr = normaliseEmail(email);
+  if (!isEmail(addr)) return null;
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("subscribers")
+      .select("email, locale, token, marketing_opt_in, unsubscribed_at")
+      .eq("email", addr)
+      .maybeSingle();
+    const row = data as SubscriberRow | null;
+    if (!row || !row.marketing_opt_in || row.unsubscribed_at) return null;
+    return { email: row.email, locale: row.locale === "uk" ? "uk" : "en", token: row.token };
+  } catch {
+    // A lookup failure must not hide the form — worst case they see it twice.
+    return null;
+  }
+}
+
 /** Change the language every future mail is written in. */
 export async function setSubscriberLocale(token: string, locale: Locale): Promise<boolean> {
   if (!/^[0-9a-f-]{36}$/i.test(token)) return false;

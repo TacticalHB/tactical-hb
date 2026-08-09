@@ -59,10 +59,26 @@ function Chevron() {
   );
 }
 
-export default function NewsletterForm({ locale }: { locale: string }) {
+export default function NewsletterForm({
+  locale,
+  accountEmail,
+}: {
+  locale: string;
+  /**
+   * The signed-in customer's address, when there is one.
+   *
+   * IT COLLAPSES THE FORM TO ONE DECISION. Someone who is already signed in
+   * has given us their name and their address once; asking for both again —
+   * and for the address twice, with paste disabled — to tick a consent box is
+   * a form that punishes the customer for being a customer. With this set the
+   * page shows who they are and the single thing it actually needs.
+   */
+  accountEmail?: string | null;
+}) {
   const t = useTranslations("newsletter");
   const countries = useCountries(locale);
   const uk = locale === "uk";
+  const signedIn = !!accountEmail;
 
   const [title, setTitle] = useState("");
   const [first, setFirst] = useState("");
@@ -82,20 +98,24 @@ export default function NewsletterForm({ locale }: { locale: string }) {
     e.preventDefault();
     setError(null);
 
-    if (!title || !first.trim() || !last.trim() || !country || !email.trim() || !confirm.trim()) {
-      return setError(t("err_required"));
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError(t("err_email"));
-    // Compare case-insensitively — "Sarah@x.com" and "sarah@x.com" are the same
-    // mailbox, and failing that comparison would just look broken.
-    if (email.trim().toLowerCase() !== confirm.trim().toLowerCase()) {
-      return setError(t("err_match"));
+    // A signed-in customer has one thing to get wrong, and it is the consent.
+    // Their address comes from the session, so it is not theirs to mistype.
+    if (!signedIn) {
+      if (!title || !first.trim() || !last.trim() || !country || !email.trim() || !confirm.trim()) {
+        return setError(t("err_required"));
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) return setError(t("err_email"));
+      // Compare case-insensitively — "Sarah@x.com" and "sarah@x.com" are the same
+      // mailbox, and failing that comparison would just look broken.
+      if (email.trim().toLowerCase() !== confirm.trim().toLowerCase()) {
+        return setError(t("err_match"));
+      }
     }
     if (!consent) return setError(t("err_consent"));
 
     setBusy(true);
     const result = await subscribeToNewsletter({
-      email: email.trim(),
+      email: (accountEmail || email).trim(),
       locale,
       source: "newsletter_page",
     });
@@ -142,7 +162,11 @@ export default function NewsletterForm({ locale }: { locale: string }) {
         <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>{t("intro")}</p>
       </div>
 
-      <p className="text-[12px] text-right mb-5" style={{ color: "var(--text-muted)" }}>{t("mandatory")}</p>
+      {/* "Required fields*" is a legend for a form with six of them. With the
+          consent tick alone it is just noise above a single checkbox. */}
+      {!signedIn && (
+        <p className="text-[12px] text-right mb-5" style={{ color: "var(--text-muted)" }}>{t("mandatory")}</p>
+      )}
 
       {error && (
         <div role="alert" className="mb-6 text-sm px-4 py-3" style={{ background: "#fdecec", color: "#b42318" }}>
@@ -150,7 +174,26 @@ export default function NewsletterForm({ locale }: { locale: string }) {
         </div>
       )}
 
+      {/* SIGNED IN: the address is known, so the page asks for the one thing it
+          does not have. The long form below is for visitors we have never met. */}
+      {signedIn && (
+        <div className="mb-2">
+          <div className="p-5" style={{ background: "var(--bg-soft)" }}>
+            <div className="text-[11px] tracking-[0.2em] uppercase mb-1.5" style={{ color: "var(--text-faint)" }}>
+              {t("signed_in_as")}
+            </div>
+            <div className="text-[15px]" style={{ color: "var(--text)" }}>{accountEmail}</div>
+          </div>
+        </div>
+      )}
+
+      {/* NOT RENDERED FOR A SIGNED-IN CUSTOMER, rather than hidden with a
+          class. Every field here is `required`, and Chrome refuses to submit a
+          form containing a required control it cannot focus — a display:none
+          field would block the button with an error only the console sees. */}
       <div className="flex flex-col gap-5">
+        {!signedIn && (
+        <>
         <div>
           <label htmlFor="nl-title" className={label} style={labelSt}>{t("form_title")}*</label>
           <div className="relative">
@@ -214,6 +257,8 @@ export default function NewsletterForm({ locale }: { locale: string }) {
             onPaste={(e) => e.preventDefault()}
             onChange={(e) => setConfirm(e.target.value)} required />
         </div>
+        </>
+        )}
 
         <label className="flex items-start gap-3 cursor-pointer mt-1">
           <input

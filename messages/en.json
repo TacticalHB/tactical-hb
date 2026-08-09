@@ -204,7 +204,10 @@
     "prefs_invalid_title": "This link is no longer valid.",
     "prefs_invalid_body": "It may have expired, or it may have been copied incompletely. You can unsubscribe with your email address on the newsletter page instead.",
     "prefs_invalid_cta": "Go to the newsletter page",
-    "prefs_back": "Back to the newsletter page"
+    "prefs_back": "Back to the newsletter page",
+    "signed_in_as": "Signed in as",
+    "already_subscribed": "You're already on the list. You can change the language of your emails, or unsubscribe, at any time.",
+    "manage_prefs": "Email preferences"
   },
   "delivery": {
     "title": "Payment & Delivery",

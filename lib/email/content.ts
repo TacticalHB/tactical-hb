@@ -13,7 +13,7 @@ import "server-only";
    the file by any means. Mario's instruction was to write it rather than wait
    for a re-export, so this is written to match the storefront's own voice —
    the same vocabulary the shop already uses for чаша, пристрій нагріву,
-   вітрозахист, "Зібрати сет" — not a machine translation of the English.
+   ковпак, "Зібрати сет" — not a machine translation of the English.
 
    If the pack is ever re-exported with a working font, replace the `uk` halves
    here and nothing else: no logic reads the words.
@@ -77,7 +77,7 @@ export const WELCOME: Record<WelcomeStep, Record<Locale, EmailCopy>> = {
       bullets: [
         "Короткі нотатки про жар, сетап і спорядження",
         "Першими про нові вироби",
-        "Практична логіка комплекту (чаша → пристрій нагріву → вітрозахист)",
+        "Практична логіка комплекту (чаша → пристрій нагріву → ковпак)",
       ],
       primaryLabel: "Переглянути колекцію",
       secondaryLabel: "Зібрати сет",
@@ -99,14 +99,14 @@ export const WELCOME: Record<WelcomeStep, Record<Locale, EmailCopy>> = {
       secondaryLabel: "Shop HMDs",
     },
     uk: {
-      subject: "Чаша. Жар. Вітрозахист.",
+      subject: "Чаша. Жар. Ковпак.",
       preheader: "Порядок, який справді має значення.",
-      headline: "Чаша. Жар. Вітрозахист.",
+      headline: "Чаша. Жар. Ковпак.",
       paragraphs: ["Повноцінна сесія — це система:"],
       bullets: [
         "Чаша — тримає тютюн і задає смаковий профіль",
         "Пристрій нагріву — керує жаром, і вугілля більше не потребує няньки",
-        "Вітрозахист — тримає сесію, коли повітря працює проти вас",
+        "Ковпак — тримає сесію, коли повітря працює проти вас",
       ],
       primaryLabel: "Зібрати сет",
       secondaryLabel: "Пристрої нагріву",
@@ -133,7 +133,7 @@ export const WELCOME: Record<WelcomeStep, Record<Locale, EmailCopy>> = {
       paragraphs: [
         "Якщо після чаші додавати лише одну річ — нехай це буде пристрій нагріву.",
         "Він вирівнює температуру, береже забивку і прибирає постійні танці з вугіллям. Наші оброблені й доведені під регулярне використання: Classic, A.Craft і OP мають різний характер, але один стандарт.",
-        "Поєднайте з чашею, якій уже довіряєте. Додайте вітрозахист, коли сесію треба тримати.",
+        "Поєднайте з чашею, якій уже довіряєте. Додайте ковпак, коли сесію треба тримати.",
       ],
       primaryLabel: "HMD TCT Classic",
       secondaryLabel: "Усі пристрої нагріву",
@@ -216,11 +216,11 @@ export const CART: Record<CartStep, Record<Locale, EmailCopy>> = {
     },
     uk: {
       subject: "Ще обмірковуєте?",
-      preheader: "Жар, забивка і вітрозахист — система за окремими деталями.",
+      preheader: "Жар, забивка і ковпак — система за окремими деталями.",
       headline: "Ще обмірковуєте?",
       paragraphs: [
         "Окремий аксесуар — корисний. Підібраний сет — кращий.",
-        "Якщо в кошику чаша, наступний крок — керування жаром. Якщо пристрій нагріву — вітрозахист тримає сесію тоді, коли це потрібно.",
+        "Якщо в кошику чаша, наступний крок — керування жаром. Якщо пристрій нагріву — ковпак тримає сесію тоді, коли це потрібно.",
         "Один стандарт роботи в кожній позиції: натуральна глина, оброблений метал, тактичне оздоблення.",
       ],
       primaryLabel: "Завершити замовлення",

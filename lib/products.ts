@@ -135,7 +135,7 @@ export const products: Product[] = [
         "М'якість куріння з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
-        "Час нагріву — близько 6 хвилин під вітрозахистом",
+        "Час нагріву — близько 6 хвилин під ковпаком",
       ],
       tipsEn: [
         "Never cool the device with water",
@@ -150,7 +150,7 @@ export const products: Product[] = [
       specs: [
         { labelEn: "Material", labelUk: "Матеріал", valueEn: "Non-toxic aluminium", valueUk: "Нетоксичний алюміній" },
         { labelEn: "Surface", labelUk: "Поверхня", valueEn: "A.Craft surface treatment", valueUk: "Обробка поверхні A.Craft" },
-        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під вітрозахистом" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком" },
         { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
       ],
       features: [
@@ -280,7 +280,7 @@ export const products: Product[] = [
       benefitsUk: [
         "М'якість куріння з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (70+ хвилин за правильного використання)",
-        "Час нагріву — близько 6 хвилин під вітрозахистом",
+        "Час нагріву — близько 6 хвилин під ковпаком",
       ],
       tipsEn: [
         "Never cool the device with water",
@@ -341,7 +341,7 @@ export const products: Product[] = [
         "Невеликий внутрішній бортик, що затримує патоку",
         "Оптимальна товщина стінок запобігає перегріву",
         "Створена для індивідуального використання",
-        "Час нагріву — близько 5 хвилин під вітрозахистом (2–3 кубики)",
+        "Час нагріву — близько 5 хвилин під ковпаком (2–3 кубики)",
       ],
       tipsEn: [
         "Never cool the device with water",
@@ -436,14 +436,14 @@ export const products: Product[] = [
     slug: "windcover-detonator",
     nameUk: "Windcover Detonator",
     nameEn: "Windcover Detonator",
-    taglineUk: "Металевий вітрозахист у тактичному стилі.",
+    taglineUk: "Металевий ковпак у тактичному стилі.",
     taglineEn: "Metal wind cover in tactical style.",
     /* THE CATALOGUE PRICE IS THE COVER WITHOUT THE TIMER. The timer is an
        add-on selected on the product page (see lib/windcover-options), which is
        why the description no longer promises one — a card quoting ₴850 while
        describing a built-in timer would be selling the ₴1700 configuration at
        the bare price. */
-    descriptionUk: "Суцільнометалевий вітрозахист із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
+    descriptionUk: "Суцільнометалевий ковпак із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
     descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
     price: 23,
     priceUah: 850,
@@ -472,7 +472,7 @@ export const products: Product[] = [
       shortEn:
         "A precision-engineered metal wind cover designed in a bold tactical style. Made from solid metal with a durable powder-coated finish and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
-        "Металевий вітрозахист точного виготовлення у виразному тактичному стилі. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
+        "Металевий ковпак точного виготовлення у виразному тактичному стилі. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
       benefitsEn: [
         "Solid metal construction with powder coating for heat and scratch resistance, finished with permanent laser engraving",
         "Effective wind protection that maintains proper airflow for consistent heat and longer sessions",
@@ -487,7 +487,7 @@ export const products: Product[] = [
         "Опційний таймер зі зворотним відліком, LED-дисплеєм і звуком у стилі бомби, заряджається через USB Type-C — виставте час, коли кладете вугілля, і контролюйте розпал",
         "Магнітне кріплення — таймер приєднується швидко та надійно",
         "Зручно для завантажених кальянних: таймер і звук допомагають персоналу та гостям одразу зрозуміти, який кальян готовий",
-        "Дві версії: стандартний вітрозахист або вітрозахист із таймером на магнітному кріпленні",
+        "Дві версії: стандартний ковпак або ковпак із таймером на магнітному кріпленні",
       ],
       specs: [
         { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання" },
@@ -508,9 +508,9 @@ export const products: Product[] = [
     slug: "windcover-kh",
     nameUk: "Windcover KH",
     nameEn: "Windcover KH",
-    taglineUk: "Металевий вітрозахист із камуфляжем.",
+    taglineUk: "Металевий ковпак із камуфляжем.",
     taglineEn: "Metal wind cover with camo finish.",
-    descriptionUk: "Суцільнометалевий вітрозахист із камуфляжним принтом і UV-друком. Таймер — опційно, кріпиться магнітом.",
+    descriptionUk: "Суцільнометалевий ковпак із камуфляжним принтом і UV-друком. Таймер — опційно, кріпиться магнітом.",
     descriptionEn: "Solid metal wind cover with a camouflage finish and UV print. Timer optional, attaches magnetically.",
     price: 23,
     priceUah: 850,
@@ -531,7 +531,7 @@ export const products: Product[] = [
       shortEn:
         "A precision-engineered metal wind cover in a camouflage finish. Made from solid metal with a durable powder-coated body and a crisp UV print, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
-        "Металевий вітрозахист точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чіткий UV-друк — надійний захист від вітру, який водночас робить сетап помітним.",
+        "Металевий ковпак точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чіткий UV-друк — надійний захист від вітру, який водночас робить сетап помітним.",
       benefitsEn: [
         "Solid metal construction with powder coating for heat and scratch resistance, finished with a permanent UV print",
         "Camouflage face panel with the TCT roundel on the reverse",
@@ -546,7 +546,7 @@ export const products: Product[] = [
         "Ефективний захист від вітру зі збереженням правильного потоку повітря: рівний жар і довші сесії",
         "Опційний таймер зі зворотним відліком, LED-дисплеєм і звуком у стилі бомби, заряджається через USB Type-C — виставте час, коли кладете вугілля, і контролюйте розпал",
         "Магнітне кріплення — таймер приєднується швидко та надійно",
-        "Дві версії: стандартний вітрозахист або вітрозахист із таймером на магнітному кріпленні",
+        "Дві версії: стандартний ковпак або ковпак із таймером на магнітному кріпленні",
       ],
       specs: [
         { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + UV print", valueUk: "Метал + порошкове покриття + UV-друк" },

@@ -44,7 +44,7 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
   const label: Record<string, string> = {
     bowl: uk ? "Чаша" : "Bowl",
     hmd: uk ? "Пристрій нагріву" : "Heat device",
-    windcover: uk ? "Вітрозахист" : "Wind cover",
+    windcover: uk ? "Ковпак" : "Wind cover",
   };
 
   return (

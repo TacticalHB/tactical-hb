@@ -74,7 +74,7 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
 const CATEGORY_NAME: Record<Product["category"], { en: string; uk: string }> = {
   bowl: { en: "bowls", uk: "чаші" },
   hmd: { en: "heat devices", uk: "пристрої нагріву" },
-  windcover: { en: "wind covers", uk: "вітрозахист" },
+  windcover: { en: "wind covers", uk: "ковпаки" },
   accessory: { en: "accessories", uk: "аксесуари" },
 };
 

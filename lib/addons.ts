@@ -62,11 +62,11 @@ export const ADDONS: Addon[] = [
     nameEn: "Timer",
     nameUk: "Таймер",
     taglineEn: "Rechargeable wind cover timer.",
-    taglineUk: "Перезаряджуваний таймер для вітрозахисту.",
+    taglineUk: "Перезаряджуваний таймер для ковпака.",
     price: TIMER_PRICE,
     parentSlug: "windcover-detonator",
     parentEn: "Choose it on a wind cover",
-    parentUk: "Обирається на сторінці вітрозахисту",
+    parentUk: "Обирається на сторінці ковпака",
   },
 ];
 

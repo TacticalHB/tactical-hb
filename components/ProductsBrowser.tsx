@@ -67,7 +67,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       all: uk ? "Усі продукти" : "All Products",
       hmd: uk ? "Пристрої для нагріву" : "Heat Devices",
       bowl: uk ? "Чаші" : "Bowls",
-      windcover: uk ? "Вітрозахист" : "Windcovers",
+      windcover: uk ? "Ковпаки" : "Windcovers",
       accessory: uk ? "Аксесуари" : "Accessories",
     } as Record<CatKey, string>,
     incoming: uk ? "Скоро" : "Incoming",

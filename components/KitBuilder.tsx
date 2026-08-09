@@ -79,12 +79,12 @@ export default function KitBuilder({ locale }: { locale: string }) {
   const L = {
     title: uk ? "Зібрати сет" : "Build a setup",
     intro: uk
-      ? "Оберіть чашу, пристрій нагріву та вітрозахист. Додайте все одним рухом."
+      ? "Оберіть чашу, пристрій нагріву та ковпак. Додайте все одним рухом."
       : "Pick a bowl, a heat device and a wind cover. Add the lot in one move.",
     steps: {
       bowl: uk ? "Чаша" : "Bowl",
       hmd: uk ? "Пристрій нагріву" : "Heat device",
-      windcover: uk ? "Вітрозахист" : "Wind cover",
+      windcover: uk ? "Ковпак" : "Wind cover",
     } as Record<SlotKey, string>,
     none: uk ? "Не обрано" : "Not selected",
     skip: uk ? "Пропустити" : "Skip",

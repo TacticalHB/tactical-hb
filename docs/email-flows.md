@@ -58,7 +58,7 @@ any means (pypdf, pdfminer and a PDFKit render all agree). Mario's instruction
 was to write it rather than wait for a re-export.
 
 It is written to the storefront's own vocabulary — чаша, пристрій нагріву,
-вітрозахист, «Зібрати сет» — not machine-translated. **If the pack is ever
+ковпак, «Зібрати сет» — not machine-translated. **If the pack is ever
 re-exported with a working font, replace the `uk` halves of `WELCOME` and `CART`
 and nothing else.** No logic reads the words.
 

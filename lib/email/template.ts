@@ -80,12 +80,42 @@ function ctaButton(cta: EmailCta): string {
       </td></tr>`;
 }
 
+/* ---------------------------------------------------------------------------
+   THE THUMBNAIL FRAME IS SQUARE, AND SO IS EVERY SOURCE THAT REACHES IT.
+
+   An email client that honours an <img> width honours its height with it, and
+   there is no object-fit to fall back on, so a non-square source in a square
+   frame is not cropped — it is crushed. That is not fixable in markup, only in
+   the asset, which is why lib/email/product-image.ts guarantees a 1:1 source
+   (152px prebuilt, the catalogue square as a fallback) and never the tall tile
+   cut-outs the flagship grid uses.
+
+   Given that guarantee, width AND height are stated. Both attributes are what
+   Outlook needs to reserve the box before the image loads, and stating only
+   one leaves a row that reflows as pictures arrive.
+
+   The cell is fixed at the same size, on the grey the photography is shot on,
+   so an image that is slow, blocked or transparent-edged still leaves a frame
+   where the product will be rather than a collapsed row.
+--------------------------------------------------------------------------- */
+const THUMB = 76;
+const THUMB_BG = "#F5F5F5";
+
 function productRowsHtml(rows: EmailProductRow[]): string {
   if (rows.length === 0) return "";
   const cards = rows
     .map((r) => {
+      /* The frame is a nested one-cell table, not padding on the image cell:
+         padding and a background colour on the same td would tint the gap as
+         well as the frame, and Outlook would give the whole thing square
+         corners of the wrong size. This way the outer cell spaces the row and
+         the inner one is exactly the thumbnail. */
       const img = r.imageUrl
-        ? `<td width="100" style="padding:14px 0 14px 14px;"><img src="${esc(r.imageUrl)}" width="76" height="76" alt="${esc(r.name)}" style="display:block;border-radius:10px;"></td>`
+        ? `<td width="${THUMB + 14}" valign="middle" style="padding:14px 0 14px 14px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="${THUMB}" style="width:${THUMB}px;border-collapse:separate;border-spacing:0;"><tr>
+    <td width="${THUMB}" height="${THUMB}" align="center" valign="middle" style="width:${THUMB}px;height:${THUMB}px;background-color:${THUMB_BG};border-radius:10px;font-size:0;line-height:0;"><img src="${esc(r.imageUrl)}" width="${THUMB}" height="${THUMB}" alt="${esc(r.name)}" style="display:block;width:${THUMB}px;height:${THUMB}px;border-radius:10px;"></td>
+  </tr></table>
+</td>`
         : "";
       const variant = r.variant
         ? `<div style="padding-top:5px;font-size:12px;color:${FAINT};">${esc(r.variant)}</div>`
@@ -102,7 +132,7 @@ ${img}
 
   return `
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#FFFFFF;">
-        <tr><td style="padding:14px 36px 4px;">${cards}</td></tr>
+        <tr><td class="rowpad" style="padding:14px 36px 4px;">${cards}</td></tr>
       </table>`;
 }
 
@@ -153,6 +183,10 @@ a{color:#3A3D40}
   .wrap{width:100%!important}
   .px{padding-left:16px!important;padding-right:16px!important}
   .cardpad{padding-left:28px!important;padding-right:28px!important}
+  /* The product rows carry a fixed 76px thumbnail, so the text has whatever is
+     left. At 36px a side on a 375px screen that is 165px, which orphans the
+     quantity onto its own line; at 16px it is 205px and the line holds. */
+  .rowpad{padding-left:16px!important;padding-right:16px!important}
   .h1{font-size:28px!important;line-height:34px!important}
   .btn{width:100%!important}
   .btna{padding-left:0!important;padding-right:0!important;text-align:center!important}

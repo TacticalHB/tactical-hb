@@ -43,7 +43,10 @@ default is no offer either, per the content pack.
 | `app/[locale]/(shop)/newsletter/preferences/page.tsx` | Language + unsubscribe, reached by token from any mail. |
 | `app/actions/newsletter.ts` | The public server actions the forms call. |
 | `app/api/dev/email-preview/route.ts` | Look at any mail without sending it. **404 in production.** |
+| `lib/email/product-image.ts` | Picks the square thumbnail for a cart line. |
+| `scripts/email-thumbs.mjs` | Builds those thumbnails — `npm run email:thumbs`. |
 | `public/email/tct-mark.png` | 144×144 transparent PNG, `#1B1B16`, served at `https://tactical-hb.com/email/tct-mark.png`. |
+| `public/email/products/*.jpg` | 152×152 product thumbnails, ~3 KB each. |
 
 ### The Ukrainian is written, not transcribed
 
@@ -197,8 +200,39 @@ W3 resolves HMD TCT Classic from the catalogue at send time. If that slug ever
 leaves the catalogue the product row is dropped and the button falls back to
 `/products`, rather than the mail carrying a broken image and a 404.
 
-Images are absolute (`https://tactical-hb.com/images/…`) and unoptimised — an
-email client cannot reach a Next.js image route.
+### Thumbnails must be square, and that is enforced in the asset
+
+An email client that honours an `<img>` width attribute honours the height with
+it, and there is no `object-fit` to fall back on. A non-square source in a
+square frame is not cropped — **it is crushed**, and no markup can prevent it.
+
+So `lib/email/product-image.ts` guarantees a 1:1 source. Two rules:
+
+- **Never `tileImage`.** `describeLine` prefers the tile art because on the site
+  it *is* the styled thumbnail, but tiles are tall bleed cut-outs for the
+  flagship grid — 588×795, 576×815, and the wind cover at 524×968. Correct
+  there, ruinous in a 76px square. This was the bug.
+- **Prefer the prebuilt thumbnail.** `public/email/products/*.jpg` are 152×152
+  (twice the 76px slot, so retina stays sharp) flattened onto `#F5F5F5`, the
+  exact grey the product photography is shot on — every corner pixel measures
+  (245,245,245), so letterbox bands and transparent edges are invisible rather
+  than framed. The fallback is the full-size catalogue square: heavy, but
+  square, so the worst case is a slow row and never a warped one.
+
+Weight matters here too. The catalogue heroes are 96–562 KB each; four in one
+message is over a megabyte to show four 76px thumbs. The thumbnails are ~3 KB,
+which takes a three-line recovery mail from ~1.1 MB of images to 13 KB.
+
+```bash
+npm run email:thumbs
+```
+
+**Re-run that whenever a product photo changes** — the output is committed, and
+a stale thumbnail is a mail showing last season's finish. If a new photo is
+added without rebuilding, the fallback keeps the mail correct, only heavier.
+
+Images are absolute (`https://tactical-hb.com/email/products/…`) and
+unoptimised — an email client cannot reach a Next.js image route.
 
 **The dashed "STUDIO PRODUCT STILL" panel from the master is not in the
 renderer.** In the master it is a note to whoever wires the mail up; sending it
@@ -249,10 +283,20 @@ The route is safe to call as often as you like and safe to overlap.
 ```
 http://localhost:3000/api/dev/email-preview?step=W1&locale=uk
 http://localhost:3000/api/dev/email-preview?step=C1&locale=en&format=text
+http://localhost:3000/api/dev/email-preview?step=C1&locale=uk&local=1
 ```
 
 Steps `W1`–`W4` and `C1`–`C3`, locales `en` and `uk`. It renders through the
 sender's own row builder, so what you see is what would be sent.
+
+`local=1` rewrites the absolute `tactical-hb.com` URLs to the dev origin, which
+is the only way to see the pictures before a deploy has put them on the CDN.
+Off by default, because a real send uses the live addresses and a preview that
+quietly showed localhost links would be lying about them.
+
+The sample bag is chosen to stress the frame: a bowl (tall subject), the wind
+cover (whose tile art is the 524×968 that used to warp), and an HMD in a named
+finish (a variant photo rather than the catalogue one).
 
 **Test the real path end to end** by subscribing with your own address on the
 running site. That exercises consent, the token, the unsubscribe header and

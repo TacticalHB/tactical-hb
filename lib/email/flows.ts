@@ -16,7 +16,7 @@ import {
 } from "./content";
 import { priceCart, type PricedLineInput } from "@/lib/pricing";
 import { describeLine } from "@/lib/cart-display";
-import { products } from "@/lib/products";
+import { emailProductImage } from "./product-image";
 import { currencyForLocale, formatMoney } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
@@ -900,7 +900,11 @@ export function productRowsFor(lines: CartSnapshotLine[], locale: Locale): Email
       Boolean
     ) as string[];
 
-    const image = described?.image ?? products.find((p) => p.slug === l.slug)?.image;
+    // NOT described.image. That prefers the tile cut-out, which is tall bleed
+    // art for the flagship grid and warps in a square frame — see
+    // lib/email/product-image.ts. Everything else about the row still comes
+    // from describeLine, so the wording cannot drift from the site's.
+    const image = emailProductImage(l.slug, l.options.variant);
 
     return {
       // Absolute and unoptimised: an email client cannot reach a Next.js image

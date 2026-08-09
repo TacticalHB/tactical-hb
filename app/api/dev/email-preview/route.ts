@@ -29,15 +29,24 @@ import { productRowsFor } from "@/lib/email/flows";
 
      /api/dev/email-preview?step=W1&locale=uk
      /api/dev/email-preview?step=C1&locale=en&format=text
+     /api/dev/email-preview?step=C1&locale=uk&local=1   ← images resolve
+
+   `local=1` rewrites the absolute tactical-hb.com URLs to this origin, which
+   is the only way to SEE the pictures before a deploy has put them on the CDN.
+   Off by default, because the addresses in a real send are the live ones and a
+   preview that quietly showed localhost links would be lying about them.
 --------------------------------------------------------------------------- */
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** A stand-in bag: one bowl and one wind cover with its timer. */
+/* A stand-in bag chosen to stress the thumbnail frame: a bowl (tall subject),
+   a wind cover (the product whose tile art is 524×968 and used to warp), and
+   an HMD in a named finish (a variant photo rather than the catalogue one). */
 const SAMPLE_CART = [
   { slug: "bowl-livanka", qty: 1 },
   { slug: "windcover-detonator", qty: 2, options: { timer: true } },
+  { slug: "hmd-tct-op", qty: 1, options: { variant: "Purple", lid: true } },
 ];
 
 const FAKE_TOKEN = "00000000-0000-0000-0000-000000000000";
@@ -97,13 +106,16 @@ export async function GET(request: NextRequest) {
     preferencesUrl: `${site}/${locale}/newsletter/preferences?token=${FAKE_TOKEN}`,
   };
 
+  const localise = (out: string) =>
+    q.get("local") ? out.split(site).join(new URL(request.url).origin) : out;
+
   if (asText) {
-    return new NextResponse(`Subject: ${copy.subject}\n\n${renderEmailText(input)}`, {
+    return new NextResponse(localise(`Subject: ${copy.subject}\n\n${renderEmailText(input)}`), {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   }
 
-  return new NextResponse(renderEmail(input), {
+  return new NextResponse(localise(renderEmail(input)), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }

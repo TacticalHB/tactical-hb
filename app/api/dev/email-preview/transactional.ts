@@ -76,10 +76,42 @@ function samplePayment(locale: string): PaymentRow {
   };
 }
 
-export type TransactionalKind = "order" | "shipping" | "wholesale" | "followup";
+/* The awkward order: every branch of lineImage() at once, so the claims in its
+   comment can be looked at rather than trusted.
+
+     line 1  a pre-migration-0015 line — the purple photo was captured but the
+             variant name never was. It must STILL be purple; resolving from
+             the slug alone would put a black HMD in someone's receipt.
+     line 2  nothing captured, so the catalogue answers from slug + variant.
+     line 3  a discontinued product the catalogue no longer knows, whose photo
+             has no prebuilt thumbnail either. The stored path is used exactly
+             as it is — heavy, but it is the only record left of what was
+             bought, and a receipt with a missing picture is worse.
+*/
+function legacyPayment(locale: string): PaymentRow {
+  const p = samplePayment(locale);
+  return {
+    ...p,
+    reference: "THB-2401-0007",
+    lines: [
+      { ...p.lines[0], variant: null, image: "/images/hmd-op-purple.png" },
+      { ...p.lines[1], image: null },
+      {
+        slug: "bowl-discontinued", name: "Tactical Prototype (2024)", qty: 1,
+        unit_eur: 18, unit_uah: 700,
+        colour: null, material: "Clay", addons: null,
+        variant: null, lid: false, rubber: false, timer: false,
+        weight_g: 300, image: "/images/bowl-livanka-2.jpg",
+      },
+    ],
+  };
+}
+
+export type TransactionalKind = "order" | "order-legacy" | "shipping" | "wholesale" | "followup";
 
 export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "order",
+  "order-legacy",
   "shipping",
   "wholesale",
   "followup",
@@ -92,6 +124,9 @@ export function renderTransactional(
   switch (kind) {
     case "order":
       return buildOrderEmail(samplePayment(locale), SITE);
+
+    case "order-legacy":
+      return buildOrderEmail(legacyPayment(locale), SITE);
 
     case "shipping":
       return buildShippedEmail({

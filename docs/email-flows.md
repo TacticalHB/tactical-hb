@@ -276,6 +276,23 @@ Weight matters here too. The catalogue heroes are 96–562 KB each; four in one
 message is over a megabyte to show four 76px thumbs. The thumbnails are ~3 KB,
 which takes a three-line recovery mail from ~1.1 MB of images to 13 KB.
 
+**The order confirmation uses them too**, via `emailThumbFor()` — 991 KB of
+product photos down to 9 KB on a three-line order, 108× lighter. Its resolution
+order is deliberately different, because a receipt is a record:
+
+1. **The thumbnail of the photo captured at checkout.** That photo is what was
+   bought. An order placed before variants were recorded has a purple HMD in
+   `image` and nothing in `variant`, so re-resolving from the slug would put a
+   black one in someone's receipt.
+2. The catalogue square for the slug and variant.
+3. The stored path exactly as it is — a discontinued product still shows what
+   the customer bought.
+
+Only step 3 can yield a source that is not 1:1, and the markup is told: a known
+square gets `width` **and** `height`, the fallback gets `width` only and scales
+proportionally. That row comes out a little taller or shorter than its
+neighbours, which is a far better receipt than a misshapen product.
+
 ```bash
 npm run email:thumbs
 ```

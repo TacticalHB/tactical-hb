@@ -1,8 +1,13 @@
 import "server-only";
-import { products } from "@/lib/products";
 import { esc } from "@/lib/email";
 import { eurToUah, moneyFromUah } from "@/lib/currency";
-import { BG, CARD, INK, MUTED, FAINT, LINE, ACCENT, FONT, uah, emailShell } from "@/lib/email-theme";
+import { CARD, INK, MUTED, FAINT, LINE, ACCENT, FONT, uah, emailShell } from "@/lib/email-theme";
+import { emailProductImage, emailThumbFor } from "@/lib/email/product-image";
+
+/* The grey the product photography is shot on. Behind every thumbnail, so a
+   blocked or slow image leaves the same square the marketing rows do rather
+   than a cream gap. */
+const THUMB_BG = "#F5F5F5";
 import type { PaymentRow } from "@/lib/fulfilment";
 
 /* ---------------------------------------------------------------------------
@@ -88,15 +93,44 @@ const COPY: Record<"uk" | "en", Copy> = {
   },
 };
 
-/** Absolute image URL for a line, or null when the product has no usable art. */
-function lineImage(slug: string, stored: string | null | undefined, siteUrl: string): string | null {
-  // Prefer the image captured at checkout — it reflects the chosen variant.
-  const path = stored || (() => {
-    const p = products.find((x) => x.slug === slug);
-    return p?.tileImage || p?.gridImage || p?.image || null;
-  })();
-  if (!path) return null;
-  return path.startsWith("http") ? path : `${siteUrl}${path}`;
+/**
+ * Absolute image URL for a line, or null when the product has no usable art.
+ *
+ * THREE STEPS, AND THE ORDER OF THEM IS THE WHOLE POINT.
+ *
+ * 1. The light version of the photo captured at checkout. That photo is the
+ *    record of what was bought — an order placed before variants were recorded
+ *    has a purple HMD in `image` and nothing in `variant`, so re-resolving from
+ *    the slug would put a black one in the receipt. The thumbnail is the same
+ *    picture at 152px and ~3 KB instead of up to 562 KB; four lines used to be
+ *    over a megabyte to show four 72px squares.
+ *
+ * 2. Failing that, the catalogue square for the slug and variant.
+ *
+ * 3. Failing that, the stored path exactly as it is — a product that has since
+ *    left the catalogue still shows what the customer bought.
+ *
+ * NO STEP CAN RETURN tileImage, and that is a fix rather than a tidy-up. The
+ * tiles are tall bleed cut-outs for the flagship grid — the wind cover's is
+ * 524×968 — and this markup states width AND height, so one landing here came
+ * out crushed to 40% of its height. It only ever showed on lines with no
+ * stored image, which is why it went unnoticed.
+ */
+function lineImage(
+  slug: string,
+  stored: string | null | undefined,
+  variant: string | null | undefined,
+  siteUrl: string
+): { url: string; square: boolean } | null {
+  const thumb = emailThumbFor(stored);
+  if (thumb) return { url: `${siteUrl}${thumb}`, square: true };
+
+  const resolved = emailProductImage(slug, variant);
+  if (resolved) return { url: `${siteUrl}${resolved}`, square: true };
+
+  if (!stored) return null;
+  // `square: false` is the honest answer, not a guess. See the markup below.
+  return { url: stored.startsWith("http") ? stored : `${siteUrl}${stored}`, square: false };
 }
 
 export function buildOrderEmail(
@@ -161,7 +195,7 @@ export function buildOrderEmail(
   /* ---- Items ---- */
   const itemRows = p.lines
     .map((l) => {
-      const img = lineImage(l.slug, l.image, siteUrl);
+      const img = lineImage(l.slug, l.image, l.variant, siteUrl);
       const spec = [l.colour, l.material, l.addons].filter(Boolean).join(" · ");
       return `
       <tr>
@@ -171,9 +205,21 @@ export function buildOrderEmail(
               <td width="76" valign="top" style="padding-right:16px">
                 ${
                   img
-                    ? `<img src="${esc(img)}" alt="${esc(l.name)}" width="72" height="72"
-                         style="display:block;width:72px;height:72px;border-radius:8px;background:${BG};object-fit:contain" />`
-                    : `<div style="width:72px;height:72px;border-radius:8px;background:${BG}"></div>`
+                    ? /* HEIGHT IS STATED ONLY WHEN THE SOURCE IS KNOWN SQUARE.
+                         An email client that honours width honours height with
+                         it and there is no object-fit to save you, so stating
+                         both on a 960×1280 photo does not crop it — it crushes
+                         it. For the discontinued-product fallback the width
+                         alone is given and the height scales proportionally:
+                         that row ends up a little taller or shorter than its
+                         neighbours, which is a far better receipt than one
+                         showing a misshapen version of what someone bought. */
+                      img.square
+                      ? `<img src="${esc(img.url)}" alt="${esc(l.name)}" width="72" height="72"
+                         style="display:block;width:72px;height:72px;border-radius:8px;background:${THUMB_BG}" />`
+                      : `<img src="${esc(img.url)}" alt="${esc(l.name)}" width="72"
+                         style="display:block;width:72px;height:auto;border-radius:8px;background:${THUMB_BG}" />`
+                    : `<div style="width:72px;height:72px;border-radius:8px;background:${THUMB_BG}"></div>`
                 }
               </td>
               <td valign="top" style="font-family:${FONT}">

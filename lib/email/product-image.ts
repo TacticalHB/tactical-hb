@@ -58,6 +58,21 @@ const thumbPath = (source: string) =>
   `/email/products/${source.split("/").pop()!.replace(/\.(png|jpe?g)$/i, ".jpg")}`;
 
 /**
+ * The thumbnail for a specific catalogue path, or null if there isn't one.
+ *
+ * For callers that already hold the exact image they want and only need the
+ * light version of it — the order confirmation, which stores the photo chosen
+ * at checkout on the line itself and must keep showing that one rather than
+ * whatever the catalogue would resolve today. An order placed before variants
+ * were recorded has a purple HMD in `image` and nothing in `variant`, so
+ * re-resolving from the slug would put a black one in the receipt.
+ */
+export function emailThumbFor(source: string | null | undefined): string | null {
+  if (!source || !PREBUILT.has(source)) return null;
+  return thumbPath(source);
+}
+
+/**
  * The path to use for one cart line, or null when the product is unknown.
  *
  * Relative — the caller makes it absolute, because only the caller knows

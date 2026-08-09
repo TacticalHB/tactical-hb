@@ -207,7 +207,9 @@
     "prefs_back": "Back to the newsletter page",
     "signed_in_as": "Signed in as",
     "already_subscribed": "You're already on the list. You can change the language of your emails, or unsubscribe, at any time.",
-    "manage_prefs": "Email preferences"
+    "manage_prefs": "Email preferences",
+    "next_label": "What's next",
+    "inbox_now": "The first email is already in your inbox — a short introduction, and the kit logic above."
   },
   "delivery": {
     "title": "Payment & Delivery",

@@ -62,6 +62,7 @@ function Chevron() {
 export default function NewsletterForm({
   locale,
   accountEmail,
+  successAside,
 }: {
   locale: string;
   /**
@@ -74,6 +75,15 @@ export default function NewsletterForm({
    * page shows who they are and the single thing it actually needs.
    */
   accountEmail?: string | null;
+  /**
+   * Rendered beside the confirmation once they are on the list.
+   *
+   * PASSED IN RATHER THAN IMPORTED, because it is a Server Component and this
+   * is not — a client module cannot render one, but it can render one handed
+   * to it as a slot. Keeping it on the server is what lets it read the
+   * translations without shipping them.
+   */
+  successAside?: React.ReactNode;
 }) {
   const t = useTranslations("newsletter");
   const countries = useCountries(locale);
@@ -132,26 +142,36 @@ export default function NewsletterForm({
 
   if (done) {
     return (
-      <div className="py-6">
-        <div className="flex items-start gap-4 mb-6">
-          <svg width="26" height="26" viewBox="0 0 14 14" fill="none" aria-hidden="true"
-            className="shrink-0 mt-0.5" style={{ color: "var(--accent)" }}>
-            <path d="M2.5 7.5l3 3 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <div>
-            <h2 className="font-display text-3xl mb-3" style={{ color: "var(--text)" }}>{t("success_title")}</h2>
-            <p className="text-[15px] leading-relaxed max-w-md" style={{ color: "var(--text-muted)" }}>
-              {t("success_body")}
-            </p>
+      /* Two columns from sm up: the confirmation reads at a comfortable
+         measure instead of stretching across 720px, and the panel fills the
+         space that opened up beside it rather than leaving a hole. */
+      <div className="py-6 flex flex-col sm:flex-row sm:items-start gap-10 sm:gap-12">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-4 mb-6">
+            <svg width="26" height="26" viewBox="0 0 14 14" fill="none" aria-hidden="true"
+              className="shrink-0 mt-0.5" style={{ color: "var(--accent)" }}>
+              <path d="M2.5 7.5l3 3 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div>
+              <h2 className="font-display text-3xl mb-3" style={{ color: "var(--text)" }}>{t("success_title")}</h2>
+              <p className="text-[15px] leading-relaxed max-w-md" style={{ color: "var(--text-muted)" }}>
+                {t("success_body")}
+              </p>
+            </div>
           </div>
+          <Link
+            href={`/${locale}`}
+            /* nowrap: the confirmation column is narrower than it was, and
+               "Повернутися до магазину" wrapped to two lines inside a fixed
+               48px pill, which reads as a squashed button rather than a wide one. */
+            className="inline-flex h-12 px-10 items-center justify-center rounded-full text-[15px] font-medium whitespace-nowrap transition-opacity hover:opacity-85"
+            style={{ background: "var(--accent)", color: "#111114" }}
+          >
+            {t("success_back")}
+          </Link>
         </div>
-        <Link
-          href={`/${locale}`}
-          className="inline-flex h-12 px-10 items-center justify-center rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
-          style={{ background: "var(--accent)", color: "#111114" }}
-        >
-          {t("success_back")}
-        </Link>
+
+        {successAside && <div className="shrink-0 w-full sm:w-auto">{successAside}</div>}
       </div>
     );
   }

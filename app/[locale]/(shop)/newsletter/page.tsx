@@ -4,6 +4,7 @@ import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import UnsubscribeForm from "@/components/newsletter/UnsubscribeForm";
 import { createClient } from "@/lib/supabase/server";
 import { subscriberByEmail } from "@/lib/email/flows";
+import WhatsNextPanel from "@/components/newsletter/WhatsNextPanel";
 
 /* ---------------------------------------------------------------------------
    The sign-up page, which used to be a trap for anyone already signed in.
@@ -67,7 +68,11 @@ export default async function NewsletterPage({
                 </Link>
               </div>
             ) : (
-              <NewsletterForm locale={locale} accountEmail={accountEmail} />
+              <NewsletterForm
+                locale={locale}
+                accountEmail={accountEmail}
+                successAside={<WhatsNextPanel locale={locale} />}
+              />
             )}
 
             {/* The public, token-less unsubscribe. Pointless for someone signed

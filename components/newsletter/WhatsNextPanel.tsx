@@ -3,20 +3,22 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 /* ---------------------------------------------------------------------------
-   The square that sits beside "You're on the list".
+   The kit-logic panel in the newsletter rail.
 
-   IT EARNS ITS PLACE BY DOING A JOB, not by filling a gap. W1 is sent inline
-   on the same request that shows this page, so by the time anyone reads it the
-   first email has ALREADY ARRIVED. That is the highest-attention second this
-   person will ever give the brand, and a signup that is forgotten before the
-   first mail is opened is a signup wasted — so the panel's real payload is one
-   sentence: it is already in your inbox, go and look.
+   IT REPLACED A PLACEHOLDER. The rail used to hold a dark plate carrying a
+   faint TCT watermark and the words PREMIUM CRAFT — borrowed from the About
+   page, by my own admission, so the column would not look empty. This says
+   something instead.
 
-   THE PICTURE IS THE THING THEY SUBSCRIBED TO. W1's own bullets promise the
+   THE PICTURE IS WHAT THE LIST IS ABOUT. W1's own bullets promise the
    practical kit logic — bowl → heat device → wind cover — and W2 is entirely
    about it. A product hero would have been a photo they can see on any product
    page; this is the argument the list exists to make, and it points at /setup,
-   which is a better next click than "back to the shop".
+   which is a better next click than anything else in the rail.
+
+   THE COPY HAS TO BE TRUE BEFORE AND AFTER SIGNING UP, which is why it does
+   not say the first email has already landed. That is only true in the second
+   after the form is submitted, and this panel is on the page the whole time.
 
    NO NEW ARTWORK. The three hairline ghosts are the setup builder's own, and
    they sit on #F5F5F5 — the catalogue's studio plate, baked into the PNGs
@@ -47,14 +49,14 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
 
   return (
     <div
-      className="w-full max-w-[340px] p-6"
+      className="w-full p-6"
       style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
     >
       <div
         className="text-[10px] tracking-[0.24em] uppercase mb-5"
         style={{ color: "var(--text-faint)" }}
       >
-        {t("next_label")}
+        {t("kit_label")}
       </div>
 
       {/* The sequence. The arrows are decorative — the labels beneath already
@@ -100,9 +102,9 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
 
       <div className="h-px w-10 my-5" style={{ background: "var(--accent)" }} />
 
-      {/* The payload. */}
+      {/* What the list is for, in one line. */}
       <p className="text-[13.5px] leading-relaxed mb-4" style={{ color: "var(--text)" }}>
-        {t("inbox_now")}
+        {t("kit_body")}
       </p>
 
       <Link

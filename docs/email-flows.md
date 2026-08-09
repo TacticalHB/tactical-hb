@@ -33,6 +33,7 @@ default is no offer either, per the content pack.
 
 | File | Job |
 |------|-----|
+| `lib/email-theme.ts` | **The palette, font and wordmark for all five email families.** |
 | `lib/email/template.ts` | The approved master shell as a function. Tables + inline styles, one orange pill, the mark over the wordmark. `renderEmail()` and `renderEmailText()`. |
 | `lib/email/content.ts` | All copy, keyed `step → locale`. Subjects, preheaders, body, bullets, CTA labels, and the paths each button points at. |
 | `lib/email/flows.ts` | Scheduling, cancelling, the guards, and the send path. |
@@ -60,6 +61,58 @@ It is written to the storefront's own vocabulary — чаша, пристрій 
 вітрозахист, «Зібрати сет» — not machine-translated. **If the pack is ever
 re-exported with a working font, replace the `uk` halves of `WELCOME` and `CART`
 and nothing else.** No logic reads the words.
+
+---
+
+## 2b. One palette, five families
+
+`lib/email-theme.ts` holds the colours, the font stack, the mark-over-wordmark
+lockup and the footer for **every** email this shop sends — the four
+transactional letters (order, shipping, wholesale, follow-up) and the marketing
+flows alike.
+
+It did not start that way. `lib/email/template.ts` carried its own copies,
+transcribed from the editorial master, and they had already drifted: five of
+seven tokens differed and the pill was a third orange. Mario's call was that the
+**editorial look is the house look**, so the transactional letters came to it
+rather than the other way round.
+
+| Token | Value | Note |
+|-------|-------|------|
+| `BG` | `#F3F1EC` | the cream ground |
+| `CARD` | `#FFFFFF` | |
+| `INK` | `#1A1915` | |
+| `MUTED` | `#6B6862` | |
+| `FAINT` | `#98948C` | |
+| `LINE` | `#E7E3DC` | |
+| `ACCENT` | `#C45A1A` | the deep weight — orange **text** on white only |
+| `ACCENT_FILL` | `#FA8246` | the bright weight — every **fill** |
+| `ACCENT_TEXT` | `#111114` | what sits on a fill |
+
+`ACCENT` and `ACCENT_FILL` are literals of `--accent-ink` and `--accent` from
+`globals.css` and **must be changed together with them**. Every other token is
+within 1.04:1 of its `globals.css` counterpart — indistinguishable side by side
+— except `FAINT`, which is a touch deeper than the site's at 1.12:1.
+
+### The one place the master was not followed
+
+The master fills its CTA with orange and sets the label in **white**. That
+measures **2.5:1**, against the 4.5:1 a body-sized label needs. Dark on the same
+fill is **7.5:1**, and it is what the site's own buttons and the shipping notice
+have always done — the master's pill was the odd one out on legibility and on
+precedent alike.
+
+So the label is dark, not the fill lighter. The fill itself is unchanged to the
+eye: the master's `#F48140` and the brand's `#FA8246` sit **1.03:1** apart.
+
+To put white back it is one constant — `ACCENT_TEXT` in `lib/email-theme.ts`.
+
+### Transactional letters get no unsubscribe
+
+`footerRows(extra)` appends the marketing flows' unsubscribe and preferences
+links; the transactional letters pass nothing. An order confirmation must not
+offer to unsubscribe from itself, and the mail rules that require a
+`List-Unsubscribe` header apply to marketing, not to receipts.
 
 ---
 
@@ -299,7 +352,13 @@ The route is safe to call as often as you like and safe to overlap.
 http://localhost:3000/api/dev/email-preview?step=W1&locale=uk
 http://localhost:3000/api/dev/email-preview?step=C1&locale=en&format=text
 http://localhost:3000/api/dev/email-preview?step=C1&locale=uk&local=1
+http://localhost:3000/api/dev/email-preview?step=order&locale=uk&local=1
 ```
+
+The four transactional letters render here too — `order`, `shipping`,
+`wholesale`, `followup` — from sample inputs in
+`app/api/dev/email-preview/transactional.ts`. That is the only way to see all
+five families together, which is what keeps the shared palette shared.
 
 Steps `W1`–`W4` and `C1`–`C3`, locales `en` and `uk`. It renders through the
 sender's own row builder, so what you see is what would be sent.

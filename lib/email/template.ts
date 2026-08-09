@@ -1,5 +1,16 @@
 import "server-only";
 import { esc } from "@/lib/email";
+import {
+  ACCENT_FILL,
+  ACCENT_TEXT,
+  BG,
+  FAINT,
+  FONT,
+  INK,
+  LINE,
+  MARK_URL,
+  MUTED,
+} from "@/lib/email-theme";
 
 /* ---------------------------------------------------------------------------
    The campaign email shell.
@@ -29,13 +40,13 @@ import { esc } from "@/lib/email";
 
 const SITE = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
 
-/** Brand constants, matching the approved shell exactly. */
-const GROUND = "#F3F1EC";
-const ACCENT = "#F48140";
-const INK = "#1A1915";
-const MUTED = "#6B6862";
-const FAINT = "#98948C";
-const SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+/* THE PALETTE IS NOT DEFINED HERE ANY MORE. It used to be, transcribed from
+   the editorial master, and it drifted from lib/email-theme.ts — five of seven
+   tokens differed and the pill was a third orange, #F48140, that existed
+   nowhere else in the project. The master's values are now the house values,
+   held in one place, so this file and the four transactional letters cannot
+   disagree again. The one deliberate change: the pill's label is dark rather
+   than white, because white on this orange is 2.5:1. See email-theme.ts. */
 
 export type EmailCta = { label: string; url: string };
 
@@ -68,6 +79,12 @@ export type EmailTemplateInput = {
   preferencesUrl: string;
 };
 
+/** The master's names for the shared tokens, so the markup below reads as it
+    did when it was transcribed. */
+const GROUND = BG;
+const ACCENT = ACCENT_FILL;
+const SANS = FONT;
+
 /** Invisible padding so the inbox preview shows the preheader, not the body. */
 const PREHEADER_PAD = "&#8199;&#847;".repeat(30);
 
@@ -75,7 +92,7 @@ function ctaButton(cta: EmailCta): string {
   return `
       <tr><td style="padding:26px 44px 6px;text-align:center;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="btn" style="border-collapse:separate;border-spacing:0;margin:0 auto;"><tr>
-          <td style="background-color:${ACCENT};border-radius:999px;"><a class="btna" href="${esc(cta.url)}" style="display:block;padding:17px 42px;font-family:${SANS};font-size:15px;line-height:15px;font-weight:700;letter-spacing:.02em;color:#FFFFFF;text-decoration:none;">${esc(cta.label)}</a></td>
+          <td style="background-color:${ACCENT};border-radius:999px;"><a class="btna" href="${esc(cta.url)}" style="display:block;padding:17px 42px;font-family:${SANS};font-size:15px;line-height:15px;font-weight:700;letter-spacing:.02em;color:${ACCENT_TEXT};text-decoration:none;">${esc(cta.label)}</a></td>
         </tr></table>
       </td></tr>`;
 }
@@ -121,7 +138,7 @@ function productRowsHtml(rows: EmailProductRow[]): string {
         ? `<div style="padding-top:5px;font-size:12px;color:${FAINT};">${esc(r.variant)}</div>`
         : "";
       return `
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #E7E3DC;border-radius:14px;margin-bottom:8px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid ${LINE};border-radius:14px;margin-bottom:8px;">
 <tr>
 ${img}
 <td style="padding:14px 8px 14px 14px;font-family:${SANS};"><div style="font-size:15px;font-weight:700;color:${INK};">${esc(r.name)}</div>${variant}</td>
@@ -200,7 +217,7 @@ a{color:#3A3D40}
 <tr><td align="center" style="padding:0;">
 <!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="wrap" width="600" style="width:600px;max-width:600px;border-collapse:collapse;background-color:${GROUND};">
-    <tr><td class="px" style="padding:34px 24px 0;text-align:center;"><img src="${SITE}/email/tct-mark.png" width="36" height="36" alt="TCT" style="display:inline-block;vertical-align:middle;"></td></tr>
+    <tr><td class="px" style="padding:34px 24px 0;text-align:center;"><img src="${MARK_URL}" width="36" height="36" alt="TCT" style="display:inline-block;vertical-align:middle;"></td></tr>
     <tr><td class="px" style="padding:12px 24px 26px;text-align:center;font-family:${SANS};font-size:14px;font-weight:700;letter-spacing:10px;color:#1B1B16;mso-line-height-rule:exactly;">TACTICAL <span style="color:${ACCENT};">HB</span></td></tr>
     <tr><td class="px" style="padding:0 24px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#FFFFFF;border-radius:20px 20px 0 0;">
@@ -213,7 +230,7 @@ ${ctaButton(i.primaryCta)}
 ${secondary}
       </table>
     </td></tr>
-    <tr><td style="padding:36px 24px 0;text-align:center;"><img src="${SITE}/email/tct-mark.png" width="22" height="22" alt="TCT" style="display:inline-block;opacity:.85;"></td></tr>
+    <tr><td style="padding:36px 24px 0;text-align:center;"><img src="${MARK_URL}" width="22" height="22" alt="TCT" style="display:inline-block;opacity:.85;"></td></tr>
     <tr><td style="padding:14px 24px 0;text-align:center;font-family:${SANS};font-size:13px;font-weight:600;"><a href="${SITE}/${i.locale}" style="color:#3A3D40;text-decoration:none;">tactical-hb.com</a></td></tr>
     <tr><td style="padding:12px 24px 0;text-align:center;font-family:${SANS};font-size:12px;color:${MUTED};"><a href="https://www.instagram.com/tactical_hb/" style="color:${MUTED};text-decoration:none;">Instagram</a> &nbsp;&middot;&nbsp; <a href="https://www.tiktok.com/@tactical_hb" style="color:${MUTED};text-decoration:none;">TikTok</a> &nbsp;&middot;&nbsp; <a href="https://www.linkedin.com/company/tactical-hb" style="color:${MUTED};text-decoration:none;">LinkedIn</a></td></tr>
     <tr><td style="padding:14px 24px 0;text-align:center;font-family:${SANS};font-size:12px;color:${FAINT};"><a href="${esc(i.unsubscribeUrl)}" style="color:${FAINT};text-decoration:underline;">${i.locale === "uk" ? "Відписатися" : "Unsubscribe"}</a> &nbsp;&middot;&nbsp; <a href="${esc(i.preferencesUrl)}" style="color:${FAINT};text-decoration:underline;">${i.locale === "uk" ? "Налаштування" : "Manage preferences"}</a></td></tr>

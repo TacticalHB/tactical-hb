@@ -1,57 +1,106 @@
 /* ---------------------------------------------------------------------------
-   Shared look for customer emails.
+   Shared look for every email this shop sends.
 
-   Extracted so the order confirmation and the shipping notification cannot
-   drift apart: one palette, one font stack, one wordmark, one footer. A brand
-   that renders two different greys in two consecutive emails looks like two
-   different senders.
+   ONE PALETTE, FOR BOTH FAMILIES. The four transactional letters — order
+   confirmation, shipping notice, wholesale reply, follow-up — and the
+   marketing flows in lib/email/ all read their colours, their font and their
+   wordmark from here. lib/email/template.ts used to carry its own copies,
+   transcribed from the editorial master, and they had already drifted: five of
+   seven tokens differed and the accent was a third orange. Two emails from one
+   brand arriving in one inbox in two different creams looks like two senders.
+
+   THE VALUES ARE THE EDITORIAL MASTER'S. That is the direction Mario chose —
+   the marketing look is the house look now, and the transactional letters came
+   to it rather than the other way round.
 
    Written for email clients, not browsers: tables for layout, inline styles
-   only, no flexbox or grid, one 600px column. Rounded corners degrade to square
-   in older Outlook, which is fine.
-
-   The wordmark is TEXT, not the logo file. Gmail and Outlook refuse SVG
-   outright, and most clients block remote images until the reader allows them —
-   a text lockup always renders, and it is the same wordmark the site header
-   uses.
+   only, no flexbox or grid, one 600px column. Rounded corners degrade to
+   square in older Outlook, which is fine.
 --------------------------------------------------------------------------- */
 
-export const BG = "#f7f5f1";
-export const CARD = "#ffffff";
-export const INK = "#17160f";
-export const MUTED = "#6c6860";
-export const FAINT = "#a39d92";
-export const LINE = "#e4e0d8";
+const SITE = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
+
+export const BG = "#F3F1EC";
+export const CARD = "#FFFFFF";
+export const INK = "#1A1915";
+export const MUTED = "#6B6862";
+export const FAINT = "#98948C";
+export const LINE = "#E7E3DC";
+
 /* The packaging orange, in the same two weights the site uses — email clients
-   have no custom properties, so the values are literals of --accent-ink and
+   have no custom properties, so these are literals of --accent-ink and
    --accent from globals.css and must be changed together with them.
-   ACCENT is the deep tone: it is only ever ink on this white card, where the
-   bright tone is too light to read. ACCENT_FILL is the bright tone, for the
-   one place a block of orange carries dark text. */
+
+   ACCENT is the deep tone: only ever ink on a white card, where the bright
+   tone is too light to read. ACCENT_FILL is the bright tone, and every block
+   of it carries DARK text.
+
+   WHY DARK AND NOT WHITE, since the editorial master fills its pill with
+   orange and sets the label in white: white on this orange measures 2.5:1,
+   against the 4.5:1 a body-sized label needs. Dark on the same fill is 7.5:1.
+   It is also what the site's own buttons do and what the shipping notice has
+   always done, so the one white-on-orange pill in the master was the odd one
+   out on legibility and on precedent alike. The fill colour is unchanged to
+   the eye — the master's #F48140 and this #FA8246 sit 1.03:1 apart — so what
+   moved is the label, not the button. */
 export const ACCENT = "#C45A1A";
 export const ACCENT_FILL = "#FA8246";
-export const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+export const ACCENT_TEXT = "#111114";
+
+export const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+
+/** The hosted mark. A PNG, not the SVG: Gmail and Outlook refuse SVG outright. */
+export const MARK_URL = `${SITE}/email/tct-mark.png`;
 
 /** Hryvnia, formatted the way every customer-facing total is. */
 export const uah = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
 
-/** The wordmark row that opens every email. */
+/** The mark-over-wordmark lockup that opens every email.
+
+    The mark is a remote image and most clients block those until the reader
+    allows them, so the wordmark underneath is TEXT and carries the brand on
+    its own. The alt is "TCT" for the same reason: a blocked image should read
+    as the mark's name, not as a broken tile. */
 export const wordmarkRow = `
         <!-- Wordmark -->
-        <tr><td align="center" style="padding-bottom:28px">
-          <span style="font-family:${FONT};font-size:19px;font-weight:700;letter-spacing:3px;color:${INK}">
-            TACTICAL <span style="color:${ACCENT}">HB</span>
+        <tr><td align="center" style="padding-bottom:6px">
+          <img src="${MARK_URL}" width="36" height="36" alt="TCT" style="display:inline-block;vertical-align:middle">
+        </td></tr>
+        <tr><td align="center" style="padding:12px 0 28px">
+          <span style="font-family:${FONT};font-size:14px;font-weight:700;letter-spacing:10px;color:#1B1B16">
+            TACTICAL <span style="color:${ACCENT_FILL}">HB</span>
           </span>
         </td></tr>`;
 
-/** The rule-and-wordmark footer that closes every email. */
-export const footerRow = `
+/** The small mark, site link and social row that closes every email.
+
+    `extra` is appended below the social row and above the country line — the
+    marketing flows pass their unsubscribe and preferences links there, and the
+    transactional letters pass nothing, because an order confirmation must not
+    offer to unsubscribe from itself. */
+export function footerRows(extra = ""): string {
+  return `
         <!-- Footer -->
-        <tr><td align="center" style="padding-top:36px;border-top:1px solid ${LINE};margin-top:20px">
-          <div style="font-family:${FONT};font-size:12px;letter-spacing:2px;color:${FAINT};padding-top:22px">
-            TACTICAL HB
-          </div>
+        <tr><td align="center" style="padding-top:36px">
+          <img src="${MARK_URL}" width="22" height="22" alt="TCT" style="display:inline-block;opacity:.85">
+        </td></tr>
+        <tr><td align="center" style="padding-top:14px;font-family:${FONT};font-size:13px;font-weight:600">
+          <a href="${SITE}" style="color:#3A3D40;text-decoration:none">tactical-hb.com</a>
+        </td></tr>
+        <tr><td align="center" style="padding-top:12px;font-family:${FONT};font-size:12px;color:${MUTED}">
+          <a href="https://www.instagram.com/tactical_hb/" style="color:${MUTED};text-decoration:none">Instagram</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://www.tiktok.com/@tactical_hb" style="color:${MUTED};text-decoration:none">TikTok</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://www.linkedin.com/company/tactical-hb" style="color:${MUTED};text-decoration:none">LinkedIn</a>
+        </td></tr>${extra}
+        <tr><td align="center" style="padding-top:10px;font-family:${FONT};font-size:11px;letter-spacing:.04em;color:#B0ACA3">
+          Tactical HB &middot; Ukraine
         </td></tr>`;
+}
+
+/** Kept as a constant because the four transactional builders import it. */
+export const footerRow = footerRows();
 
 /**
  * The outer shell — background, centring, and the 600px column.

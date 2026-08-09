@@ -11,6 +11,11 @@ import {
   type WelcomeStep,
 } from "@/lib/email/content";
 import { productRowsFor } from "@/lib/email/flows";
+import {
+  renderTransactional,
+  TRANSACTIONAL_KINDS,
+  type TransactionalKind,
+} from "./transactional";
 
 /* ---------------------------------------------------------------------------
    Look at an email without sending one. Development only.
@@ -30,6 +35,12 @@ import { productRowsFor } from "@/lib/email/flows";
      /api/dev/email-preview?step=W1&locale=uk
      /api/dev/email-preview?step=C1&locale=en&format=text
      /api/dev/email-preview?step=C1&locale=uk&local=1   ← images resolve
+     /api/dev/email-preview?step=order&locale=uk        ← transactional too
+
+   The four transactional letters render here as well — order, shipping,
+   wholesale, followup — because all five families now share one palette in
+   lib/email-theme.ts, and the only way to keep them from drifting apart again
+   is to be able to look at them together.
 
    `local=1` rewrites the absolute tactical-hb.com URLs to this origin, which
    is the only way to SEE the pictures before a deploy has put them on the CDN.
@@ -51,15 +62,34 @@ const SAMPLE_CART = [
 
 const FAKE_TOKEN = "00000000-0000-0000-0000-000000000000";
 
+const SITE_BASE = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
+
 export async function GET(request: NextRequest) {
   if (process.env.NODE_ENV === "production") {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const q = new URL(request.url).searchParams;
-  const step = (q.get("step") || "W1").toUpperCase();
+  const raw = q.get("step") || "W1";
   const locale: Locale = q.get("locale") === "uk" ? "uk" : "en";
   const asText = q.get("format") === "text";
+
+  const localiseOut = (out: string) =>
+    q.get("local") ? out.split(SITE_BASE).join(new URL(request.url).origin) : out;
+
+  // The transactional letters build themselves end to end, so they short-
+  // circuit everything below.
+  if (TRANSACTIONAL_KINDS.includes(raw.toLowerCase() as TransactionalKind)) {
+    const built = renderTransactional(raw.toLowerCase() as TransactionalKind, locale);
+    const body = asText ? `Subject: ${built.subject}\n\n${built.text}` : built.html;
+    return new NextResponse(localiseOut(body), {
+      headers: {
+        "Content-Type": asText ? "text/plain; charset=utf-8" : "text/html; charset=utf-8",
+      },
+    });
+  }
+
+  const step = raw.toUpperCase();
 
   const isWelcome = step.startsWith("W");
   const copy = isWelcome
@@ -68,7 +98,7 @@ export async function GET(request: NextRequest) {
 
   if (!copy) {
     return new NextResponse(
-      `Unknown step "${step}". Try W1–W4 or C1–C3.`,
+      `Unknown step "${step}". Try W1–W4, C1–C3, or ${TRANSACTIONAL_KINDS.join(" / ")}.`,
       { status: 400 }
     );
   }
@@ -84,7 +114,7 @@ export async function GET(request: NextRequest) {
       : []
     : SAMPLE_CART;
 
-  const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
+  const site = SITE_BASE;
   // The sender's own row builder — same prices, same finish labels, same images.
   const rows = productRowsFor(sample, locale);
 
@@ -106,8 +136,7 @@ export async function GET(request: NextRequest) {
     preferencesUrl: `${site}/${locale}/newsletter/preferences?token=${FAKE_TOKEN}`,
   };
 
-  const localise = (out: string) =>
-    q.get("local") ? out.split(site).join(new URL(request.url).origin) : out;
+  const localise = localiseOut;
 
   if (asText) {
     return new NextResponse(localise(`Subject: ${copy.subject}\n\n${renderEmailText(input)}`), {

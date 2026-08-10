@@ -68,18 +68,28 @@ comment on column public.partner_messages.sent_by is
 -- index on the same columns is write cost for nothing.
 
 -- =============================================================================
---  VERIFY
+--  VERIFY — read-only. Run this and read the two definitions back.
 --
---    -- both should now be accepted:
---    select 'p1'::text = any (enum_range(null::text)::text[]);  -- (informational)
+--    select conname, pg_get_constraintdef(oid) as definition
+--      from pg_constraint
+--     where conname in ('email_jobs_flow_check', 'partner_messages_kind_check')
+--     order by conname;
 --
---    -- the real check: these must succeed, then be removed
---    insert into public.email_jobs (job_key, flow, step, recipient, locale, send_after)
---    values ('p1:test','p1','P1','a@b.c','en', now());
---    delete from public.email_jobs where job_key = 'p1:test';
+--  Expected, and nothing less — the OLD values must still be listed, or an
+--  existing welcome/cart job or a founder's follow-up would start failing:
 --
---    -- and the old values must still be accepted
---    insert into public.email_jobs (job_key, flow, step, recipient, locale, send_after)
---    values ('welcome:test','welcome','W1','a@b.c','en', now());
---    delete from public.email_jobs where job_key = 'welcome:test';
+--    email_jobs_flow_check          CHECK (flow = ANY (ARRAY['welcome', 'cart', 'p1']))
+--    partner_messages_kind_check    CHECK (kind = ANY (ARRAY['followup', 'dormant']))
+--
+--  And the widened column comment:
+--
+--    select col_description('public.partner_messages'::regclass,
+--             (select attnum from pg_attribute
+--               where attrelid = 'public.partner_messages'::regclass
+--                 and attname = 'sent_by'));
+--
+--  NOTHING HERE WRITES A ROW. Reading the constraint back is stronger evidence
+--  than a test insert anyway: an insert proves one value was accepted, the
+--  definition proves exactly which values are, including the ones that must
+--  still work.
 -- =============================================================================

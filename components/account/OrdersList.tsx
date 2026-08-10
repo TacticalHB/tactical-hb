@@ -1,32 +1,27 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
+import { orderTotalText, type CustomerOrder } from "@/lib/account-orders";
+import { formatWhen, statusLabel } from "@/lib/orders-display";
 
 /* ---------------------------------------------------------------------------
-   Orders history with expandable line items.
+   Order history: one line per order, each a door to its detail page.
 
-   Data is fetched server-side (see the page) and passed down, so the list is
-   SSR'd and instantly visible; only expand/collapse is client state.
+   IT USED TO BE AN ACCORDION that expanded a table of line items in place,
+   which was the right call when there was nowhere else for them to go. There
+   is now — /account/orders/[id] — and keeping both would mean two renderings
+   of the same order that have to agree forever. The row shows what you scan
+   for (which order, when, how much, where it has got to) and the detail page
+   holds the rest.
+
+   A SERVER COMPONENT NOW. The accordion was the only reason this shipped
+   JavaScript; a list of links needs none.
+
+   THE STATUS PILL IS NOT COLOUR-CODED BY MOOD. Green-for-good, red-for-bad
+   turns an order history into a dashboard of alarms. Only the live step gets
+   the accent; everything else is ink on the page's own surface — the same
+   restraint the timeline uses.
 --------------------------------------------------------------------------- */
 
-export type OrderItem = {
-  id: string;
-  product_id: string;
-  product_name: string | null;
-  quantity: number;
-  price_eur: number;
-};
-
-export type OrderWithItems = {
-  id: string;
-  amount_eur: number;
-  source: string;
-  created_at: string;
-  items: OrderItem[];
-};
-
-const eur = (n: number) => `€${n.toFixed(2)}`;
+export type { CustomerOrder };
 
 export default function OrdersList({
   locale,
@@ -34,40 +29,22 @@ export default function OrdersList({
   error,
 }: {
   locale: string;
-  orders: OrderWithItems[];
+  orders: CustomerOrder[];
   error?: string | null;
 }) {
   const uk = locale === "uk";
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-  const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !o[id] }));
 
   const L = {
     title: uk ? "Замовлення" : "Orders",
     empty: uk ? "Замовлень поки немає" : "No orders yet",
     emptyHint: uk
-      ? "Коли ви зробите замовлення, воно з'явиться тут разом з нарахованими XP."
-      : "Once you place an order it'll appear here, along with the XP you earned.",
-    browse: uk ? "Переглянути товари" : "Browse products",
+      ? "Коли ви зробите замовлення, воно з'явиться тут — зі статусом, накладною та нарахованими XP."
+      : "Once you place an order it'll appear here — with its status, tracking, and the XP you earned.",
+    browse: uk ? "Переглянути колекцію" : "Explore the collection",
+    buildSetup: uk ? "Зібрати сет" : "Build a setup",
     items: (n: number) => (uk ? `${n} позицій` : `${n} item${n === 1 ? "" : "s"}`),
-    source: uk ? "Джерело" : "Source",
-    total: uk ? "Разом" : "Total",
-    product: uk ? "Товар" : "Product",
-    qty: uk ? "К-сть" : "Qty",
-    each: uk ? "Ціна" : "Each",
-    lineTotal: uk ? "Сума" : "Line total",
-    details: uk ? "Деталі" : "Details",
-    hide: uk ? "Сховати" : "Hide",
-    noItems: uk ? "Для цього замовлення немає позицій." : "No line items recorded for this order.",
+    order: uk ? "Замовлення" : "Order",
   };
-
-  const dt = (s: string) =>
-    new Date(s).toLocaleString(uk ? "uk-UA" : "en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
 
   return (
     <div>
@@ -84,81 +61,65 @@ export default function OrdersList({
             <path d="M9 7V5a3 3 0 0 1 6 0v2" />
           </svg>
           <p className="text-lg font-medium" style={{ color: "#111" }}>{L.empty}</p>
-          <p className="text-sm mt-1 mb-6" style={{ color: "var(--text-muted)" }}>{L.emptyHint}</p>
-          <Link href={`/${locale}/products`} className="inline-block h-11 leading-[44px] px-7 rounded-full text-sm font-medium"
-            style={{ background: "#111", color: "#fff" }}>
+          <p className="text-sm mt-1 mb-6 max-w-sm mx-auto" style={{ color: "var(--text-muted)" }}>{L.emptyHint}</p>
+          <Link
+            href={`/${locale}/products`}
+            className="inline-block h-11 leading-[44px] px-7 rounded-full text-sm font-medium transition-opacity hover:opacity-85"
+            style={{ background: "#111", color: "#fff" }}
+          >
             {L.browse}
           </Link>
+          <div className="mt-5">
+            <Link
+              href={`/${locale}/setup`}
+              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {L.buildSetup}
+            </Link>
+          </div>
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
           {orders.map((o) => {
-            const isOpen = !!open[o.id];
             const count = o.items.reduce((s, i) => s + i.quantity, 0);
+            const total = orderTotalText(o);
+            const live = o.status !== "delivered" && o.status !== "cancelled";
+
             return (
-              <li key={o.id} className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
-                {/* Summary row — click anywhere to expand */}
-                <button
-                  onClick={() => toggle(o.id)}
-                  aria-expanded={isOpen}
-                  className="w-full text-left px-5 py-4 flex items-center gap-4 hover:bg-[color:var(--bg-soft)] transition-colors"
+              <li key={o.id}>
+                <Link
+                  href={`/${locale}/account/orders/${o.id}`}
+                  className="rounded-2xl border px-5 py-4 flex items-center gap-4 transition-colors hover:bg-[color:var(--bg-soft)]"
+                  style={{ borderColor: "var(--border)", display: "flex" }}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium" style={{ color: "#111" }}>{dt(o.created_at)}</div>
+                    <div className="text-sm font-medium" style={{ color: "#111" }}>
+                      {L.order} {o.reference}
+                    </div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {L.items(count)} · {L.source}: {o.source}
+                      {formatWhen(o.createdAt, uk)} · {L.items(count)}
                     </div>
                   </div>
-                  <div className="text-base font-semibold tabular-nums shrink-0" style={{ color: "#111" }}>{eur(o.amount_eur)}</div>
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="1.6"
-                    className="shrink-0 transition-transform duration-[var(--motion-base)]" style={{ transform: isOpen ? "rotate(180deg)" : "none" }}>
-                    <path d="M4 7l6 6 6-6" />
-                  </svg>
-                </button>
 
-                {/* Line items — animated expand */}
-                <div className="grid transition-[grid-template-rows] duration-[var(--motion-base)] ease-out"
-                  style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}>
-                  <div className="overflow-hidden">
-                    <div className="px-5 pb-5 pt-1 border-t" style={{ borderColor: "var(--border)" }}>
-                      {o.items.length === 0 ? (
-                        <p className="text-sm py-3" style={{ color: "var(--text-muted)" }}>{L.noItems}</p>
-                      ) : (
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr style={{ color: "var(--text-faint)" }}>
-                              <th className="text-left font-normal py-2 text-xs">{L.product}</th>
-                              <th className="text-right font-normal py-2 text-xs w-14">{L.qty}</th>
-                              <th className="text-right font-normal py-2 text-xs w-20">{L.each}</th>
-                              <th className="text-right font-normal py-2 text-xs w-24">{L.lineTotal}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {o.items.map((it) => (
-                              <tr key={it.id} className="border-t" style={{ borderColor: "var(--border)" }}>
-                                <td className="py-2.5 pr-3" style={{ color: "#111" }}>
-                                  {/* product_name is the snapshot taken at purchase time */}
-                                  <Link href={`/${locale}/products/${it.product_id}`} className="hover:underline">
-                                    {it.product_name || it.product_id}
-                                  </Link>
-                                </td>
-                                <td className="py-2.5 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>{it.quantity}</td>
-                                <td className="py-2.5 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>{eur(it.price_eur)}</td>
-                                <td className="py-2.5 text-right tabular-nums font-medium" style={{ color: "#111" }}>
-                                  {eur(it.price_eur * it.quantity)}
-                                </td>
-                              </tr>
-                            ))}
-                            <tr className="border-t" style={{ borderColor: "var(--border-strong)" }}>
-                              <td colSpan={3} className="py-2.5 text-right text-xs" style={{ color: "var(--text-muted)" }}>{L.total}</td>
-                              <td className="py-2.5 text-right tabular-nums font-semibold" style={{ color: "#111" }}>{eur(o.amount_eur)}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      )}
-                    </div>
+                  <span
+                    className="shrink-0 text-[11px] px-2.5 py-1 rounded-full border whitespace-nowrap"
+                    style={{
+                      color: live ? "var(--accent-ink)" : "var(--text-muted)",
+                      borderColor: live ? "var(--accent-line)" : "var(--border)",
+                    }}
+                  >
+                    {statusLabel(o.status, uk)}
+                  </span>
+
+                  <div className="text-base font-semibold tabular-nums shrink-0" style={{ color: "#111" }}>
+                    {total.text}
                   </div>
-                </div>
+
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="1.6" className="shrink-0" aria-hidden="true">
+                    <path d="M7 4l6 6-6 6" />
+                  </svg>
+                </Link>
               </li>
             );
           })}

@@ -1,36 +1,37 @@
 import { requireUser } from "@/lib/supabase/require-user";
-import OrdersList, { type OrderWithItems } from "@/components/account/OrdersList";
+import { CUSTOMER_ORDER_COLUMNS, toCustomerOrder } from "@/lib/account-orders";
+import OrdersList from "@/components/account/OrdersList";
 
 /* Page size — a single knob to turn when we add pagination/filters.
    To paginate later: swap .limit() for .range(from, to) and pass a page param. */
 const PAGE_SIZE = 20;
 
+/* ---------------------------------------------------------------------------
+   The customer's order history.
+
+   SCOPED TWICE, like the detail page: `.eq("user_id", user.id)` here, and the
+   "orders self read" RLS policy (auth.uid() = user_id) underneath it. The
+   filter is what a refactor drops; RLS is what still holds when it does.
+
+   GUEST ORDERS ARE NOT CLAIMED BY EMAIL. An order placed without an account
+   has user_id null, and matching those on email alone would let anyone who
+   registered with an address see every order ever placed with it — an account
+   takeover dressed up as a convenience. They appear here only if something
+   with authority has attached a user_id to them, which nothing does today.
+--------------------------------------------------------------------------- */
+
 export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const { supabase, user } = await requireUser(locale); // signed-in only
 
-  // One round-trip: orders + their line items via the order_items FK.
-  // RLS scopes orders to the user, and order_items inherit that ownership.
   const { data, error } = await supabase
     .from("orders")
-    .select("id, amount_eur, source, created_at, order_items(id, product_id, product_name, quantity, price_eur)")
+    .select(CUSTOMER_ORDER_COLUMNS)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
 
-  const orders: OrderWithItems[] = (data ?? []).map((o) => ({
-    id: String(o.id),
-    amount_eur: Number(o.amount_eur),
-    source: String(o.source),
-    created_at: String(o.created_at),
-    items: (o.order_items ?? []).map((it) => ({
-      id: String(it.id),
-      product_id: String(it.product_id),
-      product_name: it.product_name ? String(it.product_name) : null,
-      quantity: Number(it.quantity),
-      price_eur: Number(it.price_eur),
-    })),
-  }));
+  const orders = (data ?? []).map((o) => toCustomerOrder(o as unknown as Record<string, unknown>));
 
   return <OrdersList locale={locale} orders={orders} error={error?.message ?? null} />;
 }

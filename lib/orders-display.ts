@@ -161,19 +161,38 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
 /* ---------------------------- display helpers ---------------------------- */
 
 /** What the customer actually paid: goods + postage, in the settled currency. */
-export function orderTotal(o: AdminOrder): { text: string; sub: string | null } {
-  if (o.amountUah !== null) {
-    const total = Math.round(o.amountUah + o.shippingUah);
+/**
+ * What an order cost, from the three amounts a row actually stores.
+ *
+ * Split out from orderTotal so the customer's own order history can print the
+ * same figure the admin sees, without the customer half importing an AdminOrder
+ * and everything on it. Two screens disagreeing about what someone paid is the
+ * kind of bug that arrives as an email rather than a bug report.
+ *
+ * The hryvnia is the charged amount — Monobank bills UAH — and the euro is what
+ * a euro-storefront customer was quoted. Legacy rows carry EUR only.
+ */
+export function totalFromAmounts(
+  amountEur: number | null,
+  amountUah: number | null,
+  shippingUah: number
+): { text: string; sub: string | null } {
+  if (amountUah !== null) {
+    const total = Math.round(amountUah + shippingUah);
     const sub =
-      o.shippingUah > 0
-        ? `goods ₴${Math.round(o.amountUah).toLocaleString("uk-UA")} + delivery ₴${Math.round(o.shippingUah).toLocaleString("uk-UA")}`
-        : o.amountEur !== null
-          ? `€${o.amountEur.toFixed(2)} goods`
+      shippingUah > 0
+        ? `goods ₴${Math.round(amountUah).toLocaleString("uk-UA")} + delivery ₴${Math.round(shippingUah).toLocaleString("uk-UA")}`
+        : amountEur !== null
+          ? `€${amountEur.toFixed(2)} goods`
           : null;
     return { text: `₴${total.toLocaleString("uk-UA")}`, sub };
   }
   // Legacy/manual rows carry EUR only.
-  return { text: o.amountEur !== null ? `€${o.amountEur.toFixed(2)}` : "—", sub: null };
+  return { text: amountEur !== null ? `€${amountEur.toFixed(2)}` : "—", sub: null };
+}
+
+export function orderTotal(o: AdminOrder): { text: string; sub: string | null } {
+  return totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah);
 }
 
 export function deliveryLabel(kind: DeliveryKind, uk: boolean): string {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatVoucher, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import type { Voucher } from "@/lib/loyalty/vouchers";
@@ -106,6 +107,16 @@ export default function LoyaltyDashboard({
     usedVouchers: uk ? "Використані ваучери" : "Used vouchers",
     history: uk ? "Історія балів" : "Points history",
     noHistory: uk ? "Історія з'явиться після першої покупки." : "Your history appears after your first purchase.",
+    /* The zero state. Deliberately states only what the system already does —
+       the ladder starts at the first rank and moves on lifetime spend — and
+       invents no rule of its own. The rank name is read from RANKS so it can
+       never drift from the ladder itself. */
+    startTitle: uk ? "Ваше звання починається тут" : "Your rank starts here",
+    startBody: uk
+      ? `Ви — ${RANKS[0].uk}. Звання зростає від суми всіх покупок, тож перше замовлення вже рухає вас далі, а бонуси й ваучери з’являться тут автоматично.`
+      : `You're a ${RANKS[0].en}. Rank grows with your lifetime spend, so your first order already moves you up — XP and vouchers appear here on their own.`,
+    startBrowse: uk ? "Переглянути колекцію" : "Explore the collection",
+    startSetup: uk ? "Зібрати сет" : "Build a setup",
     reasonOrder: uk ? "Покупка" : "Purchase",
     howTitle: uk ? "Як це працює" : "How it works",
     how: uk
@@ -167,6 +178,36 @@ export default function LoyaltyDashboard({
           )}
         </div>
       </div>
+
+      {/* AT ZERO, the three sections below all say "nothing yet" — no vouchers,
+          no history, a bar at 0%. True, and read together they land as a
+          broken page rather than a new one. This is one calm panel that says
+          what happens next, shown only before anything has been earned. */}
+      {totalXP === 0 && (
+        <div
+          className="mt-4 rounded-2xl border px-6 py-7 sm:px-8"
+          style={{ borderColor: "var(--border)", background: "var(--bg-soft)" }}
+        >
+          <p className="text-[15px] font-medium mb-1.5" style={{ color: "#111" }}>{L.startTitle}</p>
+          <p className="text-sm leading-relaxed max-w-xl" style={{ color: "var(--text-muted)" }}>{L.startBody}</p>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-5">
+            <Link
+              href={`/${locale}/products`}
+              className="inline-block h-11 leading-[44px] px-7 rounded-full text-sm font-medium transition-opacity hover:opacity-85"
+              style={{ background: "#111", color: "#fff" }}
+            >
+              {L.startBrowse}
+            </Link>
+            <Link
+              href={`/${locale}/setup`}
+              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {L.startSetup}
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Milestone chips */}
       <div className="flex flex-wrap gap-2 mt-4">

@@ -45,9 +45,11 @@ export default function SlideOver({
     <>
       <div
         onClick={onClose}
-        className="fixed inset-0 transition-opacity duration-300"
+        className="fixed inset-0"
         style={{
           background: "rgba(0,0,0,0.4)",
+          /* The backdrop and the panel travel together, on one duration. */
+          transition: "opacity var(--motion-base) var(--ease-out)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           zIndex: z,
@@ -59,17 +61,25 @@ export default function SlideOver({
         aria-modal={open}
         aria-label={label}
         aria-hidden={!open}
-        className="fixed top-0 right-0 h-full w-full flex flex-col transition-transform duration-[420ms]"
+        className="fixed top-0 right-0 h-full w-full flex flex-col"
         style={{
           maxWidth: width,
           zIndex: z + 1,
           background: "#ffffff",
           transform: open ? "translateX(0)" : "translateX(100%)",
-          transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
           boxShadow: "-24px 0 70px -24px rgba(0,0,0,0.35)",
           // Fully hidden panels must not be reachable by keyboard.
           visibility: open ? "visible" : "hidden",
-          transitionProperty: "transform, visibility",
+          /* WAS 420ms ON A CURVE OF ITS OWN. This one component is the cart
+             drawer, the added-to-bag panel, search, the nav menu and the
+             dossier, so its timing was most of what the site felt like — and
+             it was slower than everything around it. On the shared base now.
+
+             --ease-in-out rather than --ease-out: a drawer is one of the few
+             things that leaves the way it came, and an ease-out exit reads as
+             the panel being yanked off screen. */
+          transition:
+            "transform var(--motion-base) var(--ease-in-out), visibility var(--motion-base) var(--ease-in-out)",
         }}
       >
         {children}

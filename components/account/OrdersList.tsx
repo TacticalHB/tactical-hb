@@ -111,13 +111,13 @@ export default function OrdersList({
                   </div>
                   <div className="text-base font-semibold tabular-nums shrink-0" style={{ color: "#111" }}>{eur(o.amount_eur)}</div>
                   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="1.6"
-                    className="shrink-0 transition-transform duration-300" style={{ transform: isOpen ? "rotate(180deg)" : "none" }}>
+                    className="shrink-0 transition-transform duration-[var(--motion-base)]" style={{ transform: isOpen ? "rotate(180deg)" : "none" }}>
                     <path d="M4 7l6 6 6-6" />
                   </svg>
                 </button>
 
                 {/* Line items — animated expand */}
-                <div className="grid transition-[grid-template-rows] duration-300 ease-out"
+                <div className="grid transition-[grid-template-rows] duration-[var(--motion-base)] ease-out"
                   style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}>
                   <div className="overflow-hidden">
                     <div className="px-5 pb-5 pt-1 border-t" style={{ borderColor: "var(--border)" }}>

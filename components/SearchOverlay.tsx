@@ -59,12 +59,12 @@ export default function SearchOverlay({
     <>
       <div
         onClick={onClose}
-        className="fixed inset-0 z-[120] transition-opacity duration-300"
+        className="fixed inset-0 z-[120] transition-opacity duration-[var(--motion-base)]"
         style={{ background: "rgba(0,0,0,0.35)", opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none" }}
         aria-hidden="true"
       />
       <div
-        className="fixed top-0 left-0 right-0 z-[121] transition-transform duration-300"
+        className="fixed top-0 left-0 right-0 z-[121] transition-transform duration-[var(--motion-base)]"
         style={{ background: "#ffffff", transform: open ? "translateY(0)" : "translateY(-100%)" }}
         aria-hidden={!open}
       >

@@ -23,6 +23,10 @@ export default function CartDrawer({ locale }: { locale: string }) {
   const L = {
     title: uk ? "Ваш кошик" : "Your Shopping Bag",
     empty: uk ? "Ваш кошик порожній" : "Your shopping bag is empty",
+    emptyHint: uk
+      ? "Додайте окрему річ або зберіть повний сет."
+      : "Add a piece, or build a full setup.",
+    buildSetup: uk ? "Зібрати сет" : "Build a setup",
     browse: uk ? "Перейти до товарів" : "Browse products",
     total: uk ? "Разом" : "Total",
     view: uk ? "Переглянути кошик" : "View your shopping bag",
@@ -47,15 +51,29 @@ export default function CartDrawer({ locale }: { locale: string }) {
 
       <div className="flex-1 overflow-y-auto px-7">
         {lines.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-5 pb-20">
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{L.empty}</p>
+          /* The same hierarchy as the full cart page, compressed: one line of
+             state, one of guidance, a primary and a quiet alternative. A
+             drawer that offered only "browse products" sent people back where
+             they came from; the setup link is the one that answers "I do not
+             know what I need". */
+          <div className="flex flex-col items-center justify-center h-full gap-4 px-6 pb-20 text-center">
+            <p className="text-[15px]" style={{ color: "var(--text)" }}>{L.empty}</p>
+            <p className="text-[13px] max-w-[16rem]" style={{ color: "var(--text-muted)" }}>{L.emptyHint}</p>
             <Link
               href={`/${locale}/products`}
               onClick={close}
-              className="text-sm underline underline-offset-4"
-              style={{ color: "var(--text)" }}
+              className="mt-1 inline-flex h-11 px-7 rounded-full items-center justify-center text-[14px] font-medium transition-opacity hover:opacity-85"
+              style={{ background: "var(--accent)", color: "#111114" }}
             >
               {L.browse}
+            </Link>
+            <Link
+              href={`/${locale}/setup`}
+              onClick={close}
+              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {L.buildSetup}
             </Link>
           </div>
         ) : (

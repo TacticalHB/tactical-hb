@@ -47,6 +47,7 @@ export default function FavouritesList({ locale }: { locale: string }) {
       ? "Натискайте ♡ на товарах, щоб зберегти їх сюди."
       : "Tap the heart on any product to save it here.",
     browse: uk ? "Переглянути товари" : "Browse products",
+    buildSetup: uk ? "Зібрати сет" : "Build a setup",
     remove: uk ? "Прибрати" : "Remove",
     add: uk ? "Додати в кошик" : "Add to bag",
     guestTitle: uk ? "Збережено лише на цьому пристрої" : "Saved on this device only",
@@ -97,10 +98,22 @@ export default function FavouritesList({ locale }: { locale: string }) {
           </svg>
           <p className="text-lg font-medium" style={{ color: "#111" }}>{L.empty}</p>
           <p className="text-sm mt-1 mb-6" style={{ color: "var(--text-muted)" }}>{L.emptyHint}</p>
-          <Link href={`/${locale}/products`} className="inline-block h-11 leading-[44px] px-7 rounded-full text-sm font-medium"
+          {/* The dark fill is the account area's primary, not the shop's
+              orange — eight other buttons in these pages use it, and one
+              orange button here would be the odd one out rather than the
+              consistent one. */}
+          <Link href={`/${locale}/products`}
+            className="inline-block h-11 leading-[44px] px-7 rounded-full text-sm font-medium transition-opacity hover:opacity-85"
             style={{ background: "#111", color: "#fff" }}>
             {L.browse}
           </Link>
+          <div className="mt-5">
+            <Link href={`/${locale}/setup`}
+              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-muted)" }}>
+              {L.buildSetup}
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

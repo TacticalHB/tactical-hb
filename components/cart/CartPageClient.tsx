@@ -39,6 +39,10 @@ export default function CartPageClient({
   const L = {
     title: uk ? "Ваш кошик" : "Your Shopping Bag",
     empty: uk ? "У вашому кошику поки що порожньо." : "Your shopping bag is currently empty.",
+    emptyHint: uk
+      ? "Додайте окрему річ — або зберіть повний сет за один раз."
+      : "Add a piece, or build a full setup in one flow.",
+    buildSetup: uk ? "Зібрати сет" : "Build a setup",
     browse: uk ? "Перейти до товарів" : "Continue shopping",
     summary: uk ? "Підсумок замовлення" : "Order Summary",
     subtotal: uk ? "Проміжний підсумок" : "Subtotal",
@@ -67,16 +71,31 @@ export default function CartPageClient({
 
   if (lines.length === 0) {
     return (
+      /* An empty bag is a normal state, not a failure, so it reads like the
+         rest of the shop: same page padding, same headline scale, one primary
+         and one quiet alternative. The second line is the whole point — it
+         gives someone who does not know what to add a route that decides for
+         them, rather than returning them to a grid they already left. */
       <div className="page-container pt-36 pb-32">
         <h1 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{L.title}</h1>
-        <p className="text-[15px] mb-8" style={{ color: "var(--text-muted)" }}>{L.empty}</p>
-        <Link
-          href={`/${locale}/products`}
-          className="inline-flex h-12 px-8 rounded-full items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-85"
-          style={{ background: "var(--accent)", color: "#111114" }}
-        >
-          {L.browse}
-        </Link>
+        <p className="text-[15px] max-w-md" style={{ color: "var(--text-muted)" }}>{L.empty}</p>
+        <p className="text-[15px] mt-1.5 mb-8 max-w-md" style={{ color: "var(--text-muted)" }}>{L.emptyHint}</p>
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
+          <Link
+            href={`/${locale}/products`}
+            className="inline-flex h-12 px-8 rounded-full items-center justify-center text-[15px] font-medium whitespace-nowrap transition-opacity hover:opacity-85"
+            style={{ background: "var(--accent)", color: "#111114" }}
+          >
+            {L.browse}
+          </Link>
+          <Link
+            href={`/${locale}/setup`}
+            className="text-[14px] underline underline-offset-4 transition-opacity hover:opacity-70"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {L.buildSetup}
+          </Link>
+        </div>
       </div>
     );
   }

@@ -47,7 +47,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
               alt={name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain p-10 transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+              className="object-contain p-10 transition-transform duration-[var(--motion-slow)] ease-out group-hover:scale-[1.05]"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

@@ -144,12 +144,12 @@ function Accordion({ title, children, extra }: { title: string; children: React.
         <span className="flex items-center gap-4">
           {extra}
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="1.6"
-            className="transition-transform duration-300" style={{ transform: open ? "rotate(180deg)" : "none" }}>
+            className="transition-transform duration-[var(--motion-base)]" style={{ transform: open ? "rotate(180deg)" : "none" }}>
             <path d="M4 7l6 6 6-6" />
           </svg>
         </span>
       </button>
-      <div className="grid transition-[grid-template-rows] duration-300 ease-out"
+      <div className="grid transition-[grid-template-rows] duration-[var(--motion-base)] ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
         <div className="overflow-hidden">
           <div className="pb-6 text-[15px] leading-relaxed" style={{ color: "#707072" }}>{children}</div>

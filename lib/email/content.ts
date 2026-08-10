@@ -36,6 +36,7 @@ export type EmailCopy = {
 };
 
 export type WelcomeStep = "W1" | "W2" | "W3" | "W4";
+export type PostPurchaseStep = "P1";
 export type CartStep = "C1" | "C2" | "C3";
 
 const SITE = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
@@ -254,6 +255,56 @@ export const CART: Record<CartStep, Record<Locale, EmailCopy>> = {
       secondaryLabel: "Зв'язатися з нами",
     },
   },
+};
+
+/* ---- Post-purchase ------------------------------------------------------
+   ONE MAIL, DAYS AFTER THE PARCEL. Not another shipping update: the courier
+   mail already said where it is. This asks how the session went and points at
+   the one thing a first-time buyer usually has not done yet, which is finish
+   the kit.
+
+   NO DISCOUNT, and none in the data to add by accident — same rule as the
+   cart series.
+
+   THE ENGLISH FOLLOWS THE PACK'S P1 (subject and preheader are its words
+   verbatim); the body is written to the structure the brief specifies —
+   thanks, soft cross-sell, reply for questions — in the register the rest of
+   the pack uses, because P1's body was never transcribed out of the PDF. The
+   Ukrainian is mine for the reason recorded at the top of this file: the pack
+   has no recoverable Cyrillic.
+------------------------------------------------------------------------- */
+
+export const POST_PURCHASE: Record<PostPurchaseStep, Record<Locale, EmailCopy>> = {
+  P1: {
+    en: {
+      subject: "How is the session?",
+      preheader: "If you started with one piece, the system still has room.",
+      headline: "How is the session?",
+      paragraphs: [
+        "Thank you for your order — it should be with you by now.",
+        "If you started with one piece, the rest of the system is still open. A bowl sets the flavour path, a heat device takes the coal dance out of it, and a wind cover holds the session when the air moves. Build a setup puts the three together in one pass and prices them as they go.",
+        "Anything not sitting right — fit, heat, a part that arrived marked — reply to this email. It reaches a person.",
+      ],
+      primaryLabel: "Build a setup",
+      secondaryLabel: "View your orders",
+    },
+    uk: {
+      subject: "Як сесія?",
+      preheader: "Якщо почали з однієї речі — система ще має місце.",
+      headline: "Як сесія?",
+      paragraphs: [
+        "Дякуємо за замовлення — воно вже мало дійти до вас.",
+        "Якщо ви почали з однієї речі, решта системи ще відкрита. Чаша задає смаковий профіль, пристрій нагріву прибирає танці з вугіллям, а ковпак тримає сесію, коли працює повітря. «Зібрати сет» складає всі три за один раз і одразу рахує ціну.",
+        "Якщо щось не так — посадка, жар, пошкоджена деталь — просто відповідайте на цей лист. Його читає людина.",
+      ],
+      primaryLabel: "Зібрати сет",
+      secondaryLabel: "Мої замовлення",
+    },
+  },
+};
+
+export const POST_PURCHASE_LINKS: Record<PostPurchaseStep, { primary: string; secondary: string }> = {
+  P1: { primary: "/setup", secondary: "/account/orders" },
 };
 
 /** Where each step's buttons point. Paths only — `url()` adds site + locale. */

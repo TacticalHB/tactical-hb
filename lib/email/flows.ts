@@ -6,17 +6,21 @@ import { renderEmail, renderEmailText, type EmailProductRow } from "./template";
 import {
   WELCOME,
   CART,
+  POST_PURCHASE,
   WELCOME_LINKS,
   CART_LINKS,
+  POST_PURCHASE_LINKS,
   url,
   type CartStep,
   type EmailCopy,
   type Locale,
+  type PostPurchaseStep,
   type WelcomeStep,
 } from "./content";
 import { priceCart, type PricedLineInput } from "@/lib/pricing";
 import { describeLine } from "@/lib/cart-display";
 import { emailProductImage } from "./product-image";
+import { products } from "@/lib/products";
 import { currencyForLocale, formatMoney } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
@@ -99,6 +103,16 @@ const CART_STEPS = Object.keys(CART_OFFSETS) as CartStep[];
 const W3_SLUG = "hmd-tct-classic";
 
 /**
+ * Days between the shipped mail and the post-purchase one.
+ *
+ * The brief allows two to three; three is used so it can never land on the
+ * same day as the courier notice even if the shipped mail went out late in the
+ * evening and the sweep runs early. THE PARCEL SHOULD ARRIVE FIRST — this mail
+ * asks how the session went, which is nonsense if the box is still in transit.
+ */
+const P1_DELAY_DAYS = 3;
+
+/**
  * How long after a recovery sequence someone may enter another one. Tune here
  * — it is the difference between a helpful reminder and a weekly nag.
  */
@@ -124,13 +138,16 @@ export function isEmail(email: string): boolean {
 
 export const welcomeJobKey = (email: string) => `welcome:${normaliseEmail(email)}`;
 export const cartJobKey = (email: string) => `cart:${normaliseEmail(email)}`;
+/** Keyed on the ORDER, not the address: one post-purchase mail per parcel,
+    and a customer who buys twice hears from us about both. */
+export const p1JobKey = (orderId: string) => `p1:${orderId}`;
 
 /* ---- rows ---------------------------------------------------------------- */
 
 type JobRow = {
   id: string;
   job_key: string;
-  flow: "welcome" | "cart";
+  flow: "welcome" | "cart" | "p1";
   step: string;
   recipient: string;
   locale: Locale;
@@ -526,6 +543,66 @@ export async function recordCartSnapshot(input: {
   return { ok: true, tracked: true };
 }
 
+/* ---- post-purchase (P1) -------------------------------------------------- */
+
+/**
+ * The parcel is on its way. Schedule the one post-purchase mail.
+ *
+ * CALLED FROM THE SHIPPED PATH, right after the courier notice goes out, so
+ * the trigger is the shipped moment and not payment — a nurture mail sent on
+ * `paid` would arrive while the customer is still watching for a tracking
+ * number, and would compete with the mail that carries it.
+ *
+ * IDEMPOTENT BY KEY, not by a flag we maintain: 'p1:{order id}' plus the
+ * partial unique index means a second call for the same order cannot insert.
+ * Two tracking runs claiming the same parcel therefore cannot produce two
+ * mails even if both reach this line.
+ *
+ * NEVER THROWS. It is called from the tracking sweep, which also books
+ * waybills and sends the shipping mail; a nurture mail that cannot be
+ * scheduled must not take that down.
+ */
+export async function scheduleP1(order: {
+  id: string;
+  email: string | null;
+  locale: string | null;
+}): Promise<boolean> {
+  if (!order.email) return false;
+  const email = normaliseEmail(order.email);
+  if (!isEmail(email)) return false;
+
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.from("email_jobs").insert({
+      job_key: p1JobKey(order.id),
+      flow: "p1",
+      step: "P1",
+      recipient: email,
+      locale: order.locale === "uk" ? "uk" : "en",
+      send_after: new Date(Date.now() + P1_DELAY_DAYS * DAY).toISOString(),
+      payload: { order_id: order.id },
+    });
+    if (error && error.code !== "23505") {
+      console.error("[email] P1 schedule failed:", error.code, error.message);
+      return false;
+    }
+    return !error;
+  } catch (e) {
+    console.error("[email] P1 schedule threw:", e);
+    return false;
+  }
+}
+
+/** Stop a pending P1 — the order was cancelled. */
+export async function cancelP1(orderId: string, reason = "order_cancelled"): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    await cancelFlow(admin, p1JobKey(orderId), reason);
+  } catch (e) {
+    console.error("[email] P1 cancel failed for", orderId, e);
+  }
+}
+
 /**
  * The order was paid. Stop the recovery flow.
  *
@@ -672,20 +749,39 @@ async function sendJob(admin: SupabaseClient, job: JobRow): Promise<Outcome> {
     .maybeSingle();
   const sub = data as SubscriberRow | null;
 
-  if (!sub || !sub.marketing_opt_in || sub.unsubscribed_at) {
-    await markCancelled(admin, job.id, "no_consent");
+  /* CONSENT IS NOT THE SAME QUESTION FOR ALL THREE FLOWS.
+   *
+   * Welcome and cart are marketing to someone who asked for marketing, so they
+   * require an opted-in subscriber row and stop without one.
+   *
+   * P1 goes to somebody who has just bought something. Requiring a newsletter
+   * subscription would silence it for nearly every real customer, since buying
+   * a bowl is not subscribing to anything. So it sends without a subscriber
+   * row — but an explicit unsubscribe still stops it, which is what "honour
+   * unsubscribe where the stack supports it" has to mean if it means anything.
+   * An address that has pressed unsubscribe hears nothing further from any
+   * flow here. */
+  const unsubscribed = !!sub?.unsubscribed_at;
+  const optedIn = !!sub && sub.marketing_opt_in && !sub.unsubscribed_at;
+  const allowed = job.flow === "p1" ? !unsubscribed : optedIn;
+
+  if (!allowed) {
+    await markCancelled(admin, job.id, unsubscribed ? "unsubscribed" : "no_consent");
     return "cancelled";
   }
 
-  // The subscriber row is the authority on language: it holds the locale
-  // captured at signup, and if they have since changed it on the preferences
-  // page that choice outranks the one frozen into the job.
-  const locale: Locale = sub.locale === "uk" ? "uk" : "en";
+  // The subscriber row is the authority on language when there is one: it
+  // holds the locale captured at signup, and a change on the preferences page
+  // outranks the one frozen into the job. A P1 recipient may have no row at
+  // all, in which case the order's own locale — already on the job — stands.
+  const locale: Locale = sub ? (sub.locale === "uk" ? "uk" : "en") : job.locale;
 
   const built =
     job.flow === "welcome"
       ? await buildWelcome(job, locale, sub)
-      : await buildCart(admin, job, locale, sub);
+      : job.flow === "p1"
+        ? await buildP1(admin, job, locale, sub)
+        : await buildCart(admin, job, locale, sub);
 
   if (built.kind === "cancel") {
     await markCancelled(admin, job.id, built.reason);
@@ -764,7 +860,8 @@ function listHeaders(token: string): Record<string, string> {
   };
 }
 
-async function buildWelcome(job: JobRow, locale: Locale, sub: SubscriberRow): Promise<Built> {
+async function buildWelcome(job: JobRow, locale: Locale, sub: SubscriberRow | null): Promise<Built> {
+  if (!sub) return { kind: "cancel", reason: "no_consent" };
   const step = job.step as WelcomeStep;
   const copy: EmailCopy | undefined = WELCOME[step]?.[locale];
   if (!copy) return { kind: "cancel", reason: "unknown_step" };
@@ -813,12 +910,99 @@ async function buildWelcome(job: JobRow, locale: Locale, sub: SubscriberRow): Pr
   return { kind: "send", subject: copy.subject, html, text, headers: listHeaders(sub.token) };
 }
 
+/**
+ * The post-purchase mail.
+ *
+ * FOUR REASONS IT MIGHT NOT GO, all checked here rather than trusted from when
+ * the job was written three days ago:
+ *
+ *   the order was cancelled       — the parcel is not with them
+ *   the order vanished            — nothing to write about
+ *   they bought the whole kit     — the mail's one argument does not apply
+ *   they unsubscribed             — handled by the caller, before this runs
+ *
+ * THE FULL-KIT SKIP is the brief's optional rule, and it is cheap because the
+ * catalogue already knows each slug's category: an order carrying a bowl, a
+ * heat device and a wind cover has nothing to be sold on "finish the system",
+ * and sending it anyway is how a considered mail becomes noise.
+ */
+async function buildP1(
+  admin: SupabaseClient,
+  job: JobRow,
+  locale: Locale,
+  sub: SubscriberRow | null
+): Promise<Built> {
+  const copy: EmailCopy | undefined = POST_PURCHASE.P1?.[locale];
+  if (!copy) return { kind: "cancel", reason: "unknown_step" };
+
+  const orderId = typeof job.payload?.order_id === "string" ? job.payload.order_id : null;
+  if (!orderId) return { kind: "cancel", reason: "no_order" };
+
+  const { data, error } = await admin
+    .from("orders")
+    .select("id, status, order_items(product_id)")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  // A read failure is not proof of anything, so it postpones rather than kills.
+  if (error) throw new Error(`P1 order check failed: ${error.message}`);
+  if (!data) return { kind: "cancel", reason: "order_missing" };
+
+  const row = data as { status?: string; order_items?: { product_id?: string }[] };
+  if (row.status === "cancelled") return { kind: "cancel", reason: "order_cancelled" };
+
+  const categories = new Set(
+    (row.order_items ?? [])
+      .map((it) => products.find((p) => p.slug === it.product_id)?.category)
+      .filter(Boolean)
+  );
+  if (categories.has("bowl") && categories.has("hmd") && categories.has("windcover")) {
+    return { kind: "cancel", reason: "already_full_kit" };
+  }
+
+  const links = POST_PURCHASE_LINKS.P1;
+  /* Someone with no subscriber row has no token, so there is no preference
+     page to send them to and no one-click header to set. The footer still
+     carries the newsletter's unsubscribe route, which is where an unhappy
+     recipient goes; it is just not personalised. */
+  const token = sub?.token ?? null;
+  const unsubscribeUrl = token
+    ? `${SITE}/${locale}/newsletter/preferences?token=${token}&action=unsubscribe`
+    : `${SITE}/${locale}/newsletter`;
+  const preferencesUrl = token
+    ? `${SITE}/${locale}/newsletter/preferences?token=${token}`
+    : `${SITE}/${locale}/newsletter`;
+
+  const input = {
+    locale,
+    preheader: copy.preheader,
+    headline: copy.headline,
+    paragraphs: copy.paragraphs,
+    bullets: copy.bullets,
+    primaryCta: { label: copy.primaryLabel, url: url(locale, links.primary) },
+    secondaryCta: copy.secondaryLabel
+      ? { label: copy.secondaryLabel, url: url(locale, links.secondary) }
+      : undefined,
+    unsubscribeUrl,
+    preferencesUrl,
+  } as const;
+
+  return {
+    kind: "send",
+    subject: copy.subject,
+    html: renderEmail(input),
+    text: renderEmailText(input),
+    headers: token ? listHeaders(token) : {},
+  };
+}
+
 async function buildCart(
   admin: SupabaseClient,
   job: JobRow,
   locale: Locale,
-  sub: SubscriberRow
+  sub: SubscriberRow | null
 ): Promise<Built> {
+  if (!sub) return { kind: "cancel", reason: "no_consent" };
   const step = job.step as CartStep;
   const copy: EmailCopy | undefined = CART[step]?.[locale];
   if (!copy) return { kind: "cancel", reason: "unknown_step" };

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runDueJobs } from "@/lib/email/flows";
+import { runWholesaleDormant } from "@/lib/wholesale-dormant";
 
 /* ---------------------------------------------------------------------------
    Cron: send whatever the email flows have become due.
@@ -60,8 +61,19 @@ async function run(request: NextRequest) {
   }
 
   const result = await runDueJobs(25);
-  console.log("[cron/email-queue]", JSON.stringify(result));
-  return NextResponse.json({ ok: true, ...result });
+
+  /* The wholesale dormant scan rides the same sweep. It is a SCAN rather than
+     a queued flow — nothing triggers it, a pass simply asks who has gone quiet
+     — so it has no rows in email_jobs and runs beside them instead.
+
+     SECOND, and awaited separately: the customer queue is the one with time
+     pressure, and a partner letter must never be the reason a welcome mail
+     misses its window. Neither throws, so one failing still lets the other
+     through. */
+  const dormant = await runWholesaleDormant();
+
+  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant }));
+  return NextResponse.json({ ok: true, ...result, dormant });
 }
 
 export async function GET(request: NextRequest) {

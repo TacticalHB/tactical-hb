@@ -3,6 +3,8 @@ import { renderEmail, renderEmailText } from "@/lib/email/template";
 import {
   CART,
   CART_LINKS,
+  POST_PURCHASE,
+  POST_PURCHASE_LINKS,
   WELCOME,
   WELCOME_LINKS,
   url,
@@ -92,27 +94,35 @@ export async function GET(request: NextRequest) {
   const step = raw.toUpperCase();
 
   const isWelcome = step.startsWith("W");
-  const copy = isWelcome
-    ? WELCOME[step as WelcomeStep]?.[locale]
-    : CART[step as CartStep]?.[locale];
+  const isP1 = step === "P1";
+  const copy = isP1
+    ? POST_PURCHASE.P1?.[locale]
+    : isWelcome
+      ? WELCOME[step as WelcomeStep]?.[locale]
+      : CART[step as CartStep]?.[locale];
 
   if (!copy) {
     return new NextResponse(
-      `Unknown step "${step}". Try W1–W4, C1–C3, or ${TRANSACTIONAL_KINDS.join(" / ")}.`,
+      `Unknown step "${step}". Try W1–W4, C1–C3, P1, or ${TRANSACTIONAL_KINDS.join(" / ")}.`,
       { status: 400 }
     );
   }
 
-  const links = isWelcome
-    ? WELCOME_LINKS[step as WelcomeStep]
-    : CART_LINKS[step as CartStep];
+  const links = isP1
+    ? POST_PURCHASE_LINKS.P1
+    : isWelcome
+      ? WELCOME_LINKS[step as WelcomeStep]
+      : CART_LINKS[step as CartStep];
 
   // Same shape the sender builds, from the same catalogue and pricer.
-  const sample = isWelcome
-    ? step === "W3"
-      ? [{ slug: "hmd-tct-classic", qty: 1 }]
-      : []
-    : SAMPLE_CART;
+  // P1 shows no product rows: it is about the setup as an idea, not a basket.
+  const sample = isP1
+    ? []
+    : isWelcome
+      ? step === "W3"
+        ? [{ slug: "hmd-tct-classic", qty: 1 }]
+        : []
+      : SAMPLE_CART;
 
   const site = SITE_BASE;
   // The sender's own row builder — same prices, same finish labels, same images.

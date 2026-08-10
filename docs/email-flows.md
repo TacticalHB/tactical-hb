@@ -18,6 +18,13 @@ blocks the request that starts it.
 | **C1** | +1 hour after the bag last changed | Your bag is waiting | `/cart`, `/products` |
 | **C2** | +24 hours | Still thinking it through? | `/cart`, `/setup` |
 | **C3** | +72 hours | Last note on your bag | `/cart`, `/contact` |
+| **P1** | +3 days after the **shipped** mail | How is the session? | `/setup`, `/account/orders` |
+
+And one B2B flow that is not part of the consumer queue at all:
+
+| Flow | When | Subject (EN) | Goes to |
+|------|------|--------------|---------|
+| **wholesale dormant** | 90 days quiet (120 if never ordered) | Checking in — Tactical HB wholesale | the partner's own address, reply-to sales |
 
 Every URL is built by `url(locale, path)` in `lib/email/content.ts`, so a
 Ukrainian mail links to `/uk/cart` and an English one to `/en/cart`. No path is
@@ -113,6 +120,90 @@ To put white back it is one constant — `ACCENT_TEXT` in `lib/email-theme.ts`.
 links; the transactional letters pass nothing. An order confirmation must not
 offer to unsubscribe from itself, and the mail rules that require a
 `List-Unsubscribe` header apply to marketing, not to receipts.
+
+---
+
+## 2c. Post-purchase (P1) and the wholesale dormant check-in
+
+### P1 hangs off the SHIPPED moment, never off payment
+
+The trigger is `lib/order-tracking.ts`, immediately after the courier notice
+goes out — not fulfilment. A nurture mail sent on `paid` would arrive while the
+customer is still watching for a tracking number, competing with the mail that
+carries it.
+
+**Three days**, from `P1_DELAY_DAYS`. The brief allows two to three; three is
+used so it cannot land on the same day as the courier notice even if that went
+out late and the sweep runs early. The parcel should arrive before something
+asks how the session went.
+
+`p1:{order id}` is the job key — keyed on the **order**, not the address, so a
+customer who buys twice hears about both, and the partial unique index makes a
+duplicate impossible without a line of application code.
+
+**Four reasons it does not send**, all re-checked at send time rather than
+trusted from three days earlier:
+
+| | |
+|---|---|
+| order cancelled | `status = 'cancelled'` |
+| order gone | nothing to write about |
+| **full kit already** | the order carries a bowl **and** a heat device **and** a wind cover, so the mail's one argument does not apply |
+| unsubscribed | see below |
+
+### P1's consent rule is not the welcome flow's
+
+Welcome and cart require an opted-in subscriber row. P1 does **not** — it goes
+to somebody who has just bought something, and requiring a newsletter
+subscription would silence it for nearly every real customer, since buying a
+bowl is not subscribing to anything.
+
+An **explicit unsubscribe still stops it.** An address that has pressed
+unsubscribe hears nothing further from any flow here. That is what "honour
+unsubscribe where the stack supports it" has to mean if it means anything.
+
+A P1 recipient may have no subscriber row at all, so there may be no token —
+in which case the footer links to the newsletter page rather than a
+personalised preference page, and no one-click header is set.
+
+### The wholesale dormant scan is a SCAN, not a queue
+
+Nothing *happens* to trigger it — no click, no purchase, no signup — so there
+is no event to hang a job on. A nightly pass asks who has gone quiet, and asks
+it **at the moment of sending**. That is why "suppress when a new order
+arrives" needs no cancellation code: a partner who ordered yesterday simply
+does not match tomorrow. A queued job would have had to be found and cancelled.
+
+| Constant | Value | Meaning |
+|---|---|---|
+| `DORMANT_AFTER_DAYS` | 90 | quiet since their last order |
+| `NEVER_ORDERED_AFTER_DAYS` | 120 | approved but never ordered, measured from `created_at` |
+| `FOLLOW_UP_COOLDOWN_DAYS` | 90 | minimum gap between any two letters |
+| `MAX_PER_RUN` | 10 | ceiling per sweep |
+
+**Active partners only.** `dormant` as a *status* is the founder's own decision
+that a relationship has ended, and a letter chasing it would contradict them;
+`lead` and `contacted` have no relationship to revive yet.
+
+**The cooldown lives in `partner_messages`**, not in a column of its own. That
+table already records every letter sent to a partner — founder-written and
+automatic alike — so it already answers "when did we last write to them", and
+both kinds must count against the same silence. A `last_follow_up_at` column
+would be a second answer to the same question, free to drift from the first.
+
+**The two lists never meet.** The dormant scan reads `wholesale_partners`,
+`partner_messages` and `orders`, and nothing else; it never reads or writes
+`subscribers`. It sends through `buildFollowUpMail` — the plain letter shell
+the founder's own partner mail uses — not the consumer marketing shell, so
+what lands in a buyer's inbox reads as correspondence rather than a campaign.
+No discount in v1: a percentage in a first check-in tells a buyer their price
+was negotiable all along.
+
+`sent_by` records `system:dormant-cron`. Migration 0023 made that column
+NOT NULL because "a row that cannot name its human has no business existing" —
+true when only a founder could send. The column stays NOT NULL; what changed is
+that "who" may now be a process, and the marker is a form no email address can
+collide with.
 
 ---
 

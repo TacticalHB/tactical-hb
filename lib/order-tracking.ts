@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { trackParcels, TRACK_BATCH_MAX, type ParcelStage } from "@/lib/nova-poshta-tracking";
 import { buildShippedEmail } from "@/lib/shipping-email";
+import { scheduleP1 } from "@/lib/email/flows";
 import { sendMail } from "@/lib/email";
 import { ADMIN_EMAIL } from "@/lib/contact-info";
 
@@ -121,6 +122,14 @@ async function sendShippedEmail(o: TrackableOrder): Promise<boolean> {
   }
 
   console.log("[tracking] shipping email sent for", o.external_ref, "to", o.email);
+
+  /* The post-purchase mail hangs off THIS moment, not off payment: three days
+     from here the parcel has had time to arrive, and the customer is not still
+     waiting on the tracking number this mail would have competed with.
+     Scheduling only, never sending — and it cannot throw, so a nurture mail
+     can never cost us a shipping notification. */
+  await scheduleP1({ id: o.id, email: o.email, locale: o.locale });
+
   return true;
 }
 

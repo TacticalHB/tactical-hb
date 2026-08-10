@@ -1,4 +1,5 @@
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import AboutDossier from "@/components/AboutDossier";
 
@@ -65,6 +66,41 @@ function AboutContent() {
             </div>
           </Reveal>
         </div>
+      </section>
+
+      {/* THE WAY IN TO THE OPERATIVE FILE.
+          The dark panel above already carries a dossier tab, but it is a 10px
+          mono link in a corner that opens a modal — three clicks and a hunt
+          before anyone reaches /mr-hb, which is to say nobody did. This is a
+          plain, findable row that goes straight there. The modal stays exactly
+          as it was; this is the front door beside it. */}
+      <section className="page-container pb-24">
+        <Reveal>
+          <Link
+            href={`/${uk ? "uk" : "en"}/mr-hb`}
+            className="group flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8 p-7 sm:p-9 transition-opacity hover:opacity-90"
+            style={{ background: "var(--ink)", color: "#f4f3f0" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-10 h-10 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] tracking-[0.28em] uppercase mb-1.5" style={{ color: "var(--accent)" }}>
+                {t("file_kicker")}
+              </div>
+              <div className="font-display text-3xl leading-none mb-2">{t("file_title")}</div>
+              <p className="text-[14px] leading-relaxed max-w-lg" style={{ color: "rgba(255,255,255,0.55)" }}>
+                {t("file_body")}
+              </p>
+            </div>
+            <span
+              className="shrink-0 inline-flex items-center gap-3 text-[12px] font-semibold tracking-[0.2em] uppercase whitespace-nowrap"
+              style={{ color: "var(--accent)" }}
+            >
+              {t("file_cta")}
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </span>
+          </Link>
+        </Reveal>
       </section>
 
       <section className="py-24" style={{ background: "var(--bg-soft)", borderTop: "1px solid var(--border)" }}>

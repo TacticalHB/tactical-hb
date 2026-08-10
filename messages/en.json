@@ -124,7 +124,11 @@
     "returns_refund": "Refunds are issued to the original payment method within 14 days of us receiving and inspecting the returned item.",
     "pay_method_1": "Plata by Mono",
     "pay_method_2": "Visa",
-    "pay_method_3": "Mastercard"
+    "pay_method_3": "Mastercard",
+    "file_kicker": "Operative file",
+    "file_title": "Mr HB",
+    "file_body": "The standard behind the mark — the bay, the bench, and the case, in three short beats.",
+    "file_cta": "Open the file"
   },
   "contact": {
     "title": "Get in Touch",

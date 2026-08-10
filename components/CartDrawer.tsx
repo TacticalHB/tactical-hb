@@ -70,7 +70,8 @@ export default function CartDrawer({ locale }: { locale: string }) {
                   className="flex gap-4 py-6"
                   style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}
                 >
-                  <div className="relative w-20 h-20 shrink-0" style={{ background: "var(--bg-soft)" }}>
+                  {/* The studio plate — see CartPageClient. */}
+                  <div className="relative w-20 h-20 shrink-0" style={{ background: "#f5f5f5" }}>
                     <Image src={d.image} alt={d.name} fill sizes="80px" className="object-contain p-1.5" />
                   </div>
                   <div className="flex-1 min-w-0">

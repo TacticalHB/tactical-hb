@@ -45,7 +45,8 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
           <div className="flex gap-5 px-7">
             <div
               className="relative w-[104px] h-[104px] shrink-0"
-              style={{ background: "var(--bg-soft)" }}
+              /* The studio plate — see CartPageClient. */
+              style={{ background: "#f5f5f5" }}
             >
               <Image src={d.image} alt={d.name} fill sizes="104px" className="object-contain p-2" />
             </div>

@@ -77,7 +77,8 @@ export default function OrderSummaryPanel({
           if (!d) return null;
           return (
             <li key={lineKey(l.slug, l.options)} className="flex gap-4">
-              <div className="relative w-14 h-14 shrink-0" style={{ background: "var(--bg-card)" }}>
+              {/* The studio plate — see CartPageClient. */}
+              <div className="relative w-14 h-14 shrink-0" style={{ background: "#f5f5f5" }}>
                 <Image src={d.image} alt={d.name} fill sizes="56px" className="object-contain p-1" />
               </div>
               <div className="flex-1 min-w-0">

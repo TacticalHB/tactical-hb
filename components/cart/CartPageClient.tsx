@@ -107,7 +107,15 @@ export default function CartPageClient({
                 <Link
                   href={`/${locale}/products/${l.slug}`}
                   className="relative w-full sm:w-[168px] h-[200px] sm:h-[168px] shrink-0"
-                  style={{ background: "var(--bg-soft)" }}
+                  /* #f5f5f5, the catalogue's studio plate — the colour the
+                     product photography is actually shot on, and what the
+                     products grid and the PDP gallery already put behind a
+                     photo. NOT var(--bg-soft): that is the page's warm cream,
+                     and an OPAQUE photo sitting on it reads as a lighter
+                     rectangle floating in the tile. The cut-out PNGs hid this
+                     for a while — a transparent product takes whatever colour
+                     is behind it and looks right on either. */
+                  style={{ background: "#f5f5f5" }}
                 >
                   <Image
                     src={d.image}

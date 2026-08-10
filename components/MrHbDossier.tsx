@@ -44,6 +44,9 @@ export function dossierCopy(uk: boolean) {
     openFile: uk ? "Відкрити справу" : "Open file",
     tracking: uk ? "0.12em" : "0.22em",
     close: uk ? "Закрити" : "Close",
+    /* The way from the modal to the full page. The dossier shows the letter
+       and stops; the operative file is the rest of it. */
+    fullFile: uk ? "Відкрити повну справу" : "Open the full file",
     title: uk ? "Справа: Mr HB" : "File: Mr HB",
     strip: uk ? "TCT-01 · MR HB · ВНУТРІШНЄ" : "TCT-01 · MR HB · INTERNAL",
   };
@@ -145,6 +148,7 @@ export default function MrHbDossier({
     title: C.title,
     openFile: C.openFile,
     close: C.close,
+    fullFile: C.fullFile,
     envelopeAlt: uk
       ? "Запечатаний конверт із печаткою TCT"
       : "A sealed envelope bearing the TCT seal",
@@ -259,6 +263,20 @@ export default function MrHbDossier({
                 <p key={p.slice(0, 24)}>{p}</p>
               ))}
             </figcaption>
+
+            {/* ONE STEP FURTHER, offered only once the letter has been read —
+                the modal keeps doing exactly what it did, and the full file is
+                a door at the end of it rather than a competing button. Both
+                the homepage monitor and the About panel open this same modal,
+                so this single link serves both entry points. */}
+            <a
+              href={`/${uk ? "uk" : "en"}/mr-hb`}
+              className="mt-5 inline-flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] transition-opacity hover:opacity-70"
+              style={{ color: "var(--accent)" }}
+            >
+              <span aria-hidden="true" style={{ display: "block", width: 22, height: 1, background: "var(--accent)" }} />
+              {L.fullFile}
+            </a>
           </figure>
         )}
       </div>

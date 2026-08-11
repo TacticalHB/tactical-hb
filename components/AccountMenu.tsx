@@ -86,7 +86,11 @@ export default function AccountMenu({ locale }: { locale: string }) {
     <div className="relative flex items-center" ref={wrapRef}>
       <button
         onClick={() => (isAdmin ? router.push(`/${locale}/admin`) : setOpen((o) => !o))}
-        className="nav-link flex items-center justify-center gap-2"
+        /* 44px tall so the thumb has something to hit — it was a bare 21px
+           icon. min-w rather than a fixed width because on lg it also carries
+           the customer's first name beside the mark. The negative inline
+           margin keeps the icon where it sat in the row. */
+        className="nav-link flex items-center justify-center gap-2 h-11 min-w-11 -mx-1.5 shrink-0"
         aria-label={isAdmin ? (uk ? "Командний центр" : "Command centre") : L.account}
         aria-expanded={isAdmin ? undefined : open}
       >

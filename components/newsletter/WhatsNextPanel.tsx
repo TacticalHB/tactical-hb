@@ -109,7 +109,7 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
 
       <Link
         href={`/${locale}/setup`}
-        className="text-[13px] underline underline-offset-4"
+        className="inline-flex items-center min-h-11 text-[13px] underline underline-offset-4"
         style={{ color: "var(--text-muted)" }}
       >
         {c("suggest_build")}

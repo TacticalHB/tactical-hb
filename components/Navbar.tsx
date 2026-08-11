@@ -54,7 +54,18 @@ export default function Navbar({ locale }: { locale: string }) {
     { href: `/${locale}/contact`, label: t("contact") },
   ];
 
-  const iconBtn = "nav-link relative flex items-center justify-center";
+  /* THE HIT AREA IS 44px, THE ICON STAYS 20px. Measured at 375 these were the
+     four things a phone user actually presses — search, account, bag, menu —
+     and they were 20×20, 21×21, 20×22 and 24×24. Under a thumb that is a
+     coin-toss between opening the bag and opening the menu.
+
+     The box grows, not the artwork: `w-11 h-11` with the icon centred, and
+     `-mx-1.5` pulling the boxes back together so the icons stay the same
+     distance apart as before. Without that the row would grow by ~70px and
+     shove the wordmark off a 375 screen — the fix for one defect creating a
+     worse one. */
+  const iconBtn =
+    "nav-link relative flex items-center justify-center w-11 h-11 -mx-1.5 shrink-0";
 
   const bag = (
     <button
@@ -101,7 +112,9 @@ export default function Navbar({ locale }: { locale: string }) {
         <div className="page-container pl-5 sm:pl-16 md:pl-20 h-16 flex items-center justify-between gap-3">
           <Link
             href={`/${locale}`}
-            className="font-display text-xl md:text-2xl tracking-widest whitespace-nowrap"
+            /* flex + h-11 so the home link is a full-height target rather than
+               a 28px band of text in the middle of the bar. */
+            className="font-display text-xl md:text-2xl tracking-widest whitespace-nowrap flex items-center gap-[0.3em] h-11 shrink-0"
             style={{ color: "#f4f3f0" }}
           >
             TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
@@ -127,14 +140,16 @@ export default function Navbar({ locale }: { locale: string }) {
             </Link>
           </nav>
 
-          {/* Mobile right cluster */}
-          <div className="flex md:hidden items-center gap-5 ml-auto">
+          {/* Mobile right cluster. gap-1 rather than gap-5: the buttons now
+              carry 44px boxes with 12px of padding built in, so the old 20px
+              gap on top of that would have spread four icons across 250px. */}
+          <div className="flex md:hidden items-center gap-1 ml-auto">
             <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label={a("search")}>
               <SearchIcon />
             </button>
             <AccountMenu locale={locale} />
             {bag}
-            <button className="nav-link" onClick={() => setMenuOpen(!menuOpen)} aria-label={a("menu")}>
+            <button className={iconBtn} onClick={() => setMenuOpen(!menuOpen)} aria-label={a("menu")} aria-expanded={menuOpen}>
               <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 {menuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
               </svg>
@@ -142,17 +157,39 @@ export default function Navbar({ locale }: { locale: string }) {
           </div>
         </div>
 
+        {/* The menu sheet.
+
+            EVERY ROW IS 44px TALL AND FULL WIDTH. They were 20px lines of text
+            with 20px between them, which on a phone means the gap between two
+            links is bigger than either link — the classic mis-tap.
+
+            IT SCROLLS RATHER THAN OVERFLOWING. Five rows fit any phone today,
+            but the sheet hangs off a fixed header and a sixth link, or a
+            landscape phone at 375×390, would push the last row under the fold
+            with no way to reach it. max-height is measured from the bar's own
+            64px so it can never exceed what is left of the screen.
+
+            The bottom padding carries the safe-area inset, so on a notched
+            device in landscape the final row does not sit under the home
+            indicator. */}
         {menuOpen && (
-          <div className="md:hidden border-t px-6 py-6 flex flex-col gap-5"
-            style={{ background: "#1c1f24", borderColor: "var(--border-dark)" }}>
+          <div
+            className="md:hidden border-t px-6 pt-2 flex flex-col overflow-y-auto overscroll-contain"
+            style={{
+              background: "#1c1f24",
+              borderColor: "var(--border-dark)",
+              maxHeight: "calc(100dvh - 64px)",
+              paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
+            }}
+          >
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-                className="nav-link text-xs tracking-[0.2em] uppercase">
+                className="nav-link text-xs tracking-[0.2em] uppercase flex items-center h-11">
                 {link.label}
               </Link>
             ))}
             <Link href={otherLocalePath} onClick={() => setMenuOpen(false)}
-              className="nav-link text-xs tracking-[0.2em] uppercase" lang={otherLocale}>
+              className="nav-link text-xs tracking-[0.2em] uppercase flex items-center h-11" lang={otherLocale}>
               {localeLabel(otherLocale)}
             </Link>
           </div>

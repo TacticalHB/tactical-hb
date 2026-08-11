@@ -61,9 +61,17 @@ export default function SlideOver({
         aria-modal={open}
         aria-label={label}
         aria-hidden={!open}
-        className="fixed top-0 right-0 h-full w-full flex flex-col"
+        className="fixed top-0 right-0 w-full flex flex-col"
         style={{
           maxWidth: width,
+          /* dvh, NOT h-full. Every drawer on the site is this component — the
+             bag, the added-to-bag panel, search, the dossier — and `h-full`
+             resolves against the layout viewport, which on iOS Safari is the
+             tall one that exists only while the address bar is retracted. With
+             the bar showing, the panel was ~90px taller than the screen and
+             its footer, which is where "Checkout" lives, sat below the fold
+             with nothing to scroll. dvh tracks the bar as it moves. */
+          height: "100dvh",
           zIndex: z + 1,
           background: "#ffffff",
           transform: open ? "translateX(0)" : "translateX(100%)",
@@ -94,7 +102,10 @@ export function CloseButton({ onClick, label }: { onClick: () => void; label: st
     <button
       onClick={onClick}
       aria-label={label}
-      className="p-1 transition-opacity hover:opacity-60"
+      /* 44px box, negative margin so the glyph stays put. This is the close
+         control for every drawer on the site and it was a 28px target in the
+         top corner — the least comfortable place on a phone to reach. */
+      className="flex items-center justify-center w-11 h-11 -m-2.5 shrink-0 transition-opacity hover:opacity-60"
       style={{ color: "var(--text)" }}
     >
       <svg width="20" height="20" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">

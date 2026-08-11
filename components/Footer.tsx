@@ -46,14 +46,17 @@ export default function Footer() {
             privacy policy is the one the consent checkboxes point at, which is
             why it has to be reachable from every page rather than only from
             the form that mentions it. */}
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link">
+        {/* gap-y-0 with 44px rows: the links now carry their own vertical padding,
+            so the old 12px gutter on top of it just spread three lines of
+            text down the page. */}
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-0">
+          <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
             {t("link_delivery")}
           </Link>
-          <Link href={`/${locale}/offer`} className="text-sm tracking-[0.2em] uppercase nav-link">
+          <Link href={`/${locale}/offer`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
             {t("link_offer")}
           </Link>
-          <Link href={`/${locale}/privacy`} className="text-sm tracking-[0.2em] uppercase nav-link">
+          <Link href={`/${locale}/privacy`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
             {t("link_privacy")}
           </Link>
         </div>
@@ -71,7 +74,7 @@ export default function Footer() {
               </div>
               <a
                 href={`mailto:${c.email}`}
-                className="text-sm break-words transition-colors"
+                className="inline-flex items-center min-h-11 text-sm break-words transition-colors"
                 style={{ color: "#c9c5bd" }}
               >
                 {c.email}

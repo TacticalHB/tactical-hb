@@ -155,7 +155,7 @@ export default function OperativeFile({ locale }: { locale: string }) {
         className="shrink-0 flex items-center justify-between gap-4 px-5 sm:px-8"
         style={{ height: 60, borderBottom: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <Link href={`/${locale}`} className="flex items-center gap-3 transition-opacity hover:opacity-70">
+        <Link href={`/${locale}`} className="flex items-center gap-3 h-11 shrink-0 transition-opacity hover:opacity-70">
           {/* tct-logo.svg is white artwork, which is exactly right on this ground. */}
           <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-6 h-6" />
           <span className="text-[13px] font-semibold tracking-[0.18em] uppercase">Tactical HB</span>
@@ -203,7 +203,7 @@ export default function OperativeFile({ locale }: { locale: string }) {
           {/* Skip is a real exit, not a state change — it leaves for the shop. */}
           <Link
             href={`/${locale}/products`}
-            className="text-[11px] tracking-[0.18em] uppercase transition-opacity hover:opacity-70"
+            className="flex items-center h-11 text-[11px] tracking-[0.18em] uppercase transition-opacity hover:opacity-70"
             style={{ color: "rgba(255,255,255,0.4)" }}
           >
             {t("skip")}
@@ -290,7 +290,9 @@ export default function OperativeFile({ locale }: { locale: string }) {
           <button
             type="button"
             onClick={() => setBeat(1)}
-            className="mt-11 flex items-center gap-4 text-[12px] tracking-[0.28em] uppercase transition-opacity hover:opacity-75"
+            /* 44px tall: this was an 18px line of text and it is the only control
+               on the opening screen of the whole experience. */
+            className="mt-11 flex items-center justify-center gap-4 h-11 px-2 text-[12px] tracking-[0.28em] uppercase transition-opacity hover:opacity-75"
           >
             <span aria-hidden="true" style={{ display: "block", width: 34, height: 1, background: ACCENT }} />
             {t("env_open")}

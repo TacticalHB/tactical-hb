@@ -279,7 +279,7 @@ function FlagshipFile({ locale }: { locale: string }) {
             </Link>
             <Link
               href={`/${locale}/products`}
-              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              className="inline-flex items-center min-h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{ color: "var(--text-muted)" }}
             >
               {t("back")}

@@ -341,6 +341,11 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  /* The underline is the design, so the height has to come from padding above
+     it rather than from a box around it — otherwise the rule detaches from the
+     words. 23px tall was under a thumb's resolution; this makes it 44 without
+     moving the line. */
+  padding-top: 1.35rem;
   padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--border-strong);
   transition: border-color var(--motion-base) var(--ease-out), color var(--motion-base) var(--ease-out);
@@ -458,6 +463,33 @@ body {
 }
 .field:focus { border-color: var(--accent-ink); }
 .field::placeholder { color: var(--text-faint); }
+
+/* ---------------------------------------------------------------------------
+   SAFARI ON iOS ZOOMS INTO ANY FIELD SMALLER THAN 16px, and does not zoom back
+   out afterwards. At 0.9rem — 14.4px — that was every form on the site: sign
+   in, register, checkout, wholesale, contact, newsletter, the flagship
+   waitlist. Tapping the first field lurched the page to ~114% and left the
+   customer pinching their way through the rest of it, which on a checkout is
+   the difference between an order and an abandonment.
+
+   16px on coarse pointers only, so the desktop scale is untouched. The
+   pointer query rather than a width breakpoint: it is the input device that
+   decides whether the zoom happens, not the window.
+--------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .field,
+  .field-dark,
+  select.field,
+  textarea.field {
+    font-size: 16px;
+  }
+  /* The catalogue's sort control is a bare <select> rather than a .field, and
+     at 15px it zoomed for the same reason. Scoped to selects inside a label so
+     it cannot reach the admin console's own controls. */
+  label > select {
+    font-size: 16px;
+  }
+}
 
 /* ---- Form field (on dark) ---- */
 .field-dark {

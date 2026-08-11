@@ -272,7 +272,7 @@ export default function CartSuggestion({
         <Link
           href={`/${locale}/setup`}
           onClick={leave}
-          className="inline-block mt-3 text-[12px] underline underline-offset-4"
+          className="inline-flex items-center min-h-11 mt-1 text-[12px] underline underline-offset-4"
           style={{ color: "var(--text-muted)" }}
         >
           {t("suggest_build")}

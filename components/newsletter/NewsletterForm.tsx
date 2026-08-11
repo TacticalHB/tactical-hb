@@ -163,10 +163,13 @@ export default function NewsletterForm({
           </div>
         )}
 
-        <label className="flex items-start gap-3 cursor-pointer mt-1">
+        {/* py-2 makes the whole consent row a 44px target, and the box itself goes
+            from 16 to 20px. It is the one control on this form the law cares
+            about, and it was the smallest thing on the page. */}
+        <label className="flex items-start gap-3 cursor-pointer mt-1 py-2">
           <input
             type="checkbox"
-            className="mt-0.5 w-4 h-4 shrink-0"
+            className="mt-0.5 w-5 h-5 shrink-0"
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
           />

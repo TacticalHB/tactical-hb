@@ -169,7 +169,7 @@ export default function CartPageClient({
                     <div className="flex items-center" style={{ border: "1px solid var(--border-strong)" }}>
                       <button
                         onClick={() => changeQty(key, -1)}
-                        className="w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-60"
+                        className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60"
                         style={{ color: "var(--text)" }}
                         aria-label={L.dec}
                       >
@@ -180,7 +180,7 @@ export default function CartPageClient({
                       </span>
                       <button
                         onClick={() => changeQty(key, 1)}
-                        className="w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-60"
+                        className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60"
                         style={{ color: "var(--text)" }}
                         aria-label={L.inc}
                       >
@@ -189,7 +189,7 @@ export default function CartPageClient({
                     </div>
                     <button
                       onClick={() => removeLine(key)}
-                      className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-60"
+                      className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-60"
                       style={{ color: "var(--text-muted)" }}
                     >
                       {L.remove}

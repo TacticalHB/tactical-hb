@@ -15,7 +15,17 @@ export default function CookieSettingsButton({
 }) {
   const uk = locale === "uk";
   return (
-    <button type="button" onClick={openCookieSettings} className={className} style={style}>
+    /* The 44px row is set here rather than at the call site, because this is
+       the only route back into the consent settings once the banner is gone —
+       it appears in the footer of every page and in account settings, and it
+       was a 16px-tall line of text in both. Any className passed in still wins
+       on everything else. */
+    <button
+      type="button"
+      onClick={openCookieSettings}
+      className={`inline-flex items-center justify-center min-h-11 ${className ?? ""}`}
+      style={style}
+    >
       {uk ? "Налаштування cookie" : "Cookie settings"}
     </button>
   );

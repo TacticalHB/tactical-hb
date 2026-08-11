@@ -58,7 +58,7 @@ function HomeContent({ locale }: { locale: string }) {
               <div className="flex items-center gap-4 mb-8">
                 <span className="w-10 h-px" style={{ background: "var(--border-strong)" }} />
                 <span
-                  className="text-[0.6rem] tracking-[0.35em] uppercase"
+                  className="text-[0.7rem] sm:text-[0.6rem] tracking-[0.35em] uppercase"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {t("hero_tag")}
@@ -120,7 +120,7 @@ function HomeContent({ locale }: { locale: string }) {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
               <div>
                 <div
-                  className="text-[0.58rem] tracking-[0.3em] uppercase mb-5"
+                  className="text-[0.7rem] sm:text-[0.58rem] tracking-[0.3em] uppercase mb-5"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {tf("eyebrow")}
@@ -139,7 +139,7 @@ function HomeContent({ locale }: { locale: string }) {
               <div className="md:pb-1 w-full md:w-auto">
                 <Link
                   href={`/${locale}/flagship`}
-                  className="flagship-door group inline-flex items-center gap-4 text-[0.62rem] tracking-[0.28em] uppercase"
+                  className="flagship-door group inline-flex items-center gap-4 min-h-11 py-1 text-[0.72rem] sm:text-[0.62rem] tracking-[0.28em] uppercase"
                   style={{ color: "var(--text)" }}
                 >
                   <span
@@ -199,7 +199,7 @@ function HomeContent({ locale }: { locale: string }) {
               <div className="flex items-center gap-4 mb-6">
                 <span className="w-10 h-px" style={{ background: "var(--border-strong)" }} />
                 <span
-                  className="text-[0.6rem] tracking-[0.35em] uppercase"
+                  className="text-[0.7rem] sm:text-[0.6rem] tracking-[0.35em] uppercase"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {t("about_tag")}

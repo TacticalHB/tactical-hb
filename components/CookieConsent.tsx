@@ -90,8 +90,22 @@ export default function CookieConsent({ locale }: { locale: string }) {
         <div
           role="dialog"
           aria-label={L.title}
-          className="fixed bottom-0 left-0 right-0 z-[90] p-4 sm:p-5"
-          style={{ background: "#fff", borderTop: "1px solid var(--border)", boxShadow: "0 -8px 30px rgba(0,0,0,0.10)" }}
+          className="fixed bottom-0 left-0 right-0 z-[90] p-4 sm:p-5 max-h-[70dvh] overflow-y-auto overscroll-contain"
+          style={{
+            background: "#fff",
+            borderTop: "1px solid var(--border)",
+            boxShadow: "0 -8px 30px rgba(0,0,0,0.10)",
+            /* THE HOME INDICATOR SAT ON THE BUTTON ROW. On a notched iPhone the
+               bottom ~34px belongs to the system, and a banner pinned to
+               bottom:0 puts "Reject all" underneath it — the reader can see the
+               control and cannot press it. The inset is added to the padding
+               that is already there rather than replacing it.
+
+               max-height too: at 375 in Ukrainian this is a title, two lines of
+               body, a link and three buttons. On a landscape phone (~390px
+               tall) that filled the screen with no way to scroll to Accept. */
+            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
+          }}
         >
           <div className="page-container flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1">
@@ -112,15 +126,15 @@ export default function CookieConsent({ locale }: { locale: string }) {
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">
               <button onClick={() => persist({ analytics: true, marketing: true })}
-                className="h-10 px-5 rounded-full text-xs font-medium" style={{ background: "#111", color: "#fff" }}>
+                className="h-11 px-5 rounded-full text-xs font-medium" style={{ background: "#111", color: "#fff" }}>
                 {L.acceptAll}
               </button>
               <button onClick={() => persist({ analytics: false, marketing: false })}
-                className="h-10 px-5 rounded-full text-xs font-medium border" style={{ borderColor: "var(--border-strong)", color: "#111" }}>
+                className="h-11 px-5 rounded-full text-xs font-medium border" style={{ borderColor: "var(--border-strong)", color: "#111" }}>
                 {L.rejectAll}
               </button>
               <button onClick={() => setShowModal(true)}
-                className="h-10 px-5 rounded-full text-xs font-medium underline underline-offset-2" style={{ color: "#111" }}>
+                className="h-11 px-5 rounded-full text-xs font-medium underline underline-offset-2" style={{ color: "#111" }}>
                 {L.customize}
               </button>
             </div>
@@ -137,12 +151,24 @@ export default function CookieConsent({ locale }: { locale: string }) {
             aria-modal="true"
             aria-label={L.settings}
             onClick={(e) => e.stopPropagation()}
-            className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
-            style={{ background: "#fff" }}
+            className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90dvh] overflow-y-auto overscroll-contain"
+            style={{
+              background: "#fff",
+              /* dvh not vh: on iOS Safari 90vh is measured against the tallest
+                 the viewport ever gets, so with the address bar showing, a
+                 "90vh" sheet is taller than the screen and its Save button sits
+                 below the fold. And the sheet is bottom-anchored on mobile, so
+                 it needs the same home-indicator inset the banner does. */
+              paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+            }}
           >
             <div className="flex items-start justify-between gap-4 mb-5">
               <h2 className="text-xl font-semibold" style={{ color: "#111" }}>{L.settings}</h2>
-              <button onClick={() => setShowModal(false)} aria-label={L.close} className="p-1" style={{ color: "var(--text-muted)" }}>
+              {/* -m-2.5 keeps the ✕ visually in the corner while giving it a
+                  44px box; it was a 26px target in the hardest place to hit. */}
+              <button onClick={() => setShowModal(false)} aria-label={L.close}
+                className="flex items-center justify-center w-11 h-11 -m-2.5 shrink-0"
+                style={{ color: "var(--text-muted)" }}>
                 <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M4 4l8 8M12 4l-8 8" />
                 </svg>

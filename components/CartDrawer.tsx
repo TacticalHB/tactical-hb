@@ -70,7 +70,7 @@ export default function CartDrawer({ locale }: { locale: string }) {
             <Link
               href={`/${locale}/setup`}
               onClick={close}
-              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{ color: "var(--text-muted)" }}
             >
               {L.buildSetup}
@@ -110,18 +110,18 @@ export default function CartDrawer({ locale }: { locale: string }) {
                       <div className="flex items-center" style={{ border: "1px solid var(--border-strong)" }}>
                         <button
                           onClick={() => changeQty(key, -1)}
-                          className="w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-60"
+                          className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60"
                           style={{ color: "var(--text)" }}
                           aria-label={L.dec}
                         >
                           −
                         </button>
-                        <span className="w-8 text-center text-sm tabular-nums" style={{ color: "var(--text)" }}>
+                        <span className="w-8 text-center text-sm tabular-nums select-none" style={{ color: "var(--text)" }}>
                           {l.qty}
                         </span>
                         <button
                           onClick={() => changeQty(key, 1)}
-                          className="w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-60"
+                          className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60"
                           style={{ color: "var(--text)" }}
                           aria-label={L.inc}
                         >
@@ -130,7 +130,7 @@ export default function CartDrawer({ locale }: { locale: string }) {
                       </div>
                       <button
                         onClick={() => removeLine(key)}
-                        className="text-[12px] underline underline-offset-4 transition-opacity hover:opacity-60"
+                        className="inline-flex items-center h-11 text-[12px] underline underline-offset-4 transition-opacity hover:opacity-60"
                         style={{ color: "var(--text-muted)" }}
                       >
                         {L.remove}
@@ -149,8 +149,17 @@ export default function CartDrawer({ locale }: { locale: string }) {
         {lines.length > 0 && <CartSuggestion locale={locale} />}
       </div>
 
+      {/* The footer carries the total and the only way forward, so it takes the
+          home-indicator inset: on a notched phone the checkout button was
+          sitting in the system's own 34px strip. */}
       {lines.length > 0 && (
-        <div className="px-7 py-6 shrink-0" style={{ borderTop: "1px solid var(--border)" }}>
+        <div
+          className="px-7 pt-6 shrink-0"
+          style={{
+            borderTop: "1px solid var(--border)",
+            paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          }}
+        >
           <div className="flex items-center justify-between mb-5">
             <span className="text-[15px]" style={{ color: "var(--text)" }}>{L.total}</span>
             <span className="text-[17px] font-medium" style={{ color: "var(--text)" }}>

@@ -39,7 +39,12 @@ const SOCIALS: Social[] = [
 
 export default function SocialLinks() {
   return (
-    <div className="flex items-center gap-4">
+    /* THE MARKS STAY 18px, THE TARGETS ARE 44px. Three 18×18 links four pixels
+       apart is a row a thumb cannot reliably land on — and these go to the
+       accounts the ad traffic comes from, so they are pressed on a phone more
+       than anywhere else. The box grows around each glyph and the gap closes
+       to compensate, so the row looks exactly as it did. */
+    <div className="flex items-center gap-0">
       {SOCIALS.map((s) => (
         <a
           key={s.name}
@@ -48,7 +53,7 @@ export default function SocialLinks() {
           rel="noopener noreferrer"
           aria-label={`Tactical HB on ${s.name}`}
           title={`Tactical HB — @tactical_hb on ${s.name}`}
-          className="social-link"
+          className="social-link flex items-center justify-center w-11 h-11"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d={s.path} />

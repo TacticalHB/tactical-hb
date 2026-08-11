@@ -92,7 +92,7 @@ export default function ContactForm() {
                 onClick={() => setType(o.value)}
                 onMouseEnter={() => setHoverType(o.value)}
                 onMouseLeave={() => setHoverType(null)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-[3px] transition-colors"
+                className="inline-flex items-center min-h-11 gap-2 px-4 py-2.5 text-sm rounded-[3px] transition-colors"
                 style={{
                   background: active ? "var(--ink)" : "var(--field-bg)",
                   color: active ? "#f4f3f0" : "var(--text)",

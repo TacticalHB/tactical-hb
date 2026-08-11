@@ -135,7 +135,7 @@ export default function Countdown({
               {time === null ? "––" : String(unit.value).padStart(2, "0")}
             </div>
             <div
-              className="text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
+              className="text-[0.68rem] sm:text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
               style={{ color: c.quiet }}
             >
               {unit.label}

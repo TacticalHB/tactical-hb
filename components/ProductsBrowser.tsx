@@ -146,7 +146,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="bg-transparent outline-none cursor-pointer font-medium"
+                className="bg-transparent outline-none cursor-pointer font-medium h-11"
               >
                 <option value="featured">{L.featured}</option>
                 <option value="price-asc">{L.lowHigh}</option>
@@ -177,12 +177,12 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
                 <div className="text-[15px] font-medium mb-4">{L.price}</div>
                 <div className="flex flex-col gap-3">
                   {PRICE_BANDS.map((b) => (
-                    <label key={b.key} className="flex items-center gap-3 text-[15px] cursor-pointer" style={{ color: "#707072" }}>
+                    <label key={b.key} className="flex items-center gap-3 min-h-11 text-[15px] cursor-pointer" style={{ color: "#707072" }}>
                       <input
                         type="checkbox"
                         checked={bands.includes(b.key)}
                         onChange={() => toggleBand(b.key)}
-                        className="w-4 h-4 accent-black"
+                        className="w-5 h-5 accent-black shrink-0"
                       />
                       {bandLabel(b, currency, uk)}
                     </label>

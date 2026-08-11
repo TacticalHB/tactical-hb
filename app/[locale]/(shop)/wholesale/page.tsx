@@ -102,7 +102,7 @@ function WholesaleContent() {
               </p>
               <a
                 href={`mailto:${SALES_EMAIL}`}
-                className="text-lg md:text-xl break-words transition-opacity hover:opacity-70"
+                className="inline-flex items-center min-h-11 text-lg md:text-xl break-words transition-opacity hover:opacity-70"
                 style={{ color: "var(--text)" }}
               >
                 {SALES_EMAIL}

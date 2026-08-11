@@ -39,7 +39,7 @@ export default function AboutDossier({ uk }: { uk: boolean }) {
           ref={btnRef}
           type="button"
           onClick={() => setOpen(true)}
-          className="dossier-open-link inline-flex items-center gap-2.5 font-mono text-[10px] font-semibold uppercase whitespace-nowrap"
+          className="dossier-open-link inline-flex items-center min-h-11 gap-2.5 font-mono text-[10px] font-semibold uppercase whitespace-nowrap"
           style={{ letterSpacing: copy.tracking }}
           aria-haspopup="dialog"
           aria-expanded={open}

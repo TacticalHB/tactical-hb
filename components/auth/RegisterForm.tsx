@@ -142,7 +142,7 @@ export default function RegisterForm({ locale }: { locale: string }) {
             <div className="relative">
               <input className="field rounded-lg pr-12" type={showPw ? "text" : "password"} placeholder={L.password}
                 value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
-              <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs uppercase tracking-wide" style={{ color: "#707072" }}>
+              <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-11 h-11 text-xs uppercase tracking-wide" style={{ color: "#707072" }}>
                 {showPw ? (uk ? "Сховати" : "Hide") : (uk ? "Показати" : "Show")}
               </button>
             </div>

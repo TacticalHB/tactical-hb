@@ -183,7 +183,7 @@ export default function PreferencesPanel({
 
       <Link
         href={`/${locale}/newsletter`}
-        className="inline-block mt-8 text-[13px] underline underline-offset-4"
+        className="inline-flex items-center min-h-11 mt-6 text-[13px] underline underline-offset-4"
         style={{ color: "var(--text-muted)" }}
       >
         {t("prefs_back")}

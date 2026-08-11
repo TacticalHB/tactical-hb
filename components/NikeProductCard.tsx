@@ -35,7 +35,11 @@ export default function NikeProductCard({ product, locale }: { product: Product;
       {/* Heart — sits above the image link so it toggles instead of navigating */}
       <HeartButton
         productId={product.slug}
-        className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full backdrop-blur-sm"
+        /* 44px, up from 36. It sits over the photograph in the corner of the
+           card, which is exactly where a thumb arrives least accurately. The
+           inset drops to top-1.5/right-1.5 so the visible disc stays roughly
+           where it was rather than marching into the middle of the image. */
+        className="absolute top-1.5 right-1.5 z-10 w-11 h-11 rounded-full backdrop-blur-sm"
         label={`Favourite ${name}`}
       />
       {/* Image */}
@@ -65,20 +69,36 @@ export default function NikeProductCard({ product, locale }: { product: Product;
           <Link href={href} className="text-[15px] font-medium leading-snug" style={{ color: "#111111" }}>
             {name}
           </Link>
+          {/* THE DOT STAYS 20px, THE BUTTON IS 40. Two 20px circles eight pixels
+              apart, each navigating to a DIFFERENT product variant, is the
+              highest-consequence mis-tap on the catalogue — you meant black and
+              you got purple. The swatch moves into an inner span so the button
+              can carry the hit area without the colour growing with it, and the
+              negative vertical margin keeps the title row the height it was.
+
+              40 rather than 44: this row also holds the product name, and two
+              44px boxes push a longer Ukrainian name onto a second line. It is
+              the one place on the site where the full target loses to layout,
+              and doubling the area is most of the win. */}
           {multi && (
-            <div className="flex gap-2 shrink-0 pt-0.5">
+            <div className="flex gap-0 shrink-0 -my-2.5 -mr-2.5">
               {variants!.map((v, i) => (
                 <button
                   key={v.name}
                   onMouseEnter={() => setIdx(i)}
                   onClick={() => router.push(`${href}?variant=${encodeURIComponent(v.name)}`)}
                   aria-label={v.name}
-                  className="w-5 h-5 rounded-full transition-transform hover:scale-110"
-                  style={{
-                    background: v.swatch,
-                    boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
-                  }}
-                />
+                  className="w-10 h-10 flex items-center justify-center shrink-0"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="block w-5 h-5 rounded-full transition-transform hover:scale-110"
+                    style={{
+                      background: v.swatch,
+                      boxShadow: i === idx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",
+                    }}
+                  />
+                </button>
               ))}
             </div>
           )}

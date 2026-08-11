@@ -170,7 +170,7 @@ function DeliveryContent({ locale }: { locale: string }) {
             {/* The returns policy lives on the About page. */}
             <Link
               href={`/${locale}/about#returns`}
-              className="link-accent inline-block mt-6 text-xs tracking-[0.18em] uppercase border-b pb-1"
+              className="link-accent inline-flex items-center min-h-11 mt-6 text-xs tracking-[0.18em] uppercase border-b pb-1"
             >
               {t("returns_link")} →
             </Link>

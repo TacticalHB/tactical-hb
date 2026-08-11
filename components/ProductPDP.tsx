@@ -352,7 +352,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     <button
                       key={d}
                       onClick={() => setIdx((idx + d + photos.length) % photos.length)}
-                      className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                      className="w-11 h-11 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                       style={{ background: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
                       aria-label={d === -1 ? "Previous image" : "Next image"}
                     >
@@ -389,7 +389,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                       key={v.name}
                       onClick={() => selectVariant(i)}
                       aria-label={v.name}
-                      className="w-9 h-9 rounded-full transition-transform hover:scale-110"
+                      className="w-11 h-11 rounded-full transition-transform hover:scale-110"
                       style={{
                         background: v.swatch,
                         boxShadow: i === variantIdx ? "0 0 0 1.5px #111, 0 0 0 3px #fff inset" : "0 0 0 1px #d6d6d6",

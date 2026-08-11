@@ -75,16 +75,24 @@ export default function Navbar({ locale }: { locale: string }) {
       className={iconBtn}
       aria-label={a("cart")}
     >
-      <BagIcon />
-      {count > 0 && (
-        <span
-          key={bump}
-          className="cart-badge absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-semibold tabular-nums"
-          style={{ background: "var(--accent)", color: "var(--ink)" }}
-        >
-          {count}
-        </span>
-      )}
+      {/* THE BADGE HANGS OFF THE ICON, NOT OFF THE BUTTON. It used to be
+          positioned against the button box, which was the same size as the
+          glyph — then the box grew to 44px for the thumb and the badge went
+          with it, ending up adrift in the corner of an invisible square with
+          no obvious relationship to the bag. This wrapper is the icon's own
+          bounds, so the count sits on the bag at any button size. */}
+      <span className="relative flex items-center justify-center">
+        <BagIcon />
+        {count > 0 && (
+          <span
+            key={bump}
+            className="cart-badge absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-semibold tabular-nums"
+            style={{ background: "var(--accent)", color: "var(--ink)" }}
+          >
+            {count}
+          </span>
+        )}
+      </span>
     </button>
   );
 

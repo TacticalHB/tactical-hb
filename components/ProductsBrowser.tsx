@@ -49,7 +49,14 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const [cat, setCat] = useState<CatKey>("all");
   const [bands, setBands] = useState<string[]>([]);
   const [sort, setSort] = useState("featured");
-  const [showFilters, setShowFilters] = useState(true);
+  /* null = the visitor has not expressed a preference yet, and the two
+     defaults differ: a desktop shows the sidebar because there is a column
+     spare for it, a phone does not because an open panel pushed the first
+     product 577px down an 812px screen — you arrived at a shop and saw
+     filters. Which default applies is decided in CSS rather than from
+     window.innerWidth, so the server and the first client render agree.
+     Once it is toggled the choice is explicit and applies at every width. */
+  const [showFilters, setShowFilters] = useState<boolean | null>(null);
 
   const uk = locale === "uk";
   const currency = currencyForLocale(locale);
@@ -115,16 +122,26 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
       <div className="page-container pt-8 pb-24">
-        {/* Top bar */}
-        <div className="flex items-end justify-between pb-5 border-b" style={{ borderColor: "#e5e5e5" }}>
-          <h1 className="text-xl md:text-2xl font-medium">
+        {/* Top bar.
+
+            IT STACKS ON A PHONE. Side by side at 375 the heading wrapped and
+            dropped its own count onto a second line — "Products" over "(8)" —
+            while the filter and sort controls crowded the right edge. A title
+            row and a control row is the same information with room to sit in,
+            and the controls end up left-aligned with everything else on the
+            page rather than jammed against the gutter. */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 pb-5 border-b" style={{ borderColor: "#e5e5e5" }}>
+          <h1 className="text-xl md:text-2xl font-medium whitespace-nowrap">
             {cat === "all" ? L.title : L.cats[cat]}{" "}
             <span style={{ color: "#8a8a8e" }}>({shownCount})</span>
           </h1>
-          <div className="flex items-center gap-5 md:gap-8">
+          <div className="flex items-center justify-between sm:justify-end gap-5 md:gap-8">
             {/* The kit builder, offered from the shelf it draws from. A quiet
                 text link rather than a button: it is a second way to shop, not
-                a louder one than the products themselves. */}
+                a louder one than the products themselves.
+
+                It moves to its own row below on a phone — see the strip under
+                this bar — rather than being hidden, which is what it was. */}
             <Link
               href={`/${locale}/setup`}
               className="hidden sm:inline-flex items-center gap-2 text-[15px] setup-link"
@@ -132,17 +149,30 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
               {L.buildSetup}
               <span aria-hidden="true">→</span>
             </Link>
+            {/* THE FILTERS TOGGLE IS NO LONGER DESKTOP-ONLY. It was
+                `hidden md:flex`, which meant a phone had no way to filter the
+                catalogue by category or price at all — the sidebar it opens
+                was `hidden md:block` too, so both halves of the feature simply
+                did not exist below 768. */}
             <button
-              onClick={() => setShowFilters((v) => !v)}
-              className="hidden md:flex items-center gap-2 text-[15px]"
+              /* From "not chosen" the first press OPENS, which is what a phone
+                 user wants and costs a desktop user one extra click the first
+                 time they want the sidebar gone. */
+              onClick={() => setShowFilters((v) => (v === null ? true : !v))}
+              className="flex items-center gap-2 h-11 text-[15px]"
+              aria-expanded={showFilters === true}
             >
-              {showFilters ? L.hide : L.show}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <span className="hidden sm:inline">{showFilters ? L.hide : L.show}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
                 <path d="M4 6h16M7 12h10M10 18h4" />
               </svg>
+              {/* The icon alone on a phone, but never unlabelled to a reader. */}
+              <span className="sr-only sm:hidden">{showFilters ? L.hide : L.show}</span>
             </button>
             <label className="flex items-center gap-2 text-[15px]">
-              <span className="hidden sm:inline">{L.sortBy}</span>
+              {/* "Sort by" was `hidden sm:inline`, leaving a phone with a bare
+                  control reading "Featured" and no clue what it did. */}
+              <span className="whitespace-nowrap" style={{ color: "#707072" }}>{L.sortBy}</span>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
@@ -156,17 +186,52 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
           </div>
         </div>
 
-        <div className="flex gap-8 lg:gap-12 mt-8">
-          {/* Sidebar */}
-          {showFilters && (
-            <aside className="hidden md:block w-52 shrink-0">
-              <nav className="flex flex-col gap-3 mb-10">
+        {/* THE KIT BUILDER, ON ITS OWN ROW ON A PHONE. The top bar has a title,
+            a filter control and a sort control on it already; a fourth thing
+            would either wrap badly or push the sort off the edge, which is how
+            it came to be hidden in the first place. A full-width row below is
+            the honest answer — it is a headline feature and almost no
+            competitor has one, so burying it on the surface most customers
+            arrive on was the wrong trade. */}
+        <Link
+          href={`/${locale}/setup`}
+          className="sm:hidden flex items-center justify-between gap-3 mt-4 px-4 h-12 rounded-full text-[15px] setup-link"
+          style={{ border: "1px solid #e5e5e5" }}
+        >
+          <span>{L.buildSetup}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+
+        {/* Column on a desktop, stacked block on a phone. Same markup, same
+            state, same controls — the panel simply sits above the grid at full
+            width where there is no room beside it. */}
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-12 mt-8">
+          {/* Sidebar. Always rendered while it could be shown, with the
+              "not chosen yet" default expressed as `hidden md:block` — the one
+              state where the two viewports disagree. */}
+          {showFilters !== false && (
+            <aside
+              className={`${showFilters === null ? "hidden md:block" : "block"} w-full md:w-52 shrink-0`}
+            >
+              {/* Categories read as a wrapping row of chips on a phone and a
+                  stacked list on a desktop. A phone has the width for five
+                  short words side by side and not the height to spend five
+                  rows on them. */}
+              <nav className="flex flex-row flex-wrap md:flex-col gap-2 md:gap-3 mb-6 md:mb-10">
                 {catKeys.map((k) => (
                   <button
                     key={k}
                     onClick={() => setCat(k)}
-                    className="text-left text-[15px] transition-colors"
-                    style={{ color: cat === k ? "#111111" : "#707072", fontWeight: cat === k ? 500 : 400 }}
+                    aria-pressed={cat === k}
+                    /* The pill outline is mobile-only — on desktop this has
+                       always been a plain list that shows selection by weight,
+                       and md:border-0 keeps it that way. */
+                    className="text-left md:text-left text-[15px] transition-colors h-11 px-4 md:px-0 rounded-full md:rounded-none border md:border-0"
+                    style={{
+                      color: cat === k ? "#111111" : "#707072",
+                      fontWeight: cat === k ? 500 : 400,
+                      borderColor: cat === k ? "#111111" : "#e5e5e5",
+                    }}
                   >
                     {L.cats[k]}
                   </button>
@@ -175,7 +240,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
 
               <div className="border-t pt-6" style={{ borderColor: "#e5e5e5" }}>
                 <div className="text-[15px] font-medium mb-4">{L.price}</div>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-row flex-wrap md:flex-col gap-x-6 gap-y-1 md:gap-3">
                   {PRICE_BANDS.map((b) => (
                     <label key={b.key} className="flex items-center gap-3 min-h-11 text-[15px] cursor-pointer" style={{ color: "#707072" }}>
                       <input

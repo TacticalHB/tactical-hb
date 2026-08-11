@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 /* ---------------------------------------------------------------------------
@@ -19,17 +19,36 @@ import { useTranslations } from "next-intl";
    text baked into a picture that a Ukrainian reader could not read. Only the
    four chapters are photographs, and those carry no words at all.
 
-   MOTION IS A CROSSFADE AND NOTHING ELSE. The stills are stacked and their
-   opacity swapped on --motion-base, so advancing reads as one frame replacing
-   another rather than a slide or a wipe. Under prefers-reduced-motion the
-   tokens collapse to ~0 and the swap is instant — handled globally in
-   globals.css, so there is no media query here to forget.
+   MOTION IS A CROSSFADE AND NOTHING ELSE, with one exception: opening the
+   case. Everywhere else the stills are stacked and their opacity swapped on
+   --motion-base, so advancing reads as one frame replacing another rather than
+   a slide or a wipe.
+
+   THE CASE GETS WEIGHT BECAUSE IT IS THE PAYOFF. Closed → open runs a longer
+   crossfade with a small scale settle under it — 1.0 out to 1.02 and back —
+   so the lid reads as having mass rather than the picture simply changing.
+   620ms end to end, inside the brief's 450–700 and well under its 900 cap.
+   No bounce, no overshoot past the settle, no colour wash: the accent stays on
+   the seal, the CTA and the step dots where it already lives.
+
+   Under prefers-reduced-motion the opening phase is never entered at all —
+   the beat flips straight to open and the token-driven crossfade is already
+   ~0ms — so there is nothing to sit through and no media query here to forget.
 
    NO SCROLL HIJACKING, no swipe gestures, no keyboard traps. It is buttons and
    links, so it works with a keyboard and a screen reader by construction.
 --------------------------------------------------------------------------- */
 
 type Beat = 0 | 1 | 2 | 3 | 4 | 5;
+
+/* The case-open motion, in two moves.
+   "lift"   the panel swells slightly while the open frame fades up
+   "settle" it comes back to rest as the rail copy arrives
+   Idle is every other moment, when the shared --motion-base governs. */
+type Phase = "idle" | "lift" | "settle";
+const LIFT_MS = 240;
+const SETTLE_MS = 380;
+const OPEN_TOTAL_MS = LIFT_MS + SETTLE_MS; // 620 — the brief's cap is 900
 
 /** The four photographed chapters, in order, mapped to their beat. */
 const CHAPTERS: Record<number, { src: string; altKey: string }> = {
@@ -46,7 +65,46 @@ const ACCENT = "#F48140";
 export default function OperativeFile({ locale }: { locale: string }) {
   const t = useTranslations("mrhb");
   const [beat, setBeat] = useState<Beat>(0);
+  const [phase, setPhase] = useState<Phase>("idle");
+  /* Timer handles, so a component unmounting mid-open leaves nothing behind. */
+  const timers = useRef<number[]>([]);
 
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  /**
+   * Open the case.
+   *
+   * THE DOUBLE-CLICK GUARD IS THE FIRST LINE, not an afterthought: a second
+   * press while the first is running would queue another pair of timers and
+   * leave the panel mid-scale. One press, one animation.
+   *
+   * REDUCED MOTION NEVER ENTERS THE PHASES. It flips the beat and returns, so
+   * the crossfade runs at the ~0ms the tokens already impose and the copy
+   * appears with it. Nothing is animated and nothing is waited for.
+   */
+  const openCase = () => {
+    if (beat !== 4 || phase !== "idle") return;
+
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduce) {
+      setBeat(5);
+      return;
+    }
+
+    // The frame starts changing on the same tick as the press — the swell is
+    // under the crossfade, not before it, so the click has no dead time.
+    setPhase("lift");
+    setBeat(5);
+    timers.current.push(
+      window.setTimeout(() => setPhase("settle"), LIFT_MS),
+      window.setTimeout(() => setPhase("idle"), OPEN_TOTAL_MS)
+    );
+  };
+
+  const opening = phase !== "idle";
   const other = locale === "uk" ? "en" : "uk";
   const isChapter = beat >= 2;
   /* 01, 02, 03 — the case is one file with two faces, so the closed and open
@@ -237,9 +295,16 @@ export default function OperativeFile({ locale }: { locale: string }) {
           {/* The still. All four are stacked and crossfaded so advancing swaps
               a frame rather than reloading one — and so the next chapter is
               already decoded when it is asked for. */}
-          <div className="relative w-full lg:w-[59%] shrink-0" style={{ background: "#000", aspectRatio: "3 / 2" }}>
+          {/* overflow-hidden matters: the swell scales the frame past its own
+              edges, and without clipping it would bleed over the rail seam. */}
+          <div
+            className="relative w-full lg:w-[59%] shrink-0 overflow-hidden"
+            style={{ background: "#000", aspectRatio: "3 / 2" }}
+          >
             {Object.entries(CHAPTERS).map(([b, ch]) => {
               const active = Number(b) === beat;
+              /* Only the open frame swells, and only while it is arriving. */
+              const swelling = opening && Number(b) === 5;
               return (
                 <Image
                   key={ch.src}
@@ -247,11 +312,34 @@ export default function OperativeFile({ locale }: { locale: string }) {
                   alt={active ? t(ch.altKey) : ""}
                   fill
                   priority={Number(b) === 2}
+                  /* EAGER, ALL FOUR, AND THIS IS THE PRELOAD THE BRIEF ASKS FOR.
+                     Next lazy-loads by default, and measuring showed that the
+                     three stacked behind the visible one never loaded at all —
+                     not even the frame the user was looking at on the
+                     case-closed beat. Pressing Open the case would then
+                     crossfade to an empty box, which is the exact flash this
+                     motion exists to avoid.
+
+                     The whole set is 244 KB of WebP on a page whose entire
+                     content is these four frames, and every visitor who walks
+                     the file sees all four. Fetching them up front costs one
+                     small burst on a page with no other images and buys a
+                     guaranteed-clean transition at every beat, not just this
+                     one. */
+                  loading="eager"
                   sizes="(max-width: 1024px) 100vw, 59vw"
                   className="object-cover"
                   style={{
                     opacity: active ? 1 : 0,
-                    transition: "opacity var(--motion-base) var(--ease-out)",
+                    /* transform and opacity only — nothing here touches layout. */
+                    transform: swelling && phase === "lift" ? "scale(1.02)" : "scale(1)",
+                    transformOrigin: "center",
+                    willChange: opening ? "transform, opacity" : undefined,
+                    transition: opening
+                      ? `opacity ${LIFT_MS + 180}ms var(--ease-out), transform ${
+                          phase === "lift" ? LIFT_MS : SETTLE_MS
+                        }ms var(--ease-out)`
+                      : "opacity var(--motion-base) var(--ease-out)",
                     pointerEvents: "none",
                   }}
                 />
@@ -264,7 +352,20 @@ export default function OperativeFile({ locale }: { locale: string }) {
             className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-10 lg:py-8"
             style={{ background: RAIL }}
           >
-            <div className="max-w-xl">
+            {/* THE COPY ARRIVES AFTER THE LID, not with it. During the lift it
+                is held at zero so the eye stays on the case; it fades up as the
+                frame settles, which is also what keeps the final CTA from
+                appearing before the case is actually open. */}
+            <div
+              className="max-w-xl"
+              style={{
+                opacity: phase === "lift" ? 0 : 1,
+                transform: phase === "lift" ? "translateY(6px)" : "none",
+                transition: opening
+                  ? `opacity ${SETTLE_MS - 80}ms var(--ease-out) 60ms, transform ${SETTLE_MS - 80}ms var(--ease-out) 60ms`
+                  : undefined,
+              }}
+            >
               <div className="flex items-center gap-3 mb-6">
                 <span aria-hidden="true" style={{ width: 9, height: 9, background: ACCENT, display: "block" }} />
                 <span className="text-[11px] sm:text-[12px] tracking-[0.24em] uppercase font-semibold">
@@ -290,7 +391,10 @@ export default function OperativeFile({ locale }: { locale: string }) {
               {beat < 5 ? (
                 <button
                   type="button"
-                  onClick={() => setBeat((beat + 1) as Beat)}
+                  /* Beat 4 is the case; opening it is the one advance with a
+                     motion of its own, and its own guard against a second press. */
+                  onClick={beat === 4 ? openCase : () => setBeat((beat + 1) as Beat)}
+                  disabled={phase !== "idle"}
                   style={outlineBtn}
                   className="w-full sm:w-auto h-12 px-9 rounded-full text-[12px] font-semibold tracking-[0.2em] uppercase hover:bg-white/5"
                 >

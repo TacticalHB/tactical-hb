@@ -15,6 +15,12 @@ import { joinFlagshipWaitlist } from "@/app/actions/flagship";
    consent line beneath now links to a privacy policy that exists, which it
    could not do a week ago.
 
+   IT IS ON PAPER, NOT ON THE DARK COVER. The first cut set this on near-black
+   and the consent line landed at 2.88:1 — below AA and, more to the point,
+   genuinely hard to read on the one piece of text where somebody is agreeing
+   to something. It now uses the storefront's own field and pill, so it looks
+   and behaves like every other form on the site.
+
    THE REFERENCE COMES BACK FROM THE SERVER, not from anything this component
    knows. It is a count of the list at the moment of signing up, formatted as
    a file number — see app/actions/flagship.ts for why it is not a queue
@@ -44,19 +50,23 @@ export default function WaitlistForm({ locale }: { locale: string }) {
     else setError(true);
   }
 
+  const heading = (text: string) => (
+    <div className="flex items-center gap-3 mb-4">
+      <span
+        aria-hidden="true"
+        style={{ width: 9, height: 9, background: "var(--accent)", display: "block" }}
+      />
+      <span className="text-[11px] tracking-[0.24em] uppercase font-semibold" style={{ color: "var(--text)" }}>
+        {text}
+      </span>
+    </div>
+  );
+
   if (reference) {
     return (
       <div>
-        <div className="flex items-center gap-3 mb-4">
-          <span
-            aria-hidden="true"
-            style={{ width: 9, height: 9, background: "#F48140", display: "block" }}
-          />
-          <span className="text-[11px] tracking-[0.24em] uppercase font-semibold">
-            {t("wait_granted")}
-          </span>
-        </div>
-        <p className="text-[14px] leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.5)" }}>
+        {heading(t("wait_granted"))}
+        <p className="text-[14px] leading-relaxed mb-6 max-w-md" style={{ color: "var(--text-muted)" }}>
           {t("wait_granted_body")}
         </p>
         {/* The reference, set like a stamped record rather than a receipt. */}
@@ -64,8 +74,8 @@ export default function WaitlistForm({ locale }: { locale: string }) {
           className="inline-block px-5 py-3 text-[15px] tracking-[0.18em]"
           style={{
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-            color: "#F48140",
-            border: "1px solid rgba(244,129,64,0.35)",
+            color: "var(--accent-ink)",
+            border: "1px solid var(--accent-ink)",
           }}
         >
           {reference}
@@ -76,17 +86,9 @@ export default function WaitlistForm({ locale }: { locale: string }) {
 
   return (
     <form onSubmit={onSubmit}>
-      <div className="flex items-center gap-3 mb-4">
-        <span
-          aria-hidden="true"
-          style={{ width: 9, height: 9, background: "#F48140", display: "block" }}
-        />
-        <span className="text-[11px] tracking-[0.24em] uppercase font-semibold">
-          {t("wait_heading")}
-        </span>
-      </div>
+      {heading(t("wait_heading"))}
 
-      <p className="text-[14px] leading-relaxed mb-7 max-w-md" style={{ color: "rgba(255,255,255,0.5)" }}>
+      <p className="text-[14px] leading-relaxed mb-7 max-w-md" style={{ color: "var(--text-muted)" }}>
         {t("wait_body")}
       </p>
 
@@ -101,35 +103,30 @@ export default function WaitlistForm({ locale }: { locale: string }) {
           required
           autoComplete="email"
           placeholder={t("wait_placeholder")}
-          className="flex-1 h-12 px-4 text-[15px] rounded-full"
-          style={{
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.25)",
-            color: "#f4f3f0",
-          }}
+          className="field flex-1"
         />
         <button
           type="submit"
           disabled={busy}
           className="h-12 px-9 rounded-full text-[12px] font-semibold tracking-[0.2em] uppercase whitespace-nowrap transition-opacity hover:opacity-85 disabled:opacity-50"
-          style={{ background: "#F48140", color: "#1a1005" }}
+          style={{ background: "var(--accent)", color: "#111114" }}
         >
           {busy ? "…" : t("wait_button")}
         </button>
       </div>
 
       {error && (
-        <p role="alert" className="text-[13px] mt-4" style={{ color: "#F48140" }}>
+        <p role="alert" className="text-[13px] mt-4" style={{ color: "var(--accent-ink)" }}>
           {t("wait_error")}
         </p>
       )}
 
-      <p className="text-[12px] leading-relaxed mt-6 max-w-md" style={{ color: "rgba(255,255,255,0.32)" }}>
+      <p className="text-[12px] leading-relaxed mt-6 max-w-md" style={{ color: "var(--text-muted)" }}>
         {t("wait_consent")}{" "}
         <Link
           href={`/${locale}/privacy`}
           className="underline underline-offset-4"
-          style={{ color: "rgba(255,255,255,0.55)" }}
+          style={{ color: "var(--text)" }}
         >
           {t("wait_privacy")}
         </Link>

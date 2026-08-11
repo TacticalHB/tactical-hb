@@ -83,18 +83,26 @@ export default function Countdown({
       : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
   /* Days carry the accent — the figure that actually says something, and one
-     that changes once a day rather than flickering. Seconds stay faint,
+     that changes once a day rather than flickering. Seconds stay quiet,
      because seconds are what manufactures urgency and urgency reads as cheap.
 
      ON LIGHT, --accent-ink RATHER THAN --accent: the bright orange lands
      around 2.3:1 on the page's off-white and fails even the relaxed bar for
      large text, while the deep tone clears 4.9:1. On dark the argument runs
-     the other way and the bright accent is the one that carries. */
+     the other way and the bright accent is the one that carries.
+
+     THE UNIT CAPTIONS WERE FAILING WCAG AA AND HAD BEEN SINCE THIS SHIPPED.
+     They were --text-faint on the storefront cream, which is 2.47:1 at 9px
+     against a 4.5 bar — and the seconds numeral, in the same tone, missed even
+     the 3.0 allowed for large text. Both now sit at --text-muted (5.09:1) and
+     rgba(255,255,255,0.55) on dark (6.25:1). Seconds still recede against the
+     16.6:1 of the hours and minutes, which was the whole point of muting them;
+     they are simply legible while doing it. */
   const dark = tone === "dark";
   const c = {
     lead: dark ? "var(--accent)" : "var(--accent-ink)",
     body: dark ? "#f4f3f0" : "var(--text)",
-    faint: dark ? "rgba(255,255,255,0.35)" : "var(--text-faint)",
+    quiet: dark ? "rgba(255,255,255,0.55)" : "var(--text-muted)",
     rule: dark ? "rgba(255,255,255,0.15)" : "var(--border)",
   };
 
@@ -102,7 +110,7 @@ export default function Countdown({
     { value: time?.days, label: labels.days, color: c.lead },
     { value: time?.hours, label: labels.hours, color: c.body },
     { value: time?.minutes, label: labels.minutes, color: c.body },
-    { value: time?.seconds, label: labels.seconds, color: c.faint },
+    { value: time?.seconds, label: labels.seconds, color: c.quiet },
   ];
 
   return (
@@ -128,7 +136,7 @@ export default function Countdown({
             </div>
             <div
               className="text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
-              style={{ color: c.faint }}
+              style={{ color: c.quiet }}
             >
               {unit.label}
             </div>

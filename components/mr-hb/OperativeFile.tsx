@@ -24,12 +24,17 @@ import { useTranslations } from "next-intl";
    --motion-base, so advancing reads as one frame replacing another rather than
    a slide or a wipe.
 
-   THE CASE GETS WEIGHT BECAUSE IT IS THE PAYOFF. Closed → open runs a longer
-   crossfade with a small scale settle under it — 1.0 out to 1.02 and back —
-   so the lid reads as having mass rather than the picture simply changing.
-   620ms end to end, inside the brief's 450–700 and well under its 900 cap.
-   No bounce, no overshoot past the settle, no colour wash: the accent stays on
-   the seal, the CTA and the step dots where it already lives.
+   THE CASE GETS WEIGHT BECAUSE IT IS THE PAYOFF. Closed → open runs in three
+   moves: a short hold on the closed lid so the press itself is felt, a lift
+   where the whole frame swells to 1.07 while the open still fades up over the
+   closed one, and a settle back to rest as the copy arrives. 840ms end to end,
+   inside the brief's 700–900 and under its 900 cap. The first cut of this
+   motion peaked at 1.02 and users reported nothing happening — at 1.02 the
+   frame moves nine pixels a side and reads as compression noise; at 1.07 it
+   reads as a camera moving toward the case, which is the difference between
+   an effect and an event. No bounce, no overshoot past the settle, no colour
+   wash: the accent stays on the seal, the CTA and the step dots where it
+   already lives.
 
    Under prefers-reduced-motion the opening phase is never entered at all —
    the beat flips straight to open and the token-driven crossfade is already
@@ -41,14 +46,24 @@ import { useTranslations } from "next-intl";
 
 type Beat = 0 | 1 | 2 | 3 | 4 | 5;
 
-/* The case-open motion, in two moves.
-   "lift"   the panel swells slightly while the open frame fades up
-   "settle" it comes back to rest as the rail copy arrives
+/* The case-open motion, in three moves.
+   "hold"   the closed lid dims a shade under the pressed button — the click
+            is acknowledged before anything changes, which is what makes the
+            change legible when it comes
+   "lift"   the frame swells to 1.07 while the open still fades up OVER the
+            closed one — the closed frame never fades out under it, so there
+            is no midpoint where both are translucent over black
+   "settle" the swell comes back to rest and the rail copy arrives
    Idle is every other moment, when the shared --motion-base governs. */
-type Phase = "idle" | "lift" | "settle";
-const LIFT_MS = 240;
-const SETTLE_MS = 380;
-const OPEN_TOTAL_MS = LIFT_MS + SETTLE_MS; // 620 — the brief's cap is 900
+type Phase = "idle" | "hold" | "lift" | "settle";
+const HOLD_MS = 120;
+const LIFT_MS = 320;
+const SETTLE_MS = 400;
+const OPEN_TOTAL_MS = HOLD_MS + LIFT_MS + SETTLE_MS; // 840 — the cap is 900
+/* 1.07, not 1.02: the first cut used 1.02 and nobody saw it. The band the
+   brief allows is 1.06–1.08; if Safari on a real display still reads weak,
+   move to 1.08 before inventing anything else. */
+const SWELL = 1.07;
 
 /** The four photographed chapters, in order, mapped to their beat. */
 const CHAPTERS: Record<number, { src: string; altKey: string }> = {
@@ -94,12 +109,16 @@ export default function OperativeFile({ locale }: { locale: string }) {
       return;
     }
 
-    // The frame starts changing on the same tick as the press — the swell is
-    // under the crossfade, not before it, so the click has no dead time.
-    setPhase("lift");
-    setBeat(5);
+    // The beat does NOT flip on the press. The hold keeps the closed lid on
+    // screen for 120ms with a slight dim, so the press reads as a press —
+    // then the lift flips the beat and the open still fades up over it.
+    setPhase("hold");
     timers.current.push(
-      window.setTimeout(() => setPhase("settle"), LIFT_MS),
+      window.setTimeout(() => {
+        setPhase("lift");
+        setBeat(5);
+      }, HOLD_MS),
+      window.setTimeout(() => setPhase("settle"), HOLD_MS + LIFT_MS),
       window.setTimeout(() => setPhase("idle"), OPEN_TOTAL_MS)
     );
   };
@@ -301,50 +320,75 @@ export default function OperativeFile({ locale }: { locale: string }) {
             className="relative w-full lg:w-[59%] shrink-0 overflow-hidden"
             style={{ background: "#000", aspectRatio: "3 / 2" }}
           >
-            {Object.entries(CHAPTERS).map(([b, ch]) => {
-              const active = Number(b) === beat;
-              /* Only the open frame swells, and only while it is arriving. */
-              const swelling = opening && Number(b) === 5;
-              return (
-                <Image
-                  key={ch.src}
-                  src={ch.src}
-                  alt={active ? t(ch.altKey) : ""}
-                  fill
-                  priority={Number(b) === 2}
-                  /* EAGER, ALL FOUR, AND THIS IS THE PRELOAD THE BRIEF ASKS FOR.
-                     Next lazy-loads by default, and measuring showed that the
-                     three stacked behind the visible one never loaded at all —
-                     not even the frame the user was looking at on the
-                     case-closed beat. Pressing Open the case would then
-                     crossfade to an empty box, which is the exact flash this
-                     motion exists to avoid.
+            {/* THE SCALE LIVES ON THIS WRAPPER, NOT ON A FRAME. The first cut
+                scaled only the arriving open still, which ghosted a 1.02 frame
+                over a 1.0 frame mid-crossfade — misregistered edges read as
+                blur, not motion. Scaling the wrapper moves both stills as one
+                surface, so the swell reads as the camera pushing in while the
+                lid changes. The parent's overflow-hidden clips the swell at
+                the rail seam; transform and opacity only, nothing touches
+                layout. */}
+            <div
+              className="absolute inset-0"
+              style={{
+                transform: phase === "lift" ? `scale(${SWELL})` : "scale(1)",
+                transformOrigin: "center",
+                willChange: opening ? "transform" : undefined,
+                transition: opening
+                  ? `transform ${phase === "lift" ? LIFT_MS : SETTLE_MS}ms var(--ease-out)`
+                  : undefined,
+              }}
+            >
+              {Object.entries(CHAPTERS).map(([b, ch]) => {
+                const n = Number(b);
+                const active = n === beat;
+                /* THE CLOSED FRAME NEVER FADES OUT DURING THE OPEN. The open
+                   still (last in the stack, so on top) fades 0 → 1 over it;
+                   the closed one holds at 1 underneath until the settle, when
+                   it is fully covered and its drop to 0 is invisible. A
+                   mutual crossfade has a midpoint where both sit at half
+                   opacity over black — the exact empty-frame flash the
+                   production bug taught us to guard against. */
+                const heldUnder = n === 4 && phase === "lift";
+                const dimmed = n === 4 && phase === "hold";
+                return (
+                  <Image
+                    key={ch.src}
+                    src={ch.src}
+                    alt={active ? t(ch.altKey) : ""}
+                    fill
+                    priority={n === 2}
+                    /* EAGER, ALL FOUR, AND THIS IS THE PRELOAD THE BRIEF ASKS
+                       FOR. Next lazy-loads by default, and measuring showed
+                       that the three stacked behind the visible one never
+                       loaded at all — not even the frame the user was looking
+                       at on the case-closed beat. Pressing Open the case would
+                       then crossfade to an empty box, which is the exact flash
+                       this motion exists to avoid.
 
-                     The whole set is 244 KB of WebP on a page whose entire
-                     content is these four frames, and every visitor who walks
-                     the file sees all four. Fetching them up front costs one
-                     small burst on a page with no other images and buys a
-                     guaranteed-clean transition at every beat, not just this
-                     one. */
-                  loading="eager"
-                  sizes="(max-width: 1024px) 100vw, 59vw"
-                  className="object-cover"
-                  style={{
-                    opacity: active ? 1 : 0,
-                    /* transform and opacity only — nothing here touches layout. */
-                    transform: swelling && phase === "lift" ? "scale(1.02)" : "scale(1)",
-                    transformOrigin: "center",
-                    willChange: opening ? "transform, opacity" : undefined,
-                    transition: opening
-                      ? `opacity ${LIFT_MS + 180}ms var(--ease-out), transform ${
-                          phase === "lift" ? LIFT_MS : SETTLE_MS
-                        }ms var(--ease-out)`
-                      : "opacity var(--motion-base) var(--ease-out)",
-                    pointerEvents: "none",
-                  }}
-                />
-              );
-            })}
+                       The whole set is 244 KB of WebP on a page whose entire
+                       content is these four frames, and every visitor who
+                       walks the file sees all four. Fetching them up front
+                       costs one small burst on a page with no other images and
+                       buys a guaranteed-clean transition at every beat. */
+                    loading="eager"
+                    sizes="(max-width: 1024px) 100vw, 59vw"
+                    className="object-cover"
+                    style={{
+                      /* The dim is the press: 1 → 0.92 on the closed lid for
+                         the 120ms the button is held, cheaper than any filter
+                         and enough to say "received". */
+                      opacity: active ? (dimmed ? 0.92 : 1) : heldUnder ? 1 : 0,
+                      willChange: opening ? "opacity" : undefined,
+                      transition: opening
+                        ? `opacity ${phase === "hold" ? HOLD_MS : LIFT_MS}ms var(--ease-out)`
+                        : "opacity var(--motion-base) var(--ease-out)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
 
           {/* The rail. */}
@@ -352,17 +396,23 @@ export default function OperativeFile({ locale }: { locale: string }) {
             className="flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-10 lg:py-8"
             style={{ background: RAIL }}
           >
-            {/* THE COPY ARRIVES AFTER THE LID, not with it. During the lift it
-                is held at zero so the eye stays on the case; it fades up as the
-                frame settles, which is also what keeps the final CTA from
-                appearing before the case is actually open. */}
+            {/* THE COPY ARRIVES AFTER THE LID, not with it. It drops out fast
+                during the hold — the beat-4 copy fading, never the wrong
+                copy flashing, because the beat only flips once the rail is
+                already dark — stays out through the lift so the eye has one
+                thing to watch, and fades up with the settle. The 60ms delay
+                is what makes the image lead and the type follow; it is also
+                what keeps the final CTA from appearing before the case is
+                actually open. */}
             <div
               className="max-w-xl"
               style={{
-                opacity: phase === "lift" ? 0 : 1,
-                transform: phase === "lift" ? "translateY(6px)" : "none",
+                opacity: phase === "hold" || phase === "lift" ? 0 : 1,
+                transform: phase === "hold" || phase === "lift" ? "translateY(8px)" : "none",
                 transition: opening
-                  ? `opacity ${SETTLE_MS - 80}ms var(--ease-out) 60ms, transform ${SETTLE_MS - 80}ms var(--ease-out) 60ms`
+                  ? phase === "settle"
+                    ? `opacity ${SETTLE_MS - 60}ms var(--ease-out) 60ms, transform ${SETTLE_MS - 60}ms var(--ease-out) 60ms`
+                    : `opacity ${HOLD_MS}ms var(--ease-out), transform ${HOLD_MS}ms var(--ease-out)`
                   : undefined,
               }}
             >

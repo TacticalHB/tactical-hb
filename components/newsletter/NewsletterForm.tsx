@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
@@ -13,51 +13,26 @@ import { subscribeToNewsletter } from "@/app/actions/newsletter";
    ever reaches the subscribers table attached to an explicit yes. Ticking it
    also starts the four-part welcome series (W1 now, then +2, +5 and +9 days).
 
-   THE NAME, TITLE AND COUNTRY ARE COLLECTED AND NOT STORED. The list holds an
-   address, a language and a consent record and nothing else, because that is
-   all any of the flows read. Keeping a name we never use would be personal
-   data held for no purpose, which is the thing data-protection rules are
-   actually about. The fields stay because the form is a considered piece of
-   design and because a personalised send is a plausible next step — the day
-   one exists, the columns go in with it.
+   IT ASKS FOR AN EMAIL ADDRESS AND NOTHING ELSE. It used to ask for a title,
+   a first name, a surname, a country, the address, and then the address a
+   second time with paste disabled — six fields and a confirmation to join a
+   mailing list. Every one of those except the address was thrown away on
+   submit: the subscribers table holds an address, a language and a consent
+   record, because that is all any flow reads.
 
-   Country names come from Intl.DisplayNames rather than a hand-kept bilingual
-   list, so /uk shows "Німеччина" and /en shows "Germany" from the same data.
+   So the form was costing conversions to collect nothing. Worse, under
+   data-protection rules it was asking for personal data with no purpose to
+   justify it, which is precisely what those rules exist to prevent. The
+   confirm-email field went with them — it guards against a typo by doubling
+   the work for everyone, and the welcome email already proves the address
+   within seconds by either arriving or not.
+
+   If a personalised send is ever built, the name comes back WITH the column
+   that stores it and the purpose that needs it, not before.
+
+   The full profile form still exists at /newsletter/preferences, which is
+   where someone who wants to tell us more can.
 --------------------------------------------------------------------------- */
-
-/** Markets the store ships to — Europe, the Middle East, and North America. */
-const COUNTRY_CODES = [
-  "UA", "PL", "DE", "FR", "GB", "IT", "ES", "NL", "BE", "AT", "CH", "CZ", "SK",
-  "HU", "RO", "BG", "GR", "PT", "SE", "NO", "DK", "FI", "IE", "LT", "LV", "EE",
-  "MD", "GE", "TR", "CY", "AE", "SA", "QA", "KW", "IL", "US", "CA",
-];
-
-function useCountries(locale: string) {
-  return useMemo(() => {
-    let name = (code: string) => code;
-    try {
-      const dn = new Intl.DisplayNames([locale], { type: "region" });
-      name = (code: string) => dn.of(code) ?? code;
-    } catch {
-      // Very old runtimes: fall back to the raw ISO code rather than break.
-    }
-    return COUNTRY_CODES.map((code) => ({ code, label: name(code) })).sort((a, b) =>
-      a.label.localeCompare(b.label, locale)
-    );
-  }, [locale]);
-}
-
-function Chevron() {
-  return (
-    <svg
-      width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6"
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"
-      style={{ color: "var(--text-muted)" }} aria-hidden="true"
-    >
-      <path d="M4 7l6 6 6-6" />
-    </svg>
-  );
-}
 
 export default function NewsletterForm({
   locale,
@@ -76,16 +51,9 @@ export default function NewsletterForm({
   accountEmail?: string | null;
 }) {
   const t = useTranslations("newsletter");
-  const countries = useCountries(locale);
-  const uk = locale === "uk";
   const signedIn = !!accountEmail;
 
-  const [title, setTitle] = useState("");
-  const [first, setFirst] = useState("");
-  const [last, setLast] = useState("");
-  const [country, setCountry] = useState(uk ? "UA" : "");
   const [email, setEmail] = useState("");
-  const [confirm, setConfirm] = useState("");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -101,15 +69,8 @@ export default function NewsletterForm({
     // A signed-in customer has one thing to get wrong, and it is the consent.
     // Their address comes from the session, so it is not theirs to mistype.
     if (!signedIn) {
-      if (!title || !first.trim() || !last.trim() || !country || !email.trim() || !confirm.trim()) {
-        return setError(t("err_required"));
-      }
+      if (!email.trim()) return setError(t("err_required"));
       if (!/^\S+@\S+\.\S+$/.test(email)) return setError(t("err_email"));
-      // Compare case-insensitively — "Sarah@x.com" and "sarah@x.com" are the same
-      // mailbox, and failing that comparison would just look broken.
-      if (email.trim().toLowerCase() !== confirm.trim().toLowerCase()) {
-        return setError(t("err_match"));
-      }
     }
     if (!consent) return setError(t("err_consent"));
 
@@ -167,11 +128,8 @@ export default function NewsletterForm({
         <p className="text-[14px] leading-relaxed" style={{ color: "var(--text-muted)" }}>{t("intro")}</p>
       </div>
 
-      {/* "Required fields*" is a legend for a form with six of them. With the
-          consent tick alone it is just noise above a single checkbox. */}
-      {!signedIn && (
-        <p className="text-[12px] text-right mb-5" style={{ color: "var(--text-muted)" }}>{t("mandatory")}</p>
-      )}
+      {/* "Required fields*" was a legend for a form with six of them. With an
+          address and a consent tick it is noise above two controls. */}
 
       {error && (
         <div role="alert" className="mb-6 text-sm px-4 py-3" style={{ background: "#fdecec", color: "#b42318" }}>
@@ -193,76 +151,16 @@ export default function NewsletterForm({
       )}
 
       {/* NOT RENDERED FOR A SIGNED-IN CUSTOMER, rather than hidden with a
-          class. Every field here is `required`, and Chrome refuses to submit a
-          form containing a required control it cannot focus — a display:none
-          field would block the button with an error only the console sees. */}
+          class. The field is `required`, and Chrome refuses to submit a form
+          containing a required control it cannot focus — a display:none field
+          would block the button with an error only the console sees. */}
       <div className="flex flex-col gap-5">
         {!signedIn && (
-        <>
-        <div>
-          <label htmlFor="nl-title" className={label} style={labelSt}>{t("form_title")}*</label>
-          <div className="relative">
-            <select
-              id="nl-title"
-              className="field appearance-none pr-10"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            >
-              <option value="" disabled />
-              <option value="mr">{t("title_mr")}</option>
-              <option value="ms">{t("title_ms")}</option>
-              <option value="none">{t("title_none")}</option>
-            </select>
-            <Chevron />
+          <div>
+            <label htmlFor="nl-email" className={label} style={labelSt}>{t("form_email")}</label>
+            <input id="nl-email" className="field" type="email" autoComplete="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
           </div>
-        </div>
-
-        <div>
-          <label htmlFor="nl-first" className={label} style={labelSt}>{t("form_first")}*</label>
-          <input id="nl-first" className="field" autoComplete="given-name" value={first}
-            onChange={(e) => setFirst(e.target.value)} required />
-        </div>
-
-        <div>
-          <label htmlFor="nl-last" className={label} style={labelSt}>{t("form_last")}*</label>
-          <input id="nl-last" className="field" autoComplete="family-name" value={last}
-            onChange={(e) => setLast(e.target.value)} required />
-        </div>
-
-        <div>
-          <label htmlFor="nl-country" className={label} style={labelSt}>{t("form_country")}*</label>
-          <div className="relative">
-            <select
-              id="nl-country"
-              className="field appearance-none pr-10"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              required
-            >
-              <option value="" disabled />
-              {countries.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
-              ))}
-            </select>
-            <Chevron />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="nl-email" className={label} style={labelSt}>{t("form_email")}*</label>
-          <input id="nl-email" className="field" type="email" autoComplete="email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-
-        <div>
-          <label htmlFor="nl-confirm" className={label} style={labelSt}>{t("form_email_confirm")}*</label>
-          {/* Pasting defeats the point of a confirmation field. */}
-          <input id="nl-confirm" className="field" type="email" autoComplete="off" value={confirm}
-            onPaste={(e) => e.preventDefault()}
-            onChange={(e) => setConfirm(e.target.value)} required />
-        </div>
-        </>
         )}
 
         <label className="flex items-start gap-3 cursor-pointer mt-1">
@@ -273,7 +171,18 @@ export default function NewsletterForm({
             onChange={(e) => setConsent(e.target.checked)}
           />
           <span className="text-[13.5px] leading-relaxed" style={{ color: "var(--text)" }}>
-            {t("consent")}*
+            {/* THE CONSENT NAMES THE PRIVACY POLICY, so it now links to it.
+                This checkbox has always said "I have read and understood the
+                Privacy Policy" while no such page existed — asking someone to
+                confirm they have read a document that cannot be opened. */}
+            {t("consent")}{" "}
+            <Link
+              href={`/${locale}/privacy`}
+              className="underline underline-offset-4"
+              style={{ color: "var(--text)" }}
+            >
+              {t("privacy_link")}
+            </Link>
           </span>
         </label>
       </div>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
@@ -5,6 +6,7 @@ import UnsubscribeForm from "@/components/newsletter/UnsubscribeForm";
 import { createClient } from "@/lib/supabase/server";
 import { subscriberByEmail } from "@/lib/email/flows";
 import WhatsNextPanel from "@/components/newsletter/WhatsNextPanel";
+import { metadataFor } from "@/lib/seo";
 
 /* ---------------------------------------------------------------------------
    The sign-up page, which used to be a trap for anyone already signed in.
@@ -22,6 +24,15 @@ import WhatsNextPanel from "@/components/newsletter/WhatsNextPanel";
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/newsletter", key: "newsletter" });
+}
 
 export default async function NewsletterPage({
   params,

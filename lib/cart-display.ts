@@ -22,6 +22,29 @@ export type LineDisplay = {
 
 const VARIANT_UK: Record<string, string> = { Black: "Чорний", Purple: "Фіолетовий" };
 
+/**
+ * How a line's chosen add-ons are named — "With Lid + With Timer", or null for
+ * a base configuration.
+ *
+ * SPLIT OUT SO THE CROSS-SELL CARD CAN SAY THE SAME WORDS. That card offers
+ * the wind cover with its timer already on, which is a €45 price against a
+ * €23 catalogue product; it needs to name the configuration, and it needs to
+ * name it exactly as the cart line will a moment later. Two hand-written
+ * copies of "With Timer" is how the bag ends up disagreeing with the card that
+ * filled it.
+ */
+export function describeAddons(
+  options: CartLine["options"],
+  locale: string
+): string | null {
+  const uk = locale === "uk";
+  const addons: string[] = [];
+  if (options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
+  if (options?.rubber) addons.push(uk ? "З гумкою" : "With Rubber");
+  if (options?.timer) addons.push(uk ? "З таймером" : "With Timer");
+  return addons.length ? addons.join(" + ") : null;
+}
+
 export function describeLine(line: CartLine, locale: string): LineDisplay | null {
   const product = products.find((p) => p.slug === line.slug);
   if (!product) return null;
@@ -46,10 +69,7 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
   const materialSpec = product.pdp?.specs?.find((s) => s.labelEn === "Material");
   const material = materialSpec ? (uk ? materialSpec.valueUk : materialSpec.valueEn) : null;
 
-  const addons: string[] = [];
-  if (line.options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
-  if (line.options?.rubber) addons.push(uk ? "З гумкою" : "With Rubber");
-  if (line.options?.timer) addons.push(uk ? "З таймером" : "With Timer");
+  const addons = describeAddons(line.options, locale);
 
   return {
     product,
@@ -57,6 +77,6 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
     image,
     colour,
     material,
-    addons: addons.length ? addons.join(" + ") : null,
+    addons,
   };
 }

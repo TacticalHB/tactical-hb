@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from "react";
 
-/* Moved out 40 days from 1 August on 28 July 2026. UTC on purpose: the date is
-   a fixed instant worldwide, not midnight in whichever zone the reader is in.
-   The flagship.eyebrow string in messages/{en,uk}.json names the launch MONTH
-   and sits directly above this timer — move one without the other and the page
-   contradicts itself. */
-const LAUNCH = new Date("2026-09-10T00:00:00Z").getTime();
+/* 20 September 2026, set on 11 August 2026 (previously the 10th). UTC on
+   purpose: the date is a fixed instant worldwide, not midnight in whichever
+   zone the reader is in.
+
+   THIS CONSTANT IS THE LAUNCH DATE FOR THE WHOLE SITE. Two other things must
+   agree with it and neither is imported from here, so they have to be checked
+   by hand:
+
+     · flagship.eyebrow in messages/{en,uk}.json names the launch MONTH and
+       sits directly above this timer — move this into October and the page
+       contradicts itself in the same eyeful.
+     · the 12-month strategy document's revenue phasing and teaser calendar.
+
+   A date that lives in three places drifts. If it moves again, grep for
+   "2026-09" and fix every hit in the same commit. */
+const LAUNCH = new Date("2026-09-20T00:00:00Z").getTime();
 
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
 

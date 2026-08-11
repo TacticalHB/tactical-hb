@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
@@ -24,6 +26,16 @@ import { ADMIN_EMAIL } from "@/lib/contact-info";
    should read as a document, so the clauses are numbered and the measure is
    narrow rather than the two-up cards used for marketing copy.
 --------------------------------------------------------------------------- */
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/offer", key: "offer" });
+}
 
 export default async function OfferPage() {
   const locale = await getLocale();

@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { jsonLdScript, metadataFor, organizationJsonLd } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
@@ -8,9 +10,30 @@ import MissionMonitor from "@/components/MissionMonitor";
 import Reveal from "@/components/Reveal";
 import SearchlightHero from "@/components/SearchlightHero";
 
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/", key: "home" });
+}
+
 export default async function HomePage() {
   const locale = await getLocale();
-  return <HomeContent locale={locale} />;
+  return (
+    <>
+      {/* Organization schema goes on the home page only — it describes the
+          business, not this page, and repeating it on all 28 routes tells a
+          crawler nothing it did not learn the first time. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(organizationJsonLd(locale))}
+      />
+      <HomeContent locale={locale} />
+    </>
+  );
 }
 
 function HomeContent({ locale }: { locale: string }) {

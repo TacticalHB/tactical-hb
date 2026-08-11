@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
+import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import WholesaleForm from "@/components/WholesaleForm";
 import Reveal from "@/components/Reveal";
 import { SALES_EMAIL } from "@/lib/contact-info";
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/wholesale", key: "wholesale" });
+}
 
 export default function WholesalePage() {
   return <WholesaleContent />;

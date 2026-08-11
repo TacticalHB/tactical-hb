@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
@@ -15,6 +17,16 @@ import Reveal from "@/components/Reveal";
    Layout borrows the About page's grammar — soft header band with an oversized
    watermark, accent-ruled cards — so the two content pages read as siblings.
 --------------------------------------------------------------------------- */
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/delivery", key: "delivery" });
+}
 
 export default async function DeliveryPage() {
   const locale = await getLocale();

@@ -1,6 +1,22 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "@/components/account/AccountNav";
 import { rankForUser } from "@/lib/loyalty/rank-server";
+
+/**
+ * The whole account area is never indexed — profile, orders, loyalty,
+ * favourites and settings alike.
+ *
+ * app/robots.ts disallows these paths too, but the two do different jobs:
+ * robots stops a crawler FETCHING the page, while noindex stops the URL being
+ * listed at all, and a disallowed URL can still be indexed on the strength of
+ * an external link alone. Nothing under here is meaningful to anyone but the
+ * one person signed in, and an order page listed in a search result would be
+ * alarming even though the page itself refuses to render for a stranger.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Account shell.

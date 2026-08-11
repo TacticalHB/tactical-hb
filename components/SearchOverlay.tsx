@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { products } from "@/lib/products";
 import { searchAddons } from "@/lib/addons";
@@ -20,6 +21,7 @@ export default function SearchOverlay({
   const [q, setQ] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const a11y = useTranslations("a11y");
 
   useEffect(() => {
     if (open) {
@@ -82,7 +84,7 @@ export default function SearchOverlay({
               className="flex-1 bg-transparent outline-none text-lg"
               style={{ color: "var(--text)" }}
             />
-            <button onClick={onClose} aria-label="Close search" style={{ color: "var(--text-muted)" }}>
+            <button onClick={onClose} aria-label={a11y("search_close")} style={{ color: "var(--text-muted)" }}>
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <path d="M5 5l10 10M15 5L5 15" />
               </svg>

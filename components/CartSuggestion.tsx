@@ -6,6 +6,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { products } from "@/lib/products";
 import { getCartSuggestion } from "@/lib/cart-suggestion";
+import { describeAddons } from "@/lib/cart-display";
 import { useCart, lineKey, linePrice } from "./CartContext";
 import Price from "./Price";
 
@@ -137,6 +138,17 @@ export default function CartSuggestion({
      the bare cover's price. */
   const price = linePrice({ slug: suggestion.slug, qty: 1, options: suggestion.options });
 
+  /* THE CARD HAS TO NAME THE CONFIGURATION, because the price already reflects
+     it. The wind cover is suggested with its timer on — deliberately, it is
+     what the poster sells — so this card quoted €45 against a product whose
+     catalogue price is €23, under a name that said only "Windcover
+     Detonator". Nothing on the card explained the gap, so it read as either a
+     mistake or a markup. The price was never wrong; the label was incomplete.
+
+     Through describeAddons, so it is word-for-word what the bag will call the
+     same line thirty seconds later. */
+  const addons = describeAddons(suggestion.options, locale);
+
   /* Navigating away with the overlay still up would land the customer on the
      product page behind a drawer. Both surfaces close, because either could be
      the one that is open. */
@@ -220,6 +232,11 @@ export default function CartSuggestion({
             <Price money={price} locale={locale} />
           </span>
         </div>
+        {addons && (
+          <div className="px-4 pt-1 text-[12px]" style={{ color: "var(--text-muted)" }}>
+            {addons}
+          </div>
+        )}
       </Link>
 
       <div className="px-4 pb-3.5 pt-3">

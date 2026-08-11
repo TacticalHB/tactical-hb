@@ -338,10 +338,16 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
         />
       </div>
 
-      {/* Caption rail. The coordinate readout is Mario's call, made after being
-          told the figures resolve to Washington DC — it is set dressing for the
-          instrument look, not a claim about where anything is. Not localised:
-          a decimal coordinate reads the same in both languages. */}
+      {/* Caption rail. The coordinates are Kharkiv, and they are the same
+          figures the Mr HB page prints — one location, stated once, in both
+          places. They were briefly 38.8977 N · 77.0365 W, which is the White
+          House: fine as set dressing until you notice that a Ukrainian brand's
+          instrument panel was quietly reading out Washington DC. Where the
+          workshop actually is makes the better story anyway.
+
+          Not localised: a decimal coordinate reads the same in both languages,
+          which is also why mrhb.coords in messages/{en,uk}.json holds the
+          identical string. Change one, change all three. */}
       <div className="flex items-center justify-between px-1.5 pt-3">
         <span
           className="font-display text-[13px] tracking-[0.24em] uppercase"
@@ -353,7 +359,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           className="font-mono text-[9px] tracking-[0.14em]"
           style={{ color: "#5c6167" }}
         >
-          38.8977 N · 77.0365 W
+          49.9935 N · 36.2304 E
         </span>
       </div>
 

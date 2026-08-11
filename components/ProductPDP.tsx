@@ -195,6 +195,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const uk = locale === "uk";
   const { addToCart } = useCart();
   const mainImgRef = useRef<HTMLDivElement>(null);
+  const a11y = useTranslations("a11y");
 
   const pdp = product.pdp;
   const variants = product.variants;
@@ -311,7 +312,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     onClick={() => setIdx(i)}
                     className="relative w-14 h-14 rounded-xl overflow-hidden transition-opacity"
                     style={{ background: "#f5f5f5", outline: i === idx ? "1.5px solid #111" : "none", opacity: i === idx ? 1 : 0.75 }}
-                    aria-label={`View image ${i + 1}`}
+                    /* Localised, and it says how many there are. It read
+                       "View image 3" in English on both storefronts, which on
+                       /uk was the one control in the gallery speaking the
+                       wrong language. alt="" on the thumbnail is correct and
+                       stays: the button already carries the name, and a second
+                       one inside it would be announced twice. */
+                    aria-label={a11y("view_image", { n: i + 1, total: photos.length })}
                   >
                     <Image src={p} alt="" fill sizes="56px" className="object-cover" />
                   </button>

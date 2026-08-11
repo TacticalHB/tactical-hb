@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { localeLabel } from "@/lib/locale-label";
 
 /* ---------------------------------------------------------------------------
    Mr HB — the operative file.
@@ -124,7 +125,6 @@ export default function OperativeFile({ locale }: { locale: string }) {
   };
 
   const opening = phase !== "idle";
-  const other = locale === "uk" ? "en" : "uk";
   const isChapter = beat >= 2;
   /* 01, 02, 03 — the case is one file with two faces, so the closed and open
      beats share step three rather than inventing a fourth. */
@@ -168,11 +168,37 @@ export default function OperativeFile({ locale }: { locale: string }) {
           >
             {t("header")}
           </span>
+          {/* The pair reads EN / UA, from lib/locale-label — the same labels
+              the shop navbar uses, so the two chromes cannot drift apart. It
+              said "UK" here, which is the ISO code for the Ukrainian language
+              and which every English speaker reads as the United Kingdom.
+
+              THE LINK IS THE INACTIVE ONE, WHICHEVER THAT IS. It used to be
+              whichever came second: EN was always a dead span and UA always
+              the link, so on /uk the element labelled UA navigated to English
+              and the one that would have taken you back was not clickable at
+              all. Deriving both from the current locale is the only way the
+              two labels cannot disagree with where they go. */}
           <span className="hidden sm:flex items-center gap-1.5 text-[11px] tracking-[0.14em] uppercase">
-            <span style={{ color: locale === "en" ? "#f4f3f0" : "rgba(255,255,255,0.35)" }}>EN</span>
-            <span style={{ color: "rgba(255,255,255,0.2)" }}>/</span>
-            <Link href={`/${other}/mr-hb`} style={{ color: locale === "uk" ? "#f4f3f0" : "rgba(255,255,255,0.35)" }}
-              className="transition-opacity hover:opacity-70">UK</Link>
+            {(["en", "uk"] as const).map((code, i) => (
+              <span key={code} className="flex items-center gap-1.5">
+                {i > 0 && <span style={{ color: "rgba(255,255,255,0.2)" }}>/</span>}
+                {code === locale ? (
+                  <span aria-current="true" style={{ color: "#f4f3f0" }}>
+                    {localeLabel(code)}
+                  </span>
+                ) : (
+                  <Link
+                    href={`/${code}/mr-hb`}
+                    lang={code}
+                    style={{ color: "rgba(255,255,255,0.35)" }}
+                    className="transition-opacity hover:opacity-70"
+                  >
+                    {localeLabel(code)}
+                  </Link>
+                )}
+              </span>
+            ))}
           </span>
           {/* Skip is a real exit, not a state change — it leaves for the shop. */}
           <Link

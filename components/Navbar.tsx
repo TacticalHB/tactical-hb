@@ -9,6 +9,7 @@ import CartDrawer from "./CartDrawer";
 import AddedToBagPanel from "./AddedToBagPanel";
 import SearchOverlay from "./SearchOverlay";
 import AccountMenu from "./AccountMenu";
+import { localeLabel, otherLocale as pickOther } from "@/lib/locale-label";
 
 function SearchIcon() {
   return (
@@ -30,12 +31,16 @@ function BagIcon() {
 
 export default function Navbar({ locale }: { locale: string }) {
   const t = useTranslations("nav");
+  /* Icon-only controls carry their name in aria-label, so it has to be a
+     translated one — four buttons announced in English was the whole of the
+     mobile bar speaking the wrong language. */
+  const a = useTranslations("a11y");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { count, cartOpen, setCartOpen, registerCartIcon, bump } = useCart();
 
-  const otherLocale = locale === "uk" ? "en" : "uk";
+  const otherLocale = pickOther(locale);
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   // Checkout runs on its own minimal chrome — every nav link there is a way to
@@ -57,7 +62,7 @@ export default function Navbar({ locale }: { locale: string }) {
       data-cart-icon=""
       onClick={() => setCartOpen(true)}
       className={iconBtn}
-      aria-label="Cart"
+      aria-label={a("cart")}
     >
       <BagIcon />
       {count > 0 && (
@@ -82,10 +87,23 @@ export default function Navbar({ locale }: { locale: string }) {
       >
         {/* The TCT mark used to sit pinned to the very left edge here. It was
             removed deliberately — the wordmark alone carries the brand in the
-            bar. The left padding stays: it is what holds the wordmark in the
-            position it has always occupied, so nothing else in the bar moves. */}
-        <div className="page-container pl-14 sm:pl-16 md:pl-20 h-16 flex items-center justify-between">
-          <Link href={`/${locale}`} className="hidden md:block font-display text-2xl tracking-widest" style={{ color: "#f4f3f0" }}>
+            bar. On md+ the left padding stays: it is what holds the wordmark in
+            the position it has always occupied, so nothing else in the bar
+            moves. On mobile that padding is now gone, because there is a
+            wordmark to put there.
+
+            THE WORDMARK IS NO LONGER DESKTOP-ONLY. It was `hidden md:block`,
+            which left the phone — the first touchpoint for most of this
+            audience — showing a bar of four unlabelled icons and no brand at
+            all. It is the smaller `text-xl` here so the four icons on the
+            right keep their spacing at 375px; below that the flex row shrinks
+            it rather than wrapping. */}
+        <div className="page-container pl-5 sm:pl-16 md:pl-20 h-16 flex items-center justify-between gap-3">
+          <Link
+            href={`/${locale}`}
+            className="font-display text-xl md:text-2xl tracking-widest whitespace-nowrap"
+            style={{ color: "#f4f3f0" }}
+          >
             TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
           </Link>
 
@@ -95,24 +113,28 @@ export default function Navbar({ locale }: { locale: string }) {
                 {link.label}
               </Link>
             ))}
-            <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
+            <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label={a("search")}>
               <SearchIcon />
             </button>
             {bag}
             <AccountMenu locale={locale} />
-            <Link href={otherLocalePath} className="nav-lang text-xs tracking-[0.2em] uppercase px-3 py-1.5 border">
-              {otherLocale === "uk" ? "УКР" : "ENG"}
+            <Link
+              href={otherLocalePath}
+              className="nav-lang text-xs tracking-[0.2em] uppercase px-3 py-1.5 border"
+              lang={otherLocale}
+            >
+              {localeLabel(otherLocale)}
             </Link>
           </nav>
 
           {/* Mobile right cluster */}
           <div className="flex md:hidden items-center gap-5 ml-auto">
-            <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label="Search">
+            <button onClick={() => setSearchOpen(true)} className={iconBtn} aria-label={a("search")}>
               <SearchIcon />
             </button>
             <AccountMenu locale={locale} />
             {bag}
-            <button className="nav-link" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+            <button className="nav-link" onClick={() => setMenuOpen(!menuOpen)} aria-label={a("menu")}>
               <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 {menuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
               </svg>
@@ -130,8 +152,8 @@ export default function Navbar({ locale }: { locale: string }) {
               </Link>
             ))}
             <Link href={otherLocalePath} onClick={() => setMenuOpen(false)}
-              className="nav-link text-xs tracking-[0.2em] uppercase">
-              {otherLocale === "uk" ? "УКР" : "ENG"}
+              className="nav-link text-xs tracking-[0.2em] uppercase" lang={otherLocale}>
+              {localeLabel(otherLocale)}
             </Link>
           </div>
         )}

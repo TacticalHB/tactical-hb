@@ -42,13 +42,19 @@ export default function Footer() {
         </div>
 
         {/* Store policies, side by side. The offer is the legal document; the
-            delivery page is the plain-language version of the same model. */}
+            delivery page is the plain-language version of the same model; the
+            privacy policy is the one the consent checkboxes point at, which is
+            why it has to be reachable from every page rather than only from
+            the form that mentions it. */}
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
           <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link">
             {t("link_delivery")}
           </Link>
           <Link href={`/${locale}/offer`} className="text-sm tracking-[0.2em] uppercase nav-link">
             {t("link_offer")}
+          </Link>
+          <Link href={`/${locale}/privacy`} className="text-sm tracking-[0.2em] uppercase nav-link">
+            {t("link_privacy")}
           </Link>
         </div>
 

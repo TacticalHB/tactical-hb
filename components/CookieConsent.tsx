@@ -70,6 +70,7 @@ export default function CookieConsent({ locale }: { locale: string }) {
     save: uk ? "Зберегти вибір" : "Save choices",
     saved: uk ? "Налаштування cookie збережено" : "Cookie preferences saved",
     close: uk ? "Закрити" : "Close",
+    privacy: uk ? "Політика конфіденційності" : "Privacy Policy",
   };
 
   const persist = (next: Toggles) => {
@@ -95,7 +96,19 @@ export default function CookieConsent({ locale }: { locale: string }) {
           <div className="page-container flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1">
               <div className="text-sm font-semibold" style={{ color: "#111" }}>{L.title}</div>
-              <p className="text-[13px] mt-1 leading-snug" style={{ color: "var(--text-muted)" }}>{L.body}</p>
+              <p className="text-[13px] mt-1 leading-snug" style={{ color: "var(--text-muted)" }}>
+                {L.body}{" "}
+                {/* The banner implied a privacy policy long before one existed.
+                    Now it links to it — a consent request that cannot be read
+                    about is not really informed consent. */}
+                <a
+                  href={`/${uk ? "uk" : "en"}/privacy`}
+                  className="underline underline-offset-2"
+                  style={{ color: "#111" }}
+                >
+                  {L.privacy}
+                </a>
+              </p>
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">
               <button onClick={() => persist({ analytics: true, marketing: true })}

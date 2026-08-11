@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
+import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import ContactForm from "@/components/ContactForm";
 import Reveal from "@/components/Reveal";
 import { SALES_EMAIL, SOCIAL_HANDLE, SOCIAL_URLS, LINKEDIN_NAME } from "@/lib/contact-info";
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/contact", key: "contact" });
+}
 
 export default function ContactPage() {
   return <ContactContent />;

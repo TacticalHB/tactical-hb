@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
+import { metadataFor } from "@/lib/seo";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import AboutDossier from "@/components/AboutDossier";
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return metadataFor({ locale, path: "/about", key: "about" });
+}
 
 export default function AboutPage() {
   return <AboutContent />;

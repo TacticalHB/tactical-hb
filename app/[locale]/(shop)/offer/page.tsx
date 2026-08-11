@@ -17,10 +17,19 @@ import { ADMIN_EMAIL } from "@/lib/contact-info";
 
    Everything else on this page states what the shop actually does, and nothing
    more. In particular it does NOT interpret tax law, and it does not invent
-   registration details: the seller is described as the site already presents
-   itself, and the legal identifiers a Ukrainian public offer normally carries
-   (ФОП full name, ІПН, registration address) still have to be added by Mario —
-   they are his to supply, not mine to guess.
+   registration details.
+
+   THE SELLER IS NAMED AND NOT DESCRIBED — "Goods on this site are sold by
+   Tactical HB", full stop. It used to add the business form and the city;
+   Mario cut that on 11 August 2026, and /privacy names the controller the
+   same way for the same reason. The legal identifiers a Ukrainian public
+   offer normally carries still have to be added by him — they are his to
+   supply, not mine to guess — and when they are, both documents want the
+   same edit.
+
+   The payment processor IS still named in clause 04, deliberately: it is the
+   name that appears on the customer's card statement, and an unexplained
+   line item there is worse for trust than a named one.
 
    Layout is the Payment & Delivery page's grammar, one column: a legal document
    should read as a document, so the clauses are numbered and the measure is

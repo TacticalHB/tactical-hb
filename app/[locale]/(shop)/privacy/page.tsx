@@ -18,16 +18,33 @@ import { metadataFor } from "@/lib/seo";
    IT DESCRIBES THIS CODEBASE, NOT A TEMPLATE. Every category listed was read
    off the schema and the flows: orders and their shipping fields, profiles,
    subscribers, abandoned_carts, favourites, the loyalty tables, and the three
-   cookie categories in lib/cookie-consent.ts. The processors named are the
-   ones the code actually calls — Supabase, Vercel, Monobank, Nova Poshta and
-   Ukrposhta, Resend, and the fiscal receipt provider. If a flow is added that
-   touches personal data, this page is part of that change, not a follow-up.
+   cookie categories in lib/cookie-consent.ts. If a flow is added that touches
+   personal data, this page is part of that change, not a follow-up.
 
-   STILL OUTSTANDING, AND ONLY MARIO CAN SUPPLY IT: the ФОП registration
-   identifiers (full name, ІПН, registered address). The seller is described
-   here exactly as /offer describes it — same wording, deliberately — so both
-   documents can be completed in one pass. A privacy policy whose controller
-   cannot be identified is weaker than one that is late.
+   CLAUSE 04 NAMES CATEGORIES OF RECIPIENT, NOT VENDORS — Mario's call, on 11
+   August 2026, and the reason is competitive: a privacy policy is a public
+   page, and listing the stack on it tells anyone who looks exactly what this
+   business is built on. So "the providers who host this site", not the names.
+
+   The clause itself has to stay, which is why this is a rewrite rather than
+   the deletion that was asked for. Telling people who their data reaches is
+   the one disclosure the GDPR spells out by name, and it is the whole reason
+   this page exists — but the same rule says "recipients OR CATEGORIES of
+   recipients", so categories satisfy it exactly. Nothing legal is lost and no
+   vendor is named. Deleting the clause outright would have opened a hole in
+   the document written to close one.
+
+   Two names survive elsewhere on the site on purpose: the payment processor
+   in /offer, because it is what appears on the customer's card statement and
+   a mystery line item is worse than a named one, and the carrier, because the
+   customer picks it themselves at checkout. Neither is a secret to anyone who
+   has bought something. The genuinely private stack is not on the site.
+
+   STILL OUTSTANDING, AND ONLY MARIO CAN SUPPLY IT: the registration
+   identifiers for the controller. The seller is described here exactly as
+   /offer describes it — same wording, deliberately — so both documents can be
+   completed in one pass. A privacy policy whose controller cannot be
+   identified beyond a trading name is weaker than one that is late.
 
    NOT LEGAL ADVICE, and it has not been reviewed by a lawyer. It is an honest,
    specific account of what the software does with personal data, which is the

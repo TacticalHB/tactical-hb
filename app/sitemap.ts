@@ -30,6 +30,10 @@ import { SITE_URL, alternatesFor } from "@/lib/seo";
 const STATIC_PATHS = [
   { path: "/", priority: 1.0, changeFrequency: "weekly" as const },
   { path: "/products", priority: 0.9, changeFrequency: "weekly" as const },
+  /* The flagship file. High priority and a daily frequency until release:
+     it is the page the whole teaser campaign points at, and the countdown on
+     it changes every time it is fetched. */
+  { path: "/flagship", priority: 0.9, changeFrequency: "daily" as const },
   { path: "/setup", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/wholesale", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/about", priority: 0.7, changeFrequency: "monthly" as const },

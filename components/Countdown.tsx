@@ -32,9 +32,9 @@ function getTimeLeft(): TimeLeft {
 }
 
 /**
- * Launch countdown, light treatment.
+ * Launch countdown, on either ground.
  *
- * Restraint is the design: ink numerals on the page's own background, hairline
+ * Restraint is the design: numerals on the page's own background, hairline
  * dividers instead of colons, no glow, no boxes. This should look like a stated
  * fact, not a sales timer.
  *
@@ -48,7 +48,27 @@ function getTimeLeft(): TimeLeft {
  * with, so this sidesteps a hydration mismatch. tabular-nums stops the digits
  * jittering the layout every second.
  */
-export default function Countdown({ locale }: { locale: string }) {
+export default function Countdown({
+  locale,
+  tone = "light",
+}: {
+  locale: string;
+  /**
+   * Which ground it is standing on.
+   *
+   * The colours below are theme tokens tuned for the storefront's off-white —
+   * --text is near-black ink and --accent-ink is the deep orange that only
+   * clears contrast on a light surface. Dropped onto the flagship file's
+   * near-black, that set renders the digits almost invisible and the accent
+   * unreadable. "dark" swaps in the bright accent and light greys instead,
+   * which is the same pairing the rest of the dark chrome uses.
+   *
+   * A prop rather than a CSS override, because the component genuinely has
+   * two correct appearances now and a class that has to be remembered at
+   * every call site is the version that gets forgotten at the next one.
+   */
+  tone?: "light" | "dark";
+}) {
   const [time, setTime] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
@@ -63,17 +83,26 @@ export default function Countdown({ locale }: { locale: string }) {
       : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
   /* Days carry the accent — the figure that actually says something, and one
-     that changes once a day rather than flickering. Seconds are back to
-     --text-faint, the tone they had before the accent moved through here.
+     that changes once a day rather than flickering. Seconds stay faint,
+     because seconds are what manufactures urgency and urgency reads as cheap.
 
-     Note --accent-ink, not --accent: this sits on the page's off-white, where
-     the bright orange lands around 2.3:1 and fails even the relaxed bar for
-     large text. The deep tone clears 4.9:1. */
+     ON LIGHT, --accent-ink RATHER THAN --accent: the bright orange lands
+     around 2.3:1 on the page's off-white and fails even the relaxed bar for
+     large text, while the deep tone clears 4.9:1. On dark the argument runs
+     the other way and the bright accent is the one that carries. */
+  const dark = tone === "dark";
+  const c = {
+    lead: dark ? "var(--accent)" : "var(--accent-ink)",
+    body: dark ? "#f4f3f0" : "var(--text)",
+    faint: dark ? "rgba(255,255,255,0.35)" : "var(--text-faint)",
+    rule: dark ? "rgba(255,255,255,0.15)" : "var(--border)",
+  };
+
   const units = [
-    { value: time?.days, label: labels.days, color: "var(--accent-ink)" },
-    { value: time?.hours, label: labels.hours, color: "var(--text)" },
-    { value: time?.minutes, label: labels.minutes, color: "var(--text)" },
-    { value: time?.seconds, label: labels.seconds, color: "var(--text-faint)" },
+    { value: time?.days, label: labels.days, color: c.lead },
+    { value: time?.hours, label: labels.hours, color: c.body },
+    { value: time?.minutes, label: labels.minutes, color: c.body },
+    { value: time?.seconds, label: labels.seconds, color: c.faint },
   ];
 
   return (
@@ -83,7 +112,7 @@ export default function Countdown({ locale }: { locale: string }) {
           {i > 0 && (
             <div
               className="w-px self-stretch mx-4 sm:mx-7"
-              style={{ background: "var(--border)" }}
+              style={{ background: c.rule }}
               aria-hidden="true"
             />
           )}
@@ -99,7 +128,7 @@ export default function Countdown({ locale }: { locale: string }) {
             </div>
             <div
               className="text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
-              style={{ color: "var(--text-faint)" }}
+              style={{ color: c.faint }}
             >
               {unit.label}
             </div>

@@ -1109,3 +1109,24 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cart-suggest-link { transition: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   The way into the flagship file, from the homepage hero.
+
+   The rule extends on hover rather than the label moving — the same gesture
+   the envelope's OPEN FILE cue uses on /mr-hb, so the two entrances to the
+   same universe behave alike. transform, not width, so it composites.
+--------------------------------------------------------------------------- */
+.flagship-door-rule {
+  transform-origin: left center;
+  transition: transform var(--motion-base) var(--ease-out),
+              background-color var(--motion-base) var(--ease-out);
+}
+.flagship-door:hover .flagship-door-rule { transform: scaleX(1.7); }
+.flagship-door:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flagship-door:hover .flagship-door-rule { transform: none; }
+}

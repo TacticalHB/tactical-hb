@@ -32,6 +32,25 @@ import type { Dims } from "@/lib/parcel";
    parcels and move real money; a missing env var must never be the thing that
    decides which.
 
+   ── THE CREDENTIALS ARE NAMED BY ENVIRONMENT, AND THAT IS THE SAFETY ──────
+   Not one UKRPOSHTA_BEARER_ECOM whose value you swap when you go live, but
+   UKRPOSHTA_SANDBOX_BEARER_ECOM and UKRPOSHTA_PRODUCTION_BEARER_ECOM side by
+   side, with the mode choosing between them.
+
+   The single-variable version looked tidier and was a trap: it makes the
+   correct value depend on somebody remembering to paste a different secret
+   into the same box at the same moment they flip the mode. Get the order
+   wrong, or flip the mode on a machine where the box still holds the other
+   environment's secret, and you either book a real parcel from a test
+   checkout or fail every quote with no clue why.
+
+   Paired names mean BOTH sets can sit in the environment at once and sandbox
+   mode still physically cannot reach a production bearer — it never reads the
+   variable. Going live is then one word in one variable, which is what a
+   production switch should cost. It also means the production secrets can be
+   in place and dormant long before they are used, instead of arriving in a
+   hurry on the day of the cutover.
+
    ── UNITS, WHICH THE ENDPOINT'S OWN SCHEMA DOES NOT STATE ─────────────────
    ShipmentCalculationDataInter types weight/length/width/height as bare
    integers with no description. Every sibling DTO in the same document that
@@ -67,10 +86,25 @@ export class UkrposhtaError extends Error {}
 /** Thrown when the integration is not configured — distinct from a bad request. */
 export class UkrposhtaNotConfigured extends UkrposhtaError {}
 
+/**
+ * Read a credential belonging to the CURRENT mode, and only that mode.
+ *
+ * The variable name is derived from the mode rather than chosen by the caller,
+ * so there is no code path anywhere in this file that can name a production
+ * variable while running in sandbox. The error names the exact variable that
+ * is missing, because "not configured" with no clue which of eight it is
+ * costs more time than the check saves.
+ */
+function credential(suffix: string): string {
+  const mode = ukrposhtaMode();
+  const name = `UKRPOSHTA_${mode.toUpperCase()}_${suffix}`;
+  const value = process.env[name];
+  if (!value) throw new UkrposhtaNotConfigured(`${name} is not set`);
+  return value;
+}
+
 function ecomBearer(): string {
-  const key = process.env.UKRPOSHTA_BEARER_ECOM;
-  if (!key) throw new UkrposhtaNotConfigured("UKRPOSHTA_BEARER_ECOM is not set");
-  return key;
+  return credential("BEARER_ECOM");
 }
 
 /**
@@ -80,9 +114,17 @@ function ecomBearer(): string {
  * next phase and does need it.
  */
 export function counterpartyToken(): string {
-  const t = process.env.UKRPOSHTA_COUNTERPARTY_TOKEN;
-  if (!t) throw new UkrposhtaNotConfigured("UKRPOSHTA_COUNTERPARTY_TOKEN is not set");
-  return t;
+  return credential("COUNTERPARTY_TOKEN");
+}
+
+/** The counterparty's own UUID, needed when a shipment is created. */
+export function counterpartyUuid(): string {
+  return credential("COUNTERPARTY_UUID");
+}
+
+/** The StatusTracking bearer — a different credential from the eCom one. */
+export function trackingBearer(): string {
+  return credential("BEARER_TRACKING");
 }
 
 export type IntlQuote =

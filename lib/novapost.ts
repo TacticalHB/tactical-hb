@@ -94,13 +94,25 @@ export async function quoteInternational(opts: {
   declaredValueUah: number;
   city?: string;
 }): Promise<IntlQuote> {
-  const token = await jwt();
+  /* ONE RETRY ON 401, AND IT IS NOT DEFENSIVE PROGRAMMING — it was observed.
+     On a cold instance the very first international quote returns 401 from
+     /shipments/calculations even though the authorisation call just succeeded
+     and the SAME cached token prices fine a second later: the token needs a
+     moment to propagate on their side. Serverless means cold starts are
+     routine, and the checkout reads a throw here as "we cannot ship there",
+     so the visible symptom was a customer in a served country being offered
+     "we will confirm the total by email" — a lost sale, at random, for no
+     reason. Retrying once with a freshly minted token costs one round trip on
+     a path that has already failed. */
+  const call = async (token: string) =>
+    fetch(`${BASE}/shipments/calculations`, {
+      method: "POST",
+      headers: { Authorization: token, "Content-Type": "application/json" },
+      cache: "no-store",
+      body: payload,
+    });
 
-  const res = await fetch(`${BASE}/shipments/calculations`, {
-    method: "POST",
-    headers: { Authorization: token, "Content-Type": "application/json" },
-    cache: "no-store",
-    body: JSON.stringify({
+  const payload = JSON.stringify({
       payerType: "Sender",
       parcels: [
         {
@@ -124,8 +136,15 @@ export async function quoteInternational(opts: {
         countryCode: opts.countryCode.toUpperCase(),
         addressParts: { city: opts.city?.slice(0, 60) || "-" },
       },
-    }),
-  });
+    });
+
+  let res = await call(await jwt());
+
+  if (res.status === 401) {
+    // Discard the token that was just refused and mint a new one.
+    cachedJwt = null;
+    res = await call(await jwt());
+  }
 
   if (res.status === 422) {
     /* Two different 422s, and they must not be conflated. A bare errorMessage

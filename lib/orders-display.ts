@@ -50,7 +50,14 @@ export type AdminOrder = {
   /** Branch name, courier address, or international address — already joined. */
   deliveryDetail: string | null;
   deliveryNotes: string | null;
+  /** Nova Poshta's waybill number. Null on an Ukrposhta parcel. */
   ttn: string | null;
+  /** 'nova_poshta' | 'ukrposhta'. Null on orders predating the choice. */
+  carrier: string | null;
+  /** Ukrposhta's tracking barcode. Null on a Nova Poshta parcel. */
+  ukrposhtaBarcode: string | null;
+  /** Ukrposhta's own handle for the shipment, for API calls about it. */
+  ukrposhtaUuid: string | null;
 
   /* PRRO. A receipt id means a fiscal document exists; an error means one is
      owed and nobody has issued it. Both null on orders predating migration 0024
@@ -151,6 +158,15 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
     deliveryDetail: detail,
     deliveryNotes: text(row.np_notes),
     ttn: text(row.np_ttn),
+    /* WHO IS CARRYING IT. Null on every row placed before carriers were a
+       choice, which the admin renders as Nova Post rather than as a gap —
+       that is what those orders were. */
+    carrier: text(row.shipping_carrier),
+    /* Ukrposhta's own identifiers, kept apart from np_ttn: different
+       carrier, different format, and the tracking job must never confuse
+       one for the other. */
+    ukrposhtaBarcode: text(row.ukrposhta_barcode),
+    ukrposhtaUuid: text(row.ukrposhta_uuid),
 
     fiscalReceiptId: text(row.checkbox_receipt_id),
     fiscalisedAt: text(row.checkbox_fiscalised_at),

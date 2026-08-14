@@ -7,7 +7,9 @@ import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import { rankForUser } from "@/lib/loyalty/rank-server";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
-import { quoteInternational } from "@/lib/novapost";
+import { quoteInternational as quoteNovaPost } from "@/lib/novapost";
+import { quoteInternational as quoteUkrposhta } from "@/lib/ukrposhta";
+import { isShippingCarrier, type ShippingCarrier } from "@/lib/shipping-carriers";
 import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
@@ -167,9 +169,14 @@ export async function POST(request: NextRequest) {
   let npStreet: string | null = null;
   let npBuilding: string | null = null;
   let npFlat: string | null = null;
-  /** Destination country for international, and whether Nova Post priced it. */
+  /** Destination country for international, and whether anyone priced it. */
   let intlCountry: string | null = null;
   let intlQuoted = false;
+  /* Who is carrying it. Domestic is always Nova Poshta; international is the
+     customer's pick, re-quoted below and corrected if that carrier cannot
+     actually price it. Null only on an order that never reached a carrier. */
+  let shippingCarrier: ShippingCarrier | null =
+    shippingMethod === "nova_poshta" ? "nova_poshta" : null;
 
   if (shippingMethod === "nova_poshta") {
     npDeliveryType = shipReq.deliveryType === "courier" ? "courier" : "warehouse";
@@ -228,22 +235,65 @@ export async function POST(request: NextRequest) {
   if (shippingMethod === "international") {
     intlCountry = String(shipReq.countryCode ?? "").trim().toUpperCase().slice(0, 2) || null;
     if (intlCountry) {
-      try {
-        const parcel = parcelFor(priced.lines);
-        const quote = await quoteInternational({
-          countryCode: intlCountry,
-          weightKg: parcel.weightKg,
-          dims: parcel.dims,
-          declaredValueUah: goods.uah,
-          city: String(shipReq.city ?? "").trim() || undefined,
-        });
-        if (quote.ok) {
-          shippingUah = quote.costUah;
-          intlQuoted = true;
+      const parcel = parcelFor(priced.lines);
+      const country = intlCountry;
+
+      /* THE CARRIER COMES FROM THE BROWSER, THE PRICE NEVER DOES. Which of the
+         two the customer picked is a preference and is safe to accept; what
+         that carrier charges is re-asked here, because a cost posted from a
+         page anyone can edit would let somebody choose their own postage. */
+      const requested: ShippingCarrier = isShippingCarrier(shipReq.carrier)
+        ? shipReq.carrier
+        : "nova_poshta";
+
+      const ask = async (carrier: ShippingCarrier): Promise<number | null> => {
+        try {
+          const quote =
+            carrier === "ukrposhta"
+              ? await quoteUkrposhta({
+                  countryCode: country,
+                  weightKg: parcel.weightKg,
+                  dims: parcel.dims,
+                  declaredValueUah: goods.uah,
+                })
+              : await quoteNovaPost({
+                  countryCode: country,
+                  weightKg: parcel.weightKg,
+                  dims: parcel.dims,
+                  declaredValueUah: goods.uah,
+                  city: String(shipReq.city ?? "").trim() || undefined,
+                });
+          return quote.ok ? quote.costUah : null;
+        } catch (e) {
+          console.error(`[invoice] ${carrier} quote failed for ${country}:`, e);
+          return null;
         }
-      } catch (e) {
-        // An outage must not block the sale — fall back to the request flow.
-        console.error("[invoice] international quote failed, falling back to request:", e);
+      };
+
+      /* Ask the carrier they chose. If it cannot price — an outage between
+         choosing and paying, or a destination it has since stopped serving —
+         fall back to the OTHER one rather than dropping the customer into the
+         confirm-by-email flow they had already got past. They are charged what
+         that carrier costs and the order records who is actually carrying it,
+         so the row never claims a carrier that was not asked. */
+      const other: ShippingCarrier = requested === "ukrposhta" ? "nova_poshta" : "ukrposhta";
+
+      let cost = await ask(requested);
+      if (cost !== null) {
+        shippingCarrier = requested;
+      } else {
+        cost = await ask(other);
+        if (cost !== null) {
+          shippingCarrier = other;
+          console.warn(
+            `[invoice] ${requested} could not price ${country} at pay time; charged ${other} instead`
+          );
+        }
+      }
+
+      if (cost !== null) {
+        shippingUah = cost;
+        intlQuoted = true;
       }
     }
   }
@@ -339,6 +389,7 @@ export async function POST(request: NextRequest) {
     discount_eur: discount.eur,
     voucher_code: voucherCode,
     shipping_method: shippingMethod,
+    shipping_carrier: shippingCarrier,
     shipping_uah: shippingUah,
     np_delivery_type: npDeliveryType,
     np_city_ref: npCityRef,

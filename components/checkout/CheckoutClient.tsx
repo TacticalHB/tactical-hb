@@ -424,11 +424,16 @@ export default function CheckoutClient({
                   }
               : {
                   method: "international",
-                  // The country is what Nova Post prices a cross-border parcel
-                  // by; the city is sent for completeness and does not affect
-                  // the rate. Still only a destination — never a cost.
+                  // The country is what a cross-border parcel is priced by; the
+                  // city is sent for completeness and does not affect the rate.
+                  // Still only a destination — never a cost.
                   countryCode: countryCode === OTHER ? "" : countryCode,
                   city: form.city,
+                  /* WHICH CARRIER, NOT WHAT IT COSTS. A preference is safe to
+                     accept from a browser; a price is not. The server re-asks
+                     this carrier what it charges, and falls back to the other
+                     if it cannot answer at pay time. */
+                  carrier: selectedOffer?.carrier ?? null,
                 },
           lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
         }),

@@ -10,6 +10,7 @@ import {
   type AdminOrder,
 } from "@/lib/orders-display";
 import OrderTtnForm from "@/components/admin/OrderTtnForm";
+import { carrierName, isShippingCarrier } from "@/lib/shipping-carriers";
 
 /* ---------------------------------------------------------------------------
    Admin: every order, newest first.
@@ -109,10 +110,39 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
 
         <Field label={uk ? "Доставка" : "Delivery"}>
           <span className="font-medium">{deliveryLabel(order.deliveryKind, uk)}</span>
+          {/* WHO IS CARRYING IT, which used to be answerable from the
+              destination alone and no longer is: an international order may be
+              on Nova Post or on Ukrposhta, and the packing bench needs to know
+              which before it prints anything.
+
+              A null carrier is rendered as Nova Post rather than as a gap —
+              every order placed before the choice existed went that way, so
+              the blank is a known fact rather than missing data. */}
+          {order.deliveryKind === "international" && (
+            <>
+              <br />
+              <span style={{ color: "var(--console-muted)" }}>
+                {isShippingCarrier(order.carrier)
+                  ? carrierName(order.carrier, locale)
+                  : carrierName("nova_poshta", locale)}
+              </span>
+            </>
+          )}
           {order.deliveryDetail && (
             <>
               <br />
               <span style={{ color: "var(--console-muted)" }}>{order.deliveryDetail}</span>
+            </>
+          )}
+          {/* The Ukrposhta barcode sits here rather than in the TTN field
+              below, which is Nova Poshta's and is written by its own form. */}
+          {order.ukrposhtaBarcode && (
+            <>
+              <br />
+              <span style={{ color: "var(--console-muted)" }}>
+                {uk ? "Штрихкод Укрпошти: " : "Ukrposhta barcode: "}
+                <span className="font-mono">{order.ukrposhtaBarcode}</span>
+              </span>
             </>
           )}
           {order.deliveryNotes && (

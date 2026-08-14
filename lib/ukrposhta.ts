@@ -144,6 +144,32 @@ export type IntlQuote =
 const PACKAGE_TYPE = "PARCEL";
 
 /**
+ * What is in the box, for customs.
+ *
+ * SALE_OF_GOODS, and this is not a tuning knob. The enum also offers GIFT and
+ * COMMERCIAL_SAMPLE, both of which are cheaper to clear in some destinations —
+ * and both of which would be a false customs declaration on a parcel someone
+ * has just paid for. It is also not cosmetic: adding it moved the Polish quote
+ * from 735.86 to 731.17, so the field reaches the tariff.
+ */
+const CATEGORY_TYPE = "SALE_OF_GOODS";
+
+/**
+ * The declared currency.
+ *
+ * Required for some destinations and ignored by the rest — the United States
+ * refuses outright without it ("For shipment to 'US' currency should be USD"),
+ * while Germany prices identically with and without. Sent always, because a
+ * field that is free where it is optional and fatal where it is not should not
+ * be conditional on a country list somebody has to maintain.
+ *
+ * It does NOT change what declaredPrice is denominated in: the response echoes
+ * declaredPrice back unchanged in hryvnia while reporting deliveryPriceCurr in
+ * USD, so this names the currency of the customs VALUE, not of the postage.
+ */
+const DECLARED_CURRENCY = "USD";
+
+/**
  * AVIA rather than GROUND.
  *
  * Ground service from Ukraine reaches only a handful of neighbours and is slow
@@ -165,37 +191,60 @@ function mmToCm(mm: number): number {
  * shape is treated as untrusted.
  */
 type PriceResponse = {
+  /** The total, in hryvnia. The one field that decides what a customer pays. */
   deliveryPrice?: number | null;
+  /** The Ukrainian leg only — NOT the price in UAH. See chargeableUah. */
   deliveryPriceUa?: number | null;
   deliveryPriceUaWithVat?: number | null;
+  /** The same total expressed in `currencyCode` (USD in every sandbox reply). */
   deliveryPriceCurr?: number | null;
   currencyCode?: string | null;
 };
 
 /**
- * Which number we are actually going to charge the customer.
+ * Which number we are actually going to charge the customer: `deliveryPrice`,
+ * and it is hryvnia.
  *
- * The response carries up to four price fields and the spec documents none of
- * them. The order below is deliberate and conservative:
+ * THIS FUNCTION FIRST GUESSED, AND THE GUESS WOULD HAVE COST REAL MONEY. The
+ * spec documents none of these fields, so "Ua" was read as "UAH" and
+ * deliveryPriceUaWithVat was preferred on the reasoning that a VAT-inclusive
+ * hryvnia figure was the safe over-estimate. A sandbox call settled it, and
+ * the reading was wrong in the expensive direction.
  *
- *   deliveryPriceUaWithVat  hryvnia, VAT included — what leaves the account
- *   deliveryPriceUa         hryvnia, before VAT
- *   deliveryPrice           the base figure
+ * What a real response says, Germany, 125 g:
  *
- * Preferring the VAT-inclusive hryvnia figure means the worst case is quoting
- * the customer slightly MORE than the postage costs, never less. The opposite
- * ordering would have the shop absorbing VAT on every international parcel.
+ *   deliveryPrice                476.61   <- the total, in UAH
+ *   deliveryPriceWithoutPriceUa  368.61      the international leg
+ *   deliveryPriceUaWithVat       108         the UKRAINIAN leg, with VAT
+ *   deliveryPriceUa               90         the Ukrainian leg, before VAT
+ *   deliveryPriceCurr             10.66      the same total, in USD
+ *   currencyExchangeRate          44.6988
+ *
+ * "Ua" is UKRAINE, not hryvnia — the domestic portion of an international
+ * journey. It is a flat 90 to Germany, Japan and New Zealand alike, which is
+ * what gives it away; a currency conversion would not be identical across
+ * three zones. And 368.61 + 108 = 476.61 exactly, so the two legs sum to the
+ * total. That the total is hryvnia is confirmed independently:
+ * 10.66 USD × 44.6988 = 476.5, which is deliveryPrice to rounding.
+ *
+ * So the original ordering would have charged 108 UAH to send a parcel to
+ * Germany that costs 476.61 — the shop absorbing 368 UAH on every
+ * international order, growing with distance, and looking like a pricing
+ * decision rather than a bug.
+ *
+ * rawDeliveryPrice is 18 below deliveryPrice at every destination tested, so
+ * deliveryPrice is the one carrying the complete fee. It is the only field
+ * read here; there is no fallback chain, because a fallback would be another
+ * guess about a field nobody has verified.
  *
  * Returns null when nothing usable came back, which the caller reads as
  * "cannot price" rather than as free shipping — a zero here would be a silent
  * free-shipping bug on exactly the orders that cost the most to send.
  */
 function chargeableUah(body: PriceResponse): number | null {
-  const candidates = [body.deliveryPriceUaWithVat, body.deliveryPriceUa, body.deliveryPrice];
-  for (const value of candidates) {
-    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-      return Math.round(value * 100) / 100;
-    }
+  const value = body.deliveryPrice;
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.round(value * 100) / 100;
   }
   return null;
 }
@@ -227,6 +276,8 @@ export async function quoteInternational(opts: {
     recipientCountryIso3166: country,
     packageType: PACKAGE_TYPE,
     transportType: transportType(),
+    categoryType: CATEGORY_TYPE,
+    currencyCode: DECLARED_CURRENCY,
     // Grams, whole, and never zero — the API rejects a weightless parcel.
     weight: Math.max(1, Math.round(opts.weightKg * 1000)),
     length: mmToCm(opts.dims.l),
@@ -254,23 +305,62 @@ export async function quoteInternational(opts: {
     throw new UkrposhtaError(`delivery-price unreachable: ${(e as Error).message}`);
   }
 
-  /* 400 is the documented "unable to calculate delivery price", which for a
-     well-formed request means the destination is not served. Treated as a
-     routine fallback rather than an error, exactly as the Nova Post client
-     treats its own bare-message 422. */
-  if (res.status === 400 || res.status === 404) {
-    return { ok: false, reason: "unsupported_country" };
-  }
+  /* ── READING A FAILURE, WHICH THE FIRST VERSION GOT DANGEROUSLY WRONG ─────
+     It treated every 400 and 404 as "we do not go there". Sandbox showed that
+     hides three completely different things behind one silent shrug:
+
+       400 UPE01003  a genuine refusal — "United Arab Emirates with shipment
+                     PackageType:PRIME PARCEL is not available for delivery".
+                     This one really is unsupported.
+
+       400 UPE01002  A FAULT IN OUR REQUEST — a missing categoryType, a missing
+                     currency, an HS code of the wrong length. The destination
+                     is fine. Swallowing it as "unsupported" is how the UNITED
+                     STATES silently never gets a Ukrposhta quote and every
+                     American order pays the other carrier's price forever,
+                     with nothing in any log to say why.
+
+       404 (HTML)    not an answer at all. The sandbox rate-limits by returning
+                     an nginx error page, and Czechia and Spain both "went
+                     unsupported" mid-test purely because I was hammering it.
+                     Spaced out, they quote 468.79 and 851.63.
+
+     So: only an explicit refusal is unsupported. A malformed request and a
+     gateway hiccup both throw, which the caller logs and degrades from — the
+     customer still sees the other carrier, but the fault is visible instead of
+     being quietly priced in. */
+  const raw = await res.text();
+  const json = ((): (PriceResponse & { code?: string; message?: string }) | null => {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  })();
 
   if (!res.ok) {
-    /* NOTHING FROM THE REQUEST IS LOGGED. The Authorization header carries a
+    /* No JSON means it never reached the API — a gateway page, a rate limit, a
+       proxy error. Never a routing answer. */
+    if (!json) {
+      throw new UkrposhtaError(
+        `delivery-price HTTP ${res.status} for ${country} with a non-JSON body` +
+          ` (gateway or rate limit)`
+      );
+    }
+    const message = String(json.message ?? "");
+    const refused =
+      json.code === "UPE01003" || /not available for delivery/i.test(message);
+    if (refused) return { ok: false, reason: "unsupported_country" };
+
+    /* NOTHING FROM THE REQUEST IS ECHOED. The Authorization header carries a
        live bearer, and an error path is exactly where a careless log line ends
-       up in a shared drain. Status and the destination country are enough to
-       diagnose, and neither is a secret. */
-    throw new UkrposhtaError(`delivery-price HTTP ${res.status} for ${country}`);
+       up in a shared drain. The API's own message names the offending field
+       without quoting our payload, which is what makes it safe to include. */
+    throw new UkrposhtaError(
+      `delivery-price rejected for ${country}: ${json.code ?? res.status} ${message.slice(0, 160)}`
+    );
   }
 
-  const json = (await res.json().catch(() => null)) as PriceResponse | null;
   if (!json) throw new UkrposhtaError(`delivery-price returned unparseable body for ${country}`);
 
   const costUah = chargeableUah(json);

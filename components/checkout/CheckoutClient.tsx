@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
-import { money, subtractMoney } from "@/lib/currency";
+import { money, moneyFromUah, subtractMoney } from "@/lib/currency";
 import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
@@ -15,6 +15,12 @@ import { describeLine } from "@/lib/cart-display";
 import { priceCart } from "@/lib/pricing";
 import CheckoutHeader, { type Step } from "./CheckoutHeader";
 import OrderSummaryPanel from "./OrderSummaryPanel";
+import Price from "@/components/Price";
+import {
+  carrierName,
+  isShippingCarrier,
+  type ShippingCarrier,
+} from "@/lib/shipping-carriers";
 import AccountCreatingScreen from "./AccountCreatingScreen";
 
 /* ---------------------------------------------------------------------------
@@ -73,15 +79,30 @@ export default function CheckoutClient({
   const [countryCode, setCountryCode] = useState("");
   const countries = useMemo(() => countryOptions(locale), [locale]);
 
-  /* What Nova Post will charge to carry this basket to the chosen country.
-     null cost + unsupported=false means "not asked yet or still asking";
-     unsupported=true means Nova Post will not carry there, and the order
-     becomes a request priced by hand instead of a payment taken now. */
-  const [intl, setIntl] = useState<{ costUah: number | null; unsupported: boolean; loading: boolean }>({
-    costUah: null,
-    unsupported: false,
-    loading: false,
-  });
+  /* What the carriers will charge to carry this basket to the chosen country.
+     `offers` is empty + unsupported=false means "not asked yet or still
+     asking"; unsupported=true means NEITHER carrier will go there, and the
+     order becomes a request priced by hand instead of a payment taken now.
+
+     TWO CARRIERS NOW, so this holds a list rather than one number. The route
+     returns them cheapest-first and the cheapest is preselected — a customer
+     who does not care about carriers should not have to have an opinion to
+     reach the payment step. */
+  const [intl, setIntl] = useState<{
+    offers: { carrier: ShippingCarrier; costUah: number }[];
+    unsupported: boolean;
+    loading: boolean;
+  }>({ offers: [], unsupported: false, loading: false });
+
+  /* Which carrier the customer is buying. Null until offers arrive, then the
+     cheapest, then whatever they pick. Kept separate from `offers` so that a
+     re-quote — a basket change, a different country — refreshes the prices
+     without silently swapping the carrier under someone who chose one. */
+  const [carrier, setCarrier] = useState<ShippingCarrier | null>(null);
+
+  /** The offer being charged for: their choice, else the cheapest. */
+  const selectedOffer =
+    intl.offers.find((o) => o.carrier === carrier) ?? intl.offers[0] ?? null;
 
   /* A voucher is denominated in EUR; money() converts it for the UAH side.
      The rank perk is worked out from the live basket, and the two are put
@@ -101,7 +122,7 @@ export default function CheckoutClient({
      confirmed by email before any payment instead. */
 
   /** True when this order will be emailed a total rather than paid for now. */
-  const isIntlRequest = destination === "international" && (intl.unsupported || intl.costUah == null);
+  const isIntlRequest = destination === "international" && (intl.unsupported || selectedOffer == null);
 
   // A voucher applied to one basket must not survive a change to that basket —
   // its minimum-order rule was checked against the old contents.
@@ -125,11 +146,14 @@ export default function CheckoutClient({
        lint rule that catches it is worth keeping clean rather than adding to. */
     (async () => {
       if (destination !== "international" || !countryCode || countryCode === OTHER) {
-        if (live) setIntl({ costUah: null, unsupported: false, loading: false });
+        if (live) {
+          setIntl({ offers: [], unsupported: false, loading: false });
+          setCarrier(null);
+        }
         return;
       }
 
-      if (live) setIntl({ costUah: null, unsupported: false, loading: true });
+      if (live) setIntl({ offers: [], unsupported: false, loading: true });
 
       try {
         const res = await fetch("/api/shipping/quote", {
@@ -141,16 +165,42 @@ export default function CheckoutClient({
             lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
           }),
         });
-        const data = (await res.json()) as { ok?: boolean; costUah?: number; unsupported?: boolean };
+        const data = (await res.json()) as {
+          ok?: boolean;
+          offers?: { carrier?: string; costUah?: number }[];
+          unsupported?: boolean;
+        };
         if (!live) return;
-        if (data.ok && typeof data.costUah === "number") {
-          setIntl({ costUah: data.costUah, unsupported: false, loading: false });
+
+        /* Only offers with a real carrier name and a real number survive. The
+           response is server-built, but this is the value a customer is about
+           to be charged, so it is validated rather than trusted in shape. */
+        const offers = (data.offers ?? []).flatMap((o) =>
+          isShippingCarrier(o.carrier) && typeof o.costUah === "number" && o.costUah > 0
+            ? [{ carrier: o.carrier, costUah: o.costUah }]
+            : []
+        );
+
+        if (data.ok && offers.length > 0) {
+          setIntl({ offers, unsupported: false, loading: false });
+          /* KEEP THE CUSTOMER'S CHOICE IF IT IS STILL ON OFFER. Adding a
+             product re-quotes, and silently moving someone from the carrier
+             they picked to the newly-cheapest one is the sort of thing that is
+             noticed at the card screen. Only fall back to the cheapest when
+             their pick is genuinely no longer available. */
+          setCarrier((current) =>
+            current && offers.some((o) => o.carrier === current) ? current : offers[0].carrier
+          );
         } else {
-          setIntl({ costUah: null, unsupported: true, loading: false });
+          setIntl({ offers: [], unsupported: true, loading: false });
+          setCarrier(null);
         }
       } catch {
         // Treated as unquotable — the order still goes through, by email.
-        if (live) setIntl({ costUah: null, unsupported: true, loading: false });
+        if (live) {
+          setIntl({ offers: [], unsupported: true, loading: false });
+          setCarrier(null);
+        }
       }
     })();
 
@@ -224,6 +274,12 @@ export default function CheckoutClient({
       ? "Доставку до вашої країни розраховано та вже включено до суми замовлення. Ви сплачуєте одну суму — товар із доставкою."
       : "Delivery to your country has been calculated and is already included in your order total. You pay one amount — goods including delivery.",
     calculating: uk ? "Розрахунок…" : "Calculating…",
+    /* The carrier choice. Only shown when there is genuinely a choice — one
+       offer renders as a plain line, because a radio group of one is a
+       decision nobody was asked to make. */
+    carrierHeading: uk ? "Спосіб доставки" : "Delivery service",
+    carrierCheapest: uk ? "Найдешевше" : "Cheapest",
+    carrierIncluded: uk ? "Включено до суми замовлення" : "Included in your order total",
     needCity: uk ? "Оберіть місто доставки." : "Please choose a delivery city.",
     needBranch: uk ? "Оберіть відділення Нової Пошти." : "Please choose a Nova Poshta branch.",
     needAddress: uk ? "Вкажіть вулицю та будинок для кур'єрської доставки." : "Please enter the street and building for courier delivery.",
@@ -714,6 +770,73 @@ export default function CheckoutClient({
                           <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
                         </div>
                       </div>
+                      {/* ── CARRIER CHOICE ───────────────────────────────
+                          Only when there is more than one, and only once the
+                          prices are in. A single offer needs no radio group:
+                          the price is already in the summary and asking
+                          somebody to confirm the only option is friction
+                          dressed as control.
+
+                          The whole row is the label, so the tap target is the
+                          card rather than the 20px circle — the same rule the
+                          rest of the mobile pass applied. */}
+                      {intl.offers.length > 1 && (
+                        <fieldset className="mb-6">
+                          <legend className={labelCls} style={labelSt}>
+                            {L.carrierHeading}
+                          </legend>
+                          <div className="flex flex-col gap-2.5 mt-2">
+                            {intl.offers.map((offer, i) => {
+                              const active = selectedOffer?.carrier === offer.carrier;
+                              return (
+                                <label
+                                  key={offer.carrier}
+                                  className="flex items-center gap-3 p-4 cursor-pointer transition-colors"
+                                  style={{
+                                    border: `1px solid ${active ? "var(--text)" : "var(--border-strong)"}`,
+                                    background: active ? "var(--bg-soft)" : "transparent",
+                                  }}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="carrier"
+                                    className="w-5 h-5 shrink-0 accent-black"
+                                    checked={active}
+                                    onChange={() => setCarrier(offer.carrier)}
+                                  />
+                                  <span className="flex-1 min-w-0 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                                    <span className="text-[15px]" style={{ color: "var(--text)" }}>
+                                      {carrierName(offer.carrier, locale)}
+                                    </span>
+                                    {/* The list arrives cheapest-first, so the
+                                        badge is simply the first one — no
+                                        second comparison to fall out of step
+                                        with the ordering. */}
+                                    {i === 0 && (
+                                      <span
+                                        className="text-[11px] tracking-[0.14em] uppercase px-2 py-0.5"
+                                        style={{ background: "var(--accent)", color: "#111114" }}
+                                      >
+                                        {L.carrierCheapest}
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span
+                                    className="text-[15px] font-medium shrink-0 tabular-nums"
+                                    style={{ color: "var(--text)" }}
+                                  >
+                                    <Price money={moneyFromUah(offer.costUah)} locale={locale} />
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <p className="text-[12px] mt-2.5" style={{ color: "var(--text-muted)" }}>
+                            {L.carrierIncluded}
+                          </p>
+                        </fieldset>
+                      )}
+
                       <p className="text-[13px] leading-relaxed p-4 mb-8" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
                         {intl.loading ? L.calculating : isIntlRequest ? L.intlNotice : L.intlPriced}
                       </p>
@@ -796,7 +919,7 @@ export default function CheckoutClient({
           discount={discount}
           voucherCode={voucher?.code ?? null}
           discountSource={discountSource}
-          shippingUah={destination === "ukraine" ? np?.costUah ?? null : intl.costUah}
+          shippingUah={destination === "ukraine" ? np?.costUah ?? null : selectedOffer?.costUah ?? null}
           shippingPending={isIntlRequest}
         />
       </div>

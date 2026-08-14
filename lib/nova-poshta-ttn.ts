@@ -136,6 +136,12 @@ export type Sender = {
   contactRef: string;
   phone: string;
   addressRef: string;
+  /* The contact person's name, which the lookup below already returns and
+     nothing used until Ukrposhta needed a sender to print. Surfacing the
+     field we already have beats a second round trip, and beats a hand-typed
+     copy in the environment that goes stale the first time the Nova Poshta
+     cabinet is edited. Empty string when the contact has no description. */
+  contactName: string;
 };
 
 let senderCache: Sender | null = null;
@@ -187,7 +193,7 @@ export async function resolveSender(): Promise<Sender> {
     throw new NovaPoshtaError("Could not resolve a sender warehouse — set NOVA_POSHTA_SENDER_WAREHOUSE_REF");
   }
 
-  senderCache = { cityRef, counterpartyRef, contactRef, phone, addressRef };
+  senderCache = { cityRef, counterpartyRef, contactRef, phone, addressRef, contactName: (contact?.Description || "").trim() };
   return senderCache;
 }
 

@@ -72,6 +72,27 @@ const PRODUCTION_BASE = "https://www.ukrposhta.ua/ecom/0.0.1";
 
 export type UkrposhtaMode = "sandbox" | "production";
 
+/**
+ * OFF IS A REAL SETTING, and it exists because "delete your credentials" is a
+ * terrible off switch.
+ *
+ * Once the bearers are in an environment, the integration is live there — and
+ * the first environment that happened to was production, before a single
+ * shipment had ever been created. Sandbox prices are plausible (they track
+ * Ukrposhta's published tariffs), but a customer who picks a carrier we cannot
+ * actually book with is an order somebody has to buy postage for by hand.
+ *
+ * `off` lets every credential sit in Vercel, correct and dormant, while the
+ * quote path skips Ukrposhta entirely and checkout behaves exactly as it did
+ * before this integration existed. Turning it on is then the same one-word
+ * change as moving sandbox to production, rather than pasting four secrets
+ * back in under time pressure.
+ */
+export function ukrposhtaEnabled(): boolean {
+  const mode = process.env.UKRPOSHTA_API_MODE?.trim().toLowerCase();
+  return mode === "sandbox" || mode === "production";
+}
+
 /** Sandbox unless production is named explicitly. Never inferred. */
 export function ukrposhtaMode(): UkrposhtaMode {
   return process.env.UKRPOSHTA_API_MODE === "production" ? "production" : "sandbox";
@@ -262,6 +283,11 @@ export async function quoteInternational(opts: {
   dims: Dims;
   declaredValueUah: number;
 }): Promise<IntlQuote> {
+  /* Switched off means "we do not offer this carrier", not "this carrier
+     cannot go there" — but from the caller's point of view the handling is the
+     same and it must not look like a fault in the logs. */
+  if (!ukrposhtaEnabled()) return { ok: false, reason: "unsupported_country" };
+
   const country = opts.countryCode.trim().toUpperCase().slice(0, 2);
   if (country.length !== 2) return { ok: false, reason: "unsupported_country" };
 

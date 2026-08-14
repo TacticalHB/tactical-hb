@@ -10,14 +10,22 @@ tidy filename. A template that has to be force-added teaches the habit of
 force-adding env files.
 
 ```bash
-# Which environment the client talks to.
+# Which environment the client talks to — or whether it talks at all.
 #
+#  off         Ukrposhta is not offered. Credentials stay in place, dormant;
+#              checkout quotes Nova Post alone, exactly as before this
+#              integration existed. THIS IS WHAT PRODUCTION SHOULD HOLD until
+#              a shipment has actually been created in sandbox.
 #  sandbox     dev.ukrposhta.ua  — test parcels, no money, safe to hammer
 #  production  www.ukrposhta.ua  — REAL parcels and REAL money
 #
-# Anything other than the exact word `production`, including this variable
-# being absent entirely, means sandbox. That is deliberate: a missing variable
-# must never be the thing that decides whether a shipment is real.
+# Only the exact words `sandbox` and `production` switch it on; anything else,
+# including this variable being absent, means OFF. And only the exact word
+# `production` reaches the live host. A missing or mistyped variable must never
+# be the thing that decides whether a shipment is real.
+#
+# `off` exists because deleting four secrets is a terrible off switch: it means
+# pasting them back in under time pressure on the day you want the feature.
 UKRPOSHTA_API_MODE=sandbox
 
 # -----------------------------------------------------------------------------
@@ -50,8 +58,16 @@ UKRPOSHTA_PRODUCTION_COUNTERPARTY_UUID=
 #  The international price endpoint asks only for the destination and the
 #  parcel, so quoting works before any of this is filled in.
 # -----------------------------------------------------------------------------
+# NAME AND PHONE ARE OPTIONAL and normally left blank: lib/sender.ts reads them
+# from the Nova Poshta business cabinet, which is where that identity already
+# lives and is maintained. Set these two only to lodge Ukrposhta parcels under a
+# different name from the Nova Poshta account.
 UKRPOSHTA_SENDER_NAME=
 UKRPOSHTA_SENDER_PHONE=
+
+# THE POSTCODE HAS NO FALLBACK AND MUST BE SUPPLIED before any shipment can be
+# created. Nova Poshta addresses a sender by warehouse uuid and holds no postal
+# code anywhere, so there is nothing to inherit. Quoting never needs it.
 UKRPOSHTA_SENDER_POSTCODE=
 
 # -----------------------------------------------------------------------------

@@ -77,11 +77,12 @@ export const products: Product[] = [
     gridImage: "/images/hmd-classic-1.jpg",
     pdp: {
       /* GALLERY ORDER IS FIXED — the filename number IS the gallery position, so
-         a future third shot is hmd-classic-3.jpg appended at the end. -1 is the
+         a future fourth shot is hmd-classic-4.jpg appended at the end. -1 is the
          hero the customer meets first and must stay index 0. */
       photos: [
         "/images/hmd-classic-1.jpg", // 1st — product alone, studio background
         "/images/hmd-classic-2.jpg", // 2nd — product on the TCT box
+        "/images/hmd-classic-3.jpg", // 3rd — in the open presentation box
       ],
       // The existing catalogue description, unchanged: with a pdp block present
       // the page reads shortEn/shortUk instead of descriptionEn/descriptionUk,

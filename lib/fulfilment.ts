@@ -4,6 +4,7 @@ import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { esc, rowsHtml, sendMail } from "@/lib/email";
 import { buildOrderEmail } from "@/lib/order-email";
 import { createTtnForOrder } from "@/lib/order-ttn";
+import { createUkrposhtaShipmentForOrder } from "@/lib/order-ukrposhta";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
 import { cancelCartFlowOnPayment } from "@/lib/email/flows";
@@ -33,6 +34,9 @@ export type PaymentRow = {
   discount_eur: number;
   voucher_code: string | null;
   shipping_method: string | null;
+  /** Who carries it: nova_poshta | ukrposhta. Null on orders that predate
+      the choice — read as nova_poshta, which is what they were. */
+  shipping_carrier: string | null;
   shipping_uah: number;
   np_delivery_type: string | null;
   np_city_ref: string | null;
@@ -244,6 +248,7 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
         email: payment.email,
         delivery: payment.delivery,
         shipping_method: payment.shipping_method,
+        shipping_carrier: payment.shipping_carrier,
         shipping_uah: payment.shipping_uah,
         np_delivery_type: payment.np_delivery_type,
         np_city_ref: payment.np_city_ref,
@@ -339,6 +344,14 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     //    important should wait behind a courier API. Never throws — a failure
     //    leaves the order 'paid', which is the manual-waybill queue.
     await createTtnForOrder(order.id, payment);
+
+    // 6b. Or book it with Ukrposhta, if that is who is carrying it. Same
+    //     position and same rules as the Nova Poshta waybill above: after the
+    //     money, never throws, and a failure leaves the order 'paid' in the
+    //     manual queue. createTtnForOrder already returns early for anything
+    //     that is not a Nova Poshta order, and this one returns early for
+    //     anything that is not Ukrposhta — so exactly one of them acts.
+    await createUkrposhtaShipmentForOrder(order.id, payment);
 
     // 7. Fiscalise with Checkbox. After the waybill because a fiscal receipt is
     //    a legal record of a sale that HAS happened — it must never gate the

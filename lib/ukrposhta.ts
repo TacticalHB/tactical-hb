@@ -123,6 +123,22 @@ function baseUrl(): string {
   return ukrposhtaMode() === "production" ? PRODUCTION_BASE : SANDBOX_BASE;
 }
 
+/**
+ * The host for the current mode, for the shipment module.
+ *
+ * Exported rather than re-derived there: two copies of "which host am I
+ * talking to" is exactly how a booking ends up going to production while the
+ * quote that priced it came from sandbox.
+ */
+export function ukrposhtaBaseUrl(): string {
+  return baseUrl();
+}
+
+/** The eCom bearer, for the shipment module. Same credential, same gate. */
+export function ecomBearerForShipments(): string {
+  return ecomBearer();
+}
+
 export class UkrposhtaError extends Error {}
 
 /** Thrown when the integration is not configured — distinct from a bad request. */

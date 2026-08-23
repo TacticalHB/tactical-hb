@@ -58,6 +58,19 @@ UKRPOSHTA_PRODUCTION_COUNTERPARTY_UUID=
 #  The international price endpoint asks only for the destination and the
 #  parcel, so quoting works before any of this is filled in.
 # -----------------------------------------------------------------------------
+# BOOKING IS A SEPARATE SWITCH FROM QUOTING, because they are separate
+# decisions. Quoting is a calculation and can run against production all day
+# without consequence; booking creates a real parcel with a real label and a
+# real charge. Off unless this says on.
+UKRPOSHTA_BOOKING=off
+
+# THE CUSTOMS CODE, and there is deliberately no default. Ukrposhta requires a
+# УКТЗЕД classification on EVERY international parcel — not just the US — and
+# verifies it against their tariff table, so a well-formed guess is rejected.
+# It goes on a customs declaration attached to a real parcel; the wrong one
+# risks a hold or a seizure. Ask the Ukrposhta manager or the accountant.
+UKRPOSHTA_HS_CODE=
+
 # NAME AND PHONE ARE OPTIONAL and normally left blank: lib/sender.ts reads them
 # from the Nova Poshta business cabinet, which is where that identity already
 # lives and is maintained. Set these two only to lodge Ukrposhta parcels under a

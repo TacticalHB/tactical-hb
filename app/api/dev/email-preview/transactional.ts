@@ -34,6 +34,7 @@ function samplePayment(locale: string): PaymentRow {
     discount_eur: 10,
     voucher_code: "MILESTONE-10",
     shipping_method: "nova_poshta",
+    shipping_carrier: "nova_poshta",
     shipping_uah: 120,
     np_delivery_type: "courier",
     np_city_ref: null,

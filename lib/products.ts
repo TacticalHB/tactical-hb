@@ -86,10 +86,10 @@ export const products: Product[] = [
     slug: "hmd-tct-classic",
     nameUk: "HMD TCT Classic",
     nameEn: "HMD TCT Classic",
-    taglineUk: "Класичний алюміній. Відмінна продуктивність.",
-    taglineEn: "Classic aluminium. Excellent performance.",
-    descriptionUk: "Класична версія з алюмінію для відмінної продуктивності. Рівномірний розподіл тепла без екстремальних температур. Включає кришку.",
-    descriptionEn: "Classic aluminium version for excellent performance. Uniform heat distribution without temperature extremes. Includes lid.",
+    taglineUk: "Алюміній без покриття. Нічому стиратися.",
+    taglineEn: "Bare aluminium. Nothing to wear off.",
+    descriptionUk: "HMD з алюмінію без покриття — чистий метал і рівномірне тепло без екстремальних температур. Включає кришку.",
+    descriptionEn: "The bare aluminium HMD — uncoated metal, uniform heat distribution without temperature extremes. Includes lid.",
     price: 29,
     priceUah: 1080,
     currency: "EUR",
@@ -108,25 +108,73 @@ export const products: Product[] = [
         "/images/hmd-classic-2.jpg", // 2nd — product on the TCT box
         "/images/hmd-classic-3.jpg", // 3rd — in the open presentation box
       ],
-      // The existing catalogue description, unchanged: with a pdp block present
-      // the page reads shortEn/shortUk instead of descriptionEn/descriptionUk,
-      // so these must match or the copy on the page would silently change.
+      /* With a pdp block present the page reads shortEn/shortUk and never
+         descriptionEn/descriptionUk — the latter are the grid card and the
+         social/SEO fallback. The two say the same thing at different lengths
+         and must be corrected together. */
+      colourShownEn: "Bare Aluminium",
+      colourShownUk: "Алюміній без покриття",
       shortEn:
-        "Classic aluminium version for excellent performance. Uniform heat distribution without temperature extremes. Includes lid.",
+        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The Classic is the bare aluminium expression of the HMD — machined metal with no coating and no surface treatment, so there is nothing on it to wear through or discolour with use. Set it and forget it — no constant coal manipulation required.",
       shortUk:
-        "Класична версія з алюмінію для відмінної продуктивності. Рівномірний розподіл тепла без екстремальних температур. Включає кришку.",
+        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Classic — це версія HMD з алюмінію без покриття: оброблений метал без жодного шару зверху, тож на ньому нічому стиратися чи темніти з часом. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+      benefitsEn: [
+        "Mildness of smoking with rich, consistent flavour",
+        "Extended session duration (90+ minutes with proper use)",
+        "Bare aluminium — no coating to wear through or discolour",
+        "Effortless experience — no constant coal rotation or adjustments",
+        "Heating time of approximately 6 minutes under wind cover",
+      ],
+      benefitsUk: [
+        "М'якість куріння з насиченим, стабільним смаком",
+        "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
+        "Алюміній без покриття — немає шару, який стирається чи темніє",
+        "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
+        "Час нагріву — близько 6 хвилин під ковпаком",
+      ],
+      /* The care instructions are the device's, not the finish's, so all three
+         HMDs carry the same three. Wording them differently per SKU would
+         imply a difference in handling that does not exist. */
+      tipsEn: [
+        "Never cool the device with water",
+        "Use only soft, non-abrasive cloths for cleaning",
+        "Do not preheat the HMD using a charcoal lighter",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте пристрій водою",
+        "Для чищення використовуйте лише м'які неабразивні серветки",
+        "Не розігрівайте HMD на плитці для вугілля",
+      ],
+      /* Material and Finish are spelled EXACTLY so on purpose — lib/field-card
+         looks those two labels up by their English text and lifts them onto the
+         card. Rename either and the card silently loses the row. The heat
+         figures are the same on all three because it is the same 125 g body;
+         only the Finish row differs, and it is the one row that must never be
+         copied between these products. */
+      specs: [
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
+        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Bare aluminium, uncoated", valueUk: "Алюміній без покриття" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком" },
+        { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
+      ],
+      features: [
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "90+ minutes", textUk: "90+ хвилин" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", textEn: "Zero coal fuss", textUk: "Жодної метушні" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+      ],
     },
-    tags: ["aluminium", "lid", "classic"],
+    tags: ["aluminium", "bare", "lid", "classic"],
   },
   {
     id: "hmd-a-craft",
     slug: "hmd-a-craft",
     nameUk: "HMD A.Craft",
     nameEn: "HMD A.Craft",
-    taglineUk: "Крафтове видання з обробкою поверхні.",
-    taglineEn: "Surface-treated craft edition.",
-    descriptionUk: "Видання A.Craft з обробкою поверхні алюмінію. Без кришки. Унікальна тактична естетика.",
-    descriptionEn: "A.Craft edition with aluminium surface treatment. Without lid. Unique tactical aesthetic.",
+    taglineUk: "Крафтове видання з твердим анодуванням.",
+    taglineEn: "Hard anodised craft edition.",
+    descriptionUk: "Видання A.Craft з твердим анодованим покриттям алюмінію. Без кришки. Унікальна тактична естетика.",
+    descriptionEn: "A.Craft edition with a hard anodised aluminium surface. Without lid. Unique tactical aesthetic.",
     price: 24,
     priceUah: 900,
     currency: "EUR",
@@ -147,18 +195,20 @@ export const products: Product[] = [
       colourShownEn: "Tactical Grey",
       colourShownUk: "Тактичний сірий",
       shortEn:
-        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this high-quality, non-toxic aluminium device delivers mild, consistent smoking with extended session duration. Set it and forget it — no constant coal manipulation required.",
+        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The A.Craft body is hard anodised — the finish is grown into the surface of the metal rather than laid on top of it, which is what lets it take heat and handling without marking. Set it and forget it — no constant coal manipulation required.",
       shortUk:
-        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей високоякісний нетоксичний алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Корпус A.Craft має тверде анодоване покриття — воно утворюється в самому металі, а не лежить зверху, тому витримує жар і щоденне користування без слідів. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
       benefitsEn: [
         "Mildness of smoking with rich, consistent flavour",
         "Extended session duration (90+ minutes with proper use)",
+        "Hard anodised surface — resists wear, heat and marking",
         "Effortless experience — no constant coal rotation or adjustments",
         "Heating time of approximately 6 minutes under wind cover",
       ],
       benefitsUk: [
         "М'якість куріння з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
+        "Тверде анодоване покриття — стійке до зношування, жару та подряпин",
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
         "Час нагріву — близько 6 хвилин під ковпаком",
       ],
@@ -173,8 +223,8 @@ export const products: Product[] = [
         "Не розігрівайте HMD на плитці для вугілля",
       ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Non-toxic aluminium", valueUk: "Нетоксичний алюміній" },
-        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "A.Craft surface treatment", valueUk: "Обробка поверхні A.Craft" },
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
+        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Hard anodised", valueUk: "Тверде анодування" },
         { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком" },
         { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
       ],
@@ -185,17 +235,17 @@ export const products: Product[] = [
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
       ],
     },
-    tags: ["aluminium", "surface treatment"],
+    tags: ["aluminium", "hard anodised"],
   },
   {
     id: "hmd-tct-op",
     slug: "hmd-tct-op",
     nameUk: "HMD TCT OP",
     nameEn: "HMD TCT OP",
-    taglineUk: "100% антипригарна поверхня.",
-    taglineEn: "100% non-stick surface.",
-    descriptionUk: "Повністю антипригарне покриття (100% без PFOA). Запобігає прилипанню тютюну, легке очищення. Доступний у фіолетовому та чорному кольорах.",
-    descriptionEn: "Fully non-stick surface treatment (100% PFOA FREE). Prevents tobacco adhesion, easy cleaning. Available in purple and black.",
+    taglineUk: "Антипригарна поверхня, без PFOA.",
+    taglineEn: "Non-stick surface, PFOA-free.",
+    descriptionUk: "Повністю антипригарна поверхня, 100% без PFOA. Запобігає прилипанню тютюну, легке очищення. Доступний у фіолетовому та чорному кольорах.",
+    descriptionEn: "Fully non-stick surface, 100% PFOA-free. Prevents tobacco adhesion, easy cleaning. Available in purple and black.",
     price: 30,
     priceUah: 1150,
     currency: "EUR",
@@ -236,12 +286,12 @@ export const products: Product[] = [
          array is not the way to say "none" either: it used to blank the gallery
          and the page read "Photos coming soon". */
       shortEn:
-        "The HMD OP is a heat-management device engineered for overpack smoking. Its fully non-stick, 100% PFOA-free surface repels tobacco residue for clean, consistent heat distribution and effortless cleaning — even through intensive sessions. Precision-built and durable, it comes in black and purple finishes for a refined, tactical aesthetic.",
+        "The HMD OP is built for overpack smoking. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. Its fully non-stick, 100% PFOA-free surface repels tobacco residue, which keeps heat distribution even and cleaning effortless — even through intensive sessions. Offered in black and purple.",
       shortUk:
-        "HMD OP — це пристрій для нагріву, розроблений для куріння в стилі overpack. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки тютюну, забезпечуючи чистий, рівномірний розподіл тепла та легке очищення навіть під час інтенсивних сесій. Виготовлений з точністю та розрахований на довговічність, доступний у чорному та фіолетовому кольорах.",
+        "HMD OP створений для куріння в стилі overpack. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки тютюну, завдяки чому тепло розподіляється рівномірно, а очищення не потребує зусиль навіть після інтенсивних сесій. Доступний у чорному та фіолетовому кольорах.",
       benefitsEn: [
         "Non-stick surface repels residue — bold overpacks without sticking or bitterness",
-        "Optimized for overpacking — even heat for massive clouds and rich flavour",
+        "Optimised for overpacking — even heat for massive clouds and rich flavour",
         "Smooth, controlled sessions with a clean, effortless draw",
         "Durable and easy to clean — residue wipes straight off",
         "Doubles as a regular TCT HMD, but built for overpack style",
@@ -264,10 +314,17 @@ export const products: Product[] = [
         "Не розігрівайте HMD на плитці для вугілля",
       ],
       specs: [
-        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "Fully non-stick", valueUk: "Повністю антипригарна" },
-        { labelEn: "Coating", labelUk: "Покриття", valueEn: "100% PFOA FREE", valueUk: "100% БЕЗ PFOA" },
-        { labelEn: "Finishes", labelUk: "Кольори", valueEn: "Black & purple", valueUk: "Чорний і фіолетовий" },
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Tactical-grade inspired", valueUk: "Тактичного класу" },
+        /* Material first and Finish second, same as the other two HMDs, because
+           lib/field-card lifts exactly those two English labels onto the card.
+           "Finishes" used to sit here meaning COLOURS while the Ukrainian label
+           beside it already said Кольори — the two languages disagreed, and the
+           English one collided with the real finish row. "Tactical-grade
+           inspired" was not a material at all; it is the same aluminium body as
+           the Classic and the A.Craft, and only the coating differs. */
+        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
+        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Fully non-stick", valueUk: "Повністю антипригарна" },
+        { labelEn: "Coating", labelUk: "Покриття", valueEn: "100% PFOA-free", valueUk: "100% без PFOA" },
+        { labelEn: "Colours", labelUk: "Кольори", valueEn: "Black & purple", valueUk: "Чорний і фіолетовий" },
       ],
       features: [
         { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", textEn: "100% PFOA-free", textUk: "100% без PFOA" },

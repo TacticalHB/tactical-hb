@@ -1,5 +1,4 @@
 import { addMoney, money, type Money } from "./currency";
-import type { Product } from "./products";
 
 /* ---------------------------------------------------------------------------
    HMD material add-ons — the pricing model, independent of any UI.
@@ -16,21 +15,6 @@ import type { Product } from "./products";
 --------------------------------------------------------------------------- */
 
 export type HmdMaterial = { lid: boolean; rubber: boolean };
-
-/**
- * What the configurator opens with for a given device.
- *
- * ONE ANSWER FOR EVERY SURFACE. The product page and the kit builder both open
- * a device with add-ons pre-ticked, and they have to pre-tick the SAME ones or
- * the same device costs two different amounts depending on which screen the
- * customer used. The Classic is quoted bare, so it opens bare in both.
- *
- * The import above is type-only and erased at build time, so this does not put
- * the catalogue into the pricing module's runtime graph.
- */
-export function defaultMaterial(product: Pick<Product, "addonDefaults">): HmdMaterial {
-  return product.addonDefaults ?? { lid: true, rubber: true };
-}
 
 export const MATERIAL_PRICE: Record<keyof HmdMaterial, Money> = {
   lid: money(4),

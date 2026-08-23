@@ -7,7 +7,6 @@ import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";
 import { money } from "@/lib/currency";
-import { defaultMaterial } from "@/lib/hmd-options";
 
 /* ---------------------------------------------------------------------------
    Build a setup — bowl, heat device, wind cover, in that order.
@@ -160,26 +159,11 @@ export default function KitBuilder({ locale }: { locale: string }) {
     wasFull.current = full;
   }, [full]);
 
+  /* The add-on toggles deliberately SURVIVE a change of device: every device
+     offers the same two at the same prices, so someone who has turned the lid
+     off is stating a preference about lids and not about the A.Craft. */
   const choose = useCallback((slot: SlotKey, slug: string | null) => {
-    setSel((prev) => {
-      const next: Selection = { ...prev[slot], slug };
-
-      /* THE DEVICE DECIDES ITS OWN ADD-ONS, and it has to be re-asked on every
-         change of slug. The toggles used to persist across a swap, which was
-         invisible while every device pre-ticked the same two — and became a
-         real mispricing the moment one of them stopped. Picking the Classic
-         after the A.Craft would otherwise have carried the A.Craft's ticked
-         lid onto a device that is quoted without one, and quietly charged the
-         customer for a part the page never offered them. */
-      if (slot === "hmd") {
-        const product = slug ? products.find((p) => p.slug === slug) : null;
-        const d = defaultMaterial(product ?? {});
-        next.lid = d.lid;
-        next.rubber = d.rubber;
-      }
-
-      return { ...prev, [slot]: next };
-    });
+    setSel((prev) => ({ ...prev, [slot]: { ...prev[slot], slug } }));
   }, []);
 
   const toggle = useCallback((slot: SlotKey, key: "lid" | "rubber" | "timer") => {

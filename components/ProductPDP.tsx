@@ -8,7 +8,7 @@ import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
-import { defaultMaterial, materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
+import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
@@ -230,17 +230,18 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
-  /* HMD material add-ons — additive, and pre-selected FOR MOST DEVICES.
+  /* HMD material add-ons — additive, and BOTH PRE-SELECTED here, on every
+     device without exception.
      Browsing shows the base price (see NikeProductCard) so a customer scanning
      the catalogue is never quoted the fully-loaded figure; by the time they
      open a product they are choosing a specific device, so the complete
      configuration is offered and they opt out of it rather than into it.
 
-     The Classic opts in instead: its price is the bare device, so it opens
-     with nothing ticked and the page shows the figure on the card. Which way a
-     device goes is the catalogue's to say, not this component's. */
+     This holds even where the base price is the bare device, as it is on the
+     Classic: the card quotes €23 and the page opens at €29.50 with both
+     add-ons ticked, exactly as the A.Craft and the OP do. */
   const isHmd = product.category === "hmd";
-  const [material, setMaterial] = useState<HmdMaterial>(defaultMaterial(product));
+  const [material, setMaterial] = useState<HmdMaterial>({ lid: true, rubber: true });
 
   /* The wind cover's timer follows the same rule as the HMD add-ons above:
      PRE-SELECTED here, base price on the card. Opening the page offers the

@@ -38,7 +38,11 @@ export type OptionSpec = {
 
 export const HMD_OPTIONS: OptionSpec[] = [
   { key: "lid", en: "With Lid", uk: "З кришкою", glyph: "disc", price: MATERIAL_PRICE.lid },
-  { key: "rubber", en: "With Rubber", uk: "З гумкою", glyph: "ring", price: MATERIAL_PRICE.rubber },
+  /* The KEY stays `rubber` — it is written into cart lines, order rows
+     (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
+     would orphan every order already placed. Only the two labels are the
+     product's name. */
+  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber },
 ];
 
 export const WINDCOVER_OPTIONS: OptionSpec[] = [

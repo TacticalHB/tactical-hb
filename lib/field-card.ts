@@ -52,7 +52,7 @@ export function selectedConfig(
   const out: string[] = [];
   if (product.category === "hmd") {
     if (material?.lid) out.push(uk ? "з кришкою" : "with lid");
-    if (material?.rubber) out.push(uk ? "з гумкою" : "with rubber");
+    if (material?.rubber) out.push(uk ? "з FEAR 9E418" : "with FEAR 9E418");
   }
   if (product.category === "windcover" && windcover?.timer) {
     out.push(uk ? "з таймером" : "with timer");

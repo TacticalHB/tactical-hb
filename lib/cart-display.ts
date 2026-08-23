@@ -16,7 +16,7 @@ export type LineDisplay = {
   image: string;
   colour: string | null;
   material: string | null;
-  /** "With Lid + With Rubber", or null when the line is the base config. */
+  /** "With Lid + With FEAR 9E418", or null when the line is the base config. */
   addons: string | null;
 };
 
@@ -25,6 +25,11 @@ const VARIANT_UK: Record<string, string> = { Black: "Чорний", Purple: "Ф�
 /**
  * How a line's chosen add-ons are named — "With Lid + With Timer", or null for
  * a base configuration.
+ *
+ * THE NAMES LIVE HERE AND NOWHERE ELSE for the bag, the checkout and the
+ * transactional emails: all three reach this through describeLine. The account
+ * order-detail page keeps its own copy because it renders from stored order
+ * rows rather than cart lines — if a name changes, it changes in both.
  *
  * SPLIT OUT SO THE CROSS-SELL CARD CAN SAY THE SAME WORDS. That card offers
  * the wind cover with its timer already on, which is a €45 price against a
@@ -40,7 +45,7 @@ export function describeAddons(
   const uk = locale === "uk";
   const addons: string[] = [];
   if (options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
-  if (options?.rubber) addons.push(uk ? "З гумкою" : "With Rubber");
+  if (options?.rubber) addons.push(uk ? "З FEAR 9E418" : "With FEAR 9E418");
   if (options?.timer) addons.push(uk ? "З таймером" : "With Timer");
   return addons.length ? addons.join(" + ") : null;
 }

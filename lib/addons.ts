@@ -24,6 +24,8 @@ export type Addon = {
   key: "lid" | "rubber" | "timer";
   nameEn: string;
   nameUk: string;
+  /** Extra search terms. Never rendered — see the rubber entry. */
+  aliases?: string[];
   /** One line under the name, in the grid's usual tagline slot. */
   taglineEn: string;
   taglineUk: string;
@@ -48,10 +50,16 @@ export const ADDONS: Addon[] = [
   },
   {
     key: "rubber",
-    nameEn: "Rubber",
-    nameUk: "Гумка",
+    /* A name, so it is the same string in both languages and is not
+       translated. The key stays `rubber` because orders and stock are keyed
+       on it. */
+    nameEn: "FEAR 9E418",
+    nameUk: "FEAR 9E418",
     taglineEn: "Heat device sealing ring.",
     taglineUk: "Ущільнювальне кільце.",
+    /* Searchable by what it used to be called, without saying so anywhere on
+       the card. Someone who knows the part as a гумка still finds it. */
+    aliases: ["rubber", "гумка", "гумове кільце", "ring", "9e418"],
     price: MATERIAL_PRICE.rubber,
     parentSlug: "hmd-tct-op",
     parentEn: "Choose it on any heat device",
@@ -75,6 +83,8 @@ export function searchAddons(query: string): Addon[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
   return ADDONS.filter((a) =>
-    [a.nameEn, a.nameUk, a.taglineEn, a.taglineUk, a.key].some((s) => s.toLowerCase().includes(q))
+    [a.nameEn, a.nameUk, a.taglineEn, a.taglineUk, a.key, ...(a.aliases ?? [])].some((s) =>
+      s.toLowerCase().includes(q)
+    )
   );
 }

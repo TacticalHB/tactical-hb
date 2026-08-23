@@ -24,7 +24,7 @@ import Price from "./Price";
    made while shopping should not follow someone around for weeks.
 
    IT NEVER SELLS AN OPTION NOBODY CHOSE. A suggested device is the base SKU —
-   the product page preselects a lid and a rubber, and quietly charging for
+   most product pages preselect a lid and a ring, and quietly charging for
    those here would be putting two upgrades in the bag that were never shown.
    The one exception is the timer, which IS the suggestion, and even then it
    upgrades the cover already in the bag instead of adding a second one.

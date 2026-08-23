@@ -56,6 +56,21 @@ export type Product = {
   tileBleed?: boolean;
   /* Nike-style products grid */
   gridImage?: string;
+  /**
+   * Which HMD add-ons the configurator opens with.
+   *
+   * The catalogue's habit is OPT-OUT: a device is shown complete, with its lid
+   * and its ring already on, and a customer who wants neither turns them off.
+   * That works while the headline price is quoted for the bare device and the
+   * add-ons read as upgrades.
+   *
+   * The Classic is the exception and needs this field. Its price is quoted for
+   * the device ALONE — no lid in the box and none in the figure — so opening
+   * its page with a lid ticked would quote a number the product does not cost
+   * and put a part in the bag nobody asked for. Absent means all on, which is
+   * every other device.
+   */
+  addonDefaults?: { lid: boolean; rubber: boolean };
   variants?: Variant[];
   /* Nike-style product detail page */
   pdp?: {
@@ -88,10 +103,13 @@ export const products: Product[] = [
     nameEn: "HMD TCT Classic",
     taglineUk: "Алюміній без покриття. Нічому стиратися.",
     taglineEn: "Bare aluminium. Nothing to wear off.",
-    descriptionUk: "HMD з алюмінію без покриття — чистий метал і рівномірне тепло без екстремальних температур. Включає кришку.",
-    descriptionEn: "The bare aluminium HMD — uncoated metal, uniform heat distribution without temperature extremes. Includes lid.",
-    price: 29,
-    priceUah: 1080,
+    descriptionUk: "HMD з алюмінію без покриття — чистий метал і рівномірне тепло без екстремальних температур. Кришка — опція.",
+    descriptionEn: "The bare aluminium HMD — uncoated metal, uniform heat distribution without temperature extremes. Lid optional.",
+    /* THE DEVICE ALONE. No lid in the box and none in this figure; the lid is
+       an add-on here exactly as it is on the other two devices, and
+       addonDefaults below keeps the page from ticking it on arrival. */
+    price: 23,
+    priceUah: 850,
     currency: "EUR",
     weightG: 125,
     dims: { l: 122, w: 122, h: 42 },
@@ -99,6 +117,8 @@ export const products: Product[] = [
     featured: true,
     image: "/images/hmd-classic-1.jpg",
     gridImage: "/images/hmd-classic-1.jpg",
+    /* Opens bare — see addonDefaults on the Product type. */
+    addonDefaults: { lid: false, rubber: false },
     pdp: {
       /* GALLERY ORDER IS FIXED — the filename number IS the gallery position, so
          a future fourth shot is hmd-classic-4.jpg appended at the end. -1 is the
@@ -164,7 +184,7 @@ export const products: Product[] = [
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
       ],
     },
-    tags: ["aluminium", "bare", "lid", "classic"],
+    tags: ["aluminium", "bare", "classic"],
   },
   {
     id: "hmd-a-craft",

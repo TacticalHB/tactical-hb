@@ -8,7 +8,7 @@ import { Product } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
-import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
+import { defaultMaterial, materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
@@ -230,13 +230,17 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
-  /* HMD material add-ons — additive, and BOTH PRE-SELECTED here.
+  /* HMD material add-ons — additive, and pre-selected FOR MOST DEVICES.
      Browsing shows the base price (see NikeProductCard) so a customer scanning
      the catalogue is never quoted the fully-loaded figure; by the time they
      open a product they are choosing a specific device, so the complete
-     configuration is offered and they opt out of it rather than into it. */
+     configuration is offered and they opt out of it rather than into it.
+
+     The Classic opts in instead: its price is the bare device, so it opens
+     with nothing ticked and the page shows the figure on the card. Which way a
+     device goes is the catalogue's to say, not this component's. */
   const isHmd = product.category === "hmd";
-  const [material, setMaterial] = useState<HmdMaterial>({ lid: true, rubber: true });
+  const [material, setMaterial] = useState<HmdMaterial>(defaultMaterial(product));
 
   /* The wind cover's timer follows the same rule as the HMD add-ons above:
      PRE-SELECTED here, base price on the card. Opening the page offers the

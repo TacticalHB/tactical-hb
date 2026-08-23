@@ -89,10 +89,12 @@ export function getCartSuggestion(
     if (have.has("hmd")) return null;
     const slug = firstAbsent(["hmd-tct-classic", "hmd-a-craft", "hmd-tct-op"], lines);
     if (!slug) return null;
-    /* The BASE device, deliberately. The product page preselects a lid and a
-       rubber; adding those here would charge for two upgrades the customer
-       never saw, so the card offers the plain SKU and leaves the options to
-       the page where they are actually shown. */
+    /* The BASE device, deliberately. Most product pages preselect a lid and a
+       ring; adding those here would charge for two upgrades the customer never
+       saw, so the card offers the plain SKU and leaves the options to the page
+       where they are actually shown. It also means this card is right whether
+       the device it lands on preselects anything or not — the Classic does
+       not — because "no options" is the one answer that is never an upsell. */
     return { pairingKey: "bowl-hmd", poster: POSTER["bowl-hmd"], slug };
   }
 

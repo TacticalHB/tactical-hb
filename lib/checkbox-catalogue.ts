@@ -22,8 +22,16 @@ import "server-only";
    sells for ₴1700, but that does not need a second good: buildGoods sends the
    price WITH each receipt line rather than reading the cabinet's, so the stored
    ₴850 is a reference figure and the line carries whatever was actually
-   charged. It is the same reason HMD Classic sits at ₴1080 while happily
-   fiscalising an order that added a lid.
+   charged. It is the same reason HMD Classic fiscalises correctly on an order
+   that added a lid.
+
+   WHICH IS ALSO WHY A PRICE CHANGE DOES NOT INVALIDATE A CODE. The Classic was
+   repriced from ₴1080 to ₴850 when the lid came out of the base product, and
+   its code below is untouched and still right — it is the same good in the
+   cabinet, sold for less. The kopiyka figures in the comments are the cabinet's
+   reference prices as read on 2 August 2026, which is what makes them useful
+   for re-verifying a mapping; they are NOT the shop's current prices and must
+   not be corrected to match it.
 
    If a future product genuinely has no code, leave it out rather than guessing:
    the null is what stops an order being fiscalised against the wrong good, and

@@ -80,7 +80,9 @@ export default async function OrderDetailPage({
     help: uk
       ? "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо."
       : "Questions about this order? Reply to your confirmation email — it comes from an address we read.",
-    addons: { lid: uk ? "З кришкою" : "With Lid", rubber: uk ? "З гумкою" : "With Rubber" },
+    /* Kept in step with describeAddons in lib/cart-display — this page reads
+       stored order rows, not cart lines, so it names the add-ons itself. */
+    addons: { lid: uk ? "З кришкою" : "With Lid", rubber: uk ? "З FEAR 9E418" : "With FEAR 9E418" },
   };
 
   const money = (eur: number | null, uah: number | null) =>

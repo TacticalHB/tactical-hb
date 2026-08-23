@@ -45,6 +45,8 @@ type Copy = {
   orderDate: string;
   qty: string;
   subtotal: string;
+  /** Names the full-setup row. Never a percentage — see components/SetupSaving. */
+  setup: string;
   total: string;
   /** Says in words that delivery is inside the total — the receipt carries no
       priced delivery row, per the FOP-2 model. */
@@ -66,6 +68,7 @@ const COPY: Record<"uk" | "en", Copy> = {
     orderDate: "Order date",
     qty: "Qty",
     subtotal: "Subtotal",
+    setup: "Full setup",
     total: "Total",
     totalIncludes: "Order total includes shipping to your destination.",
     voucher: "Voucher",
@@ -83,6 +86,7 @@ const COPY: Record<"uk" | "en", Copy> = {
     orderDate: "Дата замовлення",
     qty: "К-сть",
     subtotal: "Проміжний підсумок",
+    setup: "Повний сет",
     total: "Разом",
     totalIncludes: "До суми замовлення включено доставку до обраного напрямку.",
     voucher: "Ваучер",
@@ -162,6 +166,27 @@ export function buildOrderEmail(
   const shipUah = Math.round(p.shipping_uah);
   const totalUah = goodsUah + shipUah;
 
+  /* THE FULL-SETUP SAVING HAS TO BE PUT BACK ON THE PAGE, for the same reason
+     the voucher above is: amount_uah is what was charged, and the item rows
+     below quote full line prices, so a receipt that jumped straight from those
+     rows to the charged figure would be a receipt whose sum does not match its
+     lines. That is the one thing a receipt may not be.
+
+     It is DERIVED rather than stored, because it is already implied by two
+     figures the order carries: the lines add up to what the goods would have
+     cost, amount + voucher is what they did cost, and the difference is the
+     saving. Nothing to migrate and nothing that can fall out of step with the
+     amount actually charged.
+
+     The tolerance is a cent, not zero. These are floats stored as numerics and
+     re-summed here; an exact comparison would occasionally invent a saving of
+     0.00 and print a row saying nothing. */
+  const linesEur = p.lines.reduce((n, l) => n + l.unit_eur * l.qty, 0);
+  const linesUah = p.lines.reduce((n, l) => n + l.unit_uah * l.qty, 0);
+  const setupEur = Math.round((linesEur - (p.amount_eur + p.discount_eur)) * 100) / 100;
+  const setupUah = Math.round(linesUah - (goodsUah + discountUah));
+  const hasSetup = setupEur > 0.01 && setupUah > 0;
+
   /* ---- Which currency the customer reads ----------------------------------
      Ukrainian shoppers saw hryvnia and are charged hryvnia — one currency,
      nothing to explain. English shoppers browsed in euro but Monobank settles
@@ -184,7 +209,13 @@ export function buildOrderEmail(
     inEur ? `€${eur.toFixed(2)}` : uah(uahValue);
 
   const amounts = {
-    subtotal: fmt(p.amount_eur + p.discount_eur, goodsUah + discountUah),
+    /* Built back up past BOTH reductions — the setup saving and then the
+       voucher — so subtotal minus the rows beneath it lands on the total. */
+    subtotal: fmt(
+      p.amount_eur + p.discount_eur + (hasSetup ? setupEur : 0),
+      goodsUah + discountUah + (hasSetup ? setupUah : 0)
+    ),
+    setup: fmt(setupEur, setupUah),
     discount: fmt(p.discount_eur, discountUah),
     shipping: fmt(shipEur, shipUah),
     total: fmt(p.amount_eur + shipEur, totalUah),
@@ -291,6 +322,7 @@ export function buildOrderEmail(
             <tr><td style="padding:20px 22px">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${summaryRow(t.subtotal, amounts.subtotal)}
+                ${hasSetup ? summaryRow(t.setup, `−${amounts.setup}`, { muted: true }) : ""}
                 ${discountUah > 0 ? summaryRow(`${t.voucher} · ${p.voucher_code}`, `−${amounts.discount}`, { muted: true }) : ""}
                 <tr><td colspan="2" style="border-top:1px solid ${ACCENT};opacity:0.4;font-size:0;line-height:0;padding-top:12px">&nbsp;</td></tr>
                 ${summaryRow(t.total, amounts.total, { strong: true })}
@@ -345,6 +377,7 @@ export function buildOrderEmail(
     ...p.lines.map((l) => `  ${l.qty} × ${l.name} — ${uah(l.unit_uah * l.qty)}`),
     "",
     `${t.subtotal}: ${amounts.subtotal}`,
+    ...(hasSetup ? [`${t.setup}: −${amounts.setup}`] : []),
     ...(discountUah > 0 ? [`${t.voucher} ${p.voucher_code}: −${amounts.discount}`] : []),
     `${t.total}: ${amounts.total}`,
     ...(shipUah > 0 ? [t.totalIncludes] : []),

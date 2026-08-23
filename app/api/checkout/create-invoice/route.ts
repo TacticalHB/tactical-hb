@@ -66,7 +66,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });
   }
 
-  // ---- Price the basket ourselves -----------------------------------------
+  /* ---- Price the basket ourselves -----------------------------------------
+
+     priced.subtotal ALREADY HAS THE FULL-SETUP SAVING OFF. It is decided in
+     priceCart from the catalogue, never read from the request, so a client
+     claiming a setup it has not got is simply priced without one — and a
+     client that forgot to claim one still gets it.
+
+     ORDER OF OPERATIONS, which matters and is deliberate: the setup saving
+     comes off first, then a voucher or a rank perk comes off what is left.
+     They are different kinds of thing. The saving is what these three pieces
+     cost together — a property of the basket — while a voucher is something
+     the customer brings to it. Taking the percentage perk on the already
+     reduced figure is also the conservative reading of both, and it is the
+     only order in which neither can be applied twice.
+
+     Everything below reads priced.subtotal, so the voucher's minimum-order
+     test is against what is actually being charged rather than a figure
+     nobody pays. */
   const priced = priceCart(b.lines, locale);
   if (priced.lines.length === 0) {
     return NextResponse.json({ ok: false, error: "empty_cart" }, { status: 400 });

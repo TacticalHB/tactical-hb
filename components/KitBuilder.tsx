@@ -7,6 +7,7 @@ import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";
 import { money } from "@/lib/currency";
+import { WasPrice, SetupNote } from "@/components/SetupSaving";
 
 /* ---------------------------------------------------------------------------
    Build a setup — bowl, heat device, wind cover, in that order.
@@ -23,10 +24,18 @@ import { money } from "@/lib/currency";
    charge is not a shape this can take. The server still re-prices at checkout;
    this is the preview agreeing with it in advance.
 
-   PARTIAL KITS ARE ALLOWED. Somebody who already owns a bowl should be able to
-   take the other two, so nothing is gated — only the CTA changes wording once
-   all three slots are filled, which is the honest way to say "this is now a
-   full setup" without refusing the sale until it is.
+   PARTIAL KITS ARE NOT ADDED FROM HERE. The builder hands over a setup or it
+   hands over nothing: with fewer than three slots answered the CTA is inert
+   and says which pieces are missing.
+
+   That is a change from how this started, and the reason is the saving. A
+   setup now costs less than its three parts do separately, so "add selection"
+   would have been a button that quietly declines the better price — the
+   customer asks for a setup, gets two thirds of one, and pays full list for
+   both. Somebody who genuinely wants only two pieces is not stuck: the
+   catalogue sells all three individually and the bag prices them the same way
+   this does, which is the whole point of the rule living in lib/bundle rather
+   than in here.
 --------------------------------------------------------------------------- */
 
 type SlotKey = "bowl" | "hmd" | "windcover";
@@ -94,8 +103,15 @@ export default function KitBuilder({ locale }: { locale: string }) {
     summary: uk ? "Ваш сет" : "Your setup",
     total: uk ? "Разом" : "Total",
     addFull: uk ? "Додати комплект" : "Add full kit",
-    addPartial: uk ? "Додати вибране" : "Add selection",
-    empty: uk ? "Оберіть хоча б один виріб" : "Choose at least one piece",
+    /* THE GATE'S OWN SENTENCE, and the only thing the button says until all
+       three are answered. It names the three rather than counting them —
+       "one more piece" would leave the customer looking for which. */
+    incomplete: uk
+      ? "Оберіть чашу, пристрій для нагріву та ковпак"
+      : "Select a bowl, heat device, and wind cover",
+    incompleteNote: uk
+      ? "Щоб продовжити, потрібні всі три: чаша, пристрій для нагріву та ковпак."
+      : "Select a bowl, heat device, and wind cover to continue.",
     lid: uk ? "Кришка" : "Lid",
     /* Not translated — it is a name, not a word. */
     rubber: FEAR_9E418,
@@ -387,24 +403,52 @@ export default function KitBuilder({ locale }: { locale: string }) {
             style={{ borderTop: "1px solid var(--border-strong)" }}
           >
             <span className="text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.total}</span>
-            <span className="text-[20px] font-medium" style={{ color: "var(--text)" }}>
-              <Price money={priced.subtotal} locale={locale} />
+            {/* Identical presentation to the bag and the checkout panel,
+                because it is the same saving arrived at the same way — the
+                builder has no pricing of its own. */}
+            <span className="flex items-baseline gap-2">
+              {priced.bundle && <WasPrice money={priced.subtotalFull} locale={locale} />}
+              <span className="text-[20px] font-medium" style={{ color: "var(--text)" }}>
+                <Price money={priced.subtotal} locale={locale} />
+              </span>
             </span>
           </div>
+          {priced.bundle && <SetupNote locale={locale} className="mt-1.5" />}
 
+          {/* THE GATE. A setup is three pieces, so the builder does not hand
+              over two — the button is inert and says what is missing, and the
+              note under it repeats that in a full sentence for anyone who
+              reads the label as a title rather than an instruction.
+
+              aria-disabled rather than the disabled attribute alone: a
+              disabled button is skipped by keyboard navigation and silent to a
+              screen reader, so someone tabbing through would meet no control
+              at all and no explanation. This way it is reachable, announced as
+              unavailable, and described by the note. */}
           <button
             type="button"
             onClick={addKit}
-            disabled={filled === 0}
+            disabled={!full}
+            aria-disabled={!full}
+            aria-describedby={full ? undefined : "kit-gate-note"}
             className={`w-full h-12 rounded-full mt-6 text-[15px] font-medium transition-opacity${pulse ? " kit-cta-pulse" : ""}`}
             style={{
-              background: filled === 0 ? "var(--border-strong)" : "var(--accent)",
-              color: filled === 0 ? "var(--text-faint)" : "#111114",
-              cursor: filled === 0 ? "not-allowed" : "pointer",
+              background: full ? "var(--accent)" : "var(--border-strong)",
+              color: full ? "#111114" : "var(--text-faint)",
+              cursor: full ? "pointer" : "not-allowed",
             }}
           >
-            {filled === 0 ? L.empty : full ? L.addFull : L.addPartial}
+            {full ? L.addFull : L.incomplete}
           </button>
+          {!full && (
+            <p
+              id="kit-gate-note"
+              className="text-[12px] leading-snug mt-2.5 text-center"
+              style={{ color: "var(--text-faint)" }}
+            >
+              {L.incompleteNote}
+            </p>
+          )}
         </aside>
       </div>
     </div>

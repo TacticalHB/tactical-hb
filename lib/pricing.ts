@@ -1,7 +1,8 @@
 import { products } from "@/lib/products";
 import { materialUpcharge, materialWeightG } from "@/lib/hmd-options";
 import { timerUpcharge, timerWeightG } from "@/lib/windcover-options";
-import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
+import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
+import { bundleFor, type Bundle, type BundleItem } from "@/lib/bundle";
 import type { Dims } from "@/lib/parcel";
 
 /* ---------------------------------------------------------------------------
@@ -41,7 +42,24 @@ export type PricedLine = {
   options: { variant: string | null; lid: boolean; rubber: boolean; timer: boolean };
 };
 
-export type PricedCart = { lines: PricedLine[]; subtotal: Money };
+export type PricedCart = {
+  lines: PricedLine[];
+  /**
+   * What the goods actually cost — THE FULL-SETUP SAVING IS ALREADY OFF.
+   *
+   * Deliberately the reduced figure rather than an extra field the callers
+   * have to remember to subtract. Every server path that touches money reaches
+   * it through here — the invoice route, the voucher check, the shipping
+   * quote, the customs value, the abandoned-cart mail — and a saving that had
+   * to be applied by hand in six places is a saving that will be missed in
+   * one. Anything that needs the pre-saving number reads `subtotalFull`.
+   */
+  subtotal: Money;
+  /** The same basket before the setup was recognised — the "Was" figure. */
+  subtotalFull: Money;
+  /** Null unless a bowl, a device and a cover are all present. */
+  bundle: Bundle | null;
+};
 
 /** Quantities a real order can contain. Anything else is a mistake or an attack. */
 const MAX_QTY = 99;
@@ -52,6 +70,10 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
   const raw: PricedLineInput[] = Array.isArray(input) ? (input as PricedLineInput[]).slice(0, MAX_LINES) : [];
 
   const lines: PricedLine[] = [];
+  /* Category travels alongside the priced line purely for the setup rule; it
+     is not on PricedLine because nothing else needs it and the persisted order
+     line should not grow a field it never reads. */
+  const bundleItems: BundleItem[] = [];
   for (const l of raw) {
     const product = products.find((p) => p.slug === l?.slug);
     // Unknown slug: drop the line rather than price it at zero.
@@ -98,8 +120,17 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       // priced, so it must not be recorded as sold either.
       options: { variant: variant?.name ?? null, lid: material.lid, rubber: material.rubber, timer: windcover.timer },
     });
+    bundleItems.push({ category: product.category, unit });
   }
 
-  const subtotal = lines.reduce<Money>((s, l) => addMoney(s, l.total), money(0, 0));
-  return { lines, subtotal };
+  const subtotalFull = lines.reduce<Money>((s, l) => addMoney(s, l.total), money(0, 0));
+
+  /* THE SAVING IS SERVER-SIDE AND IS NEVER READ FROM THE REQUEST. The browser
+     says what is in the basket; whether that is a full setup, and what it is
+     therefore worth, is decided here from the catalogue. A caller claiming a
+     bundle it does not have gets priced as if it had not. */
+  const bundle = bundleFor(bundleItems);
+  const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
+
+  return { lines, subtotal, subtotalFull, bundle };
 }

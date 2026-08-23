@@ -29,8 +29,20 @@ function samplePayment(locale: string): PaymentRow {
     user_id: null,
     email: "preview@example.invalid",
     locale,
-    amount_eur: 132.5,
-    amount_uah: 6758,
+    /* THE AMOUNTS AGREE WITH THE LINES BELOW, which they did not use to — the
+       fixture quoted a subtotal its own items never summed to, so the preview
+       could not be used to check that a receipt adds up. It is now a full
+       setup with a voucher on top, which is the busiest a receipt gets:
+
+         lines            €136.00   (10 + 36 + 45×2)
+         full setup       − €9.10   (cheapest of each: 10 + 36 + 45 = 91)
+         voucher          −€10.00
+         goods            €116.90   ← amount_eur
+         shipping           €2.35   (₴120 at the fixed 51)
+         total            €119.25
+    */
+    amount_eur: 116.9,
+    amount_uah: 4313,
     discount_eur: 10,
     voucher_code: "MILESTONE-10",
     shipping_method: "nova_poshta",

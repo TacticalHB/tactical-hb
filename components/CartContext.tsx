@@ -2,7 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { products, Product } from "@/lib/products";
-import { addMoney, money, scaleMoney, type Money } from "@/lib/currency";
+import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
+import { bundleFor, type Bundle } from "@/lib/bundle";
 import { materialUpcharge } from "@/lib/hmd-options";
 import { timerUpcharge } from "@/lib/windcover-options";
 
@@ -42,7 +43,12 @@ export function linePrice(line: CartLine): Money {
 type CartCtx = {
   lines: CartLine[];
   count: number;
+  /** Goods total with the full-setup saving already off. Mirrors priceCart. */
   subtotal: Money;
+  /** The same basket before the saving — the "Was" figure, or equal to it. */
+  subtotalFull: Money;
+  /** Null unless the bag holds a bowl, a heat device and a wind cover. */
+  bundle: Bundle | null;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
   /** `showPanel` opens the "Added to Shopping Bag" slide-over instead of the
@@ -147,10 +153,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const count = lines.reduce((n, l) => n + l.qty, 0);
   // Subtotal carries both currencies so the drawer can show either without
   // re-converting (and without the two ever disagreeing).
-  const subtotal = lines.reduce<Money>(
+  const subtotalFull = lines.reduce<Money>(
     (s, l) => addMoney(s, scaleMoney(linePrice(l), l.qty)),
     money(0, 0)
   );
+
+  /* THE SAME RULE THE SERVER WILL APPLY, from the same module — this is the
+     instant preview, priceCart is the authority, and the two agree because
+     neither of them owns the rule. A basket that shows a saving here and loses
+     it at the invoice is worse than one that never showed it. */
+  const bundle = bundleFor(
+    lines.flatMap((l) => {
+      const p = products.find((x) => x.slug === l.slug);
+      return p ? [{ category: p.category, unit: linePrice(l) }] : [];
+    })
+  );
+  const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
 
   const addToCart = useCallback((
     product: Product,
@@ -280,7 +298,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider
       value={{
-        lines, count, subtotal, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
+        lines, count, subtotal, subtotalFull, bundle, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
         clearCart, registerCartIcon, bump, lastAdded, addedOpen, setAddedOpen, hydrated,
       }}
     >

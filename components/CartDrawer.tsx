@@ -6,6 +6,7 @@ import { useCart, lineKey, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
+import { WasPrice, SetupNote } from "./SetupSaving";
 import CartSuggestion from "./CartSuggestion";
 
 /* ---------------------------------------------------------------------------
@@ -17,7 +18,7 @@ import CartSuggestion from "./CartSuggestion";
 --------------------------------------------------------------------------- */
 
 export default function CartDrawer({ locale }: { locale: string }) {
-  const { cartOpen, setCartOpen, lines, subtotal, changeQty, removeLine, count } = useCart();
+  const { cartOpen, setCartOpen, lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count } = useCart();
   const uk = locale === "uk";
 
   const L = {
@@ -160,12 +161,18 @@ export default function CartDrawer({ locale }: { locale: string }) {
             paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))",
           }}
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className={`flex items-center justify-between ${bundle ? "mb-1" : "mb-5"}`}>
             <span className="text-[15px]" style={{ color: "var(--text)" }}>{L.total}</span>
-            <span className="text-[17px] font-medium" style={{ color: "var(--text)" }}>
-              <Price money={subtotal} locale={locale} />
+            {/* Was and now on one line, the old figure muted and struck. No
+                percentage and no name for the mechanism — see SetupSaving. */}
+            <span className="flex items-baseline gap-2">
+              {bundle && <WasPrice money={subtotalFull} locale={locale} />}
+              <span className="text-[17px] font-medium" style={{ color: "var(--text)" }}>
+                <Price money={subtotal} locale={locale} />
+              </span>
             </span>
           </div>
+          {bundle && <SetupNote locale={locale} className="mb-4" />}
           <Link
             href={`/${locale}/cart`}
             onClick={close}

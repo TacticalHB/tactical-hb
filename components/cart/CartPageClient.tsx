@@ -8,6 +8,7 @@ import { describeLine } from "@/lib/cart-display";
 import CartInfoSections from "./CartInfoSections";
 import NewsletterPromo from "@/components/NewsletterPromo";
 import Price from "@/components/Price";
+import { WasPrice, SetupNote } from "@/components/SetupSaving";
 import { subtractMoney } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE, permanentDiscount } from "@/lib/loyalty/ranks";
 
@@ -27,7 +28,7 @@ export default function CartPageClient({
   /** Colonel's permanent share off the products, 0 for every other rank. */
   rankDiscountRate?: number;
 }) {
-  const { lines, subtotal, changeQty, removeLine, count, hydrated } = useCart();
+  const { lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count, hydrated } = useCart();
   /* A voucher is not applied in the basket — it is entered at checkout — so
      there is nothing to weigh the rank perk against here and it always shows.
      Checkout is where the two are compared and only one survives. */
@@ -209,8 +210,16 @@ export default function CartPageClient({
           <div className="flex flex-col gap-3 text-[14px]">
             <div className="flex items-center justify-between">
               <span style={{ color: "var(--text-muted)" }}>{L.subtotal}</span>
-              <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
+              {/* The setup saving lands on the SUBTOTAL, not as a line of its
+                  own: it is not a deduction the customer applied, it is what
+                  these three pieces cost together. A rank perk below is a
+                  different thing and keeps its own row. */}
+              <span className="flex items-baseline gap-2">
+                {bundle && <WasPrice money={subtotalFull} locale={locale} />}
+                <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
+              </span>
             </div>
+            {bundle && <SetupNote locale={locale} className="-mt-1.5" />}
             {rankPerk.eur > 0 && (
               <div className="flex items-center justify-between">
                 <span style={{ color: "var(--text-muted)" }}>{L.rankDiscount}</span>

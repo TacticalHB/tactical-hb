@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
+import { WasPrice, SetupNote } from "@/components/SetupSaving";
 import { addMoney, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE } from "@/lib/loyalty/ranks";
 
@@ -32,7 +33,7 @@ export default function OrderSummaryPanel({
   /** International: shipping is invoiced after the order, not now. */
   shippingPending?: boolean;
 }) {
-  const { lines, subtotal, count } = useCart();
+  const { lines, subtotal, subtotalFull, bundle, count } = useCart();
   const uk = locale === "uk";
   const goods = discount ? subtractMoney(subtotal, discount) : subtotal;
   // Carriers quote shipping in UAH; the summary shows ONE currency, so the
@@ -99,8 +100,12 @@ export default function OrderSummaryPanel({
       <div className="flex flex-col gap-2.5 text-[13px] pt-5" style={{ borderTop: "1px solid var(--border-strong)" }}>
         <div className="flex items-center justify-between">
           <span style={{ color: "var(--text-muted)" }}>{L.subtotal}</span>
-          <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
+          <span className="flex items-baseline gap-2">
+            {bundle && <WasPrice money={subtotalFull} locale={locale} />}
+            <span style={{ color: "var(--text)" }}><Price money={subtotal} locale={locale} /></span>
+          </span>
         </div>
+        {bundle && <SetupNote locale={locale} className="-mt-1" />}
         {discount && discount.eur > 0 && (
           <div className="flex items-center justify-between">
             <span style={{ color: "var(--text-muted)" }}>

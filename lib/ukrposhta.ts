@@ -26,11 +26,12 @@ import type { Dims } from "@/lib/parcel";
    starts returning 403. The token is still read here for the shipment-creation
    endpoints that will need it.
 
-   ── SANDBOX IS THE DEFAULT AND MUST STAY THAT WAY ─────────────────────────
-   `production` has to be spelled out in UKRPOSHTA_API_MODE. Anything else,
-   including the variable being absent, is sandbox. These credentials book real
-   parcels and move real money; a missing env var must never be the thing that
-   decides which.
+   ── THE MODE IS THE ONLY SWITCH, AND IT FAILS CLOSED ──────────────────────
+   UKRPOSHTA_API_MODE takes `production`, `sandbox`, or anything else — and
+   anything else, including the variable being absent or misspelled, means OFF:
+   the carrier is not offered at all and checkout behaves as it did before this
+   integration existed. Parsed in exactly one place, trimmed and lowercased, so
+   a stray space cannot switch it on into the wrong environment.
 
    ── THE CREDENTIALS ARE NAMED BY ENVIRONMENT, AND THAT IS THE SAFETY ──────
    Not one UKRPOSHTA_BEARER_ECOM whose value you swap when you go live, but
@@ -89,13 +90,33 @@ export type UkrposhtaMode = "sandbox" | "production";
  * back in under time pressure.
  */
 export function ukrposhtaEnabled(): boolean {
-  const mode = process.env.UKRPOSHTA_API_MODE?.trim().toLowerCase();
-  return mode === "sandbox" || mode === "production";
+  return readMode() !== "off";
+}
+
+/**
+ * The one place UKRPOSHTA_API_MODE is parsed.
+ *
+ * IT WAS PARSED TWICE, AND THE TWO DISAGREED. ukrposhtaEnabled() trimmed and
+ * lowercased; ukrposhtaMode() compared the raw string. So `Production`, or
+ * `production ` with the trailing space that a copy-paste into a hosting
+ * dashboard leaves behind, switched the carrier ON and then quoted it from
+ * SANDBOX — which is not a harmless mismatch: sandbox is 28% cheaper to Canada
+ * than production, so the shop would have absorbed the difference on those
+ * orders with nothing anywhere to say why.
+ *
+ * One reader now, and both callers derive from it.
+ */
+function readMode(): UkrposhtaMode | "off" {
+  const raw = process.env.UKRPOSHTA_API_MODE?.trim().toLowerCase();
+  if (raw === "production") return "production";
+  if (raw === "sandbox") return "sandbox";
+  return "off";
 }
 
 /** Sandbox unless production is named explicitly. Never inferred. */
 export function ukrposhtaMode(): UkrposhtaMode {
-  return process.env.UKRPOSHTA_API_MODE === "production" ? "production" : "sandbox";
+  const mode = readMode();
+  return mode === "production" ? "production" : "sandbox";
 }
 
 function baseUrl(): string {

@@ -1,4 +1,28 @@
-export type Variant = { name: string; swatch: string; image: string; price?: number; priceUah?: number };
+export type Variant = {
+  name: string;
+  swatch: string;
+  /** The one image that represents this colour — grid tile, cart line, swatch. */
+  image: string;
+  price?: number;
+  priceUah?: number;
+  /**
+   * This colour's own gallery, when it has more than one photograph.
+   *
+   * WHY THIS EXISTS RATHER THAN pdp.photos. A product with variants normally
+   * has no pdp.photos at all: the gallery IS the variant images, so the colour
+   * selector and the photo move together and picking Purple shows the purple
+   * device. Adding pdp.photos to such a product silently severs that — the
+   * selector becomes price-only and the picture stops following the colour.
+   *
+   * So a second black photograph could not simply be appended anywhere. This
+   * gives one colour its own set while the others keep the single-image
+   * behaviour they already had, and the swatch keeps driving the gallery.
+   *
+   * The first entry should be the same file as `image`, so the colour a
+   * customer picks is the first thing they see.
+   */
+  photos?: string[];
+};
 
 export type Product = {
   id: string;
@@ -186,16 +210,31 @@ export const products: Product[] = [
     tileScale: 1.5,
     gridImage: "/images/hmd-op-black.png",
     variants: [
-      { name: "Black", swatch: "#1c1c1e", image: "/images/hmd-op-black.png", price: 30, priceUah: 1150 },
+      {
+        name: "Black",
+        swatch: "#1c1c1e",
+        image: "/images/hmd-op-black.png",
+        price: 30,
+        priceUah: 1150,
+        /* Black's own gallery: the cut-out it has always had, then the
+           packaging shot. Declared PER COLOUR rather than on the product,
+           because a product-level list would replace the swatch-driven gallery
+           and leave Purple showing a black device. Purple names no photos, so
+           it keeps the one-image-per-variant rail it has always had. */
+        photos: [
+          "/images/hmd-op-black.png",   // 1st — the device alone, cut out
+          "/images/hmd-op-black-2.jpg", // 2nd — boxed, with the PFOA-free mark
+        ],
+      },
       { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1200 },
     ],
     pdp: {
-      /* No `photos` key on purpose: with it absent the gallery falls back to the
-         variant images, so Black (the first variant) is the main picture and
-         choosing Purple swaps the photo with the colour. An empty array here
-         used to blank the gallery entirely — the page read "Photos coming
-         soon" — which is not what an empty gallery should mean now that both
-         finishes have photography. */
+      /* No `photos` key on purpose: a list here outranks everything and would
+         make the gallery the same for both finishes, so choosing Purple would
+         stop changing the picture. Left absent, each colour answers for itself
+         — Black from its own `photos`, Purple from the variant images. An empty
+         array is not the way to say "none" either: it used to blank the gallery
+         and the page read "Photos coming soon". */
       shortEn:
         "The HMD OP is a heat-management device engineered for overpack smoking. Its fully non-stick, 100% PFOA-free surface repels tobacco residue for clean, consistent heat distribution and effortless cleaning — even through intensive sessions. Precision-built and durable, it comes in black and purple finishes for a refined, tactical aesthetic.",
       shortUk:

@@ -199,18 +199,35 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   const pdp = product.pdp;
   const variants = product.variants;
-  const photos = pdp?.photos ?? (variants ? variants.map((v) => v.image) : product.gridImage ? [product.gridImage] : []);
-  /* When there are no explicit pdp.photos, the variant images ARE the gallery,
-     so the photo index and variant index move together. When pdp.photos is set
-     (incl. an empty/blank gallery), the variant selector is price/finish-only. */
-  const galleryIsVariants = !!variants && !pdp?.photos;
-
   /* If arriving with ?variant=<name>, open that colour (e.g. Purple), not the default */
   const searchParams = useSearchParams();
   const initialVariant = variants
     ? Math.max(0, variants.findIndex((v) => v.name.toLowerCase() === (searchParams.get("variant") ?? "").toLowerCase()))
     : 0;
   const [variantIdx, setVariantIdx] = useState(initialVariant);
+
+  /* THREE WAYS A GALLERY CAN BE BUILT, in priority order:
+
+       1. pdp.photos          an explicit list — the single-finish products
+       2. the chosen VARIANT'S own photos, when that colour has more than one
+       3. one image per variant, which is the original behaviour
+
+     Rule 2 is the new one and it is deliberately per-colour. A variant product
+     normally has no pdp.photos precisely so the swatch drives the picture;
+     giving the whole product a flat photo list would sever that and leave
+     Purple showing a black device. This way Black can carry two photographs
+     while Purple keeps the single-image behaviour it already had, and neither
+     colour is ever shown the other's pictures. */
+  const variantPhotos = variants?.[variantIdx]?.photos;
+  const photos =
+    pdp?.photos ??
+    variantPhotos ??
+    (variants ? variants.map((v) => v.image) : product.gridImage ? [product.gridImage] : []);
+
+  /* Only in case 3 does the photo index mean "which variant". In case 2 the
+     gallery belongs to one colour and the index is a position within it. */
+  const galleryIsVariants = !!variants && !pdp?.photos && !variantPhotos;
+
   const [idx, setIdx] = useState(galleryIsVariants ? initialVariant : 0);
 
   /* HMD material add-ons — additive, and BOTH PRE-SELECTED here.
@@ -239,7 +256,21 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   const selectVariant = (i: number) => {
     setVariantIdx(i);
-    if (galleryIsVariants) setIdx(i);
+
+    /* WHERE THE GALLERY LANDS is decided by the colour being CHOSEN, never by
+       the one being left. Reading galleryIsVariants here would ask about the
+       outgoing variant: leaving Black (which has its own photos, so the flag is
+       false) for Purple (which does not) matched neither branch and left the
+       index at 0, so the swatch said Purple while the picture still showed the
+       black device. The three cases mirror the gallery resolution above. */
+    if (pdp?.photos) {
+      /* An explicit product gallery — the swatch is finish/price only and has
+         never moved the picture. Leave it exactly where the customer put it. */
+    } else if (variants?.[i]?.photos) {
+      setIdx(0); // that colour's own set: open on its main shot
+    } else {
+      setIdx(i); // one image per variant: the index IS the variant
+    }
     if (typeof window !== "undefined" && variants) {
       const url = new URL(window.location.href);
       url.searchParams.set("variant", variants[i].name);

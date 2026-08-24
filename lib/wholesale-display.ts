@@ -49,7 +49,10 @@ export function isRequestStatus(v: unknown): v is RequestStatus {
 
 export type RequestItem = {
   productSlug: string;
+  /** `<slug>` or `<slug>__<variant>` — the same key stock is counted by (0015). */
   sku: string | null;
+  /** Colour as the catalogue names it, or null when the product has none. */
+  variant: string | null;
   name: string;
   qty: number;
   unitPriceUah: number | null;

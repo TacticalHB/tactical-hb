@@ -27,17 +27,31 @@ import type { PortalPartner } from "@/lib/wholesale-display";
    order, and it would be the cost of the priced half.
 --------------------------------------------------------------------------- */
 
-export type PortalProduct = {
-  slug: string;
-  sku: string;
-  name: string;
-  category: string;
-  image: string;
+/* One orderable thing: a product without colours, or one colour of one that
+   has them. `key` is the stock sku, which makes it both a stable React key and
+   the thing staff will pick against. */
+export type PortalLine = {
+  key: string;
+  variant: string | null;
+  swatch: string | null;
+  /** The colour's name, or the product's when there are no colours. */
+  label: string;
   priceEur: number | null;
   priceUah: number | null;
 };
 
+export type PortalProduct = {
+  slug: string;
+  name: string;
+  category: string;
+  image: string;
+  lines: PortalLine[];
+};
+
 type Qty = Record<string, number>;
+
+/** A chosen line, flattened out of the grouped catalogue for the summary. */
+type Chosen = { product: PortalProduct; line: PortalLine; qty: number };
 
 const CATEGORY_ORDER = ["bowl", "hmd", "windcover", "accessory"] as const;
 
@@ -91,6 +105,12 @@ export default function PortalClient({
       ja: "少なくとも 1 つの製品に数量をご入力ください。",
       ar: "حدّد كمية لمنتج واحد على الأقل.",
     }),
+    perColour: t(locale, {
+      en: "Priced and ordered per colour",
+      uk: "Ціна та замовлення — по кольорах",
+      ja: "価格・ご注文はカラーごと",
+      ar: "السعر والطلب لكل لون",
+    }),
     clear: t(locale, { en: "Clear all", uk: "Очистити", ja: "すべてクリア", ar: "مسح الكل" }),
     doneTitle: t(locale, { en: "Request sent", uk: "Запит надіслано", ja: "リクエストを送信しました", ar: "أُرسل الطلب" }),
     doneBody: t(locale, {
@@ -127,28 +147,37 @@ export default function PortalClient({
     } as Record<string, string>,
   };
 
-  const chosen = useMemo(
-    () => products.filter((p) => (qty[p.slug] ?? 0) > 0),
-    [products, qty]
-  );
-  const units = chosen.reduce((s, p) => s + (qty[p.slug] ?? 0), 0);
+  const chosen: Chosen[] = useMemo(() => {
+    const out: Chosen[] = [];
+    for (const product of products) {
+      for (const line of product.lines) {
+        const n = qty[line.key] ?? 0;
+        if (n > 0) out.push({ product, line, qty: n });
+      }
+    }
+    return out;
+  }, [products, qty]);
+
+  const units = chosen.reduce((s, c) => s + c.qty, 0);
 
   /* Only when every chosen line is priced — see the header comment. */
   const total: Money | null = useMemo(() => {
-    if (chosen.length === 0 || chosen.some((p) => p.priceEur === null || p.priceUah === null)) return null;
+    if (chosen.length === 0 || chosen.some((c) => c.line.priceEur === null || c.line.priceUah === null)) {
+      return null;
+    }
     return chosen.reduce(
-      (acc, p) => ({
-        eur: acc.eur + (p.priceEur ?? 0) * (qty[p.slug] ?? 0),
-        uah: acc.uah + (p.priceUah ?? 0) * (qty[p.slug] ?? 0),
+      (acc, c) => ({
+        eur: acc.eur + (c.line.priceEur ?? 0) * c.qty,
+        uah: acc.uah + (c.line.priceUah ?? 0) * c.qty,
       }),
       money(0, 0)
     );
-  }, [chosen, qty]);
+  }, [chosen]);
 
-  const setQuantity = (slug: string, raw: string) => {
+  const setQuantity = (key: string, raw: string) => {
     // Integers, never negative. An empty box means zero rather than NaN.
     const n = Math.floor(Number(raw.replace(/[^\d]/g, "")));
-    setQty((q) => ({ ...q, [slug]: Number.isFinite(n) && n > 0 ? Math.min(n, 100000) : 0 }));
+    setQty((q) => ({ ...q, [key]: Number.isFinite(n) && n > 0 ? Math.min(n, 100000) : 0 }));
   };
 
   const send = async () => {
@@ -156,7 +185,7 @@ export default function PortalClient({
     if (chosen.length === 0) return setError(L.empty);
     setBusy(true);
     const result = await submitWholesaleRequest(
-      chosen.map((p) => ({ slug: p.slug, qty: qty[p.slug] ?? 0 })),
+      chosen.map((c) => ({ slug: c.product.slug, variant: c.line.variant, qty: c.qty })),
       note
     );
     setBusy(false);
@@ -200,6 +229,40 @@ export default function PortalClient({
     );
   }
 
+  /** One line's unit price, or null when no dealer price is set for it. */
+  const priceOf = (line?: PortalLine) =>
+    line && line.priceEur !== null && line.priceUah !== null
+      ? formatMoney(money(line.priceEur, line.priceUah), currency)
+      : null;
+
+  /* The quantity box, shared by plain products and colour rows so the two can
+     never drift apart in size or behaviour. */
+  const QtyBox = ({ line, label }: { line: PortalLine; label: string }) => {
+    const n = qty[line.key] ?? 0;
+    return (
+      <div className="shrink-0">
+        <label className="sr-only" htmlFor={`qty-${line.key}`}>
+          {`${L.qtyLabel} — ${label}`}
+        </label>
+        <input
+          id={`qty-${line.key}`}
+          className="w-[84px] h-11 text-center text-[15px] tabular-nums rounded-[4px]"
+          style={{
+            border: `1px solid ${n > 0 ? "var(--text)" : "var(--border-strong)"}`,
+            background: "#ffffff",
+            color: "var(--text)",
+          }}
+          dir="ltr"
+          inputMode="numeric"
+          type="text"
+          value={n === 0 ? "" : String(n)}
+          placeholder="0"
+          onChange={(e) => setQuantity(line.key, e.target.value)}
+        />
+      </div>
+    );
+  };
+
   const grouped = CATEGORY_ORDER.map((c) => ({
     key: c,
     label: L.categories[c] ?? c,
@@ -238,50 +301,76 @@ export default function PortalClient({
               </h2>
               <ul className="flex flex-col">
                 {group.items.map((p, i) => {
-                  const unit =
-                    p.priceEur !== null && p.priceUah !== null
-                      ? formatMoney(money(p.priceEur, p.priceUah), currency)
-                      : null;
-                  const n = qty[p.slug] ?? 0;
+                  const hasColours = p.lines.length > 1 || p.lines[0]?.variant !== null;
                   return (
                     <li
                       key={p.slug}
-                      className="flex items-center gap-4 py-4"
+                      className="py-4"
                       style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}
                     >
-                      <div className="relative w-16 h-16 shrink-0" style={{ background: "#f5f5f5" }}>
-                        <Image src={p.image} alt={p.name} fill sizes="64px" className="object-contain p-1.5" />
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-16 h-16 shrink-0" style={{ background: "#f5f5f5" }}>
+                          <Image src={p.image} alt={p.name} fill sizes="64px" className="object-contain p-1.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {/* Product names are never translated — same rule as
+                              the retail storefront. */}
+                          <p className="text-[15px] font-medium leading-snug" style={{ color: "var(--text)" }}>
+                            {p.name}
+                          </p>
+                          {/* A product with colours prices each one on its own
+                              row below; only a plain product shows a price
+                              here. */}
+                          {!hasColours && (
+                            <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                              {priceOf(p.lines[0]) ?? L.quote}
+                            </p>
+                          )}
+                          {hasColours && (
+                            <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-faint)" }}>
+                              {L.perColour}
+                            </p>
+                          )}
+                        </div>
+                        {!hasColours && p.lines[0] && <QtyBox line={p.lines[0]} label={p.name} />}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        {/* Product names are never translated — same rule as
-                            the retail storefront. */}
-                        <p className="text-[15px] font-medium leading-snug" style={{ color: "var(--text)" }}>
-                          {p.name}
-                        </p>
-                        <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                          {unit ?? L.quote}
-                        </p>
-                      </div>
-                      <div className="shrink-0">
-                        <label className="sr-only" htmlFor={`qty-${p.slug}`}>
-                          {`${L.qtyLabel} — ${p.name}`}
-                        </label>
-                        <input
-                          id={`qty-${p.slug}`}
-                          className="w-[84px] h-11 text-center text-[15px] tabular-nums rounded-[4px]"
-                          style={{
-                            border: `1px solid ${n > 0 ? "var(--text)" : "var(--border-strong)"}`,
-                            background: "#ffffff",
-                            color: "var(--text)",
-                          }}
-                          dir="ltr"
-                          inputMode="numeric"
-                          type="text"
-                          value={n === 0 ? "" : String(n)}
-                          placeholder="0"
-                          onChange={(e) => setQuantity(p.slug, e.target.value)}
-                        />
-                      </div>
+
+                      {/* ---- The colour picker -----------------------------
+                          Every colour is on screen with its own box, rather
+                          than one box behind a selector. A trade order is
+                          routinely "40 black and 15 purple", and a picker that
+                          swapped which colour the single box meant would make
+                          that two submissions or, worse, silently the second
+                          colour only. */}
+                      {hasColours && (
+                        <ul
+                          className="mt-3 ms-20 flex flex-col gap-2 ps-4"
+                          style={{ borderInlineStart: "1px solid var(--border)" }}
+                        >
+                          {p.lines.map((line) => (
+                            <li key={line.key} className="flex items-center gap-3">
+                              {/* The swatch is decorative: the colour's NAME is
+                                  right beside it, so nothing here is carried by
+                                  colour alone. */}
+                              <span
+                                aria-hidden="true"
+                                className="w-5 h-5 rounded-full shrink-0"
+                                style={{
+                                  background: line.swatch ?? "transparent",
+                                  boxShadow: "0 0 0 1px var(--border-strong)",
+                                }}
+                              />
+                              <span className="text-[14px] min-w-0 flex-1" style={{ color: "var(--text)" }}>
+                                {line.label}
+                                <span className="ms-2 text-[12.5px]" style={{ color: "var(--text-muted)" }}>
+                                  {priceOf(line) ?? L.quote}
+                                </span>
+                              </span>
+                              <QtyBox line={line} label={`${p.name} — ${line.label}`} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   );
                 })}
@@ -308,21 +397,23 @@ export default function PortalClient({
           ) : (
             <>
               <ul className="flex flex-col gap-2 mb-4">
-                {chosen.map((p) => (
-                  <li key={p.slug} className="flex items-baseline justify-between gap-3 text-[13px]">
+                {chosen.map((c) => (
+                  <li key={c.line.key} className="flex items-baseline justify-between gap-3 text-[13px]">
                     <span className="min-w-0" style={{ color: "var(--text-muted)" }}>
                       <span dir="ltr" className="tabular-nums" style={{ color: "var(--text)" }}>
-                        {qty[p.slug]}
+                        {c.qty}
                       </span>
                       {" × "}
-                      {p.name}
+                      {c.product.name}
+                      {/* The colour is part of what was ordered, so it belongs
+                          in the summary the partner checks before sending. */}
+                      {c.line.variant && (
+                        <span style={{ color: "var(--text-faint)" }}> · {c.line.variant}</span>
+                      )}
                     </span>
                     <span className="shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
-                      {p.priceEur !== null && p.priceUah !== null
-                        ? formatMoney(
-                            money(p.priceEur * (qty[p.slug] ?? 0), p.priceUah * (qty[p.slug] ?? 0)),
-                            currency
-                          )
+                      {c.line.priceEur !== null && c.line.priceUah !== null
+                        ? formatMoney(money(c.line.priceEur * c.qty, c.line.priceUah * c.qty), currency)
                         : "—"}
                     </span>
                   </li>

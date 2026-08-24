@@ -1,7 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { products, type Product } from "@/lib/products";
+import { products, type Product, type Variant } from "@/lib/products";
 import {
   canAccessPortal,
   isAccountStatus,
@@ -48,15 +48,35 @@ function text(v: unknown): string | null {
 
 export type DealerPrice = { eur: number; uah: number } | null;
 
-export function dealerPrice(p: Product): DealerPrice {
-  const eur = p.wholesalePriceEur;
-  const uah = p.wholesalePriceUah;
+/**
+ * The trade price of one orderable thing — a product, or one colour of it.
+ *
+ * A colour's own pair wins when it has one, and the product's is the fallback,
+ * mirroring how retail resolves `variant.price ?? product.price`. What neither
+ * level ever falls back to is the RETAIL price: absent means "not agreed", and
+ * the portal says so.
+ */
+export function dealerPrice(p: Product, variant?: Variant | null): DealerPrice {
+  const eur = variant?.wholesalePriceEur ?? p.wholesalePriceEur;
+  const uah = variant?.wholesalePriceUah ?? p.wholesalePriceUah;
   // BOTH OR NEITHER. A product priced in one currency only would show a
   // number on one storefront and "quote on request" on another for the same
   // line, and the request would be half-totalled.
   if (typeof eur !== "number" || typeof uah !== "number") return null;
   if (!Number.isFinite(eur) || !Number.isFinite(uah) || eur <= 0 || uah <= 0) return null;
   return { eur, uah };
+}
+
+/**
+ * The stock key for a line: `<slug>` or `<slug>__<variant>`.
+ *
+ * Lowercased and derived here rather than typed anywhere, because stock_items
+ * (0015) and the order-consumption function both build it exactly this way. A
+ * second spelling of the same key would be a line nothing could be counted
+ * against.
+ */
+export function lineSku(slug: string, variant?: string | null): string {
+  return variant ? `${slug}__${variant.toLowerCase()}` : slug;
 }
 
 /** Everything a partner may put on a request. Retail-only SKUs would be
@@ -207,7 +227,7 @@ export async function applyForAccount(input: ApplyInput): Promise<ApplyResult> {
 
 /* ---- Submitting a request --------------------------------------------------- */
 
-export type SubmitLine = { slug: string; qty: number };
+export type SubmitLine = { slug: string; variant?: string | null; qty: number };
 
 export type SubmitResult =
   | { ok: true; request: WholesaleRequest }
@@ -248,18 +268,29 @@ export async function submitRequest(
     if (!product) continue;
     if (!Number.isFinite(qty) || qty <= 0 || qty > MAX_QTY) continue;
 
-    const price = dealerPrice(product);
-    /* THE BASE SKU, NOT A VARIANT ONE. Stock keys products as `<slug>` or
-       `<slug>__<variant>` (0015), and a trade request is placed at product
-       level — a partner asking for 50 OP says which finishes in the note, and
-       the split is agreed in the reply. Storing the base sku keeps the line
-       resolvable against stock_items without inventing a variant nobody
-       chose. Per-variant wholesale lines would need a picker this form does
-       not have. */
+    /* THE COLOUR IS RESOLVED AGAINST THE CATALOGUE, not taken as given. The
+       client sends a name; if it does not match one this product actually has,
+       the line is dropped rather than stored with a colour nobody makes.
+
+       And a product WITH colours cannot be ordered without one: a bare
+       hmd-tct-op line would resolve to a sku stock has no row for, so it is
+       refused here rather than landing on a packing list as an open question. */
+    const wanted = line.variant ? String(line.variant) : null;
+    let variant: Variant | null = null;
+    if (product.variants?.length) {
+      variant = product.variants.find((v) => v.name === wanted) ?? null;
+      if (!variant) continue;
+    } else if (wanted) {
+      continue;
+    }
+
+    const price = dealerPrice(product, variant);
     items.push({
       productSlug: product.slug,
-      sku: product.id ?? null,
-      name: product.nameEn,
+      sku: lineSku(product.slug, variant?.name),
+      variant: variant?.name ?? null,
+      // The name as it will be read on a packing list, colour included.
+      name: variant ? `${product.nameEn} — ${variant.name}` : product.nameEn,
       qty,
       unitPriceEur: price ? price.eur : null,
       unitPriceUah: price ? price.uah : null,
@@ -309,6 +340,7 @@ export async function submitRequest(
       request_id: data.id,
       product_slug: i.productSlug,
       sku: i.sku,
+      variant: i.variant,
       name: i.name,
       qty: i.qty,
       unit_price_eur: i.unitPriceEur,
@@ -360,6 +392,7 @@ function mapItems(rows: Row[]): RequestItem[] {
   return rows.map((r) => ({
     productSlug: String(r.product_slug ?? ""),
     sku: text(r.sku),
+    variant: text(r.variant),
     name: String(r.name ?? ""),
     qty: Number(r.qty ?? 0),
     unitPriceEur: num(r.unit_price_eur),

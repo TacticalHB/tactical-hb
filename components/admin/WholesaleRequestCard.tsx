@@ -146,9 +146,17 @@ export default function WholesaleRequestCard({
             </thead>
             <tbody>
               {r.items.map((i) => (
-                <tr key={i.productSlug} style={{ borderTop: "1px solid var(--console-border)" }}>
+                <tr key={i.sku ?? i.productSlug} style={{ borderTop: "1px solid var(--console-border)" }}>
                   <td className="py-2" style={{ color: "var(--console-text)" }}>
                     {i.name}
+                    {/* The stock key, because this table is what gets picked
+                        against — `hmd-tct-op__black` is the row in stock_items,
+                        and reading it here saves deriving it by hand. */}
+                    {i.sku && (
+                      <span className="font-mono text-[11.5px] ms-2" style={{ color: "var(--console-faint)" }}>
+                        {i.sku}
+                      </span>
+                    )}
                   </td>
                   <td align="right" className="py-2 tabular-nums" style={{ color: "var(--console-text)" }}>
                     {i.qty}

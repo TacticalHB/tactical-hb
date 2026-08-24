@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n-text";
 import {
   dealerPrice,
+  lineSku,
   partnerForUser,
   requestsForUser,
   wholesaleCatalogue,
@@ -64,17 +65,48 @@ export default async function WholesalePortalPage({
 
   /* Dealer prices are resolved on the server and only for an approved reader.
      Where a product has none, the client is handed nulls and prints "quote on
-     request" — it never sees a retail price to fall back on. */
+     request" — it never sees a retail price to fall back on.
+
+     A product with colours becomes one line PER COLOUR, each carrying its own
+     stock sku and its own price, because that is what a trade order is placed
+     against. A product without colours is a single line, and renders exactly
+     as it did before. */
   const items: PortalProduct[] = wholesaleCatalogue().map((p) => {
-    const price = dealerPrice(p);
-    return {
+    const base = {
       slug: p.slug,
-      sku: p.id,
       name: p.nameEn,
       category: p.category,
       image: p.gridImage || p.image,
-      priceEur: price ? price.eur : null,
-      priceUah: price ? price.uah : null,
+    };
+    if (!p.variants?.length) {
+      const price = dealerPrice(p);
+      return {
+        ...base,
+        lines: [
+          {
+            key: lineSku(p.slug),
+            variant: null,
+            swatch: null,
+            label: p.nameEn,
+            priceEur: price ? price.eur : null,
+            priceUah: price ? price.uah : null,
+          },
+        ],
+      };
+    }
+    return {
+      ...base,
+      lines: p.variants.map((v) => {
+        const price = dealerPrice(p, v);
+        return {
+          key: lineSku(p.slug, v.name),
+          variant: v.name,
+          swatch: v.swatch,
+          label: v.name,
+          priceEur: price ? price.eur : null,
+          priceUah: price ? price.uah : null,
+        };
+      }),
     };
   });
 

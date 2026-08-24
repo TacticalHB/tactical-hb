@@ -5,6 +5,13 @@ export type Variant = {
   image: string;
   price?: number;
   priceUah?: number;
+  /* Dealer prices, per colour, for the same reason the retail ones are per
+     colour: OP Black and OP Purple are not the same money. Omitted means "use
+     the product's trade price", which is right when the colours cost the same
+     to make — it is not a licence to fall back to retail. Both currencies or
+     neither, same rule as the product-level pair. */
+  wholesalePriceEur?: number;
+  wholesalePriceUah?: number;
   /**
    * This colour's own gallery, when it has more than one photograph.
    *

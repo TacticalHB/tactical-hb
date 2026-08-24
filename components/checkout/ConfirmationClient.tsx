@@ -33,44 +33,40 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
   }, []);
 
   const L = {
-    thanks: t(locale, { uk: "Дякуємо за замовлення в Tactical HB.", en: "Thank you for your Tactical HB order.", ja: "Tactical HB へのご注文、ありがとうございます。" }),
-    great: t(locale, { uk: "Ви зробили чудовий вибір.", en: "You've made a great choice.", ja: "すばらしい選択です。" }),
+    thanks: t(locale, { uk: "Дякуємо за замовлення в Tactical HB.", en: "Thank you for your Tactical HB order.", ja: "Tactical HB へのご注文、ありがとうございます。", ar: "شكرًا لطلبك من Tactical HB." }),
+    great: t(locale, { uk: "Ви зробили чудовий вибір.", en: "You've made a great choice.", ja: "すばらしい選択です。", ar: "لقد اخترت اختيارًا موفّقًا." }),
     // This page now serves the INTERNATIONAL request flow: the order is
     // recorded, nothing is charged yet, and the promise below is the one-total
     // model in a sentence. No "invoice delivery separately" wording — ever.
     emailed: t(locale, {
       uk: "Ми напишемо вам на пошту, щойно підтвердимо суму замовлення.",
       en: "We'll email you as soon as your order total is confirmed.",
-      ja: "ご注文の合計金額が確定しだい、メールでお知らせします。",
-    }),
-    hello: t(locale, { uk: "Вітаємо,", en: "Hello,", ja: "こんにちは、" }),
+      ja: "ご注文の合計金額が確定しだい、メールでお知らせします。", ar: "سنراسلك فور تأكيد إجمالي طلبك." }),
+    hello: t(locale, { uk: "Вітаємо,", en: "Hello,", ja: "こんにちは、", ar: "مرحبًا،" }),
     body: t(locale, {
       uk: "Ваше замовлення прийнято. Ми підтвердимо точну суму — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем. Дякуємо, що обрали Tactical HB.",
       en: "Your order has been received. We'll confirm your exact total — goods including delivery to your destination — by email, and you'll pay it in a single payment. Thank you for choosing Tactical HB.",
-      ja: "ご注文を承りました。商品代金とお届け先までの配送料を含む正確な合計金額をメールでご確認いただき、一度のお支払いで完了します。Tactical HB をお選びいただきありがとうございます。",
-    }),
+      ja: "ご注文を承りました。商品代金とお届け先までの配送料を含む正確な合計金額をメールでご確認いただき、一度のお支払いで完了します。Tactical HB をお選びいただきありがとうございます。", ar: "تم استلام طلبك. سنؤكد لك الإجمالي بدقة — البضاعة شاملة الشحن إلى وجهتك — عبر البريد، وتدفعه دفعة واحدة. شكرًا لاختيارك Tactical HB." }),
     sign: "Tactical HB.",
-    back: t(locale, { uk: "Повернутися до магазину", en: "Back to store", ja: "ストアに戻る" }),
-    summary: t(locale, { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容" }),
-    orderNo: t(locale, { uk: "Номер замовлення", en: "Order No", ja: "注文番号" }),
-    shipping: t(locale, { uk: "Дані доставки", en: "Shipping details", ja: "お届け先情報" }),
-    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
-    goodsTotal: t(locale, { uk: "Товари", en: "Goods", ja: "商品" }),
+    back: t(locale, { uk: "Повернутися до магазину", en: "Back to store", ja: "ストアに戻る", ar: "العودة إلى المتجر" }),
+    summary: t(locale, { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容", ar: "ملخّص الطلب" }),
+    orderNo: t(locale, { uk: "Номер замовлення", en: "Order No", ja: "注文番号", ar: "رقم الطلب" }),
+    shipping: t(locale, { uk: "Дані доставки", en: "Shipping details", ja: "お届け先情報", ar: "بيانات الشحن" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" }),
+    goodsTotal: t(locale, { uk: "Товари", en: "Goods", ja: "商品", ar: "البضاعة" }),
     goodsTotalNote: t(locale, {
       uk: "Доставку буде включено до підтвердженої суми замовлення.",
       en: "Delivery will be included in your confirmed order total.",
-      ja: "配送料は、確定するご注文の合計金額に含まれます。",
-    }),
-    discount: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー" }),
-    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量" }),
-    none: t(locale, { uk: "Замовлення не знайдено.", en: "No recent order found.", ja: "最近のご注文が見つかりませんでした。" }),
+      ja: "配送料は、確定するご注文の合計金額に含まれます。", ar: "سيُضمّ الشحن إلى إجمالي طلبك بعد تأكيده." }),
+    discount: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー", ar: "قسيمة" }),
+    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量", ar: "الكمية" }),
+    none: t(locale, { uk: "Замовлення не знайдено.", en: "No recent order found.", ja: "最近のご注文が見つかりませんでした。", ar: "لم يُعثر على طلب حديث." }),
     noneBody: t(locale, {
       uk: "Це посилання діє лише одразу після оформлення замовлення.",
       en: "This page is only available right after placing an order.",
-      ja: "このページは、ご注文の直後のみご覧いただけます。",
-    }),
-    shop: t(locale, { uk: "Перейти до товарів", en: "Continue shopping", ja: "買い物を続ける" }),
-    accountMade: t(locale, { uk: "Ваш акаунт створено.", en: "Your account has been created.", ja: "アカウントを作成しました。" }),
+      ja: "このページは、ご注文の直後のみご覧いただけます。", ar: "هذه الصفحة متاحة فقط بعد تقديم الطلب مباشرة." }),
+    shop: t(locale, { uk: "Перейти до товарів", en: "Continue shopping", ja: "買い物を続ける", ar: "متابعة التسوق" }),
+    accountMade: t(locale, { uk: "Ваш акаунт створено.", en: "Your account has been created.", ja: "アカウントを作成しました。", ar: "تم إنشاء حسابك." }),
   };
 
   if (!ready) return <div style={{ minHeight: "60vh" }} />;

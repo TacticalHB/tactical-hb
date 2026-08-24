@@ -21,9 +21,9 @@ export default function CheckoutHeader({
   onStepBack?: (step: Step) => void;
 }) {
   const steps: { id: Step; label: string }[] = [
-    { id: "identification", label: t(locale, { uk: "Ідентифікація", en: "Identification", ja: "お客様情報" }) },
-    { id: "delivery", label: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }) },
-    { id: "payment", label: t(locale, { uk: "Оплата", en: "Payment", ja: "お支払い" }) },
+    { id: "identification", label: t(locale, { uk: "Ідентифікація", en: "Identification", ja: "お客様情報", ar: "تعريف" }) },
+    { id: "delivery", label: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送", ar: "الشحن" }) },
+    { id: "payment", label: t(locale, { uk: "Оплата", en: "Payment", ja: "お支払い", ar: "الدفع" }) },
   ];
   const currentIdx = steps.findIndex((s) => s.id === current);
 
@@ -31,7 +31,7 @@ export default function CheckoutHeader({
     <header style={{ borderBottom: "1px solid var(--border)", background: "var(--bg)" }}>
       <div className="page-container">
         <div className="flex items-center justify-between h-[72px]">
-          <Link href={`/${locale}`} className="font-display text-xl tracking-widest flex items-center gap-[0.3em] h-11 shrink-0" style={{ color: "var(--text)" }}>
+          <Link href={`/${locale}`} dir="ltr" className="font-display text-xl tracking-widest flex items-center gap-[0.3em] h-11 shrink-0" style={{ color: "var(--text)" }}>
             TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
           </Link>
           <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-muted)" }}>
@@ -39,7 +39,7 @@ export default function CheckoutHeader({
               <rect x="3" y="7" width="10" height="7" rx="1.5" />
               <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
             </svg>
-            {t(locale, { uk: "Захищене оформлення", en: "Secure checkout", ja: "安全なお会計" })}
+            {t(locale, { uk: "Захищене оформлення", en: "Secure checkout", ja: "安全なお会計", ar: "إتمام شراء آمن" })}
           </div>
         </div>
 
@@ -56,7 +56,7 @@ export default function CheckoutHeader({
             trying to print three Ukrainian words on a 375px screen. Full labels
             return at sm. */}
         <nav
-          aria-label={t(locale, { uk: "Кроки оформлення", en: "Checkout steps", ja: "お会計の手順" })}
+          aria-label={t(locale, { uk: "Кроки оформлення", en: "Checkout steps", ja: "お会計の手順", ar: "خطوات إتمام الشراء" })}
           className="flex items-center gap-2.5 sm:gap-4 pb-5 -mx-1 px-1"
         >
           {steps.map((s, i) => {
@@ -80,7 +80,7 @@ export default function CheckoutHeader({
                       ? {
                           type: "button" as const,
                           onClick: () => onStepBack(s.id),
-                          "aria-label": `${t(locale, { uk: "Повернутися до кроку", en: "Back to", ja: "前の手順へ：" })} ${s.label}`,
+                          "aria-label": `${t(locale, { uk: "Повернутися до кроку", en: "Back to", ja: "前の手順へ：", ar: "العودة إلى" })} ${s.label}`,
                         }
                       : {})}
                     className={`flex items-center gap-2.5 h-11 ${clickable ? "transition-opacity hover:opacity-70" : ""}`}

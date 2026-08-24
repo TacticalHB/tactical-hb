@@ -90,28 +90,28 @@ export default function KitBuilder({ locale }: { locale: string }) {
   );
 
   const L = {
-    title: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
-    intro: t(locale, { uk: "Оберіть чашу, пристрій нагріву та ковпак. Додайте все одним рухом.", en: "Pick a bowl, a heat device and a wind cover. Add the lot in one move.", ja: "ボウル、ヒートデバイス、ウインドカバーを選んで、まとめて追加できます。" }),
+    title: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
+    intro: t(locale, { uk: "Оберіть чашу, пристрій нагріву та ковпак. Додайте все одним рухом.", en: "Pick a bowl, a heat device and a wind cover. Add the lot in one move.", ja: "ボウル、ヒートデバイス、ウインドカバーを選んで、まとめて追加できます。", ar: "اختر رأسًا وجهاز حرارة وغطاء رياح. وأضفها كلها بحركة واحدة." }),
     steps: {
-      bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" }),
-      hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス" }),
-      windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー" }),
+      bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" }),
+      hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス", ar: "جهاز حرارة" }),
+      windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー", ar: "غطاء رياح" }),
     } as Record<SlotKey, string>,
-    none: t(locale, { uk: "Не обрано", en: "Not selected", ja: "未選択" }),
-    skip: t(locale, { uk: "Пропустити", en: "Skip", ja: "スキップ" }),
-    summary: t(locale, { uk: "Ваш сет", en: "Your setup", ja: "あなたのセット" }),
-    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
-    addFull: t(locale, { uk: "Додати комплект", en: "Add full kit", ja: "セットを追加" }),
+    none: t(locale, { uk: "Не обрано", en: "Not selected", ja: "未選択", ar: "لم يُختر" }),
+    skip: t(locale, { uk: "Пропустити", en: "Skip", ja: "スキップ", ar: "تخطّي" }),
+    summary: t(locale, { uk: "Ваш сет", en: "Your setup", ja: "あなたのセット", ar: "طقمك" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" }),
+    addFull: t(locale, { uk: "Додати комплект", en: "Add full kit", ja: "セットを追加", ar: "أضف الطقم كاملًا" }),
     /* THE GATE'S OWN SENTENCE, and the only thing the button says until all
        three are answered. It names the three rather than counting them —
        "one more piece" would leave the customer looking for which. */
-    incomplete: t(locale, { uk: "Оберіть чашу, пристрій для нагріву та ковпак", en: "Select a bowl, heat device, and wind cover", ja: "ボウル、ヒートデバイス、ウインドカバーをお選びください" }),
-    incompleteNote: t(locale, { uk: "Щоб продовжити, потрібні всі три: чаша, пристрій для нагріву та ковпак.", en: "Select a bowl, heat device, and wind cover to continue.", ja: "お進みいただくには、ボウル、ヒートデバイス、ウインドカバーの三点が必要です。" }),
-    lid: t(locale, { uk: "Кришка", en: "Lid", ja: "リッド" }),
+    incomplete: t(locale, { uk: "Оберіть чашу, пристрій для нагріву та ковпак", en: "Select a bowl, heat device, and wind cover", ja: "ボウル、ヒートデバイス、ウインドカバーをお選びください", ar: "اختر رأسًا وجهاز حرارة وغطاء رياح" }),
+    incompleteNote: t(locale, { uk: "Щоб продовжити, потрібні всі три: чаша, пристрій для нагріву та ковпак.", en: "Select a bowl, heat device, and wind cover to continue.", ja: "お進みいただくには、ボウル、ヒートデバイス、ウインドカバーの三点が必要です。", ar: "اختر رأسًا وجهاز حرارة وغطاء رياح للمتابعة." }),
+    lid: t(locale, { uk: "Кришка", en: "Lid", ja: "リッド", ar: "غطاء" }),
     /* Not translated — it is a name, not a word. */
     rubber: FEAR_9E418,
-    timer: t(locale, { uk: "Таймер", en: "Timer", ja: "タイマー" }),
-    incoming: t(locale, { uk: "Незабаром", en: "Incoming", ja: "近日入荷" }),
+    timer: t(locale, { uk: "Таймер", en: "Timer", ja: "タイマー", ar: "مؤقّت" }),
+    incoming: t(locale, { uk: "Незабаром", en: "Incoming", ja: "近日入荷", ar: "قريبًا" }),
   };
 
   /* Priced through the shop's own pricing, in the page's own locale, so the

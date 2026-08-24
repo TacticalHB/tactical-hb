@@ -41,18 +41,18 @@ export default function FavouritesList({ locale }: { locale: string }) {
     .filter((p): p is (typeof products)[number] => Boolean(p));
 
   const L = {
-    title: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }),
-    count: (n: number) => (uk ? `${n} товарів` : `${n} item${n === 1 ? "" : "s"}`),
-    empty: t(locale, { uk: "Тут поки порожньо", en: "Nothing saved yet", ja: "まだ保存されていません" }),
-    emptyHint: t(locale, { uk: "Натискайте ♡ на товарах, щоб зберегти їх сюди.", en: "Tap the heart on any product to save it here.", ja: "製品のハートをタップすると、ここに保存されます。" }),
-    browse: t(locale, { uk: "Переглянути товари", en: "Browse products", ja: "製品を見る" }),
-    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
-    remove: t(locale, { uk: "Прибрати", en: "Remove", ja: "削除" }),
-    add: t(locale, { uk: "Додати в кошик", en: "Add to bag", ja: "バッグに追加" }),
-    guestTitle: t(locale, { uk: "Збережено лише на цьому пристрої", en: "Saved on this device only", ja: "この端末にのみ保存されています" }),
-    guestBody: t(locale, { uk: "Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях — те, що ви зберегли, перенесеться автоматично.", en: "Create a free account to keep your favourites across devices — anything you've saved will move over automatically.", ja: "無料のアカウントを作成すると、お気に入りを端末間で引き継げます。保存済みのものは自動的に移行されます。" }),
-    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成" }),
-    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン" }),
+    title: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り", ar: "المفضّلة" }),
+    count: (n: number) => itemCount(locale, n),
+    empty: t(locale, { uk: "Тут поки порожньо", en: "Nothing saved yet", ja: "まだ保存されていません", ar: "لا شيء محفوظ بعد" }),
+    emptyHint: t(locale, { uk: "Натискайте ♡ на товарах, щоб зберегти їх сюди.", en: "Tap the heart on any product to save it here.", ja: "製品のハートをタップすると、ここに保存されます。", ar: "اضغط القلب على أي منتج لحفظه هنا." }),
+    browse: t(locale, { uk: "Переглянути товари", en: "Browse products", ja: "製品を見る", ar: "تصفّح المنتجات" }),
+    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
+    remove: t(locale, { uk: "Прибрати", en: "Remove", ja: "削除", ar: "إزالة" }),
+    add: t(locale, { uk: "Додати в кошик", en: "Add to bag", ja: "バッグに追加", ar: "أضف إلى الحقيبة" }),
+    guestTitle: t(locale, { uk: "Збережено лише на цьому пристрої", en: "Saved on this device only", ja: "この端末にのみ保存されています", ar: "محفوظ على هذا الجهاز فقط" }),
+    guestBody: t(locale, { uk: "Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях — те, що ви зберегли, перенесеться автоматично.", en: "Create a free account to keep your favourites across devices — anything you've saved will move over automatically.", ja: "無料のアカウントを作成すると、お気に入りを端末間で引き継げます。保存済みのものは自動的に移行されます。", ar: "أنشئ حسابًا مجانيًا للاحتفاظ بمفضّلاتك عبر أجهزتك — وسينتقل كل ما حفظته تلقائيًا." }),
+    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成", ar: "إنشاء حساب" }),
+    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン", ar: "تسجيل الدخول" }),
   };
 
   /* Guests aren't redirected away — they see their local hearts plus this nudge. */
@@ -147,4 +147,19 @@ export default function FavouritesList({ locale }: { locale: string }) {
       )}
     </div>
   );
+}
+
+/* Arabic counts a noun four different ways and writes no numeral at 1 or 2, so
+   the count and the word cannot be composed the way the other three do. Same
+   rule as checkout's itemCount — see components/checkout/OrderSummaryPanel. */
+function itemCount(locale: string, n: number): string {
+  if (locale === "uk") return `${n} товарів`;
+  if (locale === "ja") return `${n} 点`;
+  if (locale === "ar") {
+    if (n === 1) return "منتج واحد";
+    if (n === 2) return "منتجان";
+    if (n <= 10) return `${n} منتجات`;
+    return `${n} منتجًا`;
+  }
+  return `${n} item${n === 1 ? "" : "s"}`;
 }

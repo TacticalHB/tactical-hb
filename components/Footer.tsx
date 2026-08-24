@@ -20,7 +20,7 @@ export default function Footer() {
   return (
     <footer style={{ background: "var(--fog)" }}>
       <div className="page-container py-16 flex flex-col items-center text-center gap-8">
-        <div className="font-display text-3xl tracking-widest" style={{ color: "#f4f3f0" }}>
+        <div dir="ltr" className="font-display text-3xl tracking-widest" style={{ color: "#f4f3f0" }}>
           TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
         </div>
 

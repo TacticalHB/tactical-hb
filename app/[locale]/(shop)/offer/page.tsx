@@ -93,7 +93,7 @@ function OfferContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {t(locale, { uk: "ОФЕРТА", en: "TERMS", ja: "販売条件" })}
+            {t(locale, { uk: "ОФЕРТА", en: "TERMS", ja: "販売条件", ar: "الشروط" })}
           </span>
         </div>
         <div className="page-container relative">

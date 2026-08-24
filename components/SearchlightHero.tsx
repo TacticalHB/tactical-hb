@@ -163,7 +163,7 @@ export default function SearchlightHero({ locale }: { locale: string }) {
         muted
         playsInline
         preload="metadata"
-        aria-label={t(locale, { uk: "Промо-ролик Tactical HB", en: "Tactical HB promo film", ja: "Tactical HB のプロモーション映像" })}
+        aria-label={t(locale, { uk: "Промо-ролик Tactical HB", en: "Tactical HB promo film", ja: "Tactical HB のプロモーション映像", ar: "فيلم Tactical HB الترويجي" })}
       />
 
       {/* The still. Same fit and position as the film, so a swap to live

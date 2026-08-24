@@ -22,23 +22,24 @@ export default function CartDrawer({ locale }: { locale: string }) {
   const { cartOpen, setCartOpen, lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count } = useCart();
 
   const L = pick(locale, {
-    title: { uk: "Ваш кошик", en: "Your Shopping Bag", ja: "ショッピングバッグ" },
-    empty: { uk: "Ваш кошик порожній", en: "Your shopping bag is empty", ja: "バッグは空です" },
+    title: { uk: "Ваш кошик", en: "Your Shopping Bag", ja: "ショッピングバッグ", ar: "حقيبتك" },
+    empty: { uk: "Ваш кошик порожній", en: "Your shopping bag is empty", ja: "バッグは空です", ar: "حقيبتك فارغة" },
     emptyHint: {
       uk: "Додайте окрему річ або зберіть повний сет.",
       en: "Add a piece, or build a full setup.",
       ja: "単品で選ぶか、フルセットを組んでみてください。",
+      ar: "أضف قطعة، أو كوّن طقمًا كاملًا.",
     },
-    buildSetup: { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" },
-    browse: { uk: "Перейти до товарів", en: "Browse products", ja: "製品を見る" },
-    total: { uk: "Разом", en: "Total", ja: "合計" },
-    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る" },
-    remove: { uk: "Видалити", en: "Remove", ja: "削除" },
-    close: { uk: "Закрити", en: "Close", ja: "閉じる" },
-    colour: { uk: "Колір", en: "Colour", ja: "カラー" },
-    material: { uk: "Матеріал", en: "Materials", ja: "素材" },
-    dec: { uk: "Зменшити кількість", en: "Decrease quantity", ja: "数量を減らす" },
-    inc: { uk: "Збільшити кількість", en: "Increase quantity", ja: "数量を増やす" },
+    buildSetup: { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمًا" },
+    browse: { uk: "Перейти до товарів", en: "Browse products", ja: "製品を見る", ar: "تصفّح المنتجات" },
+    total: { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" },
+    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る", ar: "عرض الحقيبة" },
+    remove: { uk: "Видалити", en: "Remove", ja: "削除", ar: "إزالة" },
+    close: { uk: "Закрити", en: "Close", ja: "閉じる", ar: "إغلاق" },
+    colour: { uk: "Колір", en: "Colour", ja: "カラー", ar: "اللون" },
+    material: { uk: "Матеріал", en: "Materials", ja: "素材", ar: "المواد" },
+    dec: { uk: "Зменшити кількість", en: "Decrease quantity", ja: "数量を減らす", ar: "إنقاص الكمية" },
+    inc: { uk: "Збільшити кількість", en: "Increase quantity", ja: "数量を増やす", ar: "زيادة الكمية" },
   });
 
   const close = () => setCartOpen(false);

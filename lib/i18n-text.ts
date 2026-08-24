@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   Inline copy, in three languages.
+   Inline copy, in four languages.
 
    THE SECOND TRANSLATION SYSTEM, AND THE HONEST NAME FOR IT. messages/*.json
    is the first: page copy, marketing, anything a translator would want to see
@@ -27,12 +27,14 @@ export type Text = {
   uk: string;
   /** Absent until translated — falls back to English, never to Ukrainian. */
   ja?: string;
+  ar?: string;
 };
 
 /** The string for this storefront. */
 export function t(locale: string, text: Text): string {
   if (locale === "uk") return text.uk;
   if (locale === "ja") return text.ja ?? text.en;
+  if (locale === "ar") return text.ar ?? text.en;
   return text.en;
 }
 
@@ -58,4 +60,21 @@ export function pick<K extends string>(
     out[key] = t(locale, record[key]);
   }
   return out;
+}
+
+/**
+ * The same rule for a LIST of strings — product benefits, usage tips.
+ *
+ * Separate from t() because these are arrays and there is no sensible way to
+ * fold one into a Text. Same fallback: an untranslated list reads in English,
+ * never in Ukrainian, and an absent one is empty rather than undefined.
+ */
+export function pickList(
+  locale: string,
+  lists: { en?: string[]; uk?: string[]; ja?: string[]; ar?: string[] }
+): string[] {
+  if (locale === "uk") return lists.uk ?? lists.en ?? [];
+  if (locale === "ja") return lists.ja ?? lists.en ?? [];
+  if (locale === "ar") return lists.ar ?? lists.en ?? [];
+  return lists.en ?? [];
 }

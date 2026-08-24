@@ -24,26 +24,31 @@ export default function VoucherCard({
   cfg: LoyaltyConfig;
   locale: string;
 }) {
-  const uk = locale === "uk";
   const [copied, setCopied] = useState(false);
   const state = getVoucherState(voucher);
   const money = (eur: number) => formatVoucher(eur, cfg, locale);
 
   const L = {
-    active: t(locale, { uk: "Активний", en: "Active", ja: "有効" }),
-    expired: t(locale, { uk: "Прострочений", en: "Expired", ja: "期限切れ" }),
-    used: t(locale, { uk: "Використаний", en: "Used", ja: "使用済み" }),
-    minOrder: (v: string) => (uk ? `Мін. замовлення ${v}` : `Min order ${v}`),
-    expires: t(locale, { uk: "Діє до", en: "Expires", ja: "有効期限" }),
-    usedOn: t(locale, { uk: "Використано", en: "Used on", ja: "使用日" }),
-    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
-    copy: t(locale, { uk: "Копіювати код", en: "Copy code", ja: "コードをコピー" }),
-    copied: t(locale, { uk: "Код скопійовано", en: "Code copied", ja: "コードをコピーしました" }),
-    copyFailed: t(locale, { uk: "Не вдалося скопіювати", en: "Couldn't copy", ja: "コピーできませんでした" }),
+    active: t(locale, { uk: "Активний", en: "Active", ja: "有効", ar: "سارية" }),
+    expired: t(locale, { uk: "Прострочений", en: "Expired", ja: "期限切れ", ar: "منتهية" }),
+    used: t(locale, { uk: "Використаний", en: "Used", ja: "使用済み", ar: "مستخدَمة" }),
+    minOrder: (v: string) =>
+      t(locale, {
+        uk: `Мін. замовлення ${v}`,
+        en: `Min order ${v}`,
+        ja: `最低ご注文額 ${v}`,
+        ar: `الحد الأدنى للطلب ${v}`,
+      }),
+    expires: t(locale, { uk: "Діє до", en: "Expires", ja: "有効期限", ar: "تنتهي في" }),
+    usedOn: t(locale, { uk: "Використано", en: "Used on", ja: "使用日", ar: "استُخدمت في" }),
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文", ar: "الطلب" }),
+    copy: t(locale, { uk: "Копіювати код", en: "Copy code", ja: "コードをコピー", ar: "نسخ الرمز" }),
+    copied: t(locale, { uk: "Код скопійовано", en: "Code copied", ja: "コードをコピーしました", ar: "تم نسخ الرمز" }),
+    copyFailed: t(locale, { uk: "Не вдалося скопіювати", en: "Couldn't copy", ja: "コピーできませんでした", ar: "تعذّر النسخ" }),
   };
 
   const date = (s: string) =>
-    new Date(s).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), { day: "numeric", month: "short", year: "numeric" });
+    new Date(s).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }), { day: "numeric", month: "short", year: "numeric" });
 
   const badge =
     state === "active"

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { t } from "@/lib/i18n-text";
+import { t, pickList } from "@/lib/i18n-text";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -311,33 +311,38 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      describing a product the customer is no longer buying. */
   const fieldRows = buildFieldCard({ product, locale, material, windcover });
   const shortDesc = pdp
-    ? t(locale, { uk: pdp.shortUk, en: pdp.shortEn, ja: pdp.shortJa })
-    : t(locale, { uk: product.descriptionUk, en: product.descriptionEn, ja: product.descriptionJa });
+    ? t(locale, { uk: pdp.shortUk, en: pdp.shortEn, ja: pdp.shortJa, ar: pdp.shortAr })
+    : t(locale, { uk: product.descriptionUk, en: product.descriptionEn, ja: product.descriptionJa, ar: product.descriptionAr });
   const benefits = pdp
-    ? (locale === "uk" ? pdp.benefitsUk : locale === "ja" ? pdp.benefitsJa ?? pdp.benefitsEn : pdp.benefitsEn) ?? []
+    ? pickList(locale, {
+        uk: pdp.benefitsUk,
+        en: pdp.benefitsEn,
+        ja: pdp.benefitsJa,
+        ar: pdp.benefitsAr,
+      })
     : [];
   const tips = pdp
-    ? (locale === "uk" ? pdp.tipsUk : locale === "ja" ? pdp.tipsJa ?? pdp.tipsEn : pdp.tipsEn) ?? []
+    ? pickList(locale, { uk: pdp.tipsUk, en: pdp.tipsEn, ja: pdp.tipsJa, ar: pdp.tipsAr })
     : [];
   const colourShown = pdp
-    ? t(locale, { uk: pdp.colourShownUk ?? "", en: pdp.colourShownEn ?? "", ja: pdp.colourShownJa }) || undefined
+    ? t(locale, { uk: pdp.colourShownUk ?? "", en: pdp.colourShownEn ?? "", ja: pdp.colourShownJa, ar: pdp.colourShownAr }) || undefined
     : undefined;
 
   const catLabel =
     product.category === "hmd"
-      ? t(locale, { uk: "Пристрій для нагріву", en: "Heat Management Device", ja: "ヒートマネジメントデバイス" })
+      ? t(locale, { uk: "Пристрій для нагріву", en: "Heat Management Device", ja: "ヒートマネジメントデバイス", ar: "جهاز إدارة الحرارة" })
       : product.category === "bowl"
-        ? t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" })
-        : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー" });
+        ? t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" })
+        : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
 
   const L = {
-    addToBag: t(locale, { uk: "Додати в кошик", en: "Add to Shopping Bag", ja: "バッグに追加" }),
-    favourite: t(locale, { uk: "В обране", en: "Favourite", ja: "お気に入り" }),
-    colour: t(locale, { uk: "Колір", en: "Colour Shown", ja: "カラー" }),
-    style: t(locale, { uk: "Модель", en: "Style", ja: "品番" }),
-    specs: t(locale, { uk: "Характеристики", en: "Tech Specs", ja: "仕様" }),
-    tips: t(locale, { uk: "Поради з використання", en: "Tips for Use", ja: "ご使用のヒント" }),
-    delivery: t(locale, { uk: "Доставка та повернення", en: "Delivery & Returns", ja: "配送と返品" }),
+    addToBag: t(locale, { uk: "Додати в кошик", en: "Add to Shopping Bag", ja: "バッグに追加", ar: "أضف إلى الحقيبة" }),
+    favourite: t(locale, { uk: "В обране", en: "Favourite", ja: "お気に入り", ar: "المفضّلة" }),
+    colour: t(locale, { uk: "Колір", en: "Colour Shown", ja: "カラー", ar: "اللون المعروض" }),
+    style: t(locale, { uk: "Модель", en: "Style", ja: "品番", ar: "الطراز" }),
+    specs: t(locale, { uk: "Характеристики", en: "Tech Specs", ja: "仕様", ar: "المواصفات" }),
+    tips: t(locale, { uk: "Поради з використання", en: "Tips for Use", ja: "ご使用のヒント", ar: "نصائح الاستخدام" }),
+    delivery: t(locale, { uk: "Доставка та повернення", en: "Delivery & Returns", ja: "配送と返品", ar: "الشحن والإرجاع" }),
     /* One string for the whole catalogue, which is the point: it used to
        promise "Europe & the Middle East" while the shop ships worldwide, and a
        per-product string would have had to be corrected eight times and missed
@@ -346,9 +351,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     deliveryText: t(locale, {
       uk: "Доставляємо по всьому світу. Повернення — протягом 14 днів з обґрунтованої причини.",
       en: "We ship worldwide. Returns accepted within 14 days where the reason is justified.",
-      ja: "世界各地へ発送しています。正当な理由がある場合、お受け取りから14日以内に返品いただけます。",
-    }),
-    benefits: t(locale, { uk: "Ключові переваги", en: "Key Benefits", ja: "主な特長" }),
+      ja: "世界各地へ発送しています。正当な理由がある場合、お受け取りから14日以内に返品いただけます。", ar: "نشحن إلى جميع أنحاء العالم. ويُقبل الإرجاع خلال 14 يومًا متى كان السبب وجيهًا." }),
+    benefits: t(locale, { uk: "Ключові переваги", en: "Key Benefits", ja: "主な特長", ar: "أبرز المزايا" }),
   };
 
   /* favourites — shared state: localStorage for guests, Supabase once signed in */
@@ -409,7 +413,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="15" rx="2" /><circle cx="8.5" cy="9.5" r="1.6" /><path d="M21 16l-5-5-9 8" />
                   </svg>
-                  <span className="text-sm tracking-wide">{t(locale, { uk: "Фото незабаром", en: "Photos coming soon", ja: "写真は準備中です" })}</span>
+                  <span className="text-sm tracking-wide">{t(locale, { uk: "Фото незабаром", en: "Photos coming soon", ja: "写真は準備中です", ar: "الصور قريبًا" })}</span>
                 </div>
               )}
               {/* prev / next */}
@@ -448,7 +452,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             {variants && (
               <div className="mt-6">
                 <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
-                  {t(locale, { uk: "Колір", en: "Colour", ja: "カラー" })}: <span style={{ color: "#111" }}>{variantLabel(variants[variantIdx].name)}</span>
+                  {t(locale, { uk: "Колір", en: "Colour", ja: "カラー", ar: "اللون" })}: <span style={{ color: "#111" }}>{variantLabel(variants[variantIdx].name)}</span>
                 </div>
                 <div className="flex gap-3">
                   {variants.map((v, i) => (
@@ -577,8 +581,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   <tbody>
                     {pdp.specs.map((s) => (
                       <tr key={s.labelEn} className="border-b last:border-0" style={{ borderColor: "#efefef" }}>
-                        <td className="py-2.5 pr-4" style={{ color: "#707072" }}>{t(locale, { uk: s.labelUk, en: s.labelEn, ja: s.labelJa })}</td>
-                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{t(locale, { uk: s.valueUk, en: s.valueEn, ja: s.valueJa })}</td>
+                        <td className="py-2.5 pr-4" style={{ color: "#707072" }}>{t(locale, { uk: s.labelUk, en: s.labelEn, ja: s.labelJa, ar: s.labelAr })}</td>
+                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{t(locale, { uk: s.valueUk, en: s.valueEn, ja: s.valueJa, ar: s.valueAr })}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -612,8 +616,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 className="flex flex-col items-center text-center gap-3 py-12 px-4"
                 style={{ borderLeft: i > 0 ? "1px solid #e8e8e8" : "none" }}>
                 <FeatureIcon name={f.icon} />
-                <div className="text-[13px] mt-2" style={{ color: "#707072" }}>{t(locale, { uk: f.titleUk, en: f.titleEn, ja: f.titleJa })}</div>
-                <div className="text-[17px] font-medium" style={{ color: "#111" }}>{t(locale, { uk: f.textUk, en: f.textEn, ja: f.textJa })}</div>
+                <div className="text-[13px] mt-2" style={{ color: "#707072" }}>{t(locale, { uk: f.titleUk, en: f.titleEn, ja: f.titleJa, ar: f.titleAr })}</div>
+                <div className="text-[17px] font-medium" style={{ color: "#111" }}>{t(locale, { uk: f.textUk, en: f.textEn, ja: f.textJa, ar: f.textAr })}</div>
               </div>
             ))}
           </div>

@@ -114,6 +114,8 @@ export default function WholesaleForm() {
           type="tel"
           name="phone"
           required
+          /* LTR regardless of the storefront — see the checkout's phone field. */
+          dir="ltr"
           defaultValue={uk ? "+380" : locale === "ja" ? "+81" : "+"}
           inputMode="tel"
           autoComplete="tel"

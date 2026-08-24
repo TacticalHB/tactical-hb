@@ -50,7 +50,7 @@ function DeliveryContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {locale === "uk" ? "ДОСТАВКА" : "DELIVERY"}
+            {t("eyebrow")}
           </span>
         </div>
         <div className="page-container relative">

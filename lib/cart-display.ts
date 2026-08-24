@@ -46,9 +46,9 @@ export function describeAddons(
   const addons: string[] = [];
   /* FEAR 9E418 is a product name and stays Latin in every language — only the
      word around it changes. */
-  if (options?.lid) addons.push(t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き" }));
-  if (options?.rubber) addons.push(t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き" }));
-  if (options?.timer) addons.push(t(locale, { uk: "З таймером", en: "With Timer", ja: "タイマー付き" }));
+  if (options?.lid) addons.push(t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き", ar: "مع الغطاء" }));
+  if (options?.rubber) addons.push(t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }));
+  if (options?.timer) addons.push(t(locale, { uk: "З таймером", en: "With Timer", ja: "タイマー付き", ar: "مع المؤقّت" }));
   return addons.length ? addons.join(" + ") : null;
 }
 
@@ -73,6 +73,7 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
       uk: product.pdp?.colourShownUk ?? "",
       en: product.pdp?.colourShownEn ?? "",
       ja: product.pdp?.colourShownJa,
+      ar: product.pdp?.colourShownAr,
     }) || null;
   const colour = chosen
     ? uk
@@ -82,7 +83,7 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
 
   const materialSpec = product.pdp?.specs?.find((s) => s.labelEn === "Material");
   const material = materialSpec
-    ? t(locale, { uk: materialSpec.valueUk, en: materialSpec.valueEn, ja: materialSpec.valueJa })
+    ? t(locale, { uk: materialSpec.valueUk, en: materialSpec.valueEn, ja: materialSpec.valueJa, ar: materialSpec.valueAr })
     : null;
 
   const addons = describeAddons(line.options, locale);

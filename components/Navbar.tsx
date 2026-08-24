@@ -121,6 +121,11 @@ export default function Navbar({ locale }: { locale: string }) {
             /* flex + h-11 so the home link is a full-height target rather than
                a 28px band of text in the middle of the bar. */
             className="font-display text-xl md:text-2xl tracking-widest whitespace-nowrap flex items-center gap-[0.3em] h-11 shrink-0"
+            /* dir="ltr" PINS THE WORDMARK. This is a flex row of two spans,
+               so on the Arabic storefront the base direction reversed them and
+               the brand read "HB TACTICAL". A logotype is not a sentence — it
+               does not translate and it does not mirror, in any script. */
+            dir="ltr"
             style={{ color: "#f4f3f0" }}
           >
             TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
@@ -137,7 +142,7 @@ export default function Navbar({ locale }: { locale: string }) {
             </button>
             {bag}
             <AccountMenu locale={locale} />
-            {/* All three languages, not a toggle — see LocaleSwitch. */}
+            {/* All four languages, not a toggle — see LocaleSwitch. */}
             <LocaleSwitch locale={locale} className="ml-1" />
           </nav>
 

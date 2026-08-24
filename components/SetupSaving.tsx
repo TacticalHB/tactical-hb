@@ -41,7 +41,7 @@ export function WasPrice({
     >
       {/* 通常 = "usually/normally", which is how a Japanese shop marks the
           former figure. A literal "was" would read as a tense, not a price. */}
-      {t(locale, { uk: "Було ", en: "Was ", ja: "通常 " })}
+      {t(locale, { uk: "Було ", en: "Was ", ja: "通常 ", ar: "كان " })}
       <Price money={money} locale={locale} />
     </s>
   );
@@ -54,8 +54,7 @@ export function SetupNote({ locale, className = "" }: { locale: string; classNam
       {t(locale, {
         uk: "Повний сет — чаша, пристрій для нагріву та ковпак.",
         en: "Full setup — bowl, heat device and wind cover.",
-        ja: "フルセット — ボウル、ヒートデバイス、ウインドカバー。",
-      })}
+        ja: "フルセット — ボウル、ヒートデバイス、ウインドカバー。", ar: "طقم كامل — رأس وجهاز حرارة وغطاء رياح." })}
     </p>
   );
 }

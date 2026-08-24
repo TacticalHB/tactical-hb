@@ -55,11 +55,11 @@ export function selectedConfig(
 ): string[] {
   const out: string[] = [];
   if (product.category === "hmd") {
-    if (material?.lid) out.push(t(locale, { uk: "з кришкою", en: "with lid", ja: "リッド付き" }));
-    if (material?.rubber) out.push(t(locale, { uk: "з FEAR 9E418", en: "with FEAR 9E418", ja: "FEAR 9E418 付き" }));
+    if (material?.lid) out.push(t(locale, { uk: "з кришкою", en: "with lid", ja: "リッド付き", ar: "مع الغطاء" }));
+    if (material?.rubber) out.push(t(locale, { uk: "з FEAR 9E418", en: "with FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }));
   }
   if (product.category === "windcover" && windcover?.timer) {
-    out.push(t(locale, { uk: "з таймером", en: "with timer", ja: "タイマー付き" }));
+    out.push(t(locale, { uk: "з таймером", en: "with timer", ja: "タイマー付き", ar: "مع المؤقّت" }));
   }
   return out;
 }
@@ -76,26 +76,26 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
 };
 
 const CATEGORY_NAME: Record<Product["category"], Text> = {
-  bowl: { en: "bowls", uk: "чаші", ja: "ボウル" },
-  hmd: { en: "heat devices", uk: "пристрої нагріву", ja: "ヒートデバイス" },
-  windcover: { en: "wind covers", uk: "ковпаки", ja: "ウインドカバー" },
-  accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー" },
+  bowl: { en: "bowls", uk: "чаші", ja: "ボウル", ar: "الرؤوس" },
+  hmd: { en: "heat devices", uk: "пристрої нагріву", ja: "ヒートデバイス", ar: "أجهزة الحرارة" },
+  windcover: { en: "wind covers", uk: "ковпаки", ja: "ウインドカバー", ar: "أغطية الرياح" },
+  accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー", ar: "الإكسسوارات" },
 };
 
 export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {
   const rows: FieldRow[] = [];
-  const g = t(locale, { uk: "г", en: "g", ja: "g" });
+  const g = t(locale, { uk: "г", en: "g", ja: "g", ar: "غ" });
 
   rows.push({
     key: "weight",
-    label: t(locale, { uk: "Вага", en: "Weight", ja: "重量" }),
+    label: t(locale, { uk: "Вага", en: "Weight", ja: "重量", ar: "الوزن" }),
     value: `${selectedWeightG(product, material, windcover)} ${g}`,
   });
 
   rows.push({
     key: "dimensions",
-    label: t(locale, { uk: "Розміри", en: "Dimensions", ja: "サイズ" }),
-    value: `${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${t(locale, { uk: "мм", en: "mm", ja: "mm" })}`,
+    label: t(locale, { uk: "Розміри", en: "Dimensions", ja: "サイズ", ar: "الأبعاد" }),
+    value: `${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${t(locale, { uk: "мм", en: "mm", ja: "mm", ar: "مم" })}`,
   });
 
   /* Material and finish are lifted from the product's own spec table rather
@@ -106,8 +106,8 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
     if (spec) {
       rows.push({
         key: wanted.toLowerCase(),
-        label: t(locale, { uk: spec.labelUk, en: spec.labelEn, ja: spec.labelJa }),
-        value: t(locale, { uk: spec.valueUk, en: spec.valueEn, ja: spec.valueJa }),
+        label: t(locale, { uk: spec.labelUk, en: spec.labelEn, ja: spec.labelJa, ar: spec.labelAr }),
+        value: t(locale, { uk: spec.valueUk, en: spec.valueEn, ja: spec.valueJa, ar: spec.valueAr }),
       });
     }
   }
@@ -115,7 +115,7 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
   if (product.pdp?.styleCode) {
     rows.push({
       key: "style",
-      label: t(locale, { uk: "Артикул", en: "Style", ja: "品番" }),
+      label: t(locale, { uk: "Артикул", en: "Style", ja: "品番", ar: "الطراز" }),
       value: product.pdp.styleCode,
     });
   }
@@ -124,7 +124,7 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
   if (config.length > 0) {
     rows.push({
       key: "configuration",
-      label: t(locale, { uk: "Конфігурація", en: "Configuration", ja: "構成" }),
+      label: t(locale, { uk: "Конфігурація", en: "Configuration", ja: "構成", ar: "التكوين" }),
       value: config.join(", "),
     });
   }
@@ -133,7 +133,7 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
   if (pairs.length > 0) {
     rows.push({
       key: "compatible",
-      label: t(locale, { uk: "Сумісність", en: "Compatible with", ja: "組み合わせ" }),
+      label: t(locale, { uk: "Сумісність", en: "Compatible with", ja: "組み合わせ", ar: "متوافق مع" }),
       value: pairs.map((c) => t(locale, CATEGORY_NAME[c])).join(" · "),
     });
   }

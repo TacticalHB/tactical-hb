@@ -14,11 +14,11 @@ export default function AccountNav({ locale, rank }: { locale: string; rank?: Ra
 
   const base = `/${locale}/account`;
   const items = [
-    { href: base, label: t(locale, { uk: "Профіль", en: "Profile", ja: "プロフィール" }) },
-    { href: `${base}/orders`, label: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }) },
-    { href: `${base}/favourites`, label: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }) },
-    { href: `${base}/loyalty`, label: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" }), badge: true },
-    { href: `${base}/settings`, label: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定" }) },
+    { href: base, label: t(locale, { uk: "Профіль", en: "Profile", ja: "プロフィール", ar: "الملف الشخصي" }) },
+    { href: `${base}/orders`, label: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文", ar: "الطلبات" }) },
+    { href: `${base}/favourites`, label: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り", ar: "المفضّلة" }) },
+    { href: `${base}/loyalty`, label: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" }), badge: true },
+    { href: `${base}/settings`, label: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定", ar: "إعدادات الحساب" }) },
   ];
 
   // The admin links that used to pile up here were Phase A–D scaffolding.
@@ -67,7 +67,7 @@ export default function AccountNav({ locale, rank }: { locale: string; rank?: Ra
             className="block w-full text-left whitespace-nowrap rounded-lg px-4 py-2.5 text-sm hover:bg-[color:var(--bg-soft)]"
             style={{ color: "var(--text-muted)" }}
           >
-            {t(locale, { uk: "Вийти", en: "Sign Out", ja: "ログアウト" })}
+            {t(locale, { uk: "Вийти", en: "Sign Out", ja: "ログアウト", ar: "تسجيل الخروج" })}
           </button>
         </li>
       </ul>

@@ -10,10 +10,10 @@ import {
 } from "@/lib/locale-label";
 
 /* ---------------------------------------------------------------------------
-   The language control: all three, always visible.
+   The language control: all four, always visible.
 
    WHY NOT A TOGGLE. With two languages, one link reading "EN" is unambiguous —
-   you are on the other one. With three it becomes a guessing game, and the
+   you are on the other one. With four it becomes a guessing game, and the
    person who most needs the control is the one who landed on a language they
    cannot read: they cannot follow a hint, only a signpost. So every locale is
    on screen and one tap goes straight to it.
@@ -47,7 +47,7 @@ export default function LocaleSwitch({
   return (
     <div
       className={`flex items-center ${className}`}
-      /* A group label rather than a nav landmark: this is three links, not a
+      /* A group label rather than a nav landmark: this is four links, not a
          section of the site. */
       role="group"
       aria-label="Language"
@@ -69,7 +69,8 @@ export default function LocaleSwitch({
               title={LOCALE_ENDONYM[code]}
               aria-current={active ? "true" : undefined}
               /* 44px tall so it is a real target on a phone, but only as wide
-                 as the badge needs — three of these sit in a header. */
+                 as the badge needs — four of these sit in a header, and the
+                 measured 29×44 still clears WCAG 2.5.8's 24×24. */
               /* .nav-link carries the header's resting grey and its accent
                  hover; the active one is overridden to the bright text this
                  dark bar uses everywhere else. Literal values rather than

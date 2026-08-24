@@ -37,32 +37,33 @@ export default function VoucherField({
   const [error, setError] = useState<string | null>(null);
 
   const L = {
-    title: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー" }),
+    title: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー", ar: "قسيمة" }),
     placeholder: "TCT-XXXXXXXX",
-    apply: t(locale, { uk: "Застосувати", en: "Apply", ja: "適用する" }),
-    remove: t(locale, { uk: "Видалити", en: "Remove", ja: "削除" }),
-    signIn: t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。" }),
-    signInCta: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン" }),
-    appliedLabel: t(locale, { uk: "Ваучер застосовано", en: "Voucher applied", ja: "バウチャーを適用しました" }),
+    apply: t(locale, { uk: "Застосувати", en: "Apply", ja: "適用する", ar: "تطبيق" }),
+    remove: t(locale, { uk: "Видалити", en: "Remove", ja: "削除", ar: "إزالة" }),
+    signIn: t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。", ar: "سجّل الدخول لاستخدام قسيمة." }),
+    signInCta: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン", ar: "تسجيل الدخول" }),
+    appliedLabel: t(locale, { uk: "Ваучер застосовано", en: "Voucher applied", ja: "バウチャーを適用しました", ar: "تم تطبيق القسيمة" }),
   };
 
   const message = (r: VoucherCheck): string => {
     if (r.ok) return "";
     switch (r.reason) {
       case "auth":
-        return t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Please sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。" });
+        return t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Please sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。", ar: "يرجى تسجيل الدخول لاستخدام قسيمة." });
       case "used":
-        return t(locale, { uk: "Цей ваучер вже використано.", en: "This voucher has already been used.", ja: "このバウチャーはすでに使用済みです。" });
+        return t(locale, { uk: "Цей ваучер вже використано.", en: "This voucher has already been used.", ja: "このバウチャーはすでに使用済みです。", ar: "هذه القسيمة مستخدَمة بالفعل." });
       case "expired":
-        return t(locale, { uk: "Термін дії ваучера минув.", en: "This voucher has expired.", ja: "このバウチャーは有効期限が切れています。" });
+        return t(locale, { uk: "Термін дії ваучера минув.", en: "This voucher has expired.", ja: "このバウチャーは有効期限が切れています。", ar: "انتهت صلاحية هذه القسيمة." });
       case "min_order":
         return t(locale, {
           uk: `Ваучер діє від ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`,
           en: `This voucher applies to orders over ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`,
           ja: `このバウチャーは ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))} 以上のご注文が対象です。`,
+          ar: `هذه القسيمة صالحة للطلبات من ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))} فأكثر.`,
         });
       default:
-        return t(locale, { uk: "Ваучер не знайдено.", en: "Voucher not found.", ja: "バウチャーが見つかりません。" });
+        return t(locale, { uk: "Ваучер не знайдено.", en: "Voucher not found.", ja: "バウチャーが見つかりません。", ar: "لم يُعثر على القسيمة." });
     }
   };
 
@@ -81,7 +82,7 @@ export default function VoucherField({
       }
     } catch (err) {
       console.error("[voucher] check failed:", err);
-      setError(t(locale, { uk: "Не вдалося перевірити ваучер.", en: "Couldn't check that voucher.", ja: "バウチャーを確認できませんでした。" }));
+      setError(t(locale, { uk: "Не вдалося перевірити ваучер.", en: "Couldn't check that voucher.", ja: "バウチャーを確認できませんでした。", ar: "تعذّر التحقق من تلك القسيمة." }));
     } finally {
       setBusy(false);
     }

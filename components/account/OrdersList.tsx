@@ -33,16 +33,15 @@ export default function OrdersList({
   orders: CustomerOrder[];
   error?: string | null;
 }) {
-  const uk = locale === "uk";
 
   const L = {
-    title: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }),
-    empty: t(locale, { uk: "Замовлень поки немає", en: "No orders yet", ja: "ご注文はまだありません" }),
-    emptyHint: t(locale, { uk: "Коли ви зробите замовлення, воно з'явиться тут — зі статусом, накладною та нарахованими XP.", en: "Once you place an order it'll appear here — with its status, tracking, and the XP you earned.", ja: "ご注文いただくと、状況、追跡番号、獲得した XP とあわせてここに表示されます。" }),
-    browse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る" }),
-    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
-    items: (n: number) => (uk ? `${n} позицій` : `${n} item${n === 1 ? "" : "s"}`),
-    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
+    title: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文", ar: "الطلبات" }),
+    empty: t(locale, { uk: "Замовлень поки немає", en: "No orders yet", ja: "ご注文はまだありません", ar: "لا طلبات بعد" }),
+    emptyHint: t(locale, { uk: "Коли ви зробите замовлення, воно з'явиться тут — зі статусом, накладною та нарахованими XP.", en: "Once you place an order it'll appear here — with its status, tracking, and the XP you earned.", ja: "ご注文いただくと、状況、追跡番号、獲得した XP とあわせてここに表示されます。", ar: "بمجرد تقديمك طلبًا سيظهر هنا — مع حالته وتتبّعه ونقاط الخبرة التي كسبتها." }),
+    browse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る", ar: "تصفّح المجموعة" }),
+    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
+    items: (n: number) => items(locale, n),
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文", ar: "الطلب" }),
   };
 
   return (
@@ -126,4 +125,19 @@ export default function OrdersList({
       )}
     </div>
   );
+}
+
+/* Arabic counts a noun four different ways and writes no numeral at 1 or 2, so
+   the count and the word cannot be composed the way the other three do. Same
+   rule as checkout's itemCount — see components/checkout/OrderSummaryPanel. */
+function items(locale: string, n: number): string {
+  if (locale === "uk") return `${n} позицій`;
+  if (locale === "ja") return `${n} 点`;
+  if (locale === "ar") {
+    if (n === 1) return "منتج واحد";
+    if (n === 2) return "منتجان";
+    if (n <= 10) return `${n} منتجات`;
+    return `${n} منتجًا`;
+  }
+  return `${n} item${n === 1 ? "" : "s"}`;
 }

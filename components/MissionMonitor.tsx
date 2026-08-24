@@ -259,7 +259,7 @@ export default function MissionMonitor({ locale }: { locale: string }) {
           <span style={{ color: "var(--accent)" }}>TCT-01</span>
           {/* The separator is literal text, not a comment — quoted so neither
               the linter nor the next reader has to guess. */}
-          <span style={{ color: "#8a9097" }}>{` // ${t(locale, { uk: "ЕФІР", en: "LIVE FEED", ja: "ライブ映像" })}`}</span>
+          <span style={{ color: "#8a9097" }}>{` // ${t(locale, { uk: "ЕФІР", en: "LIVE FEED", ja: "ライブ映像", ar: "بث مباشر" })}`}</span>
         </span>
         <span
           className="flex items-center gap-1.5 font-mono text-[9px] font-medium tracking-[0.12em]"
@@ -308,7 +308,7 @@ export default function MissionMonitor({ locale }: { locale: string }) {
           muted
           playsInline
           preload="auto"
-          aria-label={t(locale, { uk: "Анімація Mr.HB", en: "Mr.HB animation", ja: "Mr.HB のアニメーション" })}
+          aria-label={t(locale, { uk: "Анімація Mr.HB", en: "Mr.HB animation", ja: "Mr.HB のアニメーション", ar: "رسوم متحركة لـ Mr.HB" })}
         />
 
         {/* The failure still. Same framing as the video — identical object-fit

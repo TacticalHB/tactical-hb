@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n-text";
 import type { Rank } from "@/lib/loyalty/ranks";
 
 /* ---------------------------------------------------------------------------
@@ -34,7 +35,7 @@ export default function RankBadge({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={rank.badge}
-      alt={locale === "uk" ? rank.uk : rank.en}
+      alt={t(locale, rank)}
       width={size}
       height={size}
       className={`block shrink-0 ${className}`}

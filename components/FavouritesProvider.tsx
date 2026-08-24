@@ -42,7 +42,6 @@ export function FavouritesProvider({
   children: React.ReactNode;
   locale: string;
 }) {
-  const uk = locale === "uk";
   const router = useRouter();
   /* One client for the life of the provider. useMemo rather than a ref read
      during render — a ref's .current is not readable while rendering, and this
@@ -56,14 +55,27 @@ export function FavouritesProvider({
   const [userId, setUserId] = useState<string | null>(null);
 
   const T = {
-    added: t(locale, { uk: "Додано в обране", en: "Added to favourites", ja: "お気に入りに追加しました" }),
-    removed: t(locale, { uk: "Прибрано з обраного", en: "Removed from favourites", ja: "お気に入りから削除しました" }),
-    failed: t(locale, { uk: "Не вдалося зберегти. Спробуйте ще раз.", en: "Couldn't save. Please try again.", ja: "保存できませんでした。もう一度お試しください。" }),
+    added: t(locale, { uk: "Додано в обране", en: "Added to favourites", ja: "お気に入りに追加しました", ar: "أُضيف إلى المفضّلة" }),
+    removed: t(locale, { uk: "Прибрано з обраного", en: "Removed from favourites", ja: "お気に入りから削除しました", ar: "أُزيل من المفضّلة" }),
+    failed: t(locale, { uk: "Не вдалося зберегти. Спробуйте ще раз.", en: "Couldn't save. Please try again.", ja: "保存できませんでした。もう一度お試しください。", ar: "تعذّر الحفظ. حاول مرة أخرى." }),
     merged: (n: number) =>
-      uk ? `${n} збережених товарів перенесено у ваш акаунт` : `${n} saved item${n === 1 ? "" : "s"} moved to your account`,
-    guestPush: t(locale, { uk: "Збережено локально. Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях.", en: "Saved locally. Create a free account to keep your favourites across devices.", ja: "この端末に保存しました。無料のアカウントを作成すると、端末間で引き継げます。" }),
-    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成" }),
-    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン" }),
+      t(locale, {
+        uk: `${n} збережених товарів перенесено у ваш акаунт`,
+        en: `${n} saved item${n === 1 ? "" : "s"} moved to your account`,
+        ja: `保存していた ${n} 点をアカウントに移しました`,
+        /* Arabic writes no numeral at one or two — see OrderSummaryPanel. */
+        ar:
+          n === 1
+            ? "نُقل منتج واحد محفوظ إلى حسابك"
+            : n === 2
+              ? "نُقل منتجان محفوظان إلى حسابك"
+              : n <= 10
+                ? `نُقلت ${n} منتجات محفوظة إلى حسابك`
+                : `نُقل ${n} منتجًا محفوظًا إلى حسابك`,
+      }),
+    guestPush: t(locale, { uk: "Збережено локально. Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях.", en: "Saved locally. Create a free account to keep your favourites across devices.", ja: "この端末に保存しました。無料のアカウントを作成すると、端末間で引き継げます。", ar: "حُفظ محليًا. أنشئ حسابًا مجانيًا للاحتفاظ بمفضّلاتك عبر أجهزتك." }),
+    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成", ar: "إنشاء حساب" }),
+    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン", ar: "تسجيل الدخول" }),
   };
 
   /**

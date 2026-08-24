@@ -37,9 +37,9 @@ const ITEMS = [
 ];
 
 export default function Bestsellers({ locale }: { locale: string }) {
-  const heading = t(locale, { uk: "Обрані бестселери", en: "Explore our bestsellers", ja: "人気の製品を見る" });
-  const view = t(locale, { uk: "Переглянути", en: "View", ja: "見る" });
-  const seeAll = t(locale, { uk: "Уся колекція", en: "See the full collection", ja: "コレクションをすべて見る" });
+  const heading = t(locale, { uk: "Обрані бестселери", en: "Explore our bestsellers", ja: "人気の製品を見る", ar: "تصفّح الأكثر مبيعًا" });
+  const view = t(locale, { uk: "Переглянути", en: "View", ja: "見る", ar: "عرض" });
+  const seeAll = t(locale, { uk: "Уся колекція", en: "See the full collection", ja: "コレクションをすべて見る", ar: "شاهد المجموعة كاملة" });
 
   return (
     <section className="page-container py-24 md:py-32">

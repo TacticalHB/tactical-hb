@@ -41,9 +41,9 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
   const c = await getTranslations("cart");
 
   const label: Record<string, string> = {
-    bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" }),
-    hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス" }),
-    windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー" }),
+    bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" }),
+    hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス", ar: "جهاز حرارة" }),
+    windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー", ar: "غطاء رياح" }),
   };
 
   return (

@@ -39,8 +39,13 @@ export type Rank = {
   key: RankKey;
   /** Position on the ladder, 0-based. Higher is better; used for comparisons. */
   order: number;
+  /* Shaped like lib/i18n-text's Text so a rank can be handed straight to t().
+     ja and ar are optional and fall back to English, same rule as everywhere
+     else — a new storefront must never make a rank read in Ukrainian. */
   en: string;
   uk: string;
+  ja?: string;
+  ar?: string;
   /** Lifetime paid spend, in EUR, at which this rank unlocks on /en. */
   thresholdEur: number;
   /** Lifetime hryvnia actually charged at which it unlocks on /uk. NOT a
@@ -62,11 +67,11 @@ export const COLONEL_DISCOUNT_RATE = 0.07;
    (€100 and €250) rather than beside them — reaching a rank and unlocking a
    voucher should be the same moment, not two near-misses. */
 export const RANKS: Rank[] = [
-  { key: "recruit",    order: 0, en: "Recruit",    uk: "Рекрут",     thresholdEur: 0,    thresholdUah: 0,     discountRate: 0,                     badge: "/loyalty/ranks/recruit.svg" },
-  { key: "operative",  order: 1, en: "Operative",  uk: "Оператив",   thresholdEur: 100,  thresholdUah: 5000,  discountRate: 0,                     badge: "/loyalty/ranks/operative.svg" },
-  { key: "specialist", order: 2, en: "Specialist", uk: "Спеціаліст", thresholdEur: 250,  thresholdUah: 12500, discountRate: 0,                     badge: "/loyalty/ranks/specialist.svg" },
-  { key: "captain",    order: 3, en: "Captain",    uk: "Капітан",    thresholdEur: 500,  thresholdUah: 25000, discountRate: 0,                     badge: "/loyalty/ranks/captain.svg" },
-  { key: "colonel",    order: 4, en: "Colonel",    uk: "Полковник",  thresholdEur: 1000, thresholdUah: 50000, discountRate: COLONEL_DISCOUNT_RATE, badge: "/loyalty/ranks/colonel.svg" },
+  { key: "recruit",    order: 0, en: "Recruit",    uk: "Рекрут",     ja: "新兵",   ar: "مجنَّد",  thresholdEur: 0,    thresholdUah: 0,     discountRate: 0,                     badge: "/loyalty/ranks/recruit.svg" },
+  { key: "operative",  order: 1, en: "Operative",  uk: "Оператив",   ja: "隊員",   ar: "عنصر",   thresholdEur: 100,  thresholdUah: 5000,  discountRate: 0,                     badge: "/loyalty/ranks/operative.svg" },
+  { key: "specialist", order: 2, en: "Specialist", uk: "Спеціаліст", ja: "特技兵", ar: "أخصائي", thresholdEur: 250,  thresholdUah: 12500, discountRate: 0,                     badge: "/loyalty/ranks/specialist.svg" },
+  { key: "captain",    order: 3, en: "Captain",    uk: "Капітан",    ja: "大尉",   ar: "نقيب",   thresholdEur: 500,  thresholdUah: 25000, discountRate: 0,                     badge: "/loyalty/ranks/captain.svg" },
+  { key: "colonel",    order: 4, en: "Colonel",    uk: "Полковник",  ja: "大佐",   ar: "عقيد",   thresholdEur: 1000, thresholdUah: 50000, discountRate: COLONEL_DISCOUNT_RATE, badge: "/loyalty/ranks/colonel.svg" },
 ];
 
 export const TOP_RANK = RANKS[RANKS.length - 1];

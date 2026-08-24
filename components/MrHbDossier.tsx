@@ -43,17 +43,17 @@ export function dossierCopy(locale: string) {
   return {
     /* "ВІДКРИТИ СПРАВУ" is a good deal longer than "OPEN FILE", so the tab
        tightens its tracking on Ukrainian rather than growing or wrapping. */
-    openFile: t(locale, { uk: "Відкрити справу", en: "Open file", ja: "ファイルを開く" }),
+    openFile: t(locale, { uk: "Відкрити справу", en: "Open file", ja: "ファイルを開く", ar: "افتح الملف" }),
     /* Not copy — letter-spacing. Ukrainian's longer label is tightened;
        Japanese is set solid, because tracking applied to kana reads as a
        typesetting fault rather than as emphasis. */
-    tracking: t(locale, { uk: "0.12em", en: "0.22em", ja: "0.02em" }),
-    close: t(locale, { uk: "Закрити", en: "Close", ja: "閉じる" }),
+    tracking: t(locale, { uk: "0.12em", en: "0.22em", ja: "0.02em", ar: "0em" }),
+    close: t(locale, { uk: "Закрити", en: "Close", ja: "閉じる", ar: "إغلاق" }),
     /* The way from the modal to the full page. The dossier shows the letter
        and stops; the operative file is the rest of it. */
-    fullFile: t(locale, { uk: "Відкрити повну справу", en: "Open the full file", ja: "ファイル全文を開く" }),
-    title: t(locale, { uk: "Справа: Mr HB", en: "File: Mr HB", ja: "ファイル：Mr HB" }),
-    strip: t(locale, { uk: "TCT-01 · MR HB · ВНУТРІШНЄ", en: "TCT-01 · MR HB · INTERNAL", ja: "TCT-01 · MR HB · 社内資料" }),
+    fullFile: t(locale, { uk: "Відкрити повну справу", en: "Open the full file", ja: "ファイル全文を開く", ar: "افتح الملف كاملًا" }),
+    title: t(locale, { uk: "Справа: Mr HB", en: "File: Mr HB", ja: "ファイル：Mr HB", ar: "ملف: Mr HB" }),
+    strip: t(locale, { uk: "TCT-01 · MR HB · ВНУТРІШНЄ", en: "TCT-01 · MR HB · INTERNAL", ja: "TCT-01 · MR HB · 社内資料", ar: "TCT-01 · MR HB · داخلي" }),
   };
 }
 
@@ -155,8 +155,8 @@ export default function MrHbDossier({
     openFile: C.openFile,
     close: C.close,
     fullFile: C.fullFile,
-    envelopeAlt: t(locale, { uk: "Запечатаний конверт із печаткою TCT", en: "A sealed envelope bearing the TCT seal", ja: "TCT の封蝋が押された封筒" }),
-    letterAlt: t(locale, { uk: "Лист: справа на Mr HB", en: "Letter: the file on Mr HB", ja: "書簡：Mr HB のファイル" }),
+    envelopeAlt: t(locale, { uk: "Запечатаний конверт із печаткою TCT", en: "A sealed envelope bearing the TCT seal", ja: "TCT の封蝋が押された封筒", ar: "ظرف مختوم يحمل ختم TCT" }),
+    letterAlt: t(locale, { uk: "Лист: справа на Mr HB", en: "Letter: the file on Mr HB", ja: "書簡：Mr HB のファイル", ar: "رسالة: ملف Mr HB" }),
   };
 
   /* The letter's words, for screen readers and for search. The image carries

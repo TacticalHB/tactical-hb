@@ -122,7 +122,7 @@ function PrivacyContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {t(locale, { uk: "ДАНІ", en: "PRIVACY", ja: "プライバシー" })}
+            {t(locale, { uk: "ДАНІ", en: "PRIVACY", ja: "プライバシー", ar: "الخصوصية" })}
           </span>
         </div>
         <div className="page-container relative">

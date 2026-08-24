@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { localeDir } from "@/i18n/routing";
 import { Bebas_Neue, Inter } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import { SITE_NAME, SITE_URL, siteMetadata } from "@/lib/seo";
@@ -46,7 +47,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${bebasNeue.variable} h-full`}>
+    /* dir BELONGS ON <html>, not on a wrapper: it sets the base direction for
+       the whole document, so text alignment, flex and grid flow, and the
+       browser's own bidi algorithm all mirror without a single style rule.
+       Anything using logical CSS properties follows it for free. */
+    <html
+      lang={locale}
+      dir={localeDir(locale)}
+      className={`${inter.variable} ${bebasNeue.variable} h-full`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

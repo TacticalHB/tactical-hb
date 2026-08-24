@@ -22,13 +22,13 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
   const d = lastAdded ? describeLine(lastAdded, locale) : null;
 
   const L = pick(locale, {
-    title: { uk: "Додано в кошик", en: "Added to Shopping Bag", ja: "バッグに追加しました" },
-    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る" },
-    keep: { uk: "Продовжити покупки", en: "Continue shopping", ja: "買い物を続ける" },
-    close: { uk: "Закрити", en: "Close", ja: "閉じる" },
-    colour: { uk: "Колір", en: "Colour", ja: "カラー" },
-    material: { uk: "Матеріал", en: "Materials", ja: "素材" },
-    config: { uk: "Комплектація", en: "Configuration", ja: "構成" },
+    title: { uk: "Додано в кошик", en: "Added to Shopping Bag", ja: "バッグに追加しました", ar: "أُضيف إلى الحقيبة" },
+    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る", ar: "عرض الحقيبة" },
+    keep: { uk: "Продовжити покупки", en: "Continue shopping", ja: "買い物を続ける", ar: "متابعة التسوّق" },
+    close: { uk: "Закрити", en: "Close", ja: "閉じる", ar: "إغلاق" },
+    colour: { uk: "Колір", en: "Colour", ja: "カラー", ar: "اللون" },
+    material: { uk: "Матеріал", en: "Materials", ja: "素材", ar: "المواد" },
+    config: { uk: "Комплектація", en: "Configuration", ja: "構成", ar: "التكوين" },
   });
 
   const close = () => setAddedOpen(false);

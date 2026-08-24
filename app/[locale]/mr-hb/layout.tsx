@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora } from "next/font/google";
 import { getTranslations } from "next-intl/server";
+import { locales } from "@/i18n/routing";
 
 /* ---------------------------------------------------------------------------
    The operative file's own shell.
@@ -44,7 +45,9 @@ export async function generateMetadata({
     description: t("meta_desc"),
     alternates: {
       canonical: `${site}/${locale}/mr-hb`,
-      languages: { en: `${site}/en/mr-hb`, uk: `${site}/uk/mr-hb` },
+      /* Every storefront, not the two this page was born with — a missing
+         hreflang is how a translated page gets indexed as a duplicate. */
+      languages: Object.fromEntries(locales.map((l) => [l, `${site}/${l}/mr-hb`])),
     },
     openGraph: {
       title: t("meta_title"),

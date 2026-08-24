@@ -30,7 +30,7 @@ export const SITE_NAME = "Tactical HB";
 /** No trailing slash, ever — every URL here is built by concatenation. */
 export const SITE_URL = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
 
-export const LOCALES = ["uk", "en", "ja"] as const;
+export const LOCALES = ["uk", "en", "ja", "ar"] as const;
 export type SeoLocale = (typeof LOCALES)[number];
 
 /**
@@ -70,15 +70,28 @@ export const siteMetadata = {
     description:
       "ウクライナ発のプレミアムシーシャアクセサリー。HMD（ヒートマネジメントデバイス）、ボウル、ウインドカバーを、武器づくりの精度で仕上げています。",
   },
+  ar: {
+    description:
+      "إكسسوارات شيشة فاخرة من أوكرانيا — أجهزة إدارة الحرارة والرؤوس وأغطية الرياح، مصنوعة بدقة صناعة السلاح.",
+  },
 };
 
 /** Both language versions of one page, plus the x-default a crawler needs. */
+/** Facebook's locale codes, which are not the same shape as ours. */
+const OG_LOCALE: Record<string, string> = {
+  uk: "uk_UA",
+  en: "en_GB",
+  ja: "ja_JP",
+  ar: "ar_AR",
+};
+
 export function alternatesFor(path: string) {
   const clean = path === "/" ? "" : path;
   return {
     uk: `${SITE_URL}/uk${clean}`,
     en: `${SITE_URL}/en${clean}`,
     ja: `${SITE_URL}/ja${clean}`,
+    ar: `${SITE_URL}/ar${clean}`,
     /* x-default points at Ukrainian: this is a Ukrainian brand shipping
        domestically first, so an unmatched language should land there rather
        than on either export-facing page. */
@@ -125,7 +138,9 @@ export function pageMetadata({
       title: `${title} · ${SITE_NAME}`,
       description,
       url: canonical,
-      locale: locale === "uk" ? "uk_UA" : "en_GB",
+      /* One per storefront. This used to be a two-way ternary, so a Japanese
+         or Arabic share card announced itself as en_GB. */
+      locale: OG_LOCALE[locale] ?? "en_GB",
       images: images ?? [OG_IMAGE],
     },
     twitter: {
@@ -197,7 +212,9 @@ export function organizationJsonLd(locale: string) {
         ? siteMetadata.uk.description
         : locale === "ja"
           ? siteMetadata.ja.description
-          : siteMetadata.en.description,
+          : locale === "ar"
+            ? siteMetadata.ar.description
+            : siteMetadata.en.description,
     address: {
       "@type": "PostalAddress",
       addressLocality: "Kharkiv",

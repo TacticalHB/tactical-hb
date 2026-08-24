@@ -5,7 +5,7 @@ import { t } from "@/lib/i18n-text";
 import { useEffect, useState } from "react";
 import { formatVoucher, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import type { Voucher } from "@/lib/loyalty/vouchers";
-import { COLONEL_DISCOUNT_RATE, RANKS, TOP_RANK as TOP, type RankProgress } from "@/lib/loyalty/ranks";
+import { COLONEL_DISCOUNT_RATE, RANKS, TOP_RANK as TOP, type Rank, type RankProgress } from "@/lib/loyalty/ranks";
 import RankBadge from "./RankBadge";
 import VoucherCard from "./VoucherCard";
 
@@ -67,10 +67,10 @@ export default function LoyaltyDashboard({
 
   const money = (eur: number) => formatVoucher(eur, cfg, locale);
   const toNext = next ? next.spend_eur - totalSpend : 0;
-  const dateFmt = (d: string) => new Date(d).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), { day: "numeric", month: "short", year: "numeric" });
+  const dateFmt = (d: string) => new Date(d).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }), { day: "numeric", month: "short", year: "numeric" });
 
   const pct = Math.round(COLONEL_DISCOUNT_RATE * 100);
-  const rankName = (r: { en: string; uk: string }) => (uk ? r.uk : r.en);
+  const rankName = (r: Rank) => t(locale, r);
 
   /* Rank thresholds are NOT run through money(). That helper converts a euro
      figure at the loyalty rate, which is exactly the shortcut that once put
@@ -82,57 +82,83 @@ export default function LoyaltyDashboard({
     ? `${rank.remainingUah.toLocaleString("uk-UA")} UAH`
     : `€${rank.remainingEur}`;
 
+  const ladder = RANKS.map((r) => `${rankName(r)} (${rankGate(r)})`).join(", ");
+
   const L = {
-    title: t(locale, { uk: "Бонуси Tactical HB", en: "Tactical HB Rewards", ja: "Tactical HB リワード" }),
+    title: t(locale, { uk: "Бонуси Tactical HB", en: "Tactical HB Rewards", ja: "Tactical HB リワード", ar: "مكافآت Tactical HB" }),
     xp: "XP",
-    maxTier: t(locale, { uk: "Максимальний рівень", en: "Max tier complete", ja: "最上位ランク達成" }),
-    toNext: t(locale, { uk: "до наступного ваучера", en: "to your next voucher", ja: "次のバウチャーまで" }),
-    voucherWorth: (v: string) => (uk ? `Ваучер на ${v}` : `${v} voucher`),
+    maxTier: t(locale, { uk: "Максимальний рівень", en: "Max tier complete", ja: "最上位ランク達成", ar: "اكتملت أعلى مرتبة" }),
+    toNext: t(locale, { uk: "до наступного ваучера", en: "to your next voucher", ja: "次のバウチャーまで", ar: "حتى قسيمتك التالية" }),
+    voucherWorth: (v: string) =>
+      t(locale, {
+        uk: `Ваучер на ${v}`,
+        en: `${v} voucher`,
+        ja: `${v} バウチャー`,
+        ar: `قسيمة بقيمة ${v}`,
+      }),
     /* The Ukrainian storefront must never quote the rate in euro. `money(1)`
        renders one euro of spend as the hryvnia the loyalty rate calls it, so
        the sentence follows loyalty_config instead of hardcoding "50". */
-    earnRate: uk
-      ? `${cfg.xp_per_eur} XP за кожні ${money(1)}`
-      : `${cfg.xp_per_eur} XP for every €1 spent`,
+    earnRate: t(locale, {
+      uk: `${cfg.xp_per_eur} XP за кожні ${money(1)}`,
+      en: `${cfg.xp_per_eur} XP for every €1 spent`,
+      ja: `€1 のお買い上げごとに ${cfg.xp_per_eur} XP`,
+      ar: `${cfg.xp_per_eur} XP على كل €1 تنفقه`,
+    }),
     /* Rank line under the badge: where you are going, or that you have
        arrived and what it is worth. */
     nextRank: rank.next
-      ? uk
-        ? `Наступне звання: ${rankName(rank.next)} · ще ${rankRemaining}`
-        : `Next rank: ${rankName(rank.next)} · ${rankRemaining} to go`
-      : uk
-        ? `Найвище звання · –${pct}% на продукцію назавжди`
-        : `Top rank · ${pct}% permanent discount on products`,
-    vouchers: t(locale, { uk: "Ваші ваучери", en: "Your vouchers", ja: "お持ちのバウチャー" }),
-    noVouchers: t(locale, { uk: "Ще немає активних ваучерів — витрачайте, щоб відкрити.", en: "No active vouchers — spend to unlock your first.", ja: "有効なバウチャーはありません — ご購入で最初の一枚が手に入ります。" }),
-    usedVouchers: t(locale, { uk: "Використані ваучери", en: "Used vouchers", ja: "使用済みのバウチャー" }),
-    history: t(locale, { uk: "Історія балів", en: "Points history", ja: "ポイント履歴" }),
-    noHistory: t(locale, { uk: "Історія з'явиться після першої покупки.", en: "Your history appears after your first purchase.", ja: "履歴は最初のご購入のあとに表示されます。" }),
+      ? t(locale, {
+          uk: `Наступне звання: ${rankName(rank.next)} · ще ${rankRemaining}`,
+          en: `Next rank: ${rankName(rank.next)} · ${rankRemaining} to go`,
+          ja: `次の階級: ${rankName(rank.next)} · あと ${rankRemaining}`,
+          ar: `المرتبة التالية: ${rankName(rank.next)} · يتبقى ${rankRemaining}`,
+        })
+      : t(locale, {
+          uk: `Найвище звання · –${pct}% на продукцію назавжди`,
+          en: `Top rank · ${pct}% permanent discount on products`,
+          ja: `最上位の階級 · 製品が常に ${pct}% オフ`,
+          ar: `أعلى مرتبة · خصم دائم ${pct}% على المنتجات`,
+        }),
+    vouchers: t(locale, { uk: "Ваші ваучери", en: "Your vouchers", ja: "お持ちのバウチャー", ar: "قسائمك" }),
+    noVouchers: t(locale, { uk: "Ще немає активних ваучерів — витрачайте, щоб відкрити.", en: "No active vouchers — spend to unlock your first.", ja: "有効なバウチャーはありません — ご購入で最初の一枚が手に入ります。", ar: "لا قسائم سارية — تسوّق لتحصل على أولى قسائمك." }),
+    usedVouchers: t(locale, { uk: "Використані ваучери", en: "Used vouchers", ja: "使用済みのバウチャー", ar: "القسائم المستخدَمة" }),
+    history: t(locale, { uk: "Історія балів", en: "Points history", ja: "ポイント履歴", ar: "سجل النقاط" }),
+    noHistory: t(locale, { uk: "Історія з'явиться після першої покупки.", en: "Your history appears after your first purchase.", ja: "履歴は最初のご購入のあとに表示されます。", ar: "يظهر سجلك بعد أول عملية شراء." }),
     /* The zero state. Deliberately states only what the system already does —
        the ladder starts at the first rank and moves on lifetime spend — and
        invents no rule of its own. The rank name is read from RANKS so it can
        never drift from the ladder itself. */
-    startTitle: t(locale, { uk: "Ваше звання починається тут", en: "Your rank starts here", ja: "ランクはここから始まります" }),
-    startBody: uk
-      ? `Ви — ${RANKS[0].uk}. Звання зростає від суми всіх покупок, тож перше замовлення вже рухає вас далі, а бонуси й ваучери з’являться тут автоматично.`
-      : `You're a ${RANKS[0].en}. Rank grows with your lifetime spend, so your first order already moves you up — XP and vouchers appear here on their own.`,
-    startBrowse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る" }),
-    startSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
-    reasonOrder: t(locale, { uk: "Покупка", en: "Purchase", ja: "ご購入" }),
-    howTitle: t(locale, { uk: "Як це працює", en: "How it works", ja: "仕組み" }),
-    how: uk
-      ? `Отримуйте ${cfg.xp_per_eur} XP за кожні ${money(1)}. Досягайте етапів витрат, щоб відкривати ваучери. Ваучери діють ${cfg.voucher_expiry_months} міс. і застосовуються до майбутнього замовлення від ${money(cfg.min_order_eur)}.`
-      : `Earn ${cfg.xp_per_eur} XP for every €1 you spend. Hit spend milestones to unlock vouchers. Vouchers last ${cfg.voucher_expiry_months} months and apply to a future order over ${money(cfg.min_order_eur)}.`,
+    startTitle: t(locale, { uk: "Ваше звання починається тут", en: "Your rank starts here", ja: "ランクはここから始まります", ar: "تبدأ مرتبتك من هنا" }),
+    startBody: t(locale, {
+      uk: `Ви — ${RANKS[0].uk}. Звання зростає від суми всіх покупок, тож перше замовлення вже рухає вас далі, а бонуси й ваучери з’являться тут автоматично.`,
+      en: `You're a ${RANKS[0].en}. Rank grows with your lifetime spend, so your first order already moves you up — XP and vouchers appear here on their own.`,
+      ja: `現在の階級は ${rankName(RANKS[0])} です。階級はこれまでのご購入総額とともに上がるので、最初のご注文がそのまま次への一歩になります。XP とバウチャーはここに自動で表示されます。`,
+      ar: `مرتبتك الآن ${rankName(RANKS[0])}. ترتفع المرتبة مع إجمالي مشترياتك، فطلبك الأول يقدّمك خطوة بالفعل — وتظهر نقاط XP والقسائم هنا تلقائيًا.`,
+    }),
+    startBrowse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る", ar: "تصفّح المجموعة" }),
+    startSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
+    reasonOrder: t(locale, { uk: "Покупка", en: "Purchase", ja: "ご購入", ar: "شراء" }),
+    howTitle: t(locale, { uk: "Як це працює", en: "How it works", ja: "仕組み", ar: "كيف يعمل" }),
+    how: t(locale, {
+      uk: `Отримуйте ${cfg.xp_per_eur} XP за кожні ${money(1)}. Досягайте етапів витрат, щоб відкривати ваучери. Ваучери діють ${cfg.voucher_expiry_months} міс. і застосовуються до майбутнього замовлення від ${money(cfg.min_order_eur)}.`,
+      en: `Earn ${cfg.xp_per_eur} XP for every €1 you spend. Hit spend milestones to unlock vouchers. Vouchers last ${cfg.voucher_expiry_months} months and apply to a future order over ${money(cfg.min_order_eur)}.`,
+      ja: `${money(1)} のお買い上げごとに ${cfg.xp_per_eur} XP が貯まります。購入総額の節目に達するとバウチャーが手に入ります。バウチャーの有効期間は ${cfg.voucher_expiry_months} か月で、${money(cfg.min_order_eur)} 以上の次回のご注文にお使いいただけます。`,
+      ar: `اجمع ${cfg.xp_per_eur} XP على كل ${money(1)} تنفقه. وكلما بلغت أحد حدود الإنفاق حصلت على قسيمة. تسري القسيمة ${cfg.voucher_expiry_months} أشهر وتُستخدم في طلب قادم قيمته ${money(cfg.min_order_eur)} فأكثر.`,
+    }),
     /* The ranks paragraph, and the one rule people will actually ask about:
        the 7% and a voucher do not add together. */
-    howRanks: uk
-      ? `Звання відкриваються за сумою всіх покупок: ${RANKS.map((r) => `${r.uk} (${rankGate(r)})`).join(", ")}. Звання лише зростає. ${TOP.uk} дає –${pct}% на продукцію в кожному замовленні — постійно, окрім доставки. Знижка за звання й ваучер не додаються: застосовується те, що вигідніше для вас.`
-      : `Ranks unlock on your lifetime spend: ${RANKS.map((r) => `${r.en} (${rankGate(r)})`).join(", ")}. Rank only goes up. ${TOP.en} takes ${pct}% off the products on every order, permanently — shipping excluded. The rank discount and a voucher never add together: whichever is worth more is the one applied.`,
+    howRanks: t(locale, {
+      uk: `Звання відкриваються за сумою всіх покупок: ${ladder}. Звання лише зростає. ${rankName(TOP)} дає –${pct}% на продукцію в кожному замовленні — постійно, окрім доставки. Знижка за звання й ваучер не додаються: застосовується те, що вигідніше для вас.`,
+      en: `Ranks unlock on your lifetime spend: ${ladder}. Rank only goes up. ${rankName(TOP)} takes ${pct}% off the products on every order, permanently — shipping excluded. The rank discount and a voucher never add together: whichever is worth more is the one applied.`,
+      ja: `階級はこれまでのご購入総額で上がります: ${ladder}。階級が下がることはありません。${rankName(TOP)} になると、送料を除く製品代金が毎回 ${pct}% オフになります（永続）。階級の割引とバウチャーは併用されず、お得なほうが自動で適用されます。`,
+      ar: `تُفتح المراتب بحسب إجمالي مشترياتك: ${ladder}. والمرتبة لا تنخفض أبدًا. ومع مرتبة ${rankName(TOP)} تحصل على خصم ${pct}% على المنتجات في كل طلب، بصفة دائمة، عدا الشحن. ولا يُجمع خصم المرتبة مع القسيمة: يُطبَّق الأوفر لك منهما.`,
+    }),
   };
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-6" style={{ color: "#111" }}>{t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" })}</h1>
+      <h1 className="text-3xl font-semibold mb-6" style={{ color: "#111" }}>{t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" })}</h1>
 
       {/* Hero card (dark + yellow, Gymshark-style) */}
       <div className="rounded-3xl px-7 py-9 sm:px-10 sm:py-12 text-center" style={{ background: "var(--ink)" }}>
@@ -152,7 +178,7 @@ export default function LoyaltyDashboard({
         </div>
 
         <div className="font-display leading-none tabular-nums" style={{ color: "var(--accent)", fontSize: "clamp(3.5rem,12vw,6rem)" }}>
-          {xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }))}
+          {xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }))}
           <span className="text-[0.28em] align-top ml-2" style={{ color: "rgba(255,255,255,0.6)" }}>{L.xp}</span>
         </div>
         <div className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.55)" }}>{L.earnRate}</div>
@@ -288,7 +314,7 @@ export default function LoyaltyDashboard({
                 <div className="text-xs" style={{ color: "var(--text-faint)" }}>{dateFmt(p.created_at)}</div>
               </div>
               <div className="text-sm font-medium tabular-nums" style={{ color: p.xp >= 0 ? "#0a7d2c" : "#b42318" }}>
-                {p.xp >= 0 ? "+" : ""}{p.xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }))} XP
+                {p.xp >= 0 ? "+" : ""}{p.xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }))} XP
               </div>
             </li>
           ))}

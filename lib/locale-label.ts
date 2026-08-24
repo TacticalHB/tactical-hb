@@ -15,10 +15,11 @@ import { locales, type AppLocale } from "@/i18n/routing";
    human-facing label and follows what a human will actually think it means.
    Nothing here is allowed to leak into a URL or an hreflang value.
 
-   JA KEEPS ITS ISO FORM, and that is not an inconsistency with the above. UA
-   was chosen over UK because UK actively means something else; JA means
-   nothing else to anybody, so there is nothing to correct. JP was the
-   alternative and it is the COUNTRY, which is the exact mistake UK made.
+   JA AND AR KEEP THEIR ISO FORM, and that is not an inconsistency with the
+   above. UA was chosen over UK because UK actively means something else; JA
+   and AR mean nothing else to anybody, so there is nothing to correct. JP and
+   SA were the alternatives and both are COUNTRIES — the exact mistake UK made,
+   and worse for Arabic, which is spoken across two dozen of them.
 
    THREE BADGES, ALL VISIBLE — see LocaleSwitch. The old control showed one
    link to "the other locale", which works for two languages and silently
@@ -33,6 +34,7 @@ export const LOCALE_LABEL: Record<AppLocale, string> = {
   uk: "UA",
   en: "EN",
   ja: "JA",
+  ar: "AR",
 };
 
 /** What each locale calls itself — for the `lang`-tagged title on the control. */
@@ -40,6 +42,7 @@ export const LOCALE_ENDONYM: Record<AppLocale, string> = {
   uk: "Українська",
   en: "English",
   ja: "日本語",
+  ar: "العربية",
 };
 
 export function localeLabel(locale: string): string {
@@ -54,7 +57,7 @@ export const LOCALE_ORDER: readonly AppLocale[] = locales;
  *
  * Kept because the Mr HB file shows a compact pair rather than the full
  * switcher, and cycling is the honest behaviour there. Not used by the header,
- * which shows all three at once.
+ * which shows all four at once.
  */
 export function otherLocale(locale: string): AppLocale {
   const i = LOCALE_ORDER.indexOf(locale as AppLocale);

@@ -13,7 +13,7 @@ import { money } from "@/lib/currency";
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
   const name = product.tileTitle ?? (locale === "uk" ? product.nameUk : product.nameEn);
-  const subtitle = t(locale, { uk: product.taglineUk, en: product.taglineEn, ja: product.taglineJa });
+  const subtitle = t(locale, { uk: product.taglineUk, en: product.taglineEn, ja: product.taglineJa, ar: product.taglineAr });
   const variants = product.variants;
   const multi = !!variants && variants.length > 1;
 

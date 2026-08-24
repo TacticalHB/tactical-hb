@@ -111,6 +111,7 @@
     "method_linkedin": "LinkedIn"
   },
   "delivery": {
+    "eyebrow": "配送",
     "title": "お支払いと配送",
     "intro": "一つのご注文に、一つの合計金額。Tactical HB のご注文のお支払いとお受け取りについて、必要なことをまとめました。",
     "payment_tag": "お支払い",

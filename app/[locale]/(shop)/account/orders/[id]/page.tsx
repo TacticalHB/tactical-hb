@@ -64,21 +64,21 @@ export default async function OrderDetailPage({
   const cancelled = order.status === "cancelled";
 
   const L = {
-    back: t(locale, { uk: "Усі замовлення", en: "All orders", ja: "すべてのご注文" }),
-    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
-    placed: t(locale, { uk: "Оформлено", en: "Placed", ja: "注文日" }),
-    status: t(locale, { uk: "Статус", en: "Status", ja: "状況" }),
-    items: t(locale, { uk: "Позиції", en: "Items", ja: "商品" }),
-    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量" }),
-    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
-    delivery: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }),
-    tracking: t(locale, { uk: "Номер накладної", en: "Tracking number", ja: "追跡番号" }),
-    track: t(locale, { uk: "Відстежити посилку", en: "Track shipment", ja: "配送状況を確認" }),
-    cancelled: t(locale, { uk: "Це замовлення скасовано. Якщо це помилка — відповідайте на лист із підтвердженням.", en: "This order was cancelled. If that looks wrong, reply to your confirmation email.", ja: "このご注文はキャンセルされました。お心当たりがない場合は、確認メールにご返信ください。" }),
-    help: t(locale, { uk: "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо.", en: "Questions about this order? Reply to your confirmation email — it comes from an address we read.", ja: "このご注文についてのご質問は、確認メールにご返信ください。こちらで確認しております。" }),
+    back: t(locale, { uk: "Усі замовлення", en: "All orders", ja: "すべてのご注文", ar: "كل الطلبات" }),
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文", ar: "الطلب" }),
+    placed: t(locale, { uk: "Оформлено", en: "Placed", ja: "注文日", ar: "تاريخ الطلب" }),
+    status: t(locale, { uk: "Статус", en: "Status", ja: "状況", ar: "الحالة" }),
+    items: t(locale, { uk: "Позиції", en: "Items", ja: "商品", ar: "الأصناف" }),
+    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量", ar: "الكمية" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" }),
+    delivery: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送", ar: "الشحن" }),
+    tracking: t(locale, { uk: "Номер накладної", en: "Tracking number", ja: "追跡番号", ar: "رقم التتبع" }),
+    track: t(locale, { uk: "Відстежити посилку", en: "Track shipment", ja: "配送状況を確認", ar: "تتبّع الشحنة" }),
+    cancelled: t(locale, { uk: "Це замовлення скасовано. Якщо це помилка — відповідайте на лист із підтвердженням.", en: "This order was cancelled. If that looks wrong, reply to your confirmation email.", ja: "このご注文はキャンセルされました。お心当たりがない場合は、確認メールにご返信ください。", ar: "أُلغي هذا الطلب. إن بدا ذلك غير صحيح، فردّ على رسالة التأكيد." }),
+    help: t(locale, { uk: "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо.", en: "Questions about this order? Reply to your confirmation email — it comes from an address we read.", ja: "このご注文についてのご質問は、確認メールにご返信ください。こちらで確認しております。", ar: "أسئلة عن هذا الطلب؟ ردّ على رسالة التأكيد — فهي من عنوان نقرأه." }),
     /* Kept in step with describeAddons in lib/cart-display — this page reads
        stored order rows, not cart lines, so it names the add-ons itself. */
-    addons: { lid: t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き" }), rubber: t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き" }) },
+    addons: { lid: t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き", ar: "مع الغطاء" }), rubber: t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }) },
   };
 
   const money = (eur: number | null, uah: number | null) =>

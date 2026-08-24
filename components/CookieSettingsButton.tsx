@@ -26,7 +26,7 @@ export default function CookieSettingsButton({
       className={`inline-flex items-center justify-center min-h-11 ${className ?? ""}`}
       style={style}
     >
-      {t(locale, { uk: "Налаштування cookie", en: "Cookie settings", ja: "Cookie 設定" })}
+      {t(locale, { uk: "Налаштування cookie", en: "Cookie settings", ja: "Cookie 設定", ar: "إعدادات ملفات تعريف الارتباط" })}
     </button>
   );
 }

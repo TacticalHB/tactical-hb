@@ -36,21 +36,22 @@ export type OptionSpec = {
   en: string;
   uk: string;
   ja?: string;
+  ar?: string;
   glyph: "disc" | "ring" | "clock";
   price: Money;
 };
 
 export const HMD_OPTIONS: OptionSpec[] = [
-  { key: "lid", en: "With Lid", uk: "З кришкою", ja: "リッド付き", glyph: "disc", price: MATERIAL_PRICE.lid },
+  { key: "lid", en: "With Lid", uk: "З кришкою", ja: "リッド付き", ar: "مع الغطاء", glyph: "disc", price: MATERIAL_PRICE.lid },
   /* The KEY stays `rubber` — it is written into cart lines, order rows
      (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
      would orphan every order already placed. Only the two labels are the
      product's name. */
-  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", glyph: "ring", price: MATERIAL_PRICE.rubber },
+  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber },
 ];
 
 export const WINDCOVER_OPTIONS: OptionSpec[] = [
-  { key: "timer", en: "With Timer", uk: "З таймером", ja: "タイマー付き", glyph: "clock", price: TIMER_PRICE },
+  { key: "timer", en: "With Timer", uk: "З таймером", ja: "タイマー付き", ar: "مع المؤقّت", glyph: "clock", price: TIMER_PRICE },
 ];
 
 function Glyph({ kind, size = 14 }: { kind: "disc" | "ring" | "clock"; size?: number }) {
@@ -94,10 +95,10 @@ export function ConfigSelector({
 }) {
   const isPdp = variant === "pdp";
   const [hoverKey, setHoverKey] = useState<string | null>(null);
-  const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成" });
+  const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成", ar: "التكوين" });
   const OPTIONS = options;
   const names = OPTIONS.filter((o) => value[o.key]).map((o) => t(locale, o));
-  const summary = names.length ? names.join(" + ") : t(locale, { uk: "Базова", en: "Base", ja: "ベース" });
+  const summary = names.length ? names.join(" + ") : t(locale, { uk: "Базова", en: "Base", ja: "ベース", ar: "أساسي" });
 
   /* ---- PDP: Rimowa-style option list ----
      Rimowa's is a single-select dropdown; ours must allow none/one/both, so the

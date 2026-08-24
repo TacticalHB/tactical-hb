@@ -245,6 +245,7 @@
     "privacy_link": "Privacy Policy"
   },
   "delivery": {
+    "eyebrow": "DELIVERY",
     "title": "Payment & Delivery",
     "intro": "One order, one total. Everything you need to know about paying for and receiving your Tactical HB order.",
     "payment_tag": "Payment",

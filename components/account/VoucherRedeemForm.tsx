@@ -18,14 +18,14 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
   const [result, setResult] = useState<MarkVoucherResult | null>(null);
 
   const L = {
-    code: t(locale, { uk: "Код ваучера", en: "Voucher code", ja: "バウチャーコード" }),
-    order: t(locale, { uk: "Номер замовлення (необовʼязково)", en: "Order reference (optional)", ja: "注文番号（任意）" }),
-    submit: t(locale, { uk: "Погасити", en: "Redeem", ja: "利用する" }),
-    working: t(locale, { uk: "Обробка…", en: "Redeeming…", ja: "処理しています…" }),
-    redeemed: t(locale, { uk: "Ваучер погашено", en: "Voucher redeemed", ja: "バウチャーを利用しました" }),
-    already: t(locale, { uk: "Цей ваучер вже було погашено раніше", en: "This voucher had already been redeemed", ja: "このバウチャーはすでに使用されています" }),
-    unknown: t(locale, { uk: "Погашено, але не вдалося перевірити, чи це повтор", en: "Redeemed, but couldn't tell whether it was a repeat", ja: "利用しましたが、重複かどうかは確認できませんでした" }),
-    hint: t(locale, { uk: "Введіть код точно як на сторінці бонусів, напр. TCT-F47A5C95.", en: "Enter the code exactly as it appears on the loyalty page, e.g. TCT-F47A5C95.", ja: "ロイヤルティページに表示されているとおりにコードをご入力ください（例：TCT-F47A5C95）。" }),
+    code: t(locale, { uk: "Код ваучера", en: "Voucher code", ja: "バウチャーコード", ar: "رمز القسيمة" }),
+    order: t(locale, { uk: "Номер замовлення (необовʼязково)", en: "Order reference (optional)", ja: "注文番号（任意）", ar: "رقم الطلب (اختياري)" }),
+    submit: t(locale, { uk: "Погасити", en: "Redeem", ja: "利用する", ar: "استبدال" }),
+    working: t(locale, { uk: "Обробка…", en: "Redeeming…", ja: "処理しています…", ar: "جارٍ الاستبدال…" }),
+    redeemed: t(locale, { uk: "Ваучер погашено", en: "Voucher redeemed", ja: "バウチャーを利用しました", ar: "تم استبدال القسيمة" }),
+    already: t(locale, { uk: "Цей ваучер вже було погашено раніше", en: "This voucher had already been redeemed", ja: "このバウチャーはすでに使用されています", ar: "كانت هذه القسيمة مستبدَلة من قبل" }),
+    unknown: t(locale, { uk: "Погашено, але не вдалося перевірити, чи це повтор", en: "Redeemed, but couldn't tell whether it was a repeat", ja: "利用しましたが、重複かどうかは確認できませんでした", ar: "تم الاستبدال، لكن تعذّر تحديد ما إذا كان مكرّرًا" }),
+    hint: t(locale, { uk: "Введіть код точно як на сторінці бонусів, напр. TCT-F47A5C95.", en: "Enter the code exactly as it appears on the loyalty page, e.g. TCT-F47A5C95.", ja: "ロイヤルティページに表示されているとおりにコードをご入力ください（例：TCT-F47A5C95）。", ar: "أدخل الرمز كما يظهر تمامًا في صفحة الولاء، مثل TCT-F47A5C95." }),
   };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -36,7 +36,7 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
       setResult(await markVoucherUsed(code, orderId.trim() || undefined));
     } catch (err) {
       console.error("[redeem] action failed:", err);
-      setResult({ ok: false, error: t(locale, { uk: "Не вдалося виконати запит.", en: "The request failed.", ja: "リクエストに失敗しました。" }) });
+      setResult({ ok: false, error: t(locale, { uk: "Не вдалося виконати запит.", en: "The request failed.", ja: "リクエストに失敗しました。", ar: "فشل الطلب." }) });
     } finally {
       setBusy(false);
     }
@@ -106,7 +106,7 @@ export default function VoucherRedeemForm({ locale }: { locale: string }) {
               <div className="mt-1 font-mono text-xs">{result.voucher.code}</div>
               {result.voucher.used_at && (
                 <div className="mt-0.5 text-xs" style={{ opacity: 0.8 }}>
-                  {new Date(result.voucher.used_at).toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }))}
+                  {new Date(result.voucher.used_at).toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }))}
                   {result.voucher.used_order_id ? ` · ${result.voucher.used_order_id}` : ""}
                 </div>
               )}

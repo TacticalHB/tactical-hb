@@ -33,6 +33,8 @@ export async function generateMetadata({
     ? product.pdp?.shortUk || product.descriptionUk
     : locale === "ja"
       ? product.pdp?.shortJa || product.descriptionJa || product.pdp?.shortEn || product.descriptionEn
+      : locale === "ar"
+        ? product.pdp?.shortAr || product.descriptionAr || product.pdp?.shortEn || product.descriptionEn
       : product.pdp?.shortEn || product.descriptionEn;
 
   return pageMetadata({
@@ -67,6 +69,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       ? product.pdp?.shortUk || product.descriptionUk
       : locale === "ja"
         ? product.pdp?.shortJa || product.descriptionJa || product.pdp?.shortEn || product.descriptionEn
+      : locale === "ar"
+        ? product.pdp?.shortAr || product.descriptionAr || product.pdp?.shortEn || product.descriptionEn
         : product.pdp?.shortEn || product.descriptionEn,
     image: [`${SITE_URL}${product.gridImage || product.image}`],
     sku: product.id,

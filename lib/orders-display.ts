@@ -213,19 +213,19 @@ export function orderTotal(o: AdminOrder): { text: string; sub: string | null } 
 }
 
 export function deliveryLabel(kind: DeliveryKind, locale: string): string {
-  if (kind === "warehouse") return t(locale, { uk: "Відділення", en: "Warehouse", ja: "営業所" });
-  if (kind === "courier") return t(locale, { uk: "Курʼєр", en: "Courier", ja: "宅配" });
-  if (kind === "international") return t(locale, { uk: "Міжнародна", en: "International", ja: "海外" });
+  if (kind === "warehouse") return t(locale, { uk: "Відділення", en: "Warehouse", ja: "営業所", ar: "فرع" });
+  if (kind === "courier") return t(locale, { uk: "Курʼєр", en: "Courier", ja: "宅配", ar: "توصيل" });
+  if (kind === "international") return t(locale, { uk: "Міжнародна", en: "International", ja: "海外", ar: "دولي" });
   return "—";
 }
 
 export function statusLabel(status: string, locale: string): string {
   const map: Record<string, Text> = {
-    paid: { uk: "Оплачено", en: "Paid", ja: "支払い済み" },
-    processing: { uk: "В обробці", en: "Processing", ja: "準備中" },
-    shipped: { uk: "Відправлено", en: "Shipped", ja: "発送済み" },
-    delivered: { uk: "Доставлено", en: "Delivered", ja: "配達済み" },
-    cancelled: { uk: "Скасовано", en: "Cancelled", ja: "キャンセル済み" },
+    paid: { uk: "Оплачено", en: "Paid", ja: "支払い済み", ar: "مدفوع" },
+    processing: { uk: "В обробці", en: "Processing", ja: "準備中", ar: "قيد التجهيز" },
+    shipped: { uk: "Відправлено", en: "Shipped", ja: "発送済み", ar: "تم الشحن" },
+    delivered: { uk: "Доставлено", en: "Delivered", ja: "配達済み", ar: "تم التسليم" },
+    cancelled: { uk: "Скасовано", en: "Cancelled", ja: "キャンセル済み", ar: "مُلغى" },
   };
   const hit = map[status];
   return hit ? t(locale, hit) : status;
@@ -234,7 +234,7 @@ export function statusLabel(status: string, locale: string): string {
 export function formatWhen(iso: string, locale: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), {
+  return d.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP", ar: "ar-u-nu-latn" }), {
     day: "2-digit",
     month: "short",
     year: "numeric",

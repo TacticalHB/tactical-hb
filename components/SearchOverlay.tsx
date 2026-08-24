@@ -8,6 +8,7 @@ import { products } from "@/lib/products";
 import { searchAddons } from "@/lib/addons";
 import Price from "./Price";
 import { money } from "@/lib/currency";
+import { t } from "@/lib/i18n-text";
 
 export default function SearchOverlay({
   open,
@@ -89,7 +90,7 @@ export default function SearchOverlay({
               ref={inputRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder={locale === "uk" ? "Пошук продуктів…" : "Search products…"}
+              placeholder={t(locale, { uk: "Пошук продуктів…", en: "Search products…", ja: "製品を検索…", ar: "ابحث في المنتجات…" })}
               className="flex-1 bg-transparent outline-none text-lg"
               style={{ color: "var(--text)" }}
             />
@@ -104,7 +105,7 @@ export default function SearchOverlay({
             <div className="py-3">
               {results.length === 0 && addonResults.length === 0 ? (
                 <p className="text-sm py-4" style={{ color: "var(--text-muted)" }}>
-                  {locale === "uk" ? "Нічого не знайдено" : "No results"}
+                  {t(locale, { uk: "Нічого не знайдено", en: "No results", ja: "該当なし", ar: "لا نتائج" })}
                 </p>
               ) : (
                 <ul className="flex flex-col">
@@ -119,7 +120,7 @@ export default function SearchOverlay({
                           style={{ background: "var(--bg-soft)", borderRadius: 6 }}
                         >
                           <span className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>
-                            {locale === "uk" ? "Опція" : "Add-on"}
+                            {t(locale, { uk: "Опція", en: "Add-on", ja: "オプション", ar: "إضافة" })}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">

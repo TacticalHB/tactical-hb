@@ -66,17 +66,17 @@ export default function AccountMenu({ locale }: { locale: string }) {
   }, [open]);
 
   const L = {
-    account: t(locale, { uk: "Акаунт", en: "Account", ja: "アカウント" }),
-    signIn: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン" }),
-    join: t(locale, { uk: "Приєднатися", en: "Join us", ja: "登録する" }),
-    hi: t(locale, { uk: "Вітаємо", en: "Hi", ja: "こんにちは" }),
-    profile: t(locale, { uk: "Профіль", en: "Profile", ja: "プロフィール" }),
-    orders: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }),
-    favourites: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }),
-    loyalty: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" }),
-    settings: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定" }),
-    signOut: t(locale, { uk: "Вийти", en: "Sign Out", ja: "ログアウト" }),
-    guestPrompt: t(locale, { uk: "Увійдіть, щоб бачити бонуси та обране", en: "Sign in for loyalty & favourites", ja: "ログインしてロイヤルティとお気に入りを利用" }),
+    account: t(locale, { uk: "Акаунт", en: "Account", ja: "アカウント", ar: "الحساب" }),
+    signIn: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン", ar: "تسجيل الدخول" }),
+    join: t(locale, { uk: "Приєднатися", en: "Join us", ja: "登録する", ar: "انضم إلينا" }),
+    hi: t(locale, { uk: "Вітаємо", en: "Hi", ja: "こんにちは", ar: "مرحبًا" }),
+    profile: t(locale, { uk: "Профіль", en: "Profile", ja: "プロフィール", ar: "الملف الشخصي" }),
+    orders: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文", ar: "الطلبات" }),
+    favourites: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り", ar: "المفضّلة" }),
+    loyalty: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" }),
+    settings: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定", ar: "إعدادات الحساب" }),
+    signOut: t(locale, { uk: "Вийти", en: "Sign Out", ja: "ログアウト", ar: "تسجيل الخروج" }),
+    guestPrompt: t(locale, { uk: "Увійдіть, щоб бачити бонуси та обране", en: "Sign in for loyalty & favourites", ja: "ログインしてロイヤルティとお気に入りを利用", ar: "سجّل الدخول للولاء والمفضّلة" }),
   };
 
   const links = [
@@ -96,13 +96,13 @@ export default function AccountMenu({ locale }: { locale: string }) {
            the customer's first name beside the mark. The negative inline
            margin keeps the icon where it sat in the row. */
         className="nav-link flex items-center justify-center gap-2 h-11 min-w-11 -mx-1.5 shrink-0"
-        aria-label={isAdmin ? (t(locale, { uk: "Командний центр", en: "Command centre", ja: "コマンドセンター" })) : L.account}
+        aria-label={isAdmin ? (t(locale, { uk: "Командний центр", en: "Command centre", ja: "コマンドセンター", ar: "مركز التحكم" })) : L.account}
         aria-expanded={isAdmin ? undefined : open}
       >
         <PersonIcon />
         {!loading && user && (
           <span className="hidden lg:inline text-xs tracking-[0.15em] uppercase max-w-[90px] truncate">
-            {profile?.first_name || (t(locale, { uk: "Акаунт", en: "Account", ja: "アカウント" }))}
+            {profile?.first_name || (t(locale, { uk: "Акаунт", en: "Account", ja: "アカウント", ar: "الحساب" }))}
           </span>
         )}
       </button>

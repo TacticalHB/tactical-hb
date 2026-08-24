@@ -66,12 +66,12 @@ export async function POST(request: NextRequest) {
 
   const delivery = (b.delivery ?? {}) as Record<string, unknown>;
   const email = String(delivery.email ?? "").trim();
-  /* THE LOCALE SURVIVES INTACT, all three of them. It used to be flattened to
+  /* THE LOCALE SURVIVES INTACT, all four of them. It used to be flattened to
      "uk" or "en", which was harmless while those were the only two and would
-     now silently turn every Japanese order into an English one — wrong emails,
-     wrong storefront rules downstream. Currency and destination are derived
-     from it (lib/currency, lib/shipping-locale) and both already treat ja the
-     same as en: euro, and shipped outside Ukraine. */
+     now silently turn every Japanese or Arabic order into an English one —
+     wrong emails, wrong storefront rules downstream. Currency and destination
+     are derived from it (lib/currency, lib/shipping-locale) and both already
+     treat ja and ar the same as en: euro, and shipped outside Ukraine. */
   const rawLocale = String(b.locale ?? "");
   const locale = isAppLocale(rawLocale) ? rawLocale : "uk";
 

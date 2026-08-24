@@ -46,42 +46,45 @@ export default function OrderSummaryPanel({
 
   const L = {
     ...pick(locale, {
-      title: { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容" },
-      items: { uk: "товарів", en: "items", ja: "点" },
-      subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計" },
-      discount: { uk: "Ваучер", en: "Voucher", ja: "バウチャー" },
-      shipping: { uk: "Доставка", en: "Shipping", ja: "配送" },
-      shippingNote: { uk: "Розраховується згодом", en: "Calculated later", ja: "後ほど計算します" },
-      shippingAfter: { uk: "Підтвердимо листом", en: "Confirmed by email", ja: "メールでご確認します" },
-      total: { uk: "Разом", en: "Total", ja: "合計" },
-      totalNote: { uk: "Без вартості доставки", en: "Excludes delivery", ja: "配送料は含みません" },
+      title: { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容", ar: "ملخّص الطلب" },
+      items: { uk: "товарів", en: "items", ja: "点", ar: "منتجات" },
+      subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計", ar: "المجموع الفرعي" },
+      discount: { uk: "Ваучер", en: "Voucher", ja: "バウチャー", ar: "قسيمة" },
+      shipping: { uk: "Доставка", en: "Shipping", ja: "配送", ar: "الشحن" },
+      shippingNote: { uk: "Розраховується згодом", en: "Calculated later", ja: "後ほど計算します", ar: "يُحتسب لاحقًا" },
+      shippingAfter: { uk: "Підтвердимо листом", en: "Confirmed by email", ja: "メールでご確認します", ar: "نؤكّده بالبريد الإلكتروني" },
+      total: { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" },
+      totalNote: { uk: "Без вартості доставки", en: "Excludes delivery", ja: "配送料は含みません", ar: "لا يشمل الشحن" },
       // The FOP-2 brief's checkout microcopy, verbatim (§4). Shown once shipping
       // is actually inside the figure above it — never sooner.
       totalIncludes: {
         uk: "До суми замовлення включено доставку до обраного напрямку.",
         en: "Order total includes shipping to your destination.",
         ja: "ご注文の合計金額には、お届け先までの配送料が含まれています。",
+        ar: "إجمالي الطلب يشمل الشحن إلى وجهتك.",
       },
       // International: nothing is charged at this step; one total follows by email.
       totalIntl: {
         uk: "Точну суму замовлення з доставкою підтвердимо листом — оплата одним платежем.",
         en: "We'll confirm your order total including delivery by email — one single payment.",
         ja: "配送料を含むご注文の合計金額はメールでご確認いただきます — お支払いは一度きりです。",
+        ar: "سنؤكّد إجمالي طلبك شاملًا الشحن عبر البريد الإلكتروني — دفعة واحدة.",
       },
-      qty: { uk: "К-сть", en: "Qty", ja: "数量" },
+      qty: { uk: "К-сть", en: "Qty", ja: "数量", ar: "الكمية" },
     }),
     /* Interpolated, so it cannot live in the record above. */
     rankDiscount: t(locale, {
       uk: `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
       en: `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
       ja: `ランク特典 · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+      ar: `خصم الرتبة · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
     }),
   };
 
   return (
     <aside className="p-7" style={{ background: "var(--bg-soft)" }}>
       <h2 className="text-[17px] font-medium mb-1" style={{ color: "var(--text)" }}>{L.title}</h2>
-      <p className="text-[12px] mb-6" style={{ color: "var(--text-faint)" }}>{count} {L.items}</p>
+      <p className="text-[12px] mb-6" style={{ color: "var(--text-faint)" }}>{itemCount(locale, count, L.items)}</p>
 
       <ul className="flex flex-col gap-5 mb-6">
         {lines.map((l) => {
@@ -158,4 +161,21 @@ export default function OrderSummaryPanel({
       </p>
     </aside>
   );
+}
+
+/* ---------------------------------------------------------------------------
+   "3 items" — one of the few places where a count and a noun cannot be two
+   separate strings.
+
+   English, Ukrainian and Japanese all take `{n} {word}` with a single word.
+   Arabic does not: the counted noun changes form at 1, at 2, at 3–10 and again
+   at 11+, and at 1 and 2 the numeral is not written at all. Rendering
+   "1 منتجات" would be the same order of wrongness as "1 items".
+--------------------------------------------------------------------------- */
+function itemCount(locale: string, n: number, word: string): string {
+  if (locale !== "ar") return `${n} ${word}`;
+  if (n === 1) return "منتج واحد";
+  if (n === 2) return "منتجان";
+  if (n <= 10) return `${n} منتجات`;
+  return `${n} منتجًا`;
 }

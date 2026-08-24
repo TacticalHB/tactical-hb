@@ -14,6 +14,11 @@ import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
 import { Resend } from "resend";
+import {
+  countryAllowedOn,
+  methodAllowedOn,
+  LOCALE_SHIPPING_MISMATCH,
+} from "@/lib/shipping-locale";
 
 /* ---------------------------------------------------------------------------
    Create a Monobank invoice and hand back the page to pay on.
@@ -172,6 +177,27 @@ export async function POST(request: NextRequest) {
   const shippingMethod = String(shipReq.method ?? "international") === "nova_poshta"
     ? "nova_poshta"
     : "international";
+
+  /* ---- THE STOREFRONT DECIDES WHERE THIS CAN GO -------------------------
+
+     /uk ships inside Ukraine, /en ships outside it, and this is where that
+     stops being a matter of what the checkout chose to render. The method and
+     the destination country are both attacker-controlled — they arrive in the
+     request body — so both are checked against the locale before a single
+     hryvnia of postage is quoted and long before an invoice exists.
+
+     Refused rather than corrected. Silently rewriting a mismatched order into
+     the "right" one would take a customer who asked to ship to Berlin and post
+     it to a Kharkiv branch, or the reverse; either is a parcel going somewhere
+     nobody asked for. The checkout knows this code and answers it with the
+     message that names the other storefront. */
+  const intlCountryReq = String(shipReq.countryCode ?? "").trim().toUpperCase().slice(0, 2);
+  if (!methodAllowedOn(locale, shippingMethod) || !countryAllowedOn(locale, intlCountryReq)) {
+    console.warn(
+      `[invoice] refused: locale ${locale} cannot ship method=${shippingMethod} country=${intlCountryReq || "-"}`
+    );
+    return NextResponse.json({ ok: false, error: LOCALE_SHIPPING_MISMATCH }, { status: 400 });
+  }
 
   let shippingUah = 0;
   let npDeliveryType: "warehouse" | "courier" | null = null;

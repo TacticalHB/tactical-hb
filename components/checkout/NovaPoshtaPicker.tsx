@@ -209,6 +209,10 @@ export default function NovaPoshtaPicker({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          /* The route will not quote a Ukrainian branch for the English
+             storefront, so it has to know which one is asking. Required, not
+             optional -- see the note in the route. */
+          locale,
           cityRef,
           deliveryType: type,
           postomat,

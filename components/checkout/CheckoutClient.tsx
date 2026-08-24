@@ -10,6 +10,13 @@ import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
 import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/lib/countries";
+import {
+  countryAllowedOn,
+  destinationForLocale,
+  wrongStorefrontMessage,
+  otherStorefrontPath,
+  LOCALE_SHIPPING_MISMATCH,
+} from "@/lib/shipping-locale";
 import { saveOrder, type DeliveryDetails, type OrderLine } from "@/lib/checkout";
 import { describeLine } from "@/lib/cart-display";
 import { priceCart } from "@/lib/pricing";
@@ -39,7 +46,6 @@ import AccountCreatingScreen from "./AccountCreatingScreen";
 --------------------------------------------------------------------------- */
 
 type Identity = "guest" | "account";
-type Destination = "ukraine" | "international";
 
 export default function CheckoutClient({
   locale,
@@ -71,13 +77,25 @@ export default function CheckoutClient({
   const [placing, setPlacing] = useState(false);
   const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
 
-  // Ukrainian visitors default to branch delivery; everyone else to an address.
-  const [destination, setDestination] = useState<Destination>(uk ? "ukraine" : "international");
+  /* WHERE THIS STOREFRONT SHIPS — derived, never chosen. /uk delivers inside
+     Ukraine, /en outside it, and the customer has no control to change that
+     because there is nothing to decide: each shop has one delivery model. The
+     destination radio group that used to sit here is gone with it. See
+     lib/shipping-locale, which the server reads from too. */
+  const destination = destinationForLocale(locale);
   const [np, setNp] = useState<NovaPoshtaSelection | null>(null);
   // The chosen country code, "OTHER", or "" (nothing picked yet). Address
   // fields stay hidden until this is set. form.country holds the resolved name.
   const [countryCode, setCountryCode] = useState("");
-  const countries = useMemo(() => countryOptions(locale), [locale]);
+  /* UKRAINE IS NOT AN INTERNATIONAL DESTINATION. On /en it is removed from the
+     list outright rather than left in to be rejected later — an option that
+     cannot be used is worse than no option, because the customer only finds
+     out after filling in an address. On /uk the list is unused; the branch
+     picker takes its place. */
+  const countries = useMemo(
+    () => countryOptions(locale).filter((c) => countryAllowedOn(locale, c.code)),
+    [locale]
+  );
 
   /* What the carriers will charge to carry this basket to the chosen country.
      `offers` is empty + unsupported=false means "not asked yet or still
@@ -160,6 +178,9 @@ export default function CheckoutClient({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            /* The server refuses a country this storefront may not ship to,
+               so it has to be told which storefront is asking. */
+            locale,
             countryCode,
             city: form.city,
             lines: lines.map((l) => ({ slug: l.slug, qty: l.qty, options: l.options })),
@@ -254,6 +275,7 @@ export default function CheckoutClient({
     contact: uk ? "Контактні дані" : "Contact details",
     address: uk ? "Адреса доставки" : "Shipping address",
     method: uk ? "Спосіб доставки" : "Delivery method",
+    otherStorefront: uk ? "Відкрити англійську версію" : "Go to the Ukrainian site",
     destUkraine: uk ? "Україна — Нова Пошта" : "Ukraine — Nova Poshta",
     destUkraineNote: uk
       ? "Доставка у відділення. Вартість розраховується одразу."
@@ -448,7 +470,16 @@ export default function CheckoutClient({
 
       if (!res.ok || !data.ok || (!data.pageUrl && !data.requested)) {
         setPlacing(false);
-        setError(data.error === "not_configured" ? L.payUnavailable : L.payFailed);
+        /* A storefront mismatch gets its own words. It is the one failure here
+           the customer can actually do something about, and "payment failed"
+           would send them to look for a problem with their card. */
+        setError(
+          data.error === LOCALE_SHIPPING_MISMATCH
+            ? wrongStorefrontMessage(locale)
+            : data.error === "not_configured"
+              ? L.payUnavailable
+              : L.payFailed
+        );
         console.error("[pay] invoice creation failed:", res.status, data.error);
         return;
       }
@@ -674,39 +705,39 @@ export default function CheckoutClient({
                 </div>
               </div>
 
-              {/* Destination decides which form follows: a Nova Poshta branch
-                  within Ukraine, or a full address anywhere else. */}
-              <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.method}</h2>
-              <div className="flex flex-col gap-3 mb-8" role="radiogroup" aria-label={L.method}>
-                {([
-                  { id: "ukraine" as const, title: L.destUkraine, note: L.destUkraineNote },
-                  { id: "international" as const, title: L.destIntl, note: L.destIntlNote },
-                ]).map((o) => {
-                  const active = destination === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={active}
-                      onClick={() => { setDestination(o.id); setError(null); }}
-                      className="w-full flex items-start gap-3.5 p-5 text-left transition-colors"
-                      style={{
-                        border: active ? "1px solid var(--ink)" : "1px solid var(--border-strong)",
-                        background: "var(--field-bg)",
-                      }}
-                    >
-                      <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                        style={{ border: `1px solid ${active ? "var(--ink)" : "var(--border-strong)"}` }}>
-                        {active && <span className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />}
-                      </span>
-                      <span>
-                        <span className="block text-[15px]" style={{ color: "var(--text)", fontWeight: active ? 500 : 400 }}>{o.title}</span>
-                        <span className="block text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>{o.note}</span>
-                      </span>
-                    </button>
-                  );
-                })}
+              {/* WHERE THIS STOREFRONT DELIVERS — stated, not asked.
+
+                  This was a two-option radio group. It is a sentence now,
+                  because the locale already answered the question and a
+                  control with one valid answer only invites the customer to
+                  discover that the other one is refused. The line names the
+                  other storefront so somebody in the wrong shop has somewhere
+                  to go rather than a dead end. */}
+              <h2 className="text-[15px] font-medium mb-3" style={{ color: "var(--text)" }}>{L.method}</h2>
+              <div
+                className="mb-8 p-5"
+                style={{ border: "1px solid var(--border-strong)", background: "var(--field-bg)" }}
+              >
+                <p className="text-[15px]" style={{ color: "var(--text)" }}>
+                  {destination === "ukraine" ? L.destUkraine : L.destIntl}
+                </p>
+                <p className="text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>
+                  {destination === "ukraine" ? L.destUkraineNote : L.destIntlNote}
+                </p>
+                <p className="text-[13px] mt-3" style={{ color: "var(--text-muted)" }}>
+                  {wrongStorefrontMessage(locale)}
+                </p>
+                {/* On its own line and 44px tall. Inline in the sentence above
+                    it was a 16px tap target, which is the line height and not
+                    a target at all — the same mistake the mobile pass caught
+                    on the bag and the sort control. */}
+                <Link
+                  href={otherStorefrontPath(locale)}
+                  className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+                  style={{ color: "var(--text)" }}
+                >
+                  {L.otherStorefront}
+                </Link>
               </div>
 
               {destination === "ukraine" ? (

@@ -17,5 +17,21 @@ export default async function CheckoutPage({
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   const { rank } = user && supabase ? await rankForUser(supabase, user.id) : GUEST_RANK;
 
-  return <CheckoutClient locale={locale} rankDiscountRate={rank.discountRate} />;
+  /* KEYED ON THE LOCALE, which is how the shipping state is guaranteed to be
+     dropped when someone moves between /uk/checkout and /en/checkout.
+
+     The two storefronts ship to different places (see lib/shipping-locale), so
+     a Nova Poshta branch chosen on the Ukrainian side means nothing on the
+     English one and a German quote means nothing on the Ukrainian one. Both
+     have to go, along with the carrier and the country that produced them.
+
+     A key rather than an effect that clears each field. Changing it discards
+     the instance outright, so there is no list of state to keep in step with
+     the component — a field added later is covered without anyone remembering
+     to add it. App Router will usually remount here anyway; usually is not a
+     guarantee, and the failure it would produce is a quote from the wrong
+     country surviving into an invoice. */
+  return (
+    <CheckoutClient key={locale} locale={locale} rankDiscountRate={rank.discountRate} />
+  );
 }

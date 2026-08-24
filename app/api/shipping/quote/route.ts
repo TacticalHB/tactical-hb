@@ -8,6 +8,11 @@ import {
 import { priceCart } from "@/lib/pricing";
 import { parcelFor } from "@/lib/parcel";
 import type { ShippingCarrier } from "@/lib/shipping-carriers";
+import {
+  countryAllowedOn,
+  destinationForLocale,
+  LOCALE_SHIPPING_MISMATCH,
+} from "@/lib/shipping-locale";
 
 /* ---------------------------------------------------------------------------
    Delivery quote — a Nova Poshta branch at home, or a country abroad.
@@ -50,9 +55,36 @@ export async function POST(request: NextRequest) {
 
   const b = (body ?? {}) as Record<string, unknown>;
 
+  /* ---- WHICH STOREFRONT IS ASKING ----------------------------------------
+
+     The locale decides what may be quoted at all: /uk quotes inside Ukraine,
+     /en quotes outside it. Enforced here and not only in the checkout, because
+     a quote is the first place a mismatched destination could be priced — and
+     a price the server produced is a price the customer will expect to pay.
+
+     REQUIRED, NOT DEFAULTED. Either default is wrong in a way that is hard to
+     see: guessing "en" refuses every domestic branch quote and takes the
+     Ukrainian checkout down with it, while guessing "uk" refuses every
+     international one. A missing locale means a caller that has not been
+     updated — a programming error, and it should read as one rather than as a
+     shop that has quietly stopped delivering somewhere. Both callers send it;
+     the checkout and the Nova Poshta picker are the only two. */
+  const rawLocale = String(b.locale ?? "").trim();
+  if (rawLocale !== "uk" && rawLocale !== "en") {
+    return NextResponse.json({ ok: false, error: "locale_required" }, { status: 400 });
+  }
+  const locale = rawLocale;
+  const wants = destinationForLocale(locale);
+
   // ---- International: priced by country, no branch involved -----------------
   const countryCode = String(b.countryCode ?? "").trim().toUpperCase().slice(0, 2);
   if (countryCode) {
+    if (wants !== "international" || !countryAllowedOn(locale, countryCode)) {
+      return NextResponse.json(
+        { ok: false, error: LOCALE_SHIPPING_MISMATCH },
+        { status: 400 }
+      );
+    }
     const { lines, subtotal } = priceCart(b.lines);
     if (subtotal.uah <= 0) return NextResponse.json({ ok: false, error: "empty_cart" }, { status: 400 });
 
@@ -128,6 +160,12 @@ export async function POST(request: NextRequest) {
          silently reading undefined and charging nothing. */
       costUah: offers[0].costUah,
     });
+  }
+
+  /* Everything past this point is a Nova Poshta branch or courier inside
+     Ukraine, which only the Ukrainian storefront may ask for. */
+  if (wants !== "ukraine") {
+    return NextResponse.json({ ok: false, error: LOCALE_SHIPPING_MISMATCH }, { status: 400 });
   }
 
   const cityRef = String(b.cityRef ?? "").trim().slice(0, 80);

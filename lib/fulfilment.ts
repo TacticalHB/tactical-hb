@@ -8,6 +8,7 @@ import { createUkrposhtaShipmentForOrder } from "@/lib/order-ukrposhta";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
 import { cancelCartFlowOnPayment } from "@/lib/email/flows";
+import { methodAllowedOn } from "@/lib/shipping-locale";
 
 /* ---------------------------------------------------------------------------
    Turning a confirmed payment into an order.
@@ -210,6 +211,28 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
   if (!payment) {
     console.log("[fulfil] already fulfilled or not pending:", reference);
     return { ok: false, reason: "already_fulfilled" };
+  }
+
+  /* 0a. THE LAST LOOK AT THE LOCALE RULE — and it deliberately does not block.
+
+      /uk ships inside Ukraine and /en outside it, enforced at the quote and
+      again at create-invoice, which is the gate that matters: it runs BEFORE
+      an invoice exists, so a mismatched order is refused before anyone is
+      charged. By the time this function runs, money has moved.
+
+      Refusing to fulfil here would therefore not prevent a bad order, it would
+      strand a paid one — and it would strand real historical orders too, since
+      every order placed before this rule existed was free to pick either
+      destination on either storefront. So a mismatch is recorded loudly and
+      fulfilment continues. Someone has paid; they get their parcel.
+
+      If this ever fires on a NEW order it means something reached the invoice
+      route around the check, and the log line is the thread to pull. */
+  if (!methodAllowedOn(payment.locale, payment.shipping_method)) {
+    console.warn(
+      `[fulfil] shipping does not match storefront: ${payment.reference} ` +
+        `locale=${payment.locale} method=${payment.shipping_method ?? "unset"} — fulfilling anyway`
+    );
   }
 
   // 0. Disarm the abandoned-cart flow, FIRST and outside the try.

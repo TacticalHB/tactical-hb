@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import WholesaleForm from "@/components/WholesaleForm";
 import Reveal from "@/components/Reveal";
 import { SALES_EMAIL } from "@/lib/contact-info";
@@ -15,8 +16,13 @@ export async function generateMetadata({
   return metadataFor({ locale, path: "/wholesale", key: "wholesale" });
 }
 
-export default function WholesalePage() {
-  return <WholesaleContent />;
+export default async function WholesalePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  return <WholesaleContent locale={locale} />;
 }
 
 function Check() {
@@ -28,7 +34,7 @@ function Check() {
   );
 }
 
-function WholesaleContent() {
+function WholesaleContent({ locale }: { locale: string }) {
   const t = useTranslations("wholesale");
 
   const collaborators = [t("collab_1"), t("collab_2"), t("collab_3")];
@@ -86,6 +92,42 @@ function WholesaleContent() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Partner accounts — the way IN for people already approved, and the
+          way to apply for everyone else. Placed above the enquiry form on
+          purpose: a returning partner should not have to scroll past a
+          "tell us about your business" form to find the sign-in. */}
+      <section className="page-container py-16 md:py-20">
+        <Reveal>
+          <div
+            className="p-8 md:p-12 rounded-[6px]"
+            style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
+          >
+            <h2 className="font-display text-3xl md:text-4xl mb-4" style={{ color: "var(--text)" }}>
+              {t("account_title")}
+            </h2>
+            <p className="text-base leading-relaxed max-w-2xl mb-8" style={{ color: "var(--text-muted)" }}>
+              {t("account_body")}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href={`/${locale}/wholesale/portal`}
+                className="inline-flex h-12 px-8 rounded-full items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-85"
+                style={{ background: "var(--accent)", color: "#111114" }}
+              >
+                {t("account_signin")}
+              </Link>
+              <Link
+                href={`/${locale}/wholesale/register`}
+                className="inline-flex h-12 px-8 rounded-full items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-70"
+                style={{ border: "1px solid var(--border-strong)", color: "var(--text)" }}
+              >
+                {t("account_register")}
+              </Link>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* Closing + enquiry form */}

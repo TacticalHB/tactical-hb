@@ -46,7 +46,7 @@ export default function FollowUpCard({
   const p = candidate.partner;
   // Draft language starts on the partner's own locale (0017) — what the
   // founder most likely sends — but both are always a click away.
-  const [lang, setLang] = useState<"en" | "uk">(p.locale);
+  const [lang, setLang] = useState<"en" | "uk">(p.locale === "uk" ? "uk" : "en");
   const [copied, setCopied] = useState(false);
 
   const template = followUpDraft(candidate, lang === "uk");

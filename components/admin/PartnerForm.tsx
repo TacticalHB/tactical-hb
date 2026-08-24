@@ -1,5 +1,6 @@
 "use client";
 
+import { isAppLocale, locales, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createPartner } from "@/app/actions/partners";
@@ -22,7 +23,7 @@ export default function PartnerForm({ today, uk }: { today: string; uk: boolean 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
-  const [locale, setLocale] = useState<"en" | "uk">("en");
+  const [locale, setLocale] = useState<AppLocale>("en");
   const [status, setStatus] = useState<PartnerStatus>("lead");
   const [nextFollowUp, setNextFollowUp] = useState("");
   const [notes, setNotes] = useState("");
@@ -154,13 +155,16 @@ export default function PartnerForm({ today, uk }: { today: string; uk: boolean 
 
         <select
           value={locale}
-          onChange={(e) => setLocale(e.target.value === "uk" ? "uk" : "en")}
+          onChange={(e) => setLocale(isAppLocale(e.target.value) ? e.target.value : "en")}
           aria-label={L.lang}
           className={inputClass}
           style={inputStyle}
         >
-          <option value="en">EN</option>
-          <option value="uk">UK</option>
+          {locales.map((l) => (
+            <option key={l} value={l}>
+              {l.toUpperCase()}
+            </option>
+          ))}
         </select>
 
         <select

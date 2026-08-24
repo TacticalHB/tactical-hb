@@ -115,7 +115,11 @@
     "form_success": "Thank you! We'll be in touch shortly.",
     "form_error": "Something went wrong. Please try again, or email us at Sales.tactical-hb@outlook.com.",
     "sales_label": "Wholesale enquiries",
-    "sales_note": "Prefer email? Write to us directly and we'll reply within one business day."
+    "sales_note": "Prefer email? Write to us directly and we'll reply within one business day.",
+    "account_title": "Already a partner?",
+    "account_body": "Approved partners order through the trade portal — set your quantities, send the list, and we'll email you the payment details. Trade accounts are approved by hand after we've reviewed your application.",
+    "account_signin": "Partner sign in",
+    "account_register": "Register as a wholesale partner"
   },
   "about": {
     "title": "About Us",

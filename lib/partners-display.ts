@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/i18n/routing";
+import type { AccountStatus } from "@/lib/wholesale-display";
 /* ---------------------------------------------------------------------------
    How a wholesale partner reads. Pure and I/O-free, like every *-display
    module: no Supabase client, no server-only. lib/partners-admin.ts does the
@@ -54,8 +56,20 @@ export type Partner = {
   email: string | null;
   phone: string | null;
   country: string | null;
-  locale: "en" | "uk";
+  /* All four storefronts, not the two this register was born with.
+     A partner who applied from /ja must not have their row rewritten to "en"
+     the first time somebody edits their country — this column decides which
+     language their portal emails go out in. */
+  locale: AppLocale;
   status: PartnerStatus;
+  /* ---- Portal account (0030) --------------------------------------------
+     accountStatus is access control and is a DIFFERENT ladder from status
+     above, which is CRM pipeline. See lib/wholesale-display. */
+  accountStatus: AccountStatus;
+  /** Whether a login is attached at all. A CRM-only row has none. */
+  hasLogin: boolean;
+  /** Free text the applicant wrote. Never mixed into the admin's `notes`. */
+  applicationNote: string | null;
   nextFollowUp: string | null; // YYYY-MM-DD
   notes: string | null;
   createdAt: string;

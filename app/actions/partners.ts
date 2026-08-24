@@ -11,6 +11,7 @@ import {
   unlinkOrder as unlink,
 } from "@/lib/partners-admin";
 import { isPartnerStatus } from "@/lib/partners-display";
+import { isAppLocale } from "@/i18n/routing";
 
 /* ---------------------------------------------------------------------------
    Admin: the wholesale CRM's writes.
@@ -72,7 +73,7 @@ function parseFields(form: PartnerFields) {
       email,
       phone: form.phone?.trim() || null,
       country: form.country?.trim() || null,
-      locale: form.locale === "uk" ? ("uk" as const) : ("en" as const),
+      locale: isAppLocale(form.locale) ? form.locale : ("en" as const),
       status: form.status,
       nextFollowUp,
       notes: form.notes?.trim() || null,

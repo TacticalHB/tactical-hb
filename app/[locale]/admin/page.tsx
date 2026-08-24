@@ -3,6 +3,8 @@ import { fetchStock } from "@/lib/stock-admin";
 import { formatUah, stockLevel } from "@/lib/stock-display";
 import { fetchFinanceMonths } from "@/lib/finance-admin";
 import { fetchPartners } from "@/lib/partners-admin";
+import { fetchAllRequests } from "@/lib/wholesale-portal";
+import { isOpenRequest } from "@/lib/wholesale-display";
 import { followUpDue } from "@/lib/partners-display";
 import { currentPeriod } from "@/lib/costs-display";
 import { quietPartners } from "@/lib/followup-display";
@@ -49,7 +51,7 @@ export default async function AdminHomePage({
   const { email } = await requireAdminPage(locale, "/admin");
 
   const uk = locale === "uk";
-  const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead, marginRuns] =
+  const [items, months, partnersRead, briefRuns, adSpendRows, planRuns, projectsRead, marginRuns, wholesaleRequests] =
     await Promise.all([
       fetchStock(),
       fetchFinanceMonths(1),
@@ -59,6 +61,7 @@ export default async function AdminHomePage({
       fetchAgentRuns("marketing_strategist", 1),
       fetchProjects(),
       fetchAgentRuns("cost_margin_guard", 1),
+      fetchAllRequests(200),
     ]);
 
   const shortDate = (iso: string) =>
@@ -104,8 +107,20 @@ export default async function AdminHomePage({
           tone: (thisMonth.marginUah < 0 ? "alert" : "ok") as RoomTone,
         };
 
+  const pendingAccounts =
+    partnersRead === null
+      ? null
+      : partnersRead.partners.filter((p) => p.hasLogin && p.accountStatus === "pending").length;
+  const openRequests = (wholesaleRequests ?? []).filter((r) => isOpenRequest(r.status)).length;
+
+  /* A partner waiting to be let in, or a request nobody has answered, is
+     somebody blocked on us — that outranks a follow-up we chose to schedule. */
   const wholesaleStat =
-    dueFollowUps === null
+    pendingAccounts
+      ? { text: uk ? `${pendingAccounts} на схвалення` : `${pendingAccounts} to approve`, tone: "warn" as RoomTone }
+      : openRequests
+        ? { text: uk ? `${openRequests} запитів` : `${openRequests} requests`, tone: "warn" as RoomTone }
+        : dueFollowUps === null
       ? { text: "?", tone: "idle" as RoomTone }
       : dueFollowUps > 0
         ? { text: uk ? `${dueFollowUps} сьогодні` : `${dueFollowUps} due`, tone: "warn" as RoomTone }
@@ -176,6 +191,7 @@ export default async function AdminHomePage({
       stat: wholesaleStat,
       chips: [
         { label: uk ? "Партнери" : "Partners", href: p("/partners") },
+        { label: uk ? "Запити" : "Requests", href: p("/wholesale") },
         { label: uk ? "Листи" : "Follow-ups", href: p("/followups") },
       ],
     },

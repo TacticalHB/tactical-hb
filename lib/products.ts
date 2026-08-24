@@ -44,6 +44,20 @@ export type Product = {
   price: number;
   /** Hand-set UAH price (not a conversion of `price`) — see lib/currency.ts */
   priceUah: number;
+  /* ---- Dealer prices -----------------------------------------------------
+     Optional, and UNSET on every product until a real dealer list exists.
+
+     Absent does not mean "use the retail price". It means the wholesale
+     portal prints "quote on request" against that line and submits it as a
+     quantity ask with no total — which is a perfectly ordinary request, and
+     the only honest thing to show when the number has not been agreed.
+     Exposing retail as though it were trade would misprice the first order
+     somebody placed against it.
+
+     Hand-set in both currencies for the same reason priceUah is: the trade
+     terms in Ukraine are not a conversion of the euro ones. */
+  wholesalePriceEur?: number;
+  wholesalePriceUah?: number;
   currency: string;
   /** Packed weight in grams. For an HMD this is the weight WITHOUT the lid;
       the lid add-on adds LID_WEIGHT_G (see lib/hmd-options). Drives the real

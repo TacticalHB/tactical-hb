@@ -1,6 +1,8 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Partner, PartnerStatus } from "@/lib/partners-display";
+import { isAppLocale, type AppLocale } from "@/i18n/routing";
+import { isAccountStatus } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
    Reading and writing wholesale partners for /admin/partners.
@@ -61,7 +63,7 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
       admin
         .from("wholesale_partners")
         .select(
-          "id, company, contact_name, email, phone, country, locale, status, next_follow_up, notes, created_at"
+          "id, company, contact_name, email, phone, country, locale, status, next_follow_up, notes, created_at, user_id, account_status, application_note"
         ),
       admin
         .from("orders")
@@ -120,7 +122,10 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
         email: text(row.email),
         phone: text(row.phone),
         country: text(row.country),
-        locale: row.locale === "uk" ? ("uk" as const) : ("en" as const),
+        locale: isAppLocale(row.locale) ? row.locale : ("en" as const),
+        accountStatus: isAccountStatus(row.account_status) ? row.account_status : ("pending" as const),
+        hasLogin: Boolean(row.user_id),
+        applicationNote: text(row.application_note),
         status: String(row.status) as PartnerStatus,
         nextFollowUp: text(row.next_follow_up),
         notes: text(row.notes),
@@ -148,7 +153,7 @@ export async function insertPartner(input: {
   email: string | null;
   phone: string | null;
   country: string | null;
-  locale: "en" | "uk";
+  locale: AppLocale;
   status: PartnerStatus;
   nextFollowUp: string | null;
   notes: string | null;
@@ -188,7 +193,7 @@ export async function updatePartnerRecord(
     email: string | null;
     phone: string | null;
     country: string | null;
-    locale: "en" | "uk";
+    locale: AppLocale;
     status: PartnerStatus;
     nextFollowUp: string | null;
     notes: string | null;

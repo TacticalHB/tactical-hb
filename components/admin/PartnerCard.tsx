@@ -1,7 +1,9 @@
 "use client";
 
+import { isAppLocale, locales, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { setPartnerAccountStatus } from "@/app/actions/wholesale-admin";
 import {
   deletePartner,
   linkMatchingOrders,
@@ -17,6 +19,7 @@ import {
   type Partner,
   type PartnerStatus,
 } from "@/lib/partners-display";
+import { ADMIN_ACCOUNT_STATUS, type AccountStatus } from "@/lib/wholesale-display";
 import { formatUah } from "@/lib/stock-display";
 import type { PartnerOrder } from "@/lib/partners-admin";
 
@@ -51,7 +54,7 @@ export default function PartnerCard({
   const [email, setEmail] = useState(p.email ?? "");
   const [phone, setPhone] = useState(p.phone ?? "");
   const [country, setCountry] = useState(p.country ?? "");
-  const [locale, setLocale] = useState<"en" | "uk">(p.locale);
+  const [locale, setLocale] = useState<AppLocale>(p.locale);
   const [status, setStatus] = useState<PartnerStatus>(p.status);
   const [nextFollowUp, setNextFollowUp] = useState(p.nextFollowUp ?? "");
   const [notes, setNotes] = useState(p.notes ?? "");
@@ -83,6 +86,13 @@ export default function PartnerCard({
     linkRef: uk ? "Прив'язати" : "Link",
     refPlaceholder: uk ? "TCT-… або id замовлення" : "TCT-… or order id",
     linkedOrders: uk ? "Прив'язані замовлення" : "Linked orders",
+    account: uk ? "Доступ до порталу" : "Portal access",
+    noLogin: uk ? "Без логіна" : "No login",
+    approve: uk ? "Схвалити" : "Approve",
+    reject: uk ? "Відхилити" : "Reject",
+    suspend: uk ? "Призупинити" : "Suspend",
+    restore: uk ? "Відновити" : "Restore",
+    application: uk ? "Заявка партнера" : "Partner's application",
     noOrders: uk ? "Ще немає прив'язаних замовлень." : "No linked orders yet.",
     unlink: uk ? "Відв'язати" : "Unlink",
     remove: uk ? "Видалити партнера" : "Delete partner",
@@ -165,6 +175,20 @@ export default function PartnerCard({
     else report(res.error);
   }
 
+  /* Approve / reject / suspend. Separated from Save on purpose: everything
+     else on this card is an annotation, and this one decides whether a company
+     can see dealer prices at all. It should never ride along with a typo fix
+     in the phone number. */
+  async function onAccount(next: AccountStatus) {
+    setBusy("account");
+    setError(null);
+    setInfo(null);
+    const res = await setPartnerAccountStatus(p.id, next);
+    setBusy(null);
+    if (res.ok) router.refresh();
+    else report(res.error);
+  }
+
   async function onUnlink(orderId: string) {
     setBusy(orderId);
     setError(null);
@@ -196,6 +220,29 @@ export default function PartnerCard({
         >
           {statusLabel(p.status, uk)}
         </span>
+        {/* Portal access sits beside the pipeline status, visibly a
+            different thing — see 0030 on why the two never merged. */}
+        {p.hasLogin && (
+          <span
+            className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
+            style={{
+              background:
+                p.accountStatus === "approved"
+                  ? "color-mix(in srgb, var(--console-ok) 18%, transparent)"
+                  : p.accountStatus === "pending"
+                    ? "color-mix(in srgb, var(--console-alert) 18%, transparent)"
+                    : "var(--console-panel-2)",
+              color:
+                p.accountStatus === "approved"
+                  ? "var(--console-ok)"
+                  : p.accountStatus === "pending"
+                    ? "var(--console-alert)"
+                    : "var(--console-faint)",
+            }}
+          >
+            {ADMIN_ACCOUNT_STATUS[p.accountStatus][uk ? "uk" : "en"]}
+          </span>
+        )}
         {p.country && <span style={{ color: "var(--console-muted)" }}>{p.country}</span>}
         {p.email && (
           <span className="font-mono text-[12px]" style={{ color: "var(--console-muted)" }}>
@@ -234,6 +281,69 @@ export default function PartnerCard({
       {/* Editing surface ------------------------------------------------- */}
       {open && (
         <div className="px-5 pb-4">
+          {/* Portal access, first and on its own line, because it is the one
+              control here that changes what a stranger can see. */}
+          <div
+            className="mb-4 p-3 rounded"
+            style={{ background: "var(--console-panel-2)", border: "1px solid var(--console-border)" }}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[12px] font-medium" style={{ color: "var(--console-muted)" }}>
+                {L.account}:
+              </span>
+              <span className="text-[12.5px]" style={{ color: "var(--console-text)" }}>
+                {p.hasLogin ? ADMIN_ACCOUNT_STATUS[p.accountStatus][uk ? "uk" : "en"] : L.noLogin}
+              </span>
+              {p.hasLogin && (
+                <span className="flex flex-wrap gap-2 ml-auto">
+                  {p.accountStatus !== "approved" && (
+                    <button
+                      type="button"
+                      disabled={busy === "account"}
+                      onClick={() => onAccount("approved")}
+                      className="h-9 px-4 text-[13px] rounded font-medium transition-opacity hover:opacity-85 disabled:opacity-50"
+                      style={{ background: "var(--console-accent)", color: "#111114" }}
+                    >
+                      {p.accountStatus === "suspended" ? L.restore : L.approve}
+                    </button>
+                  )}
+                  {p.accountStatus !== "suspended" && p.accountStatus !== "rejected" && (
+                    <button
+                      type="button"
+                      disabled={busy === "account"}
+                      onClick={() => onAccount("suspended")}
+                      className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-50"
+                      style={{ border: "1px solid var(--console-border)", color: "var(--console-text)" }}
+                    >
+                      {L.suspend}
+                    </button>
+                  )}
+                  {p.accountStatus === "pending" && (
+                    <button
+                      type="button"
+                      disabled={busy === "account"}
+                      onClick={() => onAccount("rejected")}
+                      className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-50"
+                      style={{ border: "1px solid var(--console-border)", color: "var(--console-faint)" }}
+                    >
+                      {L.reject}
+                    </button>
+                  )}
+                </span>
+              )}
+            </div>
+            {p.applicationNote && (
+              <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--console-border)" }}>
+                <div className="text-[11px] tracking-[0.1em] uppercase mb-1" style={{ color: "var(--console-faint)" }}>
+                  {L.application}
+                </div>
+                <p className="text-[13px] whitespace-pre-wrap" style={{ color: "var(--console-muted)" }}>
+                  {p.applicationNote}
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-wrap gap-2">
             <input
               value={contactName}
@@ -275,13 +385,16 @@ export default function PartnerCard({
             />
             <select
               value={locale}
-              onChange={(e) => setLocale(e.target.value === "uk" ? "uk" : "en")}
+              onChange={(e) => setLocale(isAppLocale(e.target.value) ? e.target.value : "en")}
               aria-label={`Locale — ${p.company}`}
               className={inputClass}
               style={inputStyle}
             >
-              <option value="en">EN</option>
-              <option value="uk">UK</option>
+              {locales.map((l) => (
+                <option key={l} value={l}>
+                  {l.toUpperCase()}
+                </option>
+              ))}
             </select>
             <select
               value={status}

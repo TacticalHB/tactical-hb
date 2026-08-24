@@ -22,19 +22,25 @@ import { resolveSender as resolveNovaPoshtaSender } from "@/lib/nova-poshta-ttn"
    never needs one. Ukrposhta does: a shipment is lodged from a post office
    identified by its index.
 
-   So UKRPOSHTA_SENDER_POSTCODE has no fallback and is not guessable. It is
-   only needed to CREATE a shipment — quoting never asks — so its absence is
-   not an error until the first parcel is booked, and senderPostcode() says so
-   plainly rather than inventing one.
+   So it could not be derived, and for a while there was nothing to derive it
+   from. Mario supplied it on 24 August 2026: 61204, Kharkiv. It now lives in
+   code for the same reasons the customs code does — a post office index is not
+   a secret, it is the same in sandbox and production, and a value that decides
+   where parcels are lodged from is better reviewed than typed once into a
+   dashboard. The environment variable still overrides it, so moving to another
+   office does not need a deploy.
 --------------------------------------------------------------------------- */
+
+/** The post office parcels are lodged from — Kharkiv 61204. */
+const SENDER_POSTCODE = "61204";
 
 export type Sender = {
   /** The contact person's name as the carrier will print it. */
   name: string;
   /** E.164-ish, as Nova Poshta normalises it. */
   phone: string;
-  /** Ukrposhta's post office index. Null until it is configured. */
-  postcode: string | null;
+  /** Ukrposhta's post office index — the office parcels are lodged from. */
+  postcode: string;
 };
 
 /**
@@ -49,7 +55,7 @@ export type Sender = {
  * can say so — but nothing has to be set for the common case.
  */
 export async function resolveSender(): Promise<Sender> {
-  const postcode = process.env.UKRPOSHTA_SENDER_POSTCODE?.trim() || null;
+  const postcode = process.env.UKRPOSHTA_SENDER_POSTCODE?.trim() || SENDER_POSTCODE;
 
   const overrideName = process.env.UKRPOSHTA_SENDER_NAME?.trim();
   const overridePhone = process.env.UKRPOSHTA_SENDER_PHONE?.trim();
@@ -78,12 +84,15 @@ export async function resolveSender(): Promise<Sender> {
  * missing while everything else is correctly configured.
  */
 export function senderPostcode(): string {
-  const value = process.env.UKRPOSHTA_SENDER_POSTCODE?.trim();
-  if (!value) {
+  const value = process.env.UKRPOSHTA_SENDER_POSTCODE?.trim() || SENDER_POSTCODE;
+
+  /* Five digits. Ukrainian indexes are exactly that, and an override with a
+     space or a typo would otherwise reach Ukrposhta as a bad sender address —
+     which fails late, on a parcel someone has already paid for. */
+  if (!/^\d{5}$/.test(value)) {
     throw new Error(
-      "UKRPOSHTA_SENDER_POSTCODE is not set. Ukrposhta lodges a shipment from a " +
-        "post office index, and Nova Poshta's sender record has no postcode to " +
-        "borrow — it addresses branches by uuid. This one has to be supplied."
+      `UKRPOSHTA_SENDER_POSTCODE is "${value}", which is not a 5-digit Ukrainian ` +
+        `post office index. Unset it to fall back to ${SENDER_POSTCODE}.`
     );
   }
   return value;

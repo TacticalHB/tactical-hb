@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HoneypotField from "./HoneypotField";
 
 export default function WholesaleForm() {
@@ -14,8 +14,15 @@ export default function WholesaleForm() {
   const [bizError, setBizError] = useState(false);
   const [hoverBiz, setHoverBiz] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  // When the form appeared, so the server can tell a person from a script.
-  const mountedAt = useRef(Date.now());
+  /* When the form appeared, so the server can tell a person from a script.
+     Stamped at commit, not in the initialiser: Date.now() is impure, and a
+     render can be discarded or replayed, so a timestamp taken during one is
+     not necessarily when the form appeared. Zero until then, which the server
+     reads as "not measured" and skips rather than fails. */
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
 
   // Single-select, so labels double as stable values. Order and wording are
   // deliberate — no "Hotel / Restaurant".

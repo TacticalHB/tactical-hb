@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 /* 20 September 2026, set on 11 August 2026 (previously the 10th). UTC on
    purpose: the date is a fixed instant worldwide, not midnight in whichever
@@ -29,6 +29,43 @@ function getTimeLeft(): TimeLeft {
     minutes: Math.floor((diff / 60000) % 60),
     seconds: Math.floor((diff / 1000) % 60),
   };
+}
+
+/* ---- The clock, as an external store ------------------------------------
+
+   Time is not React state — it is something outside the component that
+   changes on its own, which is precisely what useSyncExternalStore is for.
+   Holding it in useState meant a mount effect that seeded the first value,
+   i.e. one render showing nothing followed immediately by another showing the
+   time.
+
+   THE SNAPSHOT IS CACHED PER SECOND, and it has to be. React calls
+   getSnapshot on every render and compares the result with Object.is; a fresh
+   object each time never compares equal and the component would re-render
+   forever. Recomputing only when the whole second changes makes the identity
+   stable between ticks, which is also exactly how often the display changes.
+
+   The server snapshot is null — there is no countdown until there is a clock
+   to run it, and the markup renders dashes until then. */
+let tickCache: TimeLeft | null = null;
+let tickSecond = -1;
+
+function subscribeToTick(onTick: () => void): () => void {
+  const id = setInterval(onTick, 1000);
+  return () => clearInterval(id);
+}
+
+function tickSnapshot(): TimeLeft {
+  const second = Math.floor(Date.now() / 1000);
+  if (second !== tickSecond || tickCache === null) {
+    tickSecond = second;
+    tickCache = getTimeLeft();
+  }
+  return tickCache;
+}
+
+function tickServerSnapshot(): TimeLeft | null {
+  return null;
 }
 
 /**
@@ -69,13 +106,7 @@ export default function Countdown({
    */
   tone?: "light" | "dark";
 }) {
-  const [time, setTime] = useState<TimeLeft | null>(null);
-
-  useEffect(() => {
-    setTime(getTimeLeft());
-    const id = setInterval(() => setTime(getTimeLeft()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const time = useSyncExternalStore(subscribeToTick, tickSnapshot, tickServerSnapshot);
 
   const labels =
     locale === "uk"

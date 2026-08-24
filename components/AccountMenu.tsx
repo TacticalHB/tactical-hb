@@ -25,9 +25,14 @@ export default function AccountMenu({ locale }: { locale: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  useEffect(() => {
+  /* Close the dropdown when the route changes. Adjusted during render rather
+     than in an effect: an effect would paint the menu still open over the new
+     page for a frame before closing it. */
+  const [openOnPath, setOpenOnPath] = useState(pathname);
+  if (openOnPath !== pathname) {
+    setOpenOnPath(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Phase E: an admin's person icon opens the console, not the dropdown.
   // ADMIN_EMAILS lives server-side, so ask /api/admin/me once per sign-in.

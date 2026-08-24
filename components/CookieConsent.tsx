@@ -31,10 +31,16 @@ export default function CookieConsent({ locale }: { locale: string }) {
 
   // Decide whether to prompt, and wire up the "reopen settings" event.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect --
+       the stored consent is in a cookie/localStorage and is unavailable to the
+       server. Deciding during render would either show the banner to somebody
+       who already answered, for one frame, or hide it from somebody who has
+       not — which is why `ready` gates the whole thing until this has run. */
     const existing: Consent | null = readConsent();
     if (existing) setToggles({ analytics: existing.analytics, marketing: existing.marketing });
     setShowBanner(!existing);
     setReady(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const open = () => {
       const c = readConsent();

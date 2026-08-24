@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -43,8 +43,11 @@ export function FavouritesProvider({
 }) {
   const uk = locale === "uk";
   const router = useRouter();
-  const supabaseRef = useRef(createClient());
-  const supabase = supabaseRef.current;
+  /* One client for the life of the provider. useMemo rather than a ref read
+     during render — a ref's .current is not readable while rendering, and this
+     is also what AuthContext already does, so both providers now get their
+     client the same way. */
+  const supabase = useMemo(() => createClient(), []);
 
   const [favourites, setFavourites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,6 +166,9 @@ export function FavouritesProvider({
   /* Auth wiring: resolve the current session, then react to sign in/out. */
   useEffect(() => {
     if (!supabase) {
+      /* eslint-disable-next-line react-hooks/set-state-in-effect --
+         no auth client, so favourites are whatever localStorage holds — and
+         localStorage does not exist during the server render. */
       setFavourites(getFavs());
       setIsLoading(false);
       return;

@@ -157,6 +157,8 @@ export default function OperativeFile({ locale }: { locale: string }) {
       >
         <Link href={`/${locale}`} className="flex items-center gap-3 h-11 shrink-0 transition-opacity hover:opacity-70">
           {/* tct-logo.svg is white artwork, which is exactly right on this ground. */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- a 24px SVG;
+              next/image cannot optimise one and would add a request. */}
           <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-6 h-6" />
           <span className="text-[13px] font-semibold tracking-[0.18em] uppercase">Tactical HB</span>
         </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HoneypotField from "./HoneypotField";
 
 // Enquiry types. `subjectEn` is a stable English label sent to the API so the
@@ -22,8 +22,15 @@ export default function ContactForm() {
   // Pre-select the most common reason so the field is never empty.
   const [type, setType] = useState<(typeof ENQUIRY_TYPES)[number]["value"]>("product");
   const [hoverType, setHoverType] = useState<string | null>(null);
-  // When the form appeared, so the server can tell a person from a script.
-  const mountedAt = useRef(Date.now());
+  /* When the form appeared, so the server can tell a person from a script.
+     Stamped at commit, not in the initialiser: Date.now() is impure, and a
+     render can be discarded or replayed, so a timestamp taken during one is
+     not necessarily when the form appeared. Zero until then, which the server
+     reads as "not measured" and skips rather than fails. */
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

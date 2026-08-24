@@ -56,6 +56,10 @@ export default function NewsletterPromo({
           light surfaces and nothing at all on dark ones. */}
       {dark ? (
         <>
+          {/* A one-colour SVG at 32px or less. next/image cannot optimise an
+              SVG and would only add a wrapper and a request, so the plain
+              element is the right one here. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-8 h-8 shrink-0" />
           <span
             aria-hidden="true"
@@ -68,6 +72,8 @@ export default function NewsletterPromo({
           className="w-[68px] h-[68px] shrink-0 grid place-items-center self-stretch"
           style={{ background: "#111114" }}
         >
+          {/* Same as above: an SVG next/image cannot improve on. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/tct-logo.svg" alt="" aria-hidden="true" className="w-9 h-9" />
         </span>
       )}

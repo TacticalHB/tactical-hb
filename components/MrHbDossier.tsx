@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useMounted } from "@/hooks/useBrowserState";
 
 /* ---------------------------------------------------------------------------
    The Mr HB dossier — a sealed envelope that opens into his file.
@@ -65,12 +66,10 @@ export default function MrHbDossier({
   onClose: () => void;
 }) {
   const [stage, setStage] = useState<Stage>("closed");
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const reduced = useRef(false);
-
-  useEffect(() => setMounted(true), []);
 
   /* Reset to a sealed envelope every time it opens — reopening a file that is
      already lying open is not the moment we are trying to sell. Reduced motion

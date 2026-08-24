@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { openCookieSettings } from "@/lib/cookie-consent";
 
@@ -31,14 +31,24 @@ export default function SettingsForm({ locale }: { locale: string }) {
   const [savingComms, setSavingComms] = useState(false);
   const [msg, setMsg] = useState<{ k: string; text: string; ok: boolean } | null>(null);
 
-  useEffect(() => {
-    if (profile) {
-      setFirstName(profile.first_name || "");
-      setSurname(profile.surname || "");
-      setDob(profile.date_of_birth || "");
-      setMarketing(!!profile.marketing_opt_in);
-    }
-  }, [profile]);
+  /* Fill the form from the profile as it arrives, and again if it changes.
+
+     Adjusted during render rather than in an effect, so the fields are already
+     populated on the frame they appear instead of flashing empty first. Keyed
+     on the VALUES, not the object: the profile is refetched on save and comes
+     back as a new object with the same contents, and re-running on that would
+     overwrite whatever the customer had typed since. */
+  const profileKey = profile
+    ? `${profile.first_name ?? ""}|${profile.surname ?? ""}|${profile.date_of_birth ?? ""}|${profile.marketing_opt_in ? 1 : 0}`
+    : null;
+  const [filledFrom, setFilledFrom] = useState<string | null>(null);
+  if (profile && filledFrom !== profileKey) {
+    setFilledFrom(profileKey);
+    setFirstName(profile.first_name || "");
+    setSurname(profile.surname || "");
+    setDob(profile.date_of_birth || "");
+    setMarketing(!!profile.marketing_opt_in);
+  }
 
   const L = {
     details: uk ? "Особисті дані" : "Account Details",

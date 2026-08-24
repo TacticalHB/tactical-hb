@@ -23,11 +23,20 @@ export default function SearchOverlay({
   const router = useRouter();
   const a11y = useTranslations("a11y");
 
+  /* Opening the overlay starts a fresh search. The reset is a render-phase
+     adjustment so the box is already empty on the frame it appears — an effect
+     would show the previous query for one paint. Focus stays in an effect,
+     which is where a DOM side effect belongs. */
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (open) setQ("");
+  }
+
   useEffect(() => {
-    if (open) {
-      setQ("");
-      setTimeout(() => inputRef.current?.focus(), 60);
-    }
+    if (!open) return;
+    const id = setTimeout(() => inputRef.current?.focus(), 60);
+    return () => clearTimeout(id);
   }, [open]);
 
   useEffect(() => {

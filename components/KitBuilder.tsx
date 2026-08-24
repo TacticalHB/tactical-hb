@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { products, type Product } from "@/lib/products";
+import { products } from "@/lib/products";
 import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";

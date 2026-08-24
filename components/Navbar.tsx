@@ -38,7 +38,7 @@ export default function Navbar({ locale }: { locale: string }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { count, cartOpen, setCartOpen, registerCartIcon, bump } = useCart();
+  const { count, setCartOpen, registerCartIcon, bump } = useCart();
 
   const otherLocale = pickOther(locale);
   const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);

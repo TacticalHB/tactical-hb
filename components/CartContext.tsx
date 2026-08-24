@@ -111,6 +111,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // valid — a missing `options` simply means the base configuration.
         const parsed: unknown = JSON.parse(s);
         if (Array.isArray(parsed)) {
+          /* eslint-disable-next-line react-hooks/set-state-in-effect --
+             the saved basket lives in localStorage, which does not exist while
+             the server renders. Reading it in the initialiser would emit
+             markup on the client that the server never produced; an effect
+             after hydration is the only correct place, and `hydrated` below
+             exists precisely so consumers can tell "empty" from "not read
+             yet". */
           setLines(
             parsed
               .filter((l): l is CartLine => !!l && typeof l.slug === "string" && typeof l.qty === "number")

@@ -13,6 +13,7 @@ import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 import { buildFieldCard } from "@/lib/field-card";
+import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /* Brand slogan — shown as the statement band on every product page */
 const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
@@ -70,13 +71,12 @@ function Banner() {
      false means leaving, and the index only advances once it has left. */
   const [i, setI] = useState(0);
   const [onStage, setOnStage] = useState(true);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setReduced(true);
-    }
-  }, []);
+  /* Read straight from the media query rather than mirrored into state by a
+     mount effect. The effect version painted once with motion allowed before
+     correcting itself, which on this component meant the banner started
+     travelling for a frame in front of somebody who asked it not to. It also
+     never noticed the setting being changed while the page was open. */
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
     /* Reduced motion never schedules anything and holds line one. The timer is

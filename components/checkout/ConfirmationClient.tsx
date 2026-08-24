@@ -21,8 +21,13 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
   const [order, setOrder] = useState<OrderSnapshot | null>(null);
   const [ready, setReady] = useState(false);
 
-  // sessionStorage is client-only; read after mount to avoid a hydration gap.
+  /* sessionStorage is client-only; read after mount to avoid a hydration gap.
+     `ready` is what tells "no order in storage" apart from "not looked yet",
+     which matters here — the second one must not render "we couldn't find
+     your order" at somebody who has just paid. */
   useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect --
+       see above: there is no order snapshot during the server render. */
     setOrder(loadOrder());
     setReady(true);
   }, []);

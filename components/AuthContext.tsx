@@ -33,7 +33,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  /* Starts false when there is no Supabase client, because nothing is being
+     loaded — the site simply runs logged-out. Deriving it here rather than
+     correcting it in the effect keeps the very first render honest: it used to
+     claim "loading" for one paint on a site that was never going to load
+     anything, which is a spinner nobody was owed. */
+  const [loading, setLoading] = useState(() => !!supabase);
 
   const loadProfile = useCallback(
     async (u: User | null) => {
@@ -52,10 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    // Nothing to wait for when there is no client — `loading` already started
+    // false in that case, so there is no state to correct here.
+    if (!supabase) return;
     let active = true;
     supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
       if (!active) return;

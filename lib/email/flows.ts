@@ -14,7 +14,6 @@ import {
   type CartStep,
   type EmailCopy,
   type Locale,
-  type PostPurchaseStep,
   type WelcomeStep,
 } from "./content";
 import { priceCart, type PricedLineInput } from "@/lib/pricing";

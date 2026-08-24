@@ -85,6 +85,10 @@ export default function CartSuggestion({
   useEffect(() => {
     try {
       const keys = Object.keys(sessionStorage).filter((k) => k.startsWith(DISMISS_PREFIX));
+      /* eslint-disable-next-line react-hooks/set-state-in-effect --
+         sessionStorage is client-only, so this cannot move into the
+         initialiser without a hydration mismatch — which is what the comment
+         above the effect already says. */
       setDismissed(keys.map((k) => k.slice(DISMISS_PREFIX.length)));
     } catch {
       /* Private mode with storage disabled: the card simply never remembers. */

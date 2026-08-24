@@ -47,6 +47,51 @@ import AccountCreatingScreen from "./AccountCreatingScreen";
 
 type Identity = "guest" | "account";
 
+/**
+ * A selectable identity card (guest / create account).
+ *
+ * AT MODULE SCOPE, not inside the checkout. Declared in the component body it
+ * was a NEW component type on every render, so React could not match it to the
+ * previous tree and remounted both cards each time anything in checkout
+ * changed — losing focus on the way. The state it used to close over is passed
+ * in instead, which is all it ever needed.
+ */
+function IdentityOption({
+  id,
+  title,
+  note,
+  active,
+  onSelect,
+}: {
+  id: Identity;
+  title: string;
+  note: string;
+  active: boolean;
+  onSelect: (id: Identity) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={active}
+      onClick={() => onSelect(id)}
+      className="w-full flex items-start gap-3.5 p-5 text-left transition-colors"
+      style={{ border: active ? "1px solid var(--ink)" : "1px solid var(--border-strong)", background: "var(--field-bg)" }}
+    >
+      <span
+        className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+        style={{ border: `1px solid ${active ? "var(--ink)" : "var(--border-strong)"}` }}
+      >
+        {active && <span className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />}
+      </span>
+      <span>
+        <span className="block text-[15px]" style={{ color: "var(--text)", fontWeight: active ? 500 : 400 }}>{title}</span>
+        <span className="block text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>{note}</span>
+      </span>
+    </button>
+  );
+}
+
 export default function CheckoutClient({
   locale,
   rankDiscountRate = 0,
@@ -142,12 +187,20 @@ export default function CheckoutClient({
   /** True when this order will be emailed a total rather than paid for now. */
   const isIntlRequest = destination === "international" && (intl.unsupported || selectedOffer == null);
 
-  // A voucher applied to one basket must not survive a change to that basket —
-  // its minimum-order rule was checked against the old contents.
-  useEffect(() => {
+  /* A voucher applied to one basket must not survive a change to that basket —
+     its minimum-order rule was checked against the old contents.
+
+     ADJUSTED DURING RENDER, which is React's own answer to "reset state when
+     an input changes" and is not the same thing as an effect. An effect would
+     paint the stale voucher first and correct it on the next frame, so a
+     customer removing the item that qualified them would see the discount
+     linger for a beat. This drops it before anything is shown, and React
+     restarts the render immediately without committing the discarded one. */
+  const [voucherBasket, setVoucherBasket] = useState(lines);
+  if (voucherBasket !== lines) {
+    setVoucherBasket(lines);
     if (voucher) setVoucher(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines]);
+  }
 
   /* Price the international leg whenever the destination country or the basket
      changes. Display only — create-invoice re-quotes server-side, so a figure
@@ -233,19 +286,52 @@ export default function CheckoutClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destination, countryCode, lines]);
 
-  // When checkout opened, so the order endpoint can tell a person from a script.
-  const mountedAt = useRef(Date.now());
+  /* When checkout opened, so the order endpoint can tell a person from a
+     script (see lib/anti-spam: a form filled faster than MIN_FILL_MS is a
+     bot). Stamped in an effect rather than in the initialiser — Date.now() is
+     impure, and a render may be discarded or replayed, so a timestamp taken
+     during one is not necessarily the moment the page appeared. The effect
+     runs at commit, which is that moment, and long before anyone can submit.
 
-  // Prefill from the signed-in account.
+     Zero until then. The server treats a non-positive ts as "not measured" and
+     skips the check rather than failing it, so the brief window costs nothing
+     even if a request could somehow beat the effect. */
+  const mountedAt = useRef(0);
   useEffect(() => {
-    if (!user) return;
+    mountedAt.current = Date.now();
+  }, []);
+
+  /* Prefill from the signed-in account, once per identity.
+     
+     Same render-phase adjustment as the voucher above, and for a better reason
+     than lint: the account arrives asynchronously, so an effect would render
+     the empty fields first and fill them a frame later — a visible flicker on
+     every checkout by a signed-in customer. Filling before the first paint
+     means the fields are simply already there.
+
+     Guarded on the id and the profile FIELDS, not on the objects. Auth hands
+     back a new user object on every token refresh, so keying on identity would
+     re-run constantly; but the profile arrives AFTER the user, so keying on
+     the id alone would run once against an absent profile and never fill the
+     name — which the old effect got right by depending on both. Keying on the
+     values themselves gets both: refreshes are ignored, a profile arriving
+     late is not.
+
+     Re-running is harmless in any case. Each field falls back to itself first,
+     so this can only ever fill a blank and never overwrite something typed. */
+  const prefillKey = user
+    ? `${user.id}|${profile?.first_name ?? ""}|${profile?.surname ?? ""}`
+    : null;
+  const [prefilledFor, setPrefilledFor] = useState<string | null>(null);
+  if (user && prefilledFor !== prefillKey) {
+    setPrefilledFor(prefillKey);
     setForm((f) => ({
       ...f,
       email: f.email || user.email || "",
       firstName: f.firstName || profile?.first_name || "",
       surname: f.surname || profile?.surname || "",
     }));
-  }, [user, profile]);
+  }
 
   // Nothing to check out. Waits for `hydrated` — before the saved cart is read
   // back, `lines` is [] for reasons that have nothing to do with the shopper.
@@ -578,32 +664,6 @@ export default function CheckoutClient({
   const labelCls = "block text-[11px] tracking-[0.2em] uppercase mb-2";
   const labelSt = { color: "var(--text-faint)" };
 
-  /** A selectable identity card (guest / create account). */
-  const IdentityOption = ({ id, title, note }: { id: Identity; title: string; note: string }) => {
-    const active = identity === id;
-    return (
-      <button
-        type="button"
-        role="radio"
-        aria-checked={active}
-        onClick={() => setIdentity(id)}
-        className="w-full flex items-start gap-3.5 p-5 text-left transition-colors"
-        style={{ border: active ? "1px solid var(--ink)" : "1px solid var(--border-strong)", background: "var(--field-bg)" }}
-      >
-        <span
-          className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-          style={{ border: `1px solid ${active ? "var(--ink)" : "var(--border-strong)"}` }}
-        >
-          {active && <span className="w-2 h-2 rounded-full" style={{ background: "var(--ink)" }} />}
-        </span>
-        <span>
-          <span className="block text-[15px]" style={{ color: "var(--text)", fontWeight: active ? 500 : 400 }}>{title}</span>
-          <span className="block text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>{note}</span>
-        </span>
-      </button>
-    );
-  };
-
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
       <CheckoutHeader
@@ -648,8 +708,20 @@ export default function CheckoutClient({
                   </div>
 
                   <div className="flex flex-col gap-3 mb-6" role="radiogroup" aria-label={L.identification}>
-                    <IdentityOption id="guest" title={L.guest} note={L.guestNote} />
-                    <IdentityOption id="account" title={L.account} note={L.accountNote} />
+                    <IdentityOption
+                      id="guest"
+                      title={L.guest}
+                      note={L.guestNote}
+                      active={identity === "guest"}
+                      onSelect={setIdentity}
+                    />
+                    <IdentityOption
+                      id="account"
+                      title={L.account}
+                      note={L.accountNote}
+                      active={identity === "account"}
+                      onSelect={setIdentity}
+                    />
                   </div>
 
                   <p className="text-[13px] mb-8" style={{ color: "var(--text-muted)" }}>

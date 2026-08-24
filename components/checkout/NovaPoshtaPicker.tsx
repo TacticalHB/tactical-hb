@@ -81,10 +81,29 @@ export default function NovaPoshtaPicker({
   const searchSeq = useRef(0);
   const whSeq = useRef(0);
   const quoteSeq = useRef(0);
+  /* The basket, held in a ref so quote() can read the CURRENT one without
+     being rebuilt every time a line changes — it is a useCallback the effects
+     below depend on, and a new identity per keystroke would restart the
+     debounce. Written in an effect rather than during render: a render may be
+     thrown away or replayed, and a ref written during one is a write that may
+     never have happened or may happen twice. The effect runs after commit,
+     which is well before any user action can call quote(). */
   const cartRef = useRef(cart);
-  cartRef.current = cart;
+  useEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
 
   const shownWarehouses = warehouses;
+
+  /* WHETHER THE TYPED TEXT IS WORTH SEARCHING FOR. Under two characters, or
+     exactly the city already chosen, there is nothing to look up.
+
+     Derived rather than stored, which is what lets the effect below stop
+     clearing state: it used to answer "not searchable" with setCities([]),
+     i.e. a render, a state write and a second render every time somebody
+     deleted a character. The list is simply not shown instead. */
+  const searchable = query.trim().length >= 2 && query.trim() !== value?.cityName;
+  const shownCities = searchable ? cities : [];
 
   const L = {
     typeWarehouse: uk ? "Відділення" : "Branch pickup",
@@ -131,10 +150,7 @@ export default function NovaPoshtaPicker({
   // Debounced city search.
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2 || q === value?.cityName) {
-      setCities([]);
-      return;
-    }
+    if (!searchable) return;
     const seq = ++searchSeq.current;
     const id = setTimeout(async () => {
       setSearching(true);
@@ -329,16 +345,26 @@ export default function NovaPoshtaPicker({
           autoComplete="off"
           placeholder={L.cityHint}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => cities.length > 0 && setOpenList(true)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setQuery(next);
+            /* Drop the stored results the moment the text stops being worth
+               searching for. The derived list above already hides them, but
+               without this they would flash back the instant a second
+               character is typed, before the new search has answered — which
+               is the one behaviour the old setCities([]) in the effect was
+               buying. Same clear, moved into the event that causes it. */
+            if (next.trim().length < 2) setCities([]);
+          }}
+          onFocus={() => shownCities.length > 0 && setOpenList(true)}
         />
         {searching && (
           <span className="absolute right-4 top-[42px] text-[12px]" style={{ color: "var(--text-faint)" }}>{L.loading}</span>
         )}
-        {openList && cities.length > 0 && (
+        {openList && shownCities.length > 0 && (
           <ul className="absolute z-20 left-0 right-0 mt-1 max-h-[260px] overflow-y-auto"
             style={{ background: "var(--field-bg)", border: "1px solid var(--border-strong)" }}>
-            {cities.map((c) => (
+            {shownCities.map((c) => (
               <li key={c.ref}>
                 <button type="button" onClick={() => pickCity(c)}
                   className="w-full text-left px-4 py-3 text-[14px] transition-colors hover:bg-[color:var(--bg-soft)]"

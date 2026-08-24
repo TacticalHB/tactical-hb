@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { toast } from "sonner";
 import {
   CONSENT_OPEN_EVENT,
@@ -23,7 +24,6 @@ import {
 type Toggles = { analytics: boolean; marketing: boolean };
 
 export default function CookieConsent({ locale }: { locale: string }) {
-  const uk = locale === "uk";
   const [ready, setReady] = useState(false);       // avoids SSR/hydration flash
   const [showBanner, setShowBanner] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -52,31 +52,23 @@ export default function CookieConsent({ locale }: { locale: string }) {
   }, []);
 
   const L = {
-    title: uk ? "Ми використовуємо файли cookie" : "We use cookies",
-    body: uk
-      ? "Необхідні cookie тримають сайт робочим (вхід, кошик). За вашою згодою ми також використовуємо аналітику та маркетинг."
-      : "Necessary cookies keep the site working (sign-in, bag). With your consent we also use analytics and marketing cookies.",
-    acceptAll: uk ? "Прийняти все" : "Accept all",
-    rejectAll: uk ? "Відхилити все" : "Reject all",
-    customize: uk ? "Налаштувати" : "Customize",
-    settings: uk ? "Налаштування cookie" : "Cookie settings",
-    necessary: uk ? "Необхідні" : "Necessary",
-    necessaryDesc: uk
-      ? "Потрібні для роботи сайту: сесія входу, кошик, безпека. Вимкнути неможливо."
-      : "Required for the site to work: sign-in session, bag, security. Cannot be turned off.",
-    always: uk ? "Завжди увімкнено" : "Always on",
-    analytics: uk ? "Аналітика" : "Analytics",
-    analyticsDesc: uk
-      ? "Допомагає зрозуміти, як використовується сайт, щоб покращувати його."
-      : "Helps us understand how the site is used so we can improve it.",
-    marketing: uk ? "Маркетинг та вподобання" : "Marketing & preferences",
-    marketingDesc: uk
-      ? "Персоналізовані пропозиції та запам'ятовування ваших вподобань."
-      : "Personalised offers and remembering your preferences.",
-    save: uk ? "Зберегти вибір" : "Save choices",
-    saved: uk ? "Налаштування cookie збережено" : "Cookie preferences saved",
-    close: uk ? "Закрити" : "Close",
-    privacy: uk ? "Політика конфіденційності" : "Privacy Policy",
+    title: t(locale, { uk: "Ми використовуємо файли cookie", en: "We use cookies", ja: "Cookie を使用しています" }),
+    body: t(locale, { uk: "Необхідні cookie тримають сайт робочим (вхід, кошик). За вашою згодою ми також використовуємо аналітику та маркетинг.", en: "Necessary cookies keep the site working (sign-in, bag). With your consent we also use analytics and marketing cookies.", ja: "必須 Cookie はサイトの動作（ログイン、バッグ）に必要です。ご同意いただける場合は、分析とマーケティングの Cookie も使用します。" }),
+    acceptAll: t(locale, { uk: "Прийняти все", en: "Accept all", ja: "すべて許可" }),
+    rejectAll: t(locale, { uk: "Відхилити все", en: "Reject all", ja: "すべて拒否" }),
+    customize: t(locale, { uk: "Налаштувати", en: "Customize", ja: "設定する" }),
+    settings: t(locale, { uk: "Налаштування cookie", en: "Cookie settings", ja: "Cookie 設定" }),
+    necessary: t(locale, { uk: "Необхідні", en: "Necessary", ja: "必須" }),
+    necessaryDesc: t(locale, { uk: "Потрібні для роботи сайту: сесія входу, кошик, безпека. Вимкнути неможливо.", en: "Required for the site to work: sign-in session, bag, security. Cannot be turned off.", ja: "サイトの動作に必要です：ログインセッション、バッグ、セキュリティ。無効にできません。" }),
+    always: t(locale, { uk: "Завжди увімкнено", en: "Always on", ja: "常に有効" }),
+    analytics: t(locale, { uk: "Аналітика", en: "Analytics", ja: "分析" }),
+    analyticsDesc: t(locale, { uk: "Допомагає зрозуміти, як використовується сайт, щоб покращувати його.", en: "Helps us understand how the site is used so we can improve it.", ja: "サイトの利用状況を把握し、改善に役立てます。" }),
+    marketing: t(locale, { uk: "Маркетинг та вподобання", en: "Marketing & preferences", ja: "マーケティングと設定" }),
+    marketingDesc: t(locale, { uk: "Персоналізовані пропозиції та запам'ятовування ваших вподобань.", en: "Personalised offers and remembering your preferences.", ja: "お客様に合わせたご案内と、設定の記憶に使用します。" }),
+    save: t(locale, { uk: "Зберегти вибір", en: "Save choices", ja: "設定を保存" }),
+    saved: t(locale, { uk: "Налаштування cookie збережено", en: "Cookie preferences saved", ja: "Cookie の設定を保存しました" }),
+    close: t(locale, { uk: "Закрити", en: "Close", ja: "閉じる" }),
+    privacy: t(locale, { uk: "Політика конфіденційності", en: "Privacy Policy", ja: "プライバシーポリシー" }),
   };
 
   const persist = (next: Toggles) => {
@@ -122,7 +114,7 @@ export default function CookieConsent({ locale }: { locale: string }) {
                     Now it links to it — a consent request that cannot be read
                     about is not really informed consent. */}
                 <a
-                  href={`/${uk ? "uk" : "en"}/privacy`}
+                  href={`/${locale}/privacy`}
                   className="underline underline-offset-2"
                   style={{ color: "#111" }}
                 >

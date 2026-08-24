@@ -1,4 +1,5 @@
 import type { DeliveryDetails } from "@/lib/checkout";
+import { t, type Text } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    Turning a raw `orders` row into what the admin list actually shows.
@@ -211,29 +212,29 @@ export function orderTotal(o: AdminOrder): { text: string; sub: string | null } 
   return totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah);
 }
 
-export function deliveryLabel(kind: DeliveryKind, uk: boolean): string {
-  if (kind === "warehouse") return uk ? "Відділення" : "Warehouse";
-  if (kind === "courier") return uk ? "Курʼєр" : "Courier";
-  if (kind === "international") return uk ? "Міжнародна" : "International";
+export function deliveryLabel(kind: DeliveryKind, locale: string): string {
+  if (kind === "warehouse") return t(locale, { uk: "Відділення", en: "Warehouse", ja: "営業所" });
+  if (kind === "courier") return t(locale, { uk: "Курʼєр", en: "Courier", ja: "宅配" });
+  if (kind === "international") return t(locale, { uk: "Міжнародна", en: "International", ja: "海外" });
   return "—";
 }
 
-export function statusLabel(status: string, uk: boolean): string {
-  const map: Record<string, [string, string]> = {
-    paid: ["Оплачено", "Paid"],
-    processing: ["В обробці", "Processing"],
-    shipped: ["Відправлено", "Shipped"],
-    delivered: ["Доставлено", "Delivered"],
-    cancelled: ["Скасовано", "Cancelled"],
+export function statusLabel(status: string, locale: string): string {
+  const map: Record<string, Text> = {
+    paid: { uk: "Оплачено", en: "Paid", ja: "支払い済み" },
+    processing: { uk: "В обробці", en: "Processing", ja: "準備中" },
+    shipped: { uk: "Відправлено", en: "Shipped", ja: "発送済み" },
+    delivered: { uk: "Доставлено", en: "Delivered", ja: "配達済み" },
+    cancelled: { uk: "Скасовано", en: "Cancelled", ja: "キャンセル済み" },
   };
   const hit = map[status];
-  return hit ? (uk ? hit[0] : hit[1]) : status;
+  return hit ? t(locale, hit) : status;
 }
 
-export function formatWhen(iso: string, uk: boolean): string {
+export function formatWhen(iso: string, locale: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString(uk ? "uk-UA" : "en-GB", {
+  return d.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), {
     day: "2-digit",
     month: "short",
     year: "numeric",

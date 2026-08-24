@@ -114,10 +114,10 @@ export default function WholesaleForm() {
           type="tel"
           name="phone"
           required
-          defaultValue={uk ? "+380" : "+"}
+          defaultValue={uk ? "+380" : locale === "ja" ? "+81" : "+"}
           inputMode="tel"
           autoComplete="tel"
-          placeholder={uk ? "+380 00 000 0000" : "+00 000 000 000"}
+          placeholder={uk ? "+380 00 000 0000" : locale === "ja" ? "+81 00 0000 0000" : "+00 000 000 000"}
           className="field"
         />
       </div>

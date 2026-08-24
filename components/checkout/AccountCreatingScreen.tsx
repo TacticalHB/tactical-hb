@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { useAuth } from "@/components/AuthContext";
 
 /* ---------------------------------------------------------------------------
@@ -38,7 +39,6 @@ export default function AccountCreatingScreen({
   /** Continue to payment as a guest instead. */
   onSkip: () => void;
 }) {
-  const uk = locale === "uk";
   const { supabase, refreshProfile } = useAuth();
 
   const [sending, setSending] = useState(true);
@@ -52,25 +52,25 @@ export default function AccountCreatingScreen({
   const sentRef = useRef(false);
 
   const L = {
-    title: uk ? "Створюємо ваш акаунт…" : "Your account is being created…",
-    sentTo: uk ? "Ми надіслали код підтвердження на" : "We've sent a verification code to",
-    benefitsTitle: uk ? "Що ви отримаєте" : "What you'll get",
-    b1: uk ? "Відстеження замовлень та історія покупок" : "Track your orders and view your purchase history",
-    b2: uk ? "Бонусна програма та ваучери" : "Loyalty progress and vouchers",
-    b3: uk ? "Збережені улюблені товари" : "Save your favourite products",
-    b4: uk ? "Швидше оформлення наступного разу" : "Faster checkout next time",
-    code: uk ? "Код підтвердження" : "Verification code",
-    password: uk ? "Пароль" : "Create a password",
-    min8: uk ? "Мінімум 8 символів" : "Minimum of 8 characters",
-    mixed: uk ? "Великі, малі літери та цифра" : "Uppercase, lowercase and a number",
-    confirm: uk ? "Підтвердити та продовжити" : "Confirm and continue",
-    skip: uk ? "Продовжити без акаунта" : "Continue as guest instead",
-    resend: uk ? "Надіслати код ще раз" : "Resend code",
-    sendingMsg: uk ? "Надсилаємо код…" : "Sending your code…",
-    needCode: uk ? "Введіть код з листа." : "Enter the code from your email.",
-    weakPw: uk ? "Пароль не відповідає вимогам." : "Password doesn't meet the requirements.",
-    unavailable: uk ? "Реєстрація тимчасово недоступна." : "Sign-up is temporarily unavailable.",
-    badCode: uk ? "Невірний або протермінований код." : "Invalid or expired code.",
+    title: t(locale, { uk: "Створюємо ваш акаунт…", en: "Your account is being created…", ja: "アカウントを作成しています…" }),
+    sentTo: t(locale, { uk: "Ми надіслали код підтвердження на", en: "We've sent a verification code to", ja: "確認コードをお送りしました：" }),
+    benefitsTitle: t(locale, { uk: "Що ви отримаєте", en: "What you'll get", ja: "アカウントでできること" }),
+    b1: t(locale, { uk: "Відстеження замовлень та історія покупок", en: "Track your orders and view your purchase history", ja: "ご注文の追跡と購入履歴の確認" }),
+    b2: t(locale, { uk: "Бонусна програма та ваучери", en: "Loyalty progress and vouchers", ja: "ロイヤルティの進捗とバウチャー" }),
+    b3: t(locale, { uk: "Збережені улюблені товари", en: "Save your favourite products", ja: "お気に入り製品の保存" }),
+    b4: t(locale, { uk: "Швидше оформлення наступного разу", en: "Faster checkout next time", ja: "次回以降のスムーズなお会計" }),
+    code: t(locale, { uk: "Код підтвердження", en: "Verification code", ja: "確認コード" }),
+    password: t(locale, { uk: "Пароль", en: "Create a password", ja: "パスワードを設定" }),
+    min8: t(locale, { uk: "Мінімум 8 символів", en: "Minimum of 8 characters", ja: "8文字以上" }),
+    mixed: t(locale, { uk: "Великі, малі літери та цифра", en: "Uppercase, lowercase and a number", ja: "大文字・小文字・数字を含む" }),
+    confirm: t(locale, { uk: "Підтвердити та продовжити", en: "Confirm and continue", ja: "確認して続ける" }),
+    skip: t(locale, { uk: "Продовжити без акаунта", en: "Continue as guest instead", ja: "ゲストのまま続ける" }),
+    resend: t(locale, { uk: "Надіслати код ще раз", en: "Resend code", ja: "コードを再送する" }),
+    sendingMsg: t(locale, { uk: "Надсилаємо код…", en: "Sending your code…", ja: "コードを送信しています…" }),
+    needCode: t(locale, { uk: "Введіть код з листа.", en: "Enter the code from your email.", ja: "メールに記載のコードをご入力ください。" }),
+    weakPw: t(locale, { uk: "Пароль не відповідає вимогам.", en: "Password doesn't meet the requirements.", ja: "パスワードが条件を満たしていません。" }),
+    unavailable: t(locale, { uk: "Реєстрація тимчасово недоступна.", en: "Sign-up is temporarily unavailable.", ja: "アカウント登録を一時的にご利用いただけません。" }),
+    badCode: t(locale, { uk: "Невірний або протермінований код.", en: "Invalid or expired code.", ja: "コードが正しくないか、有効期限が切れています。" }),
   };
 
   const send = async () => {
@@ -198,7 +198,7 @@ export default function AccountCreatingScreen({
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] uppercase tracking-wide"
               style={{ color: "var(--text-muted)" }}
             >
-              {showPw ? (uk ? "Сховати" : "Hide") : (uk ? "Показати" : "Show")}
+              {showPw ? t(locale, { uk: "Сховати", en: "Hide", ja: "隠す" }) : t(locale, { uk: "Показати", en: "Show", ja: "表示" })}
             </button>
           </div>
           <ul className="text-[12px] flex flex-col gap-1 mt-2">

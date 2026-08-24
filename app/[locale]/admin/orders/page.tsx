@@ -66,7 +66,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
           style={{ background: tone.bg, color: tone.fg }}
         >
-          {statusLabel(order.status, uk)}
+          {statusLabel(order.status, locale)}
         </span>
         {order.source !== "monobank" && (
           <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "var(--console-panel-2)", color: "var(--console-muted)" }}>
@@ -80,7 +80,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         )}
 
         <span className="ml-auto text-[12.5px]" style={{ color: "var(--console-muted)" }}>
-          {formatWhen(order.createdAt, uk)}
+          {formatWhen(order.createdAt, locale)}
         </span>
         <span className="text-[15px] font-medium tabular-nums" style={{ color: "var(--console-text)" }}>
           {total.text}
@@ -109,7 +109,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         </Field>
 
         <Field label={uk ? "Доставка" : "Delivery"}>
-          <span className="font-medium">{deliveryLabel(order.deliveryKind, uk)}</span>
+          <span className="font-medium">{deliveryLabel(order.deliveryKind, locale)}</span>
           {/* WHO IS CARRYING IT, which used to be answerable from the
               destination alone and no longer is: an international order may be
               on Nova Post or on Ukrposhta, and the packing bench needs to know
@@ -203,7 +203,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
               {order.fiscalReceiptId}
             </span>
             {order.fiscalisedAt && (
-              <span style={{ color: "var(--console-faint)" }}>{formatWhen(order.fiscalisedAt, uk)}</span>
+              <span style={{ color: "var(--console-faint)" }}>{formatWhen(order.fiscalisedAt, locale)}</span>
             )}
           </>
         ) : order.fiscalError ? (

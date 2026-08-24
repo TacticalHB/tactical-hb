@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
@@ -12,7 +13,6 @@ const pwRules = (pw: string) => ({
 });
 
 export default function RegisterForm({ locale }: { locale: string }) {
-  const uk = locale === "uk";
   const { supabase, refreshProfile } = useAuth();
   const router = useRouter();
 
@@ -30,37 +30,37 @@ export default function RegisterForm({ locale }: { locale: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const L = {
-    title: uk ? "Приєднуйтесь до Tactical HB" : "Now let's make you a member.",
-    emailLabel: uk ? "Електронна пошта" : "Email address",
-    continue: uk ? "Продовжити" : "Continue",
-    sentTo: uk ? "Ми надіслали код на" : "We've sent a code to",
-    edit: uk ? "Змінити" : "Edit",
-    code: uk ? "Код підтвердження" : "Verification code",
-    firstName: uk ? "Ім'я" : "First name",
-    surname: uk ? "Прізвище" : "Surname",
-    dob: uk ? "Дата народження" : "Date of Birth",
-    day: uk ? "День" : "Day",
-    month: uk ? "Місяць" : "Month",
-    year: uk ? "Рік" : "Year",
-    password: uk ? "Пароль" : "Password",
-    min8: uk ? "Мінімум 8 символів" : "Minimum of 8 characters",
-    mixed: uk ? "Великі, малі літери та цифра" : "Uppercase, lowercase letters and one number",
-    marketing: uk ? "Отримувати новини та пропозиції Tactical HB" : "Sign up for emails to get updates, offers and member benefits.",
-    terms: uk ? "Я погоджуюсь з Умовами використання та Політикою конфіденційності" : "I agree to the Terms of Use and Privacy Policy.",
-    create: uk ? "Створити акаунт" : "Create Account",
-    haveAcc: uk ? "Вже маєте акаунт?" : "Already a member?",
-    signIn: uk ? "Увійти" : "Sign in",
-    badEmail: uk ? "Введіть дійсну електронну пошту." : "Enter a valid email address.",
-    needCode: uk ? "Введіть код з листа." : "Enter the code from your email.",
-    needName: uk ? "Вкажіть ім'я та прізвище." : "Please enter your first name and surname.",
-    needDob: uk ? "Вкажіть дату народження." : "Please enter your date of birth.",
-    weakPw: uk ? "Пароль не відповідає вимогам." : "Password doesn't meet the requirements.",
-    needTerms: uk ? "Потрібно прийняти умови." : "You must agree to the Terms & Privacy Policy.",
+    title: t(locale, { uk: "Приєднуйтесь до Tactical HB", en: "Now let's make you a member.", ja: "アカウントを作成しましょう。" }),
+    emailLabel: t(locale, { uk: "Електронна пошта", en: "Email address", ja: "メールアドレス" }),
+    continue: t(locale, { uk: "Продовжити", en: "Continue", ja: "次へ" }),
+    sentTo: t(locale, { uk: "Ми надіслали код на", en: "We've sent a code to", ja: "コードをお送りしました：" }),
+    edit: t(locale, { uk: "Змінити", en: "Edit", ja: "変更" }),
+    code: t(locale, { uk: "Код підтвердження", en: "Verification code", ja: "確認コード" }),
+    firstName: t(locale, { uk: "Ім'я", en: "First name", ja: "名" }),
+    surname: t(locale, { uk: "Прізвище", en: "Surname", ja: "姓" }),
+    dob: t(locale, { uk: "Дата народження", en: "Date of Birth", ja: "生年月日" }),
+    day: t(locale, { uk: "День", en: "Day", ja: "日" }),
+    month: t(locale, { uk: "Місяць", en: "Month", ja: "月" }),
+    year: t(locale, { uk: "Рік", en: "Year", ja: "年" }),
+    password: t(locale, { uk: "Пароль", en: "Password", ja: "パスワード" }),
+    min8: t(locale, { uk: "Мінімум 8 символів", en: "Minimum of 8 characters", ja: "8文字以上" }),
+    mixed: t(locale, { uk: "Великі, малі літери та цифра", en: "Uppercase, lowercase letters and one number", ja: "大文字・小文字・数字を含む" }),
+    marketing: t(locale, { uk: "Отримувати новини та пропозиції Tactical HB", en: "Sign up for emails to get updates, offers and member benefits.", ja: "最新情報、ご案内、会員特典をメールで受け取る。" }),
+    terms: t(locale, { uk: "Я погоджуюсь з Умовами використання та Політикою конфіденційності", en: "I agree to the Terms of Use and Privacy Policy.", ja: "利用規約とプライバシーポリシーに同意します。" }),
+    create: t(locale, { uk: "Створити акаунт", en: "Create Account", ja: "アカウントを作成" }),
+    haveAcc: t(locale, { uk: "Вже маєте акаунт?", en: "Already a member?", ja: "すでに会員の方" }),
+    signIn: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン" }),
+    badEmail: t(locale, { uk: "Введіть дійсну електронну пошту.", en: "Enter a valid email address.", ja: "有効なメールアドレスをご入力ください。" }),
+    needCode: t(locale, { uk: "Введіть код з листа.", en: "Enter the code from your email.", ja: "メールに記載のコードをご入力ください。" }),
+    needName: t(locale, { uk: "Вкажіть ім'я та прізвище.", en: "Please enter your first name and surname.", ja: "姓と名をご入力ください。" }),
+    needDob: t(locale, { uk: "Вкажіть дату народження.", en: "Please enter your date of birth.", ja: "生年月日をご入力ください。" }),
+    weakPw: t(locale, { uk: "Пароль не відповідає вимогам.", en: "Password doesn't meet the requirements.", ja: "パスワードが条件を満たしていません。" }),
+    needTerms: t(locale, { uk: "Потрібно прийняти умови.", en: "You must agree to the Terms & Privacy Policy.", ja: "利用規約とプライバシーポリシーへの同意が必要です。" }),
   };
 
   const sendCode = async () => {
     setError(null);
-    if (!supabase) return setError(uk ? "Реєстрація тимчасово недоступна." : "Sign-up is temporarily unavailable.");
+    if (!supabase) return setError(t(locale, { uk: "Реєстрація тимчасово недоступна.", en: "Sign-up is temporarily unavailable.", ja: "アカウント登録を一時的にご利用いただけません。" }));
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError(L.badEmail);
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
@@ -71,7 +71,7 @@ export default function RegisterForm({ locale }: { locale: string }) {
 
   const submit = async () => {
     setError(null);
-    if (!supabase) return setError(uk ? "Реєстрація тимчасово недоступна." : "Sign-up is temporarily unavailable.");
+    if (!supabase) return setError(t(locale, { uk: "Реєстрація тимчасово недоступна.", en: "Sign-up is temporarily unavailable.", ja: "アカウント登録を一時的にご利用いただけません。" }));
     const r = pwRules(password);
     if (!code.trim()) return setError(L.needCode);
     if (!firstName.trim() || !surname.trim()) return setError(L.needName);
@@ -89,7 +89,7 @@ export default function RegisterForm({ locale }: { locale: string }) {
     const { data, error: vErr } = verify;
     if (vErr || !data.user) {
       setLoading(false);
-      return setError(vErr?.message || (uk ? "Невірний код." : "Invalid or expired code."));
+      return setError(vErr?.message || (t(locale, { uk: "Невірний код.", en: "Invalid or expired code.", ja: "コードが正しくないか、有効期限が切れています。" })));
     }
     const date_of_birth = `${dob.y.padStart(4, "0")}-${dob.m.padStart(2, "0")}-${dob.d.padStart(2, "0")}`;
     const { error: uErr } = await supabase.auth.updateUser({
@@ -143,7 +143,7 @@ export default function RegisterForm({ locale }: { locale: string }) {
               <input className="field rounded-lg pr-12" type={showPw ? "text" : "password"} placeholder={L.password}
                 value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
               <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-11 h-11 text-xs uppercase tracking-wide" style={{ color: "#707072" }}>
-                {showPw ? (uk ? "Сховати" : "Hide") : (uk ? "Показати" : "Show")}
+                {showPw ? (t(locale, { uk: "Сховати", en: "Hide", ja: "隠す" })) : (t(locale, { uk: "Показати", en: "Show", ja: "表示" }))}
               </button>
             </div>
             <ul className="text-xs flex flex-col gap-1 -mt-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    Minimal checkout chrome — logo, secure mark, step progress. No nav, no
@@ -19,11 +20,10 @@ export default function CheckoutHeader({
   /** Lets a completed step be revisited; undefined renders it as plain text. */
   onStepBack?: (step: Step) => void;
 }) {
-  const uk = locale === "uk";
   const steps: { id: Step; label: string }[] = [
-    { id: "identification", label: uk ? "Ідентифікація" : "Identification" },
-    { id: "delivery", label: uk ? "Доставка" : "Delivery" },
-    { id: "payment", label: uk ? "Оплата" : "Payment" },
+    { id: "identification", label: t(locale, { uk: "Ідентифікація", en: "Identification", ja: "お客様情報" }) },
+    { id: "delivery", label: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }) },
+    { id: "payment", label: t(locale, { uk: "Оплата", en: "Payment", ja: "お支払い" }) },
   ];
   const currentIdx = steps.findIndex((s) => s.id === current);
 
@@ -39,7 +39,7 @@ export default function CheckoutHeader({
               <rect x="3" y="7" width="10" height="7" rx="1.5" />
               <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
             </svg>
-            {uk ? "Захищене оформлення" : "Secure checkout"}
+            {t(locale, { uk: "Захищене оформлення", en: "Secure checkout", ja: "安全なお会計" })}
           </div>
         </div>
 
@@ -56,7 +56,7 @@ export default function CheckoutHeader({
             trying to print three Ukrainian words on a 375px screen. Full labels
             return at sm. */}
         <nav
-          aria-label={uk ? "Кроки оформлення" : "Checkout steps"}
+          aria-label={t(locale, { uk: "Кроки оформлення", en: "Checkout steps", ja: "お会計の手順" })}
           className="flex items-center gap-2.5 sm:gap-4 pb-5 -mx-1 px-1"
         >
           {steps.map((s, i) => {
@@ -80,7 +80,7 @@ export default function CheckoutHeader({
                       ? {
                           type: "button" as const,
                           onClick: () => onStepBack(s.id),
-                          "aria-label": `${uk ? "Повернутися до кроку" : "Back to"} ${s.label}`,
+                          "aria-label": `${t(locale, { uk: "Повернутися до кроку", en: "Back to", ja: "前の手順へ：" })} ${s.label}`,
                         }
                       : {})}
                     className={`flex items-center gap-2.5 h-11 ${clickable ? "transition-opacity hover:opacity-70" : ""}`}

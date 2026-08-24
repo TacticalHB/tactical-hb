@@ -17,14 +17,14 @@ import MrHbDossier, { dossierCopy } from "./MrHbDossier";
    rather than needing a new section of its own.
 --------------------------------------------------------------------------- */
 
-export default function AboutDossier({ uk }: { uk: boolean }) {
+export default function AboutDossier({ locale }: { locale: string }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const close = useCallback(() => {
     setOpen(false);
     btnRef.current?.focus();
   }, []);
-  const copy = dossierCopy(uk);
+  const copy = dossierCopy(locale);
 
   return (
     <>
@@ -49,7 +49,7 @@ export default function AboutDossier({ uk }: { uk: boolean }) {
         </button>
       </div>
 
-      <MrHbDossier uk={uk} open={open} onClose={close} />
+      <MrHbDossier locale={locale} open={open} onClose={close} />
     </>
   );
 }

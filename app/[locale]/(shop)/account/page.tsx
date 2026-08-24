@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import { requireUser } from "@/lib/supabase/require-user";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const uk = locale === "uk";
   const { supabase, user } = await requireUser(locale);
 
   const { data: profile } = await supabase
@@ -18,14 +18,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   const initial = (profile?.first_name?.[0] || user.email?.[0] || "?").toUpperCase();
 
   const memberSince = new Date(profile?.created_at || user.created_at).toLocaleDateString(
-    uk ? "uk-UA" : "en-GB",
+    t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }),
     { month: "long", year: "numeric" }
   );
 
   const cards = [
-    { href: `/${locale}/account/loyalty`, title: uk ? "Бонуси" : "Loyalty", desc: uk ? "XP, прогрес та ваучери" : "XP, progress & vouchers" },
-    { href: `/${locale}/account/orders`, title: uk ? "Замовлення" : "Orders", desc: uk ? "Історія покупок" : "Your purchase history" },
-    { href: `/${locale}/account/favourites`, title: uk ? "Обране" : "Favourites", desc: uk ? "Збережені товари" : "Saved products" },
+    { href: `/${locale}/account/loyalty`, title: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" }), desc: t(locale, { uk: "XP, прогрес та ваучери", en: "XP, progress & vouchers", ja: "XP、進捗、バウチャー" }) },
+    { href: `/${locale}/account/orders`, title: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }), desc: t(locale, { uk: "Історія покупок", en: "Your purchase history", ja: "購入履歴" }) },
+    { href: `/${locale}/account/favourites`, title: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }), desc: t(locale, { uk: "Збережені товари", en: "Saved products", ja: "保存した製品" }) },
   ];
 
   return (
@@ -40,7 +40,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
         <div>
           <h1 className="text-3xl font-semibold" style={{ color: "#111" }}>{name}</h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            {uk ? "Учасник Tactical HB з" : "Tactical HB member since"} {memberSince}
+            {t(locale, { uk: "Учасник Tactical HB з", en: "Tactical HB member since", ja: "Tactical HB 会員登録日" })} {memberSince}
           </p>
         </div>
       </div>

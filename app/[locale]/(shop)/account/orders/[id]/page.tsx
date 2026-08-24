@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/supabase/require-user";
@@ -43,7 +44,6 @@ export default async function OrderDetailPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
-  const uk = locale === "uk";
   const { supabase, user } = await requireUser(locale);
 
   // A malformed id must not reach the database as a uuid comparison error.
@@ -60,29 +60,25 @@ export default async function OrderDetailPage({
 
   const order = toCustomerOrder(data as unknown as Record<string, unknown>);
   const total = orderTotalText(order);
-  const steps = timelineFor(order.status, uk);
+  const steps = timelineFor(order.status, locale);
   const cancelled = order.status === "cancelled";
 
   const L = {
-    back: uk ? "Усі замовлення" : "All orders",
-    order: uk ? "Замовлення" : "Order",
-    placed: uk ? "Оформлено" : "Placed",
-    status: uk ? "Статус" : "Status",
-    items: uk ? "Позиції" : "Items",
-    qty: uk ? "К-сть" : "Qty",
-    total: uk ? "Разом" : "Total",
-    delivery: uk ? "Доставка" : "Delivery",
-    tracking: uk ? "Номер накладної" : "Tracking number",
-    track: uk ? "Відстежити посилку" : "Track shipment",
-    cancelled: uk
-      ? "Це замовлення скасовано. Якщо це помилка — відповідайте на лист із підтвердженням."
-      : "This order was cancelled. If that looks wrong, reply to your confirmation email.",
-    help: uk
-      ? "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо."
-      : "Questions about this order? Reply to your confirmation email — it comes from an address we read.",
+    back: t(locale, { uk: "Усі замовлення", en: "All orders", ja: "すべてのご注文" }),
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
+    placed: t(locale, { uk: "Оформлено", en: "Placed", ja: "注文日" }),
+    status: t(locale, { uk: "Статус", en: "Status", ja: "状況" }),
+    items: t(locale, { uk: "Позиції", en: "Items", ja: "商品" }),
+    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
+    delivery: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }),
+    tracking: t(locale, { uk: "Номер накладної", en: "Tracking number", ja: "追跡番号" }),
+    track: t(locale, { uk: "Відстежити посилку", en: "Track shipment", ja: "配送状況を確認" }),
+    cancelled: t(locale, { uk: "Це замовлення скасовано. Якщо це помилка — відповідайте на лист із підтвердженням.", en: "This order was cancelled. If that looks wrong, reply to your confirmation email.", ja: "このご注文はキャンセルされました。お心当たりがない場合は、確認メールにご返信ください。" }),
+    help: t(locale, { uk: "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо.", en: "Questions about this order? Reply to your confirmation email — it comes from an address we read.", ja: "このご注文についてのご質問は、確認メールにご返信ください。こちらで確認しております。" }),
     /* Kept in step with describeAddons in lib/cart-display — this page reads
        stored order rows, not cart lines, so it names the add-ons itself. */
-    addons: { lid: uk ? "З кришкою" : "With Lid", rubber: uk ? "З FEAR 9E418" : "With FEAR 9E418" },
+    addons: { lid: t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き" }), rubber: t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き" }) },
   };
 
   const money = (eur: number | null, uah: number | null) =>
@@ -105,7 +101,7 @@ export default async function OrderDetailPage({
         <div className="text-lg font-semibold tabular-nums" style={{ color: "#111" }}>{total.text}</div>
       </div>
       <p className="text-[13px] mb-8" style={{ color: "var(--text-muted)" }}>
-        {L.placed} {formatWhen(order.createdAt, uk)}
+        {L.placed} {formatWhen(order.createdAt, locale)}
         {total.sub ? <span className="ml-2">· {total.sub}</span> : null}
       </p>
 
@@ -115,7 +111,7 @@ export default async function OrderDetailPage({
           <OrderTimeline steps={steps} />
         ) : (
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {cancelled ? L.cancelled : statusLabel(order.status, uk)}
+            {cancelled ? L.cancelled : statusLabel(order.status, locale)}
           </p>
         )}
 

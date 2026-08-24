@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import type { CartLine } from "@/components/CartContext";
 
 /* ---------------------------------------------------------------------------
@@ -59,7 +60,6 @@ export default function NovaPoshtaPicker({
   value: NovaPoshtaSelection | null;
   onChange: (v: NovaPoshtaSelection | null) => void;
 }) {
-  const uk = locale === "uk";
   const deliveryType: NpDeliveryType = value?.deliveryType ?? "warehouse";
   const isCourier = deliveryType === "courier";
 
@@ -106,29 +106,27 @@ export default function NovaPoshtaPicker({
   const shownCities = searchable ? cities : [];
 
   const L = {
-    typeWarehouse: uk ? "Відділення" : "Branch pickup",
-    typeCourier: uk ? "Кур'єр (адресна)" : "Courier to address",
-    typeWarehouseNote: uk ? "Самовивіз із відділення Нової Пошти" : "Collect from a Nova Poshta branch",
-    typeCourierNote: uk ? "Доставка кур'єром на вашу адресу" : "Delivered by courier to your door",
-    city: uk ? "Місто" : "City",
-    cityHint: uk ? "Почніть вводити назву міста" : "Start typing a city name",
-    warehouse: uk ? "Відділення Нової Пошти" : "Nova Poshta branch",
-    chooseCityFirst: uk ? "Спершу оберіть місто" : "Choose a city first",
-    loading: uk ? "Завантаження…" : "Loading…",
-    noMatch: uk ? "Нічого не знайдено" : "No matches",
-    branchSearch: uk ? "Номер відділення або вулиця" : "Branch number or street",
-    change: uk ? "Змінити" : "Change",
-    street: uk ? "Вулиця" : "Street",
-    building: uk ? "Будинок" : "Building / house no.",
-    apartment: uk ? "Квартира (необов'язково)" : "Apartment (optional)",
-    notes: uk ? "Додаткові примітки (необов'язково)" : "Additional notes (optional)",
-    delivery: uk ? "Вартість доставки" : "Delivery cost",
-    calculating: uk ? "Розраховуємо…" : "Calculating…",
-    failed: uk ? "Не вдалося завантажити дані Нової Пошти." : "Couldn't load Nova Poshta data.",
-    quoteFailed: uk
-      ? "Не вдалося розрахувати доставку. Вартість повідомимо після оформлення."
-      : "Couldn't calculate delivery. We'll confirm the cost after your order.",
-    notConfigured: uk ? "Доставка тимчасово недоступна." : "Shipping lookup is temporarily unavailable.",
+    typeWarehouse: t(locale, { uk: "Відділення", en: "Branch pickup", ja: "営業所受け取り" }),
+    typeCourier: t(locale, { uk: "Кур'єр (адресна)", en: "Courier to address", ja: "住所へ配送" }),
+    typeWarehouseNote: t(locale, { uk: "Самовивіз із відділення Нової Пошти", en: "Collect from a Nova Poshta branch", ja: "Nova Poshta の営業所で受け取る" }),
+    typeCourierNote: t(locale, { uk: "Доставка кур'єром на вашу адресу", en: "Delivered by courier to your door", ja: "ご自宅までお届けします" }),
+    city: t(locale, { uk: "Місто", en: "City", ja: "市区町村" }),
+    cityHint: t(locale, { uk: "Почніть вводити назву міста", en: "Start typing a city name", ja: "都市名を入力してください" }),
+    warehouse: t(locale, { uk: "Відділення Нової Пошти", en: "Nova Poshta branch", ja: "Nova Poshta 営業所" }),
+    chooseCityFirst: t(locale, { uk: "Спершу оберіть місто", en: "Choose a city first", ja: "先に都市をお選びください" }),
+    loading: t(locale, { uk: "Завантаження…", en: "Loading…", ja: "読み込み中…" }),
+    noMatch: t(locale, { uk: "Нічого не знайдено", en: "No matches", ja: "該当なし" }),
+    branchSearch: t(locale, { uk: "Номер відділення або вулиця", en: "Branch number or street", ja: "営業所番号または通り名" }),
+    change: t(locale, { uk: "Змінити", en: "Change", ja: "変更" }),
+    street: t(locale, { uk: "Вулиця", en: "Street", ja: "通り名" }),
+    building: t(locale, { uk: "Будинок", en: "Building / house no.", ja: "建物番号" }),
+    apartment: t(locale, { uk: "Квартира (необов'язково)", en: "Apartment (optional)", ja: "部屋番号（任意）" }),
+    notes: t(locale, { uk: "Додаткові примітки (необов'язково)", en: "Additional notes (optional)", ja: "備考（任意）" }),
+    delivery: t(locale, { uk: "Вартість доставки", en: "Delivery cost", ja: "配送料" }),
+    calculating: t(locale, { uk: "Розраховуємо…", en: "Calculating…", ja: "計算中…" }),
+    failed: t(locale, { uk: "Не вдалося завантажити дані Нової Пошти.", en: "Couldn't load Nova Poshta data.", ja: "Nova Poshta のデータを読み込めませんでした。" }),
+    quoteFailed: t(locale, { uk: "Не вдалося розрахувати доставку. Вартість повідомимо після оформлення.", en: "Couldn't calculate delivery. We'll confirm the cost after your order.", ja: "配送料を計算できませんでした。ご注文後に金額をご連絡します。" }),
+    notConfigured: t(locale, { uk: "Доставка тимчасово недоступна.", en: "Shipping lookup is temporarily unavailable.", ja: "配送検索を一時的にご利用いただけません。" }),
   };
 
   const patch = (p: Partial<NovaPoshtaSelection>) => {
@@ -310,7 +308,7 @@ export default function NovaPoshtaPicker({
   return (
     <div className="flex flex-col gap-4">
       {/* Delivery type — branch pickup vs courier */}
-      <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={uk ? "Тип доставки" : "Delivery type"}>
+      <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label={t(locale, { uk: "Тип доставки", en: "Delivery type", ja: "配送方法" })}>
         {([
           { id: "warehouse" as const, title: L.typeWarehouse, note: L.typeWarehouseNote },
           { id: "courier" as const, title: L.typeCourier, note: L.typeCourierNote },

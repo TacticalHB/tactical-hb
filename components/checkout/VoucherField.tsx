@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import { useState } from "react";
 import { checkVoucher, type VoucherCheck } from "@/app/actions/checkout-voucher";
 import { formatMoney, currencyForLocale, money } from "@/lib/currency";
@@ -31,36 +32,37 @@ export default function VoucherField({
   onApply: (v: AppliedVoucher) => void;
   onRemove: () => void;
 }) {
-  const uk = locale === "uk";
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const L = {
-    title: uk ? "Ваучер" : "Voucher",
+    title: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー" }),
     placeholder: "TCT-XXXXXXXX",
-    apply: uk ? "Застосувати" : "Apply",
-    remove: uk ? "Видалити" : "Remove",
-    signIn: uk ? "Увійдіть, щоб використати ваучер." : "Sign in to use a voucher.",
-    signInCta: uk ? "Увійти" : "Sign in",
-    appliedLabel: uk ? "Ваучер застосовано" : "Voucher applied",
+    apply: t(locale, { uk: "Застосувати", en: "Apply", ja: "適用する" }),
+    remove: t(locale, { uk: "Видалити", en: "Remove", ja: "削除" }),
+    signIn: t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。" }),
+    signInCta: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン" }),
+    appliedLabel: t(locale, { uk: "Ваучер застосовано", en: "Voucher applied", ja: "バウチャーを適用しました" }),
   };
 
   const message = (r: VoucherCheck): string => {
     if (r.ok) return "";
     switch (r.reason) {
       case "auth":
-        return uk ? "Увійдіть, щоб використати ваучер." : "Please sign in to use a voucher.";
+        return t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Please sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。" });
       case "used":
-        return uk ? "Цей ваучер вже використано." : "This voucher has already been used.";
+        return t(locale, { uk: "Цей ваучер вже використано.", en: "This voucher has already been used.", ja: "このバウチャーはすでに使用済みです。" });
       case "expired":
-        return uk ? "Термін дії ваучера минув." : "This voucher has expired.";
+        return t(locale, { uk: "Термін дії ваучера минув.", en: "This voucher has expired.", ja: "このバウチャーは有効期限が切れています。" });
       case "min_order":
-        return uk
-          ? `Ваучер діє від ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`
-          : `This voucher applies to orders over ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`;
+        return t(locale, {
+          uk: `Ваучер діє від ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`,
+          en: `This voucher applies to orders over ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))}.`,
+          ja: `このバウチャーは ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))} 以上のご注文が対象です。`,
+        });
       default:
-        return uk ? "Ваучер не знайдено." : "Voucher not found.";
+        return t(locale, { uk: "Ваучер не знайдено.", en: "Voucher not found.", ja: "バウチャーが見つかりません。" });
     }
   };
 
@@ -79,7 +81,7 @@ export default function VoucherField({
       }
     } catch (err) {
       console.error("[voucher] check failed:", err);
-      setError(uk ? "Не вдалося перевірити ваучер." : "Couldn't check that voucher.");
+      setError(t(locale, { uk: "Не вдалося перевірити ваучер.", en: "Couldn't check that voucher.", ja: "バウチャーを確認できませんでした。" }));
     } finally {
       setBusy(false);
     }

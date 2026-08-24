@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import { useEffect, useState } from "react";
 import { formatVoucher, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import type { Voucher } from "@/lib/loyalty/vouchers";
@@ -66,7 +67,7 @@ export default function LoyaltyDashboard({
 
   const money = (eur: number) => formatVoucher(eur, cfg, locale);
   const toNext = next ? next.spend_eur - totalSpend : 0;
-  const dateFmt = (d: string) => new Date(d).toLocaleDateString(uk ? "uk-UA" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const dateFmt = (d: string) => new Date(d).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), { day: "numeric", month: "short", year: "numeric" });
 
   const pct = Math.round(COLONEL_DISCOUNT_RATE * 100);
   const rankName = (r: { en: string; uk: string }) => (uk ? r.uk : r.en);
@@ -82,10 +83,10 @@ export default function LoyaltyDashboard({
     : `€${rank.remainingEur}`;
 
   const L = {
-    title: uk ? "Бонуси Tactical HB" : "Tactical HB Rewards",
+    title: t(locale, { uk: "Бонуси Tactical HB", en: "Tactical HB Rewards", ja: "Tactical HB リワード" }),
     xp: "XP",
-    maxTier: uk ? "Максимальний рівень" : "Max tier complete",
-    toNext: uk ? "до наступного ваучера" : "to your next voucher",
+    maxTier: t(locale, { uk: "Максимальний рівень", en: "Max tier complete", ja: "最上位ランク達成" }),
+    toNext: t(locale, { uk: "до наступного ваучера", en: "to your next voucher", ja: "次のバウチャーまで" }),
     voucherWorth: (v: string) => (uk ? `Ваучер на ${v}` : `${v} voucher`),
     /* The Ukrainian storefront must never quote the rate in euro. `money(1)`
        renders one euro of spend as the hryvnia the loyalty rate calls it, so
@@ -102,23 +103,23 @@ export default function LoyaltyDashboard({
       : uk
         ? `Найвище звання · –${pct}% на продукцію назавжди`
         : `Top rank · ${pct}% permanent discount on products`,
-    vouchers: uk ? "Ваші ваучери" : "Your vouchers",
-    noVouchers: uk ? "Ще немає активних ваучерів — витрачайте, щоб відкрити." : "No active vouchers — spend to unlock your first.",
-    usedVouchers: uk ? "Використані ваучери" : "Used vouchers",
-    history: uk ? "Історія балів" : "Points history",
-    noHistory: uk ? "Історія з'явиться після першої покупки." : "Your history appears after your first purchase.",
+    vouchers: t(locale, { uk: "Ваші ваучери", en: "Your vouchers", ja: "お持ちのバウチャー" }),
+    noVouchers: t(locale, { uk: "Ще немає активних ваучерів — витрачайте, щоб відкрити.", en: "No active vouchers — spend to unlock your first.", ja: "有効なバウチャーはありません — ご購入で最初の一枚が手に入ります。" }),
+    usedVouchers: t(locale, { uk: "Використані ваучери", en: "Used vouchers", ja: "使用済みのバウチャー" }),
+    history: t(locale, { uk: "Історія балів", en: "Points history", ja: "ポイント履歴" }),
+    noHistory: t(locale, { uk: "Історія з'явиться після першої покупки.", en: "Your history appears after your first purchase.", ja: "履歴は最初のご購入のあとに表示されます。" }),
     /* The zero state. Deliberately states only what the system already does —
        the ladder starts at the first rank and moves on lifetime spend — and
        invents no rule of its own. The rank name is read from RANKS so it can
        never drift from the ladder itself. */
-    startTitle: uk ? "Ваше звання починається тут" : "Your rank starts here",
+    startTitle: t(locale, { uk: "Ваше звання починається тут", en: "Your rank starts here", ja: "ランクはここから始まります" }),
     startBody: uk
       ? `Ви — ${RANKS[0].uk}. Звання зростає від суми всіх покупок, тож перше замовлення вже рухає вас далі, а бонуси й ваучери з’являться тут автоматично.`
       : `You're a ${RANKS[0].en}. Rank grows with your lifetime spend, so your first order already moves you up — XP and vouchers appear here on their own.`,
-    startBrowse: uk ? "Переглянути колекцію" : "Explore the collection",
-    startSetup: uk ? "Зібрати сет" : "Build a setup",
-    reasonOrder: uk ? "Покупка" : "Purchase",
-    howTitle: uk ? "Як це працює" : "How it works",
+    startBrowse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る" }),
+    startSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
+    reasonOrder: t(locale, { uk: "Покупка", en: "Purchase", ja: "ご購入" }),
+    howTitle: t(locale, { uk: "Як це працює", en: "How it works", ja: "仕組み" }),
     how: uk
       ? `Отримуйте ${cfg.xp_per_eur} XP за кожні ${money(1)}. Досягайте етапів витрат, щоб відкривати ваучери. Ваучери діють ${cfg.voucher_expiry_months} міс. і застосовуються до майбутнього замовлення від ${money(cfg.min_order_eur)}.`
       : `Earn ${cfg.xp_per_eur} XP for every €1 you spend. Hit spend milestones to unlock vouchers. Vouchers last ${cfg.voucher_expiry_months} months and apply to a future order over ${money(cfg.min_order_eur)}.`,
@@ -131,7 +132,7 @@ export default function LoyaltyDashboard({
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-6" style={{ color: "#111" }}>{uk ? "Бонуси" : "Loyalty"}</h1>
+      <h1 className="text-3xl font-semibold mb-6" style={{ color: "#111" }}>{t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" })}</h1>
 
       {/* Hero card (dark + yellow, Gymshark-style) */}
       <div className="rounded-3xl px-7 py-9 sm:px-10 sm:py-12 text-center" style={{ background: "var(--ink)" }}>
@@ -151,7 +152,7 @@ export default function LoyaltyDashboard({
         </div>
 
         <div className="font-display leading-none tabular-nums" style={{ color: "var(--accent)", fontSize: "clamp(3.5rem,12vw,6rem)" }}>
-          {xp.toLocaleString(uk ? "uk-UA" : "en-GB")}
+          {xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }))}
           <span className="text-[0.28em] align-top ml-2" style={{ color: "rgba(255,255,255,0.6)" }}>{L.xp}</span>
         </div>
         <div className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.55)" }}>{L.earnRate}</div>
@@ -287,7 +288,7 @@ export default function LoyaltyDashboard({
                 <div className="text-xs" style={{ color: "var(--text-faint)" }}>{dateFmt(p.created_at)}</div>
               </div>
               <div className="text-sm font-medium tabular-nums" style={{ color: p.xp >= 0 ? "#0a7d2c" : "#b42318" }}>
-                {p.xp >= 0 ? "+" : ""}{p.xp.toLocaleString(uk ? "uk-UA" : "en-GB")} XP
+                {p.xp >= 0 ? "+" : ""}{p.xp.toLocaleString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }))} XP
               </div>
             </li>
           ))}

@@ -92,7 +92,6 @@ export function ConfigSelector({
                name on the left and price on the right, selected row filled. */
   variant?: "card" | "pdp";
 }) {
-  const uk = locale === "uk";
   const isPdp = variant === "pdp";
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成" });

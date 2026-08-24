@@ -68,7 +68,12 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
 
   /* No Japanese colour-shown field on the catalogue yet, so ja reads the
      English one — a colour name, and the honest fallback. */
-  const colourShown = uk ? product.pdp?.colourShownUk : product.pdp?.colourShownEn;
+  const colourShown =
+    t(locale, {
+      uk: product.pdp?.colourShownUk ?? "",
+      en: product.pdp?.colourShownEn ?? "",
+      ja: product.pdp?.colourShownJa,
+    }) || null;
   const colour = chosen
     ? uk
       ? VARIANT_UK[chosen.name] ?? chosen.name
@@ -76,7 +81,9 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
     : colourShown ?? null;
 
   const materialSpec = product.pdp?.specs?.find((s) => s.labelEn === "Material");
-  const material = materialSpec ? (uk ? materialSpec.valueUk : materialSpec.valueEn) : null;
+  const material = materialSpec
+    ? t(locale, { uk: materialSpec.valueUk, en: materialSpec.valueEn, ja: materialSpec.valueJa })
+    : null;
 
   const addons = describeAddons(line.options, locale);
 

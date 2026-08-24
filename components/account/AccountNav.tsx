@@ -1,24 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import RankBadge from "./RankBadge";
 import type { Rank } from "@/lib/loyalty/ranks";
 
 export default function AccountNav({ locale, rank }: { locale: string; rank?: Rank | null }) {
-  const uk = locale === "uk";
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useAuth();
 
   const base = `/${locale}/account`;
   const items = [
-    { href: base, label: uk ? "Профіль" : "Profile" },
-    { href: `${base}/orders`, label: uk ? "Замовлення" : "Orders" },
-    { href: `${base}/favourites`, label: uk ? "Обране" : "Favourites" },
-    { href: `${base}/loyalty`, label: uk ? "Бонуси" : "Loyalty", badge: true },
-    { href: `${base}/settings`, label: uk ? "Налаштування" : "Account Settings" },
+    { href: base, label: t(locale, { uk: "Профіль", en: "Profile", ja: "プロフィール" }) },
+    { href: `${base}/orders`, label: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }) },
+    { href: `${base}/favourites`, label: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }) },
+    { href: `${base}/loyalty`, label: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ" }), badge: true },
+    { href: `${base}/settings`, label: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定" }) },
   ];
 
   // The admin links that used to pile up here were Phase A–D scaffolding.
@@ -67,7 +67,7 @@ export default function AccountNav({ locale, rank }: { locale: string; rank?: Ra
             className="block w-full text-left whitespace-nowrap rounded-lg px-4 py-2.5 text-sm hover:bg-[color:var(--bg-soft)]"
             style={{ color: "var(--text-muted)" }}
           >
-            {uk ? "Вийти" : "Sign Out"}
+            {t(locale, { uk: "Вийти", en: "Sign Out", ja: "ログアウト" })}
           </button>
         </li>
       </ul>

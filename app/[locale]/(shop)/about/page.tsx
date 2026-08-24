@@ -21,7 +21,7 @@ export default function AboutPage() {
 
 function AboutContent() {
   const t = useTranslations("about");
-  const uk = useLocale() === "uk";
+  const locale = useLocale();
 
   const values = [
     { title: t("value_1_title"), text: t("value_1_text") },
@@ -74,7 +74,7 @@ function AboutContent() {
               {/* The file, reachable from here as well as the homepage monitor.
                   Opposite corner to the Ukraine lockup so the panel stays
                   balanced and neither reads as an afterthought. */}
-              <AboutDossier uk={uk} />
+              <AboutDossier locale={locale} />
             </div>
           </Reveal>
         </div>
@@ -89,7 +89,7 @@ function AboutContent() {
       <section className="page-container pb-24">
         <Reveal>
           <Link
-            href={`/${uk ? "uk" : "en"}/mr-hb`}
+            href={`/${locale}/mr-hb`}
             className="group flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8 p-7 sm:p-9 transition-opacity hover:opacity-90"
             style={{ background: "var(--ink)", color: "#f4f3f0" }}
           >

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { t } from "@/lib/i18n-text";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { products } from "@/lib/products";
 import { priceCart } from "@/lib/pricing";
@@ -89,34 +90,28 @@ export default function KitBuilder({ locale }: { locale: string }) {
   );
 
   const L = {
-    title: uk ? "Зібрати сет" : "Build a setup",
-    intro: uk
-      ? "Оберіть чашу, пристрій нагріву та ковпак. Додайте все одним рухом."
-      : "Pick a bowl, a heat device and a wind cover. Add the lot in one move.",
+    title: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
+    intro: t(locale, { uk: "Оберіть чашу, пристрій нагріву та ковпак. Додайте все одним рухом.", en: "Pick a bowl, a heat device and a wind cover. Add the lot in one move.", ja: "ボウル、ヒートデバイス、ウインドカバーを選んで、まとめて追加できます。" }),
     steps: {
-      bowl: uk ? "Чаша" : "Bowl",
-      hmd: uk ? "Пристрій нагріву" : "Heat device",
-      windcover: uk ? "Ковпак" : "Wind cover",
+      bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" }),
+      hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス" }),
+      windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー" }),
     } as Record<SlotKey, string>,
-    none: uk ? "Не обрано" : "Not selected",
-    skip: uk ? "Пропустити" : "Skip",
-    summary: uk ? "Ваш сет" : "Your setup",
-    total: uk ? "Разом" : "Total",
-    addFull: uk ? "Додати комплект" : "Add full kit",
+    none: t(locale, { uk: "Не обрано", en: "Not selected", ja: "未選択" }),
+    skip: t(locale, { uk: "Пропустити", en: "Skip", ja: "スキップ" }),
+    summary: t(locale, { uk: "Ваш сет", en: "Your setup", ja: "あなたのセット" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
+    addFull: t(locale, { uk: "Додати комплект", en: "Add full kit", ja: "セットを追加" }),
     /* THE GATE'S OWN SENTENCE, and the only thing the button says until all
        three are answered. It names the three rather than counting them —
        "one more piece" would leave the customer looking for which. */
-    incomplete: uk
-      ? "Оберіть чашу, пристрій для нагріву та ковпак"
-      : "Select a bowl, heat device, and wind cover",
-    incompleteNote: uk
-      ? "Щоб продовжити, потрібні всі три: чаша, пристрій для нагріву та ковпак."
-      : "Select a bowl, heat device, and wind cover to continue.",
-    lid: uk ? "Кришка" : "Lid",
+    incomplete: t(locale, { uk: "Оберіть чашу, пристрій для нагріву та ковпак", en: "Select a bowl, heat device, and wind cover", ja: "ボウル、ヒートデバイス、ウインドカバーをお選びください" }),
+    incompleteNote: t(locale, { uk: "Щоб продовжити, потрібні всі три: чаша, пристрій для нагріву та ковпак.", en: "Select a bowl, heat device, and wind cover to continue.", ja: "お進みいただくには、ボウル、ヒートデバイス、ウインドカバーの三点が必要です。" }),
+    lid: t(locale, { uk: "Кришка", en: "Lid", ja: "リッド" }),
     /* Not translated — it is a name, not a word. */
     rubber: FEAR_9E418,
-    timer: uk ? "Таймер" : "Timer",
-    incoming: uk ? "Незабаром" : "Incoming",
+    timer: t(locale, { uk: "Таймер", en: "Timer", ja: "タイマー" }),
+    incoming: t(locale, { uk: "Незабаром", en: "Incoming", ja: "近日入荷" }),
   };
 
   /* Priced through the shop's own pricing, in the page's own locale, so the

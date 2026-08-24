@@ -303,7 +303,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                     <span style={{ color: "var(--console-muted)" }}>{reasonLabel(m.reason, uk)}</span>
                     {m.note && <span style={{ color: "var(--console-muted)" }}>{m.note}</span>}
                     <span className="ml-auto" style={{ color: "var(--console-faint)" }}>
-                      {m.createdBy} · {formatWhen(m.createdAt, uk)}
+                      {m.createdBy} · {formatWhen(m.createdAt, uk ? "uk" : "en")}
                     </span>
                   </li>
                 ))}

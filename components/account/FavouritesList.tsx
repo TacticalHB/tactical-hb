@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import Image from "next/image";
 import { products } from "@/lib/products";
 import Price from "@/components/Price";
@@ -40,22 +41,18 @@ export default function FavouritesList({ locale }: { locale: string }) {
     .filter((p): p is (typeof products)[number] => Boolean(p));
 
   const L = {
-    title: uk ? "Обране" : "Favourites",
+    title: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り" }),
     count: (n: number) => (uk ? `${n} товарів` : `${n} item${n === 1 ? "" : "s"}`),
-    empty: uk ? "Тут поки порожньо" : "Nothing saved yet",
-    emptyHint: uk
-      ? "Натискайте ♡ на товарах, щоб зберегти їх сюди."
-      : "Tap the heart on any product to save it here.",
-    browse: uk ? "Переглянути товари" : "Browse products",
-    buildSetup: uk ? "Зібрати сет" : "Build a setup",
-    remove: uk ? "Прибрати" : "Remove",
-    add: uk ? "Додати в кошик" : "Add to bag",
-    guestTitle: uk ? "Збережено лише на цьому пристрої" : "Saved on this device only",
-    guestBody: uk
-      ? "Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях — те, що ви зберегли, перенесеться автоматично."
-      : "Create a free account to keep your favourites across devices — anything you've saved will move over automatically.",
-    createAccount: uk ? "Створити акаунт" : "Create account",
-    logIn: uk ? "Увійти" : "Log in",
+    empty: t(locale, { uk: "Тут поки порожньо", en: "Nothing saved yet", ja: "まだ保存されていません" }),
+    emptyHint: t(locale, { uk: "Натискайте ♡ на товарах, щоб зберегти їх сюди.", en: "Tap the heart on any product to save it here.", ja: "製品のハートをタップすると、ここに保存されます。" }),
+    browse: t(locale, { uk: "Переглянути товари", en: "Browse products", ja: "製品を見る" }),
+    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
+    remove: t(locale, { uk: "Прибрати", en: "Remove", ja: "削除" }),
+    add: t(locale, { uk: "Додати в кошик", en: "Add to bag", ja: "バッグに追加" }),
+    guestTitle: t(locale, { uk: "Збережено лише на цьому пристрої", en: "Saved on this device only", ja: "この端末にのみ保存されています" }),
+    guestBody: t(locale, { uk: "Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях — те, що ви зберегли, перенесеться автоматично.", en: "Create a free account to keep your favourites across devices — anything you've saved will move over automatically.", ja: "無料のアカウントを作成すると、お気に入りを端末間で引き継げます。保存済みのものは自動的に移行されます。" }),
+    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成" }),
+    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン" }),
   };
 
   /* Guests aren't redirected away — they see their local hearts plus this nudge. */

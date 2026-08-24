@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -55,16 +56,14 @@ export function FavouritesProvider({
   const [userId, setUserId] = useState<string | null>(null);
 
   const T = {
-    added: uk ? "Додано в обране" : "Added to favourites",
-    removed: uk ? "Прибрано з обраного" : "Removed from favourites",
-    failed: uk ? "Не вдалося зберегти. Спробуйте ще раз." : "Couldn't save. Please try again.",
+    added: t(locale, { uk: "Додано в обране", en: "Added to favourites", ja: "お気に入りに追加しました" }),
+    removed: t(locale, { uk: "Прибрано з обраного", en: "Removed from favourites", ja: "お気に入りから削除しました" }),
+    failed: t(locale, { uk: "Не вдалося зберегти. Спробуйте ще раз.", en: "Couldn't save. Please try again.", ja: "保存できませんでした。もう一度お試しください。" }),
     merged: (n: number) =>
       uk ? `${n} збережених товарів перенесено у ваш акаунт` : `${n} saved item${n === 1 ? "" : "s"} moved to your account`,
-    guestPush: uk
-      ? "Збережено локально. Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях."
-      : "Saved locally. Create a free account to keep your favourites across devices.",
-    createAccount: uk ? "Створити акаунт" : "Create account",
-    logIn: uk ? "Увійти" : "Log in",
+    guestPush: t(locale, { uk: "Збережено локально. Створіть безкоштовний акаунт, щоб зберігати обране на всіх пристроях.", en: "Saved locally. Create a free account to keep your favourites across devices.", ja: "この端末に保存しました。無料のアカウントを作成すると、端末間で引き継げます。" }),
+    createAccount: t(locale, { uk: "Створити акаунт", en: "Create account", ja: "アカウントを作成" }),
+    logIn: t(locale, { uk: "Увійти", en: "Log in", ja: "ログイン" }),
   };
 
   /**

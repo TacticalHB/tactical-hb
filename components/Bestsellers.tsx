@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import Image from "next/image";
 import Reveal from "./Reveal";
 
@@ -36,10 +37,9 @@ const ITEMS = [
 ];
 
 export default function Bestsellers({ locale }: { locale: string }) {
-  const uk = locale === "uk";
-  const heading = uk ? "Обрані бестселери" : "Explore our bestsellers";
-  const view = uk ? "Переглянути" : "View";
-  const seeAll = uk ? "Уся колекція" : "See the full collection";
+  const heading = t(locale, { uk: "Обрані бестселери", en: "Explore our bestsellers", ja: "人気の製品を見る" });
+  const view = t(locale, { uk: "Переглянути", en: "View", ja: "見る" });
+  const seeAll = t(locale, { uk: "Уся колекція", en: "See the full collection", ja: "コレクションをすべて見る" });
 
   return (
     <section className="page-container py-24 md:py-32">

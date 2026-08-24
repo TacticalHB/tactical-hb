@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { useAuth } from "@/components/AuthContext";
 import { openCookieSettings } from "@/lib/cookie-consent";
 
@@ -16,7 +17,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsForm({ locale }: { locale: string }) {
-  const uk = locale === "uk";
   const { supabase, user, profile, refreshProfile } = useAuth();
 
   const [firstName, setFirstName] = useState("");
@@ -51,27 +51,25 @@ export default function SettingsForm({ locale }: { locale: string }) {
   }
 
   const L = {
-    details: uk ? "Особисті дані" : "Account Details",
-    firstName: uk ? "Ім'я" : "First name",
-    surname: uk ? "Прізвище" : "Surname",
-    email: uk ? "Електронна пошта" : "Email",
-    dob: uk ? "Дата народження" : "Date of birth",
-    save: uk ? "Зберегти" : "Save",
-    password: uk ? "Пароль" : "Password",
-    newPassword: uk ? "Новий пароль" : "New password",
-    pwHint: uk ? "Мінімум 8 символів, великі й малі літери та цифра" : "Min 8 characters, upper & lower case and a number",
-    updatePw: uk ? "Оновити пароль" : "Update password",
-    comms: uk ? "Налаштування сповіщень" : "Communication Preferences",
-    marketing: uk ? "Отримувати новини, пропозиції та переваги учасника" : "Emails about updates, offers and member benefits",
-    privacy: uk ? "Приватність" : "Privacy",
-    cookieBody: uk
-      ? "Керуйте тим, які файли cookie ми можемо використовувати. Необхідні cookie завжди увімкнені."
-      : "Manage which cookies we're allowed to use. Necessary cookies are always on.",
-    cookieBtn: uk ? "Налаштування cookie" : "Cookie settings",
-    saved: uk ? "Збережено" : "Saved",
-    pwUpdated: uk ? "Пароль оновлено" : "Password updated",
-    pwWeak: uk ? "Пароль не відповідає вимогам." : "Password doesn't meet the requirements.",
-    err: uk ? "Не вдалося зберегти. Спробуйте ще раз." : "Couldn't save. Please try again.",
+    details: t(locale, { uk: "Особисті дані", en: "Account Details", ja: "アカウント情報" }),
+    firstName: t(locale, { uk: "Ім'я", en: "First name", ja: "名" }),
+    surname: t(locale, { uk: "Прізвище", en: "Surname", ja: "姓" }),
+    email: t(locale, { uk: "Електронна пошта", en: "Email", ja: "メールアドレス" }),
+    dob: t(locale, { uk: "Дата народження", en: "Date of birth", ja: "生年月日" }),
+    save: t(locale, { uk: "Зберегти", en: "Save", ja: "保存する" }),
+    password: t(locale, { uk: "Пароль", en: "Password", ja: "パスワード" }),
+    newPassword: t(locale, { uk: "Новий пароль", en: "New password", ja: "新しいパスワード" }),
+    pwHint: t(locale, { uk: "Мінімум 8 символів, великі й малі літери та цифра", en: "Min 8 characters, upper & lower case and a number", ja: "8文字以上、大文字・小文字・数字を含む" }),
+    updatePw: t(locale, { uk: "Оновити пароль", en: "Update password", ja: "パスワードを更新" }),
+    comms: t(locale, { uk: "Налаштування сповіщень", en: "Communication Preferences", ja: "配信設定" }),
+    marketing: t(locale, { uk: "Отримувати новини, пропозиції та переваги учасника", en: "Emails about updates, offers and member benefits", ja: "最新情報、ご案内、会員特典のメール" }),
+    privacy: t(locale, { uk: "Приватність", en: "Privacy", ja: "プライバシー" }),
+    cookieBody: t(locale, { uk: "Керуйте тим, які файли cookie ми можемо використовувати. Необхідні cookie завжди увімкнені.", en: "Manage which cookies we're allowed to use. Necessary cookies are always on.", ja: "利用する Cookie を管理できます。必須 Cookie は常に有効です。" }),
+    cookieBtn: t(locale, { uk: "Налаштування cookie", en: "Cookie settings", ja: "Cookie 設定" }),
+    saved: t(locale, { uk: "Збережено", en: "Saved", ja: "保存しました" }),
+    pwUpdated: t(locale, { uk: "Пароль оновлено", en: "Password updated", ja: "パスワードを更新しました" }),
+    pwWeak: t(locale, { uk: "Пароль не відповідає вимогам.", en: "Password doesn't meet the requirements.", ja: "パスワードが条件を満たしていません。" }),
+    err: t(locale, { uk: "Не вдалося зберегти. Спробуйте ще раз.", en: "Couldn't save. Please try again.", ja: "保存できませんでした。もう一度お試しください。" }),
   };
 
   const flash = (k: string, text: string, ok = true) => setMsg({ k, text, ok });
@@ -117,7 +115,7 @@ export default function SettingsForm({ locale }: { locale: string }) {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-2" style={{ color: "#111" }}>{uk ? "Налаштування" : "Account Settings"}</h1>
+      <h1 className="text-3xl font-semibold mb-2" style={{ color: "#111" }}>{t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定" })}</h1>
 
       <Section title={L.details}>
         <div className="flex flex-col gap-4 max-w-md">
@@ -148,7 +146,7 @@ export default function SettingsForm({ locale }: { locale: string }) {
             <input className="field rounded-lg pr-12" type={showPw ? "text" : "password"} placeholder={L.newPassword}
               value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
             <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs uppercase" style={{ color: "#707072" }}>
-              {showPw ? (uk ? "Сховати" : "Hide") : (uk ? "Показати" : "Show")}
+              {showPw ? (t(locale, { uk: "Сховати", en: "Hide", ja: "隠す" })) : (t(locale, { uk: "Показати", en: "Show", ja: "表示" }))}
             </button>
           </div>
           <p className="text-xs" style={{ color: "var(--text-faint)" }}>{L.pwHint}</p>

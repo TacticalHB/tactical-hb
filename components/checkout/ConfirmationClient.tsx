@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { loadOrder, type OrderSnapshot } from "@/lib/checkout";
@@ -17,7 +18,6 @@ import { formatMoney, currencyForLocale, scaleMoney } from "@/lib/currency";
 --------------------------------------------------------------------------- */
 
 export default function ConfirmationClient({ locale }: { locale: string }) {
-  const uk = locale === "uk";
   const [order, setOrder] = useState<OrderSnapshot | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -33,36 +33,44 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
   }, []);
 
   const L = {
-    thanks: uk ? "Дякуємо за замовлення в Tactical HB." : "Thank you for your Tactical HB order.",
-    great: uk ? "Ви зробили чудовий вибір." : "You've made a great choice.",
+    thanks: t(locale, { uk: "Дякуємо за замовлення в Tactical HB.", en: "Thank you for your Tactical HB order.", ja: "Tactical HB へのご注文、ありがとうございます。" }),
+    great: t(locale, { uk: "Ви зробили чудовий вибір.", en: "You've made a great choice.", ja: "すばらしい選択です。" }),
     // This page now serves the INTERNATIONAL request flow: the order is
     // recorded, nothing is charged yet, and the promise below is the one-total
     // model in a sentence. No "invoice delivery separately" wording — ever.
-    emailed: uk
-      ? "Ми напишемо вам на пошту, щойно підтвердимо суму замовлення."
-      : "We'll email you as soon as your order total is confirmed.",
-    hello: uk ? "Вітаємо," : "Hello,",
-    body: uk
-      ? "Ваше замовлення прийнято. Ми підтвердимо точну суму — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем. Дякуємо, що обрали Tactical HB."
-      : "Your order has been received. We'll confirm your exact total — goods including delivery to your destination — by email, and you'll pay it in a single payment. Thank you for choosing Tactical HB.",
+    emailed: t(locale, {
+      uk: "Ми напишемо вам на пошту, щойно підтвердимо суму замовлення.",
+      en: "We'll email you as soon as your order total is confirmed.",
+      ja: "ご注文の合計金額が確定しだい、メールでお知らせします。",
+    }),
+    hello: t(locale, { uk: "Вітаємо,", en: "Hello,", ja: "こんにちは、" }),
+    body: t(locale, {
+      uk: "Ваше замовлення прийнято. Ми підтвердимо точну суму — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем. Дякуємо, що обрали Tactical HB.",
+      en: "Your order has been received. We'll confirm your exact total — goods including delivery to your destination — by email, and you'll pay it in a single payment. Thank you for choosing Tactical HB.",
+      ja: "ご注文を承りました。商品代金とお届け先までの配送料を含む正確な合計金額をメールでご確認いただき、一度のお支払いで完了します。Tactical HB をお選びいただきありがとうございます。",
+    }),
     sign: "Tactical HB.",
-    back: uk ? "Повернутися до магазину" : "Back to store",
-    summary: uk ? "Підсумок замовлення" : "Order Summary",
-    orderNo: uk ? "Номер замовлення" : "Order No",
-    shipping: uk ? "Дані доставки" : "Shipping details",
-    total: uk ? "Разом" : "Total",
-    goodsTotal: uk ? "Товари" : "Goods",
-    goodsTotalNote: uk
-      ? "Доставку буде включено до підтвердженої суми замовлення."
-      : "Delivery will be included in your confirmed order total.",
-    discount: uk ? "Ваучер" : "Voucher",
-    qty: uk ? "К-сть" : "Qty",
-    none: uk ? "Замовлення не знайдено." : "No recent order found.",
-    noneBody: uk
-      ? "Це посилання діє лише одразу після оформлення замовлення."
-      : "This page is only available right after placing an order.",
-    shop: uk ? "Перейти до товарів" : "Continue shopping",
-    accountMade: uk ? "Ваш акаунт створено." : "Your account has been created.",
+    back: t(locale, { uk: "Повернутися до магазину", en: "Back to store", ja: "ストアに戻る" }),
+    summary: t(locale, { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容" }),
+    orderNo: t(locale, { uk: "Номер замовлення", en: "Order No", ja: "注文番号" }),
+    shipping: t(locale, { uk: "Дані доставки", en: "Shipping details", ja: "お届け先情報" }),
+    total: t(locale, { uk: "Разом", en: "Total", ja: "合計" }),
+    goodsTotal: t(locale, { uk: "Товари", en: "Goods", ja: "商品" }),
+    goodsTotalNote: t(locale, {
+      uk: "Доставку буде включено до підтвердженої суми замовлення.",
+      en: "Delivery will be included in your confirmed order total.",
+      ja: "配送料は、確定するご注文の合計金額に含まれます。",
+    }),
+    discount: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー" }),
+    qty: t(locale, { uk: "К-сть", en: "Qty", ja: "数量" }),
+    none: t(locale, { uk: "Замовлення не знайдено.", en: "No recent order found.", ja: "最近のご注文が見つかりませんでした。" }),
+    noneBody: t(locale, {
+      uk: "Це посилання діє лише одразу після оформлення замовлення.",
+      en: "This page is only available right after placing an order.",
+      ja: "このページは、ご注文の直後のみご覧いただけます。",
+    }),
+    shop: t(locale, { uk: "Перейти до товарів", en: "Continue shopping", ja: "買い物を続ける" }),
+    accountMade: t(locale, { uk: "Ваш акаунт створено.", en: "Your account has been created.", ja: "アカウントを作成しました。" }),
   };
 
   if (!ready) return <div style={{ minHeight: "60vh" }} />;

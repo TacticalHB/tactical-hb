@@ -39,12 +39,11 @@ const PLATE = "#f5f5f5";
 export default async function WhatsNextPanel({ locale }: { locale: string }) {
   const t = await getTranslations("newsletter");
   const c = await getTranslations("cart");
-  const uk = locale === "uk";
 
   const label: Record<string, string> = {
-    bowl: uk ? "Чаша" : "Bowl",
-    hmd: uk ? "Пристрій нагріву" : "Heat device",
-    windcover: uk ? "Ковпак" : "Wind cover",
+    bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" }),
+    hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス" }),
+    windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー" }),
   };
 
   return (

@@ -310,10 +310,18 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      the weight and adds the configuration row rather than leaving the page
      describing a product the customer is no longer buying. */
   const fieldRows = buildFieldCard({ product, locale, material, windcover });
-  const shortDesc = pdp ? (uk ? pdp.shortUk : pdp.shortEn) : (uk ? product.descriptionUk : product.descriptionEn);
-  const benefits = pdp ? (uk ? pdp.benefitsUk : pdp.benefitsEn) ?? [] : [];
-  const tips = pdp ? (uk ? pdp.tipsUk : pdp.tipsEn) ?? [] : [];
-  const colourShown = pdp ? (uk ? pdp.colourShownUk : pdp.colourShownEn) : undefined;
+  const shortDesc = pdp
+    ? t(locale, { uk: pdp.shortUk, en: pdp.shortEn, ja: pdp.shortJa })
+    : t(locale, { uk: product.descriptionUk, en: product.descriptionEn, ja: product.descriptionJa });
+  const benefits = pdp
+    ? (locale === "uk" ? pdp.benefitsUk : locale === "ja" ? pdp.benefitsJa ?? pdp.benefitsEn : pdp.benefitsEn) ?? []
+    : [];
+  const tips = pdp
+    ? (locale === "uk" ? pdp.tipsUk : locale === "ja" ? pdp.tipsJa ?? pdp.tipsEn : pdp.tipsEn) ?? []
+    : [];
+  const colourShown = pdp
+    ? t(locale, { uk: pdp.colourShownUk ?? "", en: pdp.colourShownEn ?? "", ja: pdp.colourShownJa }) || undefined
+    : undefined;
 
   const catLabel =
     product.category === "hmd"
@@ -330,14 +338,16 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     specs: t(locale, { uk: "Характеристики", en: "Tech Specs", ja: "仕様" }),
     tips: t(locale, { uk: "Поради з використання", en: "Tips for Use", ja: "ご使用のヒント" }),
     delivery: t(locale, { uk: "Доставка та повернення", en: "Delivery & Returns", ja: "配送と返品" }),
-    deliveryText: uk
-      /* One string for the whole catalogue, which is the point: it used to
-         promise "Europe & the Middle East" while the shop ships worldwide, and
-         a per-product string would have had to be corrected eight times and
-         missed on the ninth. Fourteen days matches the offer and the returns
-         policy — do not change it here alone. */
-      ? "Доставляємо по всьому світу. Повернення — протягом 14 днів з обґрунтованої причини."
-      : "We ship worldwide. Returns accepted within 14 days where the reason is justified.",
+    /* One string for the whole catalogue, which is the point: it used to
+       promise "Europe & the Middle East" while the shop ships worldwide, and a
+       per-product string would have had to be corrected eight times and missed
+       on the ninth. Fourteen days matches the offer and the returns policy —
+       do not change it here alone, and that now means in three languages. */
+    deliveryText: t(locale, {
+      uk: "Доставляємо по всьому світу. Повернення — протягом 14 днів з обґрунтованої причини.",
+      en: "We ship worldwide. Returns accepted within 14 days where the reason is justified.",
+      ja: "世界各地へ発送しています。正当な理由がある場合、お受け取りから14日以内に返品いただけます。",
+    }),
     benefits: t(locale, { uk: "Ключові переваги", en: "Key Benefits", ja: "主な特長" }),
   };
 
@@ -567,8 +577,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   <tbody>
                     {pdp.specs.map((s) => (
                       <tr key={s.labelEn} className="border-b last:border-0" style={{ borderColor: "#efefef" }}>
-                        <td className="py-2.5 pr-4" style={{ color: "#707072" }}>{uk ? s.labelUk : s.labelEn}</td>
-                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{uk ? s.valueUk : s.valueEn}</td>
+                        <td className="py-2.5 pr-4" style={{ color: "#707072" }}>{t(locale, { uk: s.labelUk, en: s.labelEn, ja: s.labelJa })}</td>
+                        <td className="py-2.5 text-right" style={{ color: "#111" }}>{t(locale, { uk: s.valueUk, en: s.valueEn, ja: s.valueJa })}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -602,8 +612,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 className="flex flex-col items-center text-center gap-3 py-12 px-4"
                 style={{ borderLeft: i > 0 ? "1px solid #e8e8e8" : "none" }}>
                 <FeatureIcon name={f.icon} />
-                <div className="text-[13px] mt-2" style={{ color: "#707072" }}>{uk ? f.titleUk : f.titleEn}</div>
-                <div className="text-[17px] font-medium" style={{ color: "#111" }}>{uk ? f.textUk : f.textEn}</div>
+                <div className="text-[13px] mt-2" style={{ color: "#707072" }}>{t(locale, { uk: f.titleUk, en: f.titleEn, ja: f.titleJa })}</div>
+                <div className="text-[17px] font-medium" style={{ color: "#111" }}>{t(locale, { uk: f.textUk, en: f.textEn, ja: f.textJa })}</div>
               </div>
             ))}
           </div>

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
 export default function LoginForm({ locale }: { locale: string }) {
-  const uk = locale === "uk";
   const { supabase } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,20 +18,20 @@ export default function LoginForm({ locale }: { locale: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const L = {
-    title: uk ? "З поверненням" : "Welcome back",
-    subtitle: uk ? "Увійдіть у свій акаунт Tactical HB." : "Sign in to your Tactical HB account.",
-    email: uk ? "Електронна пошта" : "Email address",
-    password: uk ? "Пароль" : "Password",
-    signIn: uk ? "Увійти" : "Sign in",
-    noAcc: uk ? "Ще не з нами?" : "Not a member yet?",
-    join: uk ? "Приєднатися" : "Join us",
-    badEmail: uk ? "Введіть дійсну електронну пошту." : "Enter a valid email address.",
-    badCreds: uk ? "Невірна пошта або пароль." : "Incorrect email or password.",
+    title: t(locale, { uk: "З поверненням", en: "Welcome back", ja: "おかえりなさい" }),
+    subtitle: t(locale, { uk: "Увійдіть у свій акаунт Tactical HB.", en: "Sign in to your Tactical HB account.", ja: "Tactical HB のアカウントにログインしてください。" }),
+    email: t(locale, { uk: "Електронна пошта", en: "Email address", ja: "メールアドレス" }),
+    password: t(locale, { uk: "Пароль", en: "Password", ja: "パスワード" }),
+    signIn: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン" }),
+    noAcc: t(locale, { uk: "Ще не з нами?", en: "Not a member yet?", ja: "アカウントをお持ちでない方" }),
+    join: t(locale, { uk: "Приєднатися", en: "Join us", ja: "登録する" }),
+    badEmail: t(locale, { uk: "Введіть дійсну електронну пошту.", en: "Enter a valid email address.", ja: "有効なメールアドレスをご入力ください。" }),
+    badCreds: t(locale, { uk: "Невірна пошта або пароль.", en: "Incorrect email or password.", ja: "メールアドレスまたはパスワードが正しくありません。" }),
   };
 
   const submit = async () => {
     setError(null);
-    if (!supabase) return setError(uk ? "Вхід тимчасово недоступний." : "Sign-in is temporarily unavailable.");
+    if (!supabase) return setError(t(locale, { uk: "Вхід тимчасово недоступний.", en: "Sign-in is temporarily unavailable.", ja: "ログインを一時的にご利用いただけません。" }));
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError(L.badEmail);
     if (!password) return setError(L.badCreds);
     setLoading(true);
@@ -59,7 +59,7 @@ export default function LoginForm({ locale }: { locale: string }) {
             <input className="field rounded-lg pr-12" type={showPw ? "text" : "password"} placeholder={L.password}
               value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
             <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-11 h-11 text-xs uppercase tracking-wide" style={{ color: "#707072" }}>
-              {showPw ? (uk ? "Сховати" : "Hide") : (uk ? "Показати" : "Show")}
+              {showPw ? (t(locale, { uk: "Сховати", en: "Hide", ja: "隠す" })) : (t(locale, { uk: "Показати", en: "Show", ja: "表示" }))}
             </button>
           </div>
           <button type="submit" disabled={loading}

@@ -83,7 +83,6 @@ const CATEGORY_NAME: Record<Product["category"], Text> = {
 };
 
 export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {
-  const uk = locale === "uk";
   const rows: FieldRow[] = [];
   const g = t(locale, { uk: "г", en: "g", ja: "g" });
 
@@ -107,8 +106,8 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
     if (spec) {
       rows.push({
         key: wanted.toLowerCase(),
-        label: uk ? spec.labelUk : spec.labelEn,
-        value: uk ? spec.valueUk : spec.valueEn,
+        label: t(locale, { uk: spec.labelUk, en: spec.labelEn, ja: spec.labelJa }),
+        value: t(locale, { uk: spec.valueUk, en: spec.valueEn, ja: spec.valueJa }),
       });
     }
   }

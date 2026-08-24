@@ -38,7 +38,6 @@ export default async function HomePage() {
 function HomeContent({ locale }: { locale: string }) {
   const t = useTranslations("home");
   const tf = useTranslations("flagship");
-  const uk = locale === "uk";
 
   return (
     <div style={{ background: "var(--bg)" }}>
@@ -172,7 +171,7 @@ function HomeContent({ locale }: { locale: string }) {
           neither. */}
       <section className="page-container py-10 md:py-16">
         <Reveal>
-          <SearchlightHero uk={uk} />
+          <SearchlightHero locale={locale} />
         </Reveal>
       </section>
 
@@ -227,7 +226,7 @@ function HomeContent({ locale }: { locale: string }) {
               carrying a watermark of the logo — the section's right half now
               shows the brand's own character instead of a placeholder. */}
           <Reveal delay={160}>
-            <MissionMonitor uk={uk} />
+            <MissionMonitor locale={locale} />
           </Reveal>
           </div>
         </div>

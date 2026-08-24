@@ -131,13 +131,13 @@ export type TimelineStep = {
  * reached or passed it; the last real status is where the line stops. An order
  * sitting at paid shows shipped and delivered as future, not as promises.
  */
-export function timelineFor(status: string, uk: boolean): TimelineStep[] | null {
+export function timelineFor(status: string, locale: string): TimelineStep[] | null {
   const at = ORDER_STEPS.indexOf(status as OrderStep);
   if (at === -1) return null; // cancelled, or a status this build has not met
 
   return ORDER_STEPS.map((key, i) => ({
     key,
-    label: statusLabel(key, uk),
+    label: statusLabel(key, locale),
     state: i < at ? "done" : i === at ? "current" : "future",
   }));
 }

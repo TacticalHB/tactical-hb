@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import MrHbDossier, { dossierCopy } from "./MrHbDossier";
 
 /* ---------------------------------------------------------------------------
@@ -47,7 +48,7 @@ import MrHbDossier, { dossierCopy } from "./MrHbDossier";
    a larger size would produce the same pixels for a great deal more work.
 --------------------------------------------------------------------------- */
 
-export default function MissionMonitor({ uk }: { uk: boolean }) {
+export default function MissionMonitor({ locale }: { locale: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   /* The dossier hangs off this device. State lives here rather than inside the
@@ -60,7 +61,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
     setDossierOpen(false);
     tabRef.current?.focus();
   }, []);
-  const dossier = dossierCopy(uk);
+  const dossier = dossierCopy(locale);
 
   /* THE FALLBACK IS A REAL <img>, NOT THE POSTER ATTRIBUTE, and that is the
      whole fix for the black screen. A poster assigned from script AFTER the
@@ -258,7 +259,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           <span style={{ color: "var(--accent)" }}>TCT-01</span>
           {/* The separator is literal text, not a comment — quoted so neither
               the linter nor the next reader has to guess. */}
-          <span style={{ color: "#8a9097" }}>{` // ${uk ? "ЕФІР" : "LIVE FEED"}`}</span>
+          <span style={{ color: "#8a9097" }}>{` // ${t(locale, { uk: "ЕФІР", en: "LIVE FEED", ja: "ライブ映像" })}`}</span>
         </span>
         <span
           className="flex items-center gap-1.5 font-mono text-[9px] font-medium tracking-[0.12em]"
@@ -307,7 +308,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
           muted
           playsInline
           preload="auto"
-          aria-label={uk ? "Анімація Mr.HB" : "Mr.HB animation"}
+          aria-label={t(locale, { uk: "Анімація Mr.HB", en: "Mr.HB animation", ja: "Mr.HB のアニメーション" })}
         />
 
         {/* The failure still. Same framing as the video — identical object-fit
@@ -383,7 +384,7 @@ export default function MissionMonitor({ uk }: { uk: boolean }) {
         </button>
       </div>
 
-      <MrHbDossier uk={uk} open={dossierOpen} onClose={closeDossier} />
+      <MrHbDossier locale={locale} open={dossierOpen} onClose={closeDossier} />
     </div>
   );
 }

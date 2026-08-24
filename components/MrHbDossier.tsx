@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { createPortal } from "react-dom";
 import { useMounted } from "@/hooks/useBrowserState";
 
@@ -38,18 +39,21 @@ type Stage = "closed" | "breaking" | "letter";
    every surface that shows it applies `uppercase`; writing it in caps here
    would double up with the CSS and defeat any future lower-case use.
 --------------------------------------------------------------------------- */
-export function dossierCopy(uk: boolean) {
+export function dossierCopy(locale: string) {
   return {
     /* "ВІДКРИТИ СПРАВУ" is a good deal longer than "OPEN FILE", so the tab
        tightens its tracking on Ukrainian rather than growing or wrapping. */
-    openFile: uk ? "Відкрити справу" : "Open file",
-    tracking: uk ? "0.12em" : "0.22em",
-    close: uk ? "Закрити" : "Close",
+    openFile: t(locale, { uk: "Відкрити справу", en: "Open file", ja: "ファイルを開く" }),
+    /* Not copy — letter-spacing. Ukrainian's longer label is tightened;
+       Japanese is set solid, because tracking applied to kana reads as a
+       typesetting fault rather than as emphasis. */
+    tracking: t(locale, { uk: "0.12em", en: "0.22em", ja: "0.02em" }),
+    close: t(locale, { uk: "Закрити", en: "Close", ja: "閉じる" }),
     /* The way from the modal to the full page. The dossier shows the letter
        and stops; the operative file is the rest of it. */
-    fullFile: uk ? "Відкрити повну справу" : "Open the full file",
-    title: uk ? "Справа: Mr HB" : "File: Mr HB",
-    strip: uk ? "TCT-01 · MR HB · ВНУТРІШНЄ" : "TCT-01 · MR HB · INTERNAL",
+    fullFile: t(locale, { uk: "Відкрити повну справу", en: "Open the full file", ja: "ファイル全文を開く" }),
+    title: t(locale, { uk: "Справа: Mr HB", en: "File: Mr HB", ja: "ファイル：Mr HB" }),
+    strip: t(locale, { uk: "TCT-01 · MR HB · ВНУТРІШНЄ", en: "TCT-01 · MR HB · INTERNAL", ja: "TCT-01 · MR HB · 社内資料" }),
   };
 }
 
@@ -57,14 +61,17 @@ export function dossierCopy(uk: boolean) {
 const BREAK_MS = 520;
 
 export default function MrHbDossier({
-  uk,
+  locale,
   open,
   onClose,
 }: {
-  uk: boolean;
+  /* The locale, not a `uk` flag: this component links to /{locale}/mr-hb, and
+     a boolean can only ever send a Japanese reader to the English page. */
+  locale: string;
   open: boolean;
   onClose: () => void;
 }) {
+  const uk = locale === "uk";
   const [stage, setStage] = useState<Stage>("closed");
   const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -142,18 +149,14 @@ export default function MrHbDossier({
 
   if (!mounted || !open) return null;
 
-  const C = dossierCopy(uk);
+  const C = dossierCopy(locale);
   const L = {
     title: C.title,
     openFile: C.openFile,
     close: C.close,
     fullFile: C.fullFile,
-    envelopeAlt: uk
-      ? "Запечатаний конверт із печаткою TCT"
-      : "A sealed envelope bearing the TCT seal",
-    letterAlt: uk
-      ? "Лист: справа на Mr HB"
-      : "Letter: the file on Mr HB",
+    envelopeAlt: t(locale, { uk: "Запечатаний конверт із печаткою TCT", en: "A sealed envelope bearing the TCT seal", ja: "TCT の封蝋が押された封筒" }),
+    letterAlt: t(locale, { uk: "Лист: справа на Mr HB", en: "Letter: the file on Mr HB", ja: "書簡：Mr HB のファイル" }),
   };
 
   /* The letter's words, for screen readers and for search. The image carries
@@ -269,7 +272,7 @@ export default function MrHbDossier({
                 the homepage monitor and the About panel open this same modal,
                 so this single link serves both entry points. */}
             <a
-              href={`/${uk ? "uk" : "en"}/mr-hb`}
+              href={`/${locale}/mr-hb`}
               className="mt-5 inline-flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] transition-opacity hover:opacity-70"
               style={{ color: "var(--accent)" }}
             >

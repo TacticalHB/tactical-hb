@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    The searchlight film, in the homepage's wide black stage.
@@ -36,7 +37,7 @@ import { useEffect, useRef, useState } from "react";
    than letting it spin unseen.
 --------------------------------------------------------------------------- */
 
-export default function SearchlightHero({ uk }: { uk: boolean }) {
+export default function SearchlightHero({ locale }: { locale: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   /* THE FALLBACK IS A REAL <img>, NOT THE POSTER ATTRIBUTE. A poster assigned
@@ -162,7 +163,7 @@ export default function SearchlightHero({ uk }: { uk: boolean }) {
         muted
         playsInline
         preload="metadata"
-        aria-label={uk ? "Промо-ролик Tactical HB" : "Tactical HB promo film"}
+        aria-label={t(locale, { uk: "Промо-ролик Tactical HB", en: "Tactical HB promo film", ja: "Tactical HB のプロモーション映像" })}
       />
 
       {/* The still. Same fit and position as the film, so a swap to live

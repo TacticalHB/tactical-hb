@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { toast } from "sonner";
 import { getVoucherState, type Voucher } from "@/lib/loyalty/vouchers";
 import { formatVoucher, type LoyaltyConfig } from "@/lib/loyalty/config";
@@ -29,20 +30,20 @@ export default function VoucherCard({
   const money = (eur: number) => formatVoucher(eur, cfg, locale);
 
   const L = {
-    active: uk ? "Активний" : "Active",
-    expired: uk ? "Прострочений" : "Expired",
-    used: uk ? "Використаний" : "Used",
+    active: t(locale, { uk: "Активний", en: "Active", ja: "有効" }),
+    expired: t(locale, { uk: "Прострочений", en: "Expired", ja: "期限切れ" }),
+    used: t(locale, { uk: "Використаний", en: "Used", ja: "使用済み" }),
     minOrder: (v: string) => (uk ? `Мін. замовлення ${v}` : `Min order ${v}`),
-    expires: uk ? "Діє до" : "Expires",
-    usedOn: uk ? "Використано" : "Used on",
-    order: uk ? "Замовлення" : "Order",
-    copy: uk ? "Копіювати код" : "Copy code",
-    copied: uk ? "Код скопійовано" : "Code copied",
-    copyFailed: uk ? "Не вдалося скопіювати" : "Couldn't copy",
+    expires: t(locale, { uk: "Діє до", en: "Expires", ja: "有効期限" }),
+    usedOn: t(locale, { uk: "Використано", en: "Used on", ja: "使用日" }),
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
+    copy: t(locale, { uk: "Копіювати код", en: "Copy code", ja: "コードをコピー" }),
+    copied: t(locale, { uk: "Код скопійовано", en: "Code copied", ja: "コードをコピーしました" }),
+    copyFailed: t(locale, { uk: "Не вдалося скопіювати", en: "Couldn't copy", ja: "コピーできませんでした" }),
   };
 
   const date = (s: string) =>
-    new Date(s).toLocaleDateString(uk ? "uk-UA" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+    new Date(s).toLocaleDateString(t(locale, { uk: "uk-UA", en: "en-GB", ja: "ja-JP" }), { day: "numeric", month: "short", year: "numeric" });
 
   const badge =
     state === "active"

@@ -31,7 +31,9 @@ export async function generateMetadata({
      fallback for the products that do not carry one. */
   const description = uk
     ? product.pdp?.shortUk || product.descriptionUk
-    : product.pdp?.shortEn || product.descriptionEn;
+    : locale === "ja"
+      ? product.pdp?.shortJa || product.descriptionJa || product.pdp?.shortEn || product.descriptionEn
+      : product.pdp?.shortEn || product.descriptionEn;
 
   return pageMetadata({
     locale,
@@ -63,7 +65,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     name,
     description: uk
       ? product.pdp?.shortUk || product.descriptionUk
-      : product.pdp?.shortEn || product.descriptionEn,
+      : locale === "ja"
+        ? product.pdp?.shortJa || product.descriptionJa || product.pdp?.shortEn || product.descriptionEn
+        : product.pdp?.shortEn || product.descriptionEn,
     image: [`${SITE_URL}${product.gridImage || product.image}`],
     sku: product.id,
     brand: { "@type": "Brand", name: SITE_NAME },

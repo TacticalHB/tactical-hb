@@ -31,8 +31,14 @@ export type Product = {
   nameEn: string;
   taglineUk: string;
   taglineEn: string;
+  /* Japanese is OPTIONAL on every copy field. Absent means the English is
+     used, which is the same fallback lib/i18n-text and i18n/request.ts apply —
+     never Ukrainian. Product NAMES have no Ja twin on purpose: nameEn and
+     nameUk already hold the same Latin string, and a name is not translated. */
+  taglineJa?: string;
   descriptionUk: string;
   descriptionEn: string;
+  descriptionJa?: string;
   price: number;
   /** Hand-set UAH price (not a conversion of `price`) — see lib/currency.ts */
   priceUah: number;
@@ -66,16 +72,27 @@ export type Product = {
     styleCode?: string;
     colourShownEn?: string;
     colourShownUk?: string;
+    colourShownJa?: string;
     shortEn: string;
     shortUk: string;
+    shortJa?: string;
     benefitsEn?: string[];
     benefitsUk?: string[];
+    benefitsJa?: string[];
     tipsEn?: string[];
     tipsUk?: string[];
-    specs?: { labelEn: string; labelUk: string; valueEn: string; valueUk: string }[];
+    tipsJa?: string[];
+    specs?: {
+      labelEn: string;
+      labelUk: string;
+      labelJa?: string;
+      valueEn: string;
+      valueUk: string;
+      valueJa?: string;
+    }[];
     statementEn?: string;
     statementUk?: string;
-    features?: { icon: "flame" | "clock" | "hands" | "wave" | "cloud" | "user" | "droplet" | "mesh" | "layers" | "shield" | "sparkle"; titleEn: string; titleUk: string; textEn: string; textUk: string }[];
+    features?: { icon: "flame" | "clock" | "hands" | "wave" | "cloud" | "user" | "droplet" | "mesh" | "layers" | "shield" | "sparkle"; titleEn: string; titleUk: string; titleJa?: string; textEn: string; textUk: string; textJa?: string }[];
   };
   tags: string[];
 };
@@ -88,8 +105,10 @@ export const products: Product[] = [
     nameEn: "HMD TCT Classic",
     taglineUk: "Алюміній без покриття. Нічому стиратися.",
     taglineEn: "Bare aluminium. Nothing to wear off.",
+    taglineJa: "素地のアルミニウム。すり減るものがありません。",
     descriptionUk: "HMD з алюмінію без покриття — чистий метал і рівномірне тепло без екстремальних температур. Кришка — опція.",
     descriptionEn: "The bare aluminium HMD — uncoated metal, uniform heat distribution without temperature extremes. Lid optional.",
+    descriptionJa: "素地アルミニウムの HMD — 無垢の金属で、極端な温度差のない均一な熱まわり。リッドは別売です。",
     /* THE DEVICE ALONE. No lid in the box and none in this figure — the lid is
        an add-on here exactly as it is on the other two devices.
 
@@ -121,10 +140,13 @@ export const products: Product[] = [
          and must be corrected together. */
       colourShownEn: "Bare Aluminium",
       colourShownUk: "Алюміній без покриття",
+      colourShownJa: "素地アルミニウム",
       shortEn:
         "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The Classic is the bare aluminium expression of the HMD — machined metal with no coating and no surface treatment, so there is nothing on it to wear through or discolour with use. Set it and forget it — no constant coal manipulation required.",
       shortUk:
         "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Classic — це версія HMD з алюмінію без покриття: оброблений метал без жодного шару зверху, тож на ньому нічому стиратися чи темніти з часом. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+      shortJa:
+        "極端な温度変化を伴わない均一な熱分布のために設計されています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。Classic は HMD の素地アルミニウム版です。コーティングも表面処理もない削り出しの金属なので、使ううちにすり減ったり変色したりする層がありません。セットしたら、あとは任せるだけ — 炭を絶えず動かす必要はありません。",
       benefitsEn: [
         "Mildness of smoking with rich, consistent flavour",
         "Extended session duration (90+ minutes with proper use)",
@@ -139,6 +161,13 @@ export const products: Product[] = [
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
         "Час нагріву — близько 6 хвилин під ковпаком",
       ],
+      benefitsJa: [
+        "豊かで安定した香味と、まろやかな吸い心地",
+        "長いセッション（適切にお使いいただいた場合 90分以上）",
+        "素地アルミニウム — すり減ったり変色したりする被膜がありません",
+        "手間いらず — 炭を回したり調整し続ける必要がありません",
+        "ウインドカバー使用時の加熱時間は約6分",
+      ],
       /* The care instructions are the device's, not the finish's, so all three
          HMDs carry the same three. Wording them differently per SKU would
          imply a difference in handling that does not exist. */
@@ -152,6 +181,11 @@ export const products: Product[] = [
         "Для чищення використовуйте лише м'які неабразивні серветки",
         "Не розігрівайте HMD на плитці для вугілля",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "清掃には柔らかく研磨性のない布のみをお使いください",
+        "炭用のヒーターで HMD を予熱しないでください",
+      ],
       /* Material and Finish are spelled EXACTLY so on purpose — lib/field-card
          looks those two labels up by their English text and lifts them onto the
          card. Rename either and the card silently loses the row. The heat
@@ -159,16 +193,16 @@ export const products: Product[] = [
          only the Finish row differs, and it is the one row that must never be
          copied between these products. */
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
-        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Bare aluminium, uncoated", valueUk: "Алюміній без покриття" },
-        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком" },
-        { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній", valueJa: "航空アルミニウム" },
+        { labelEn: "Finish", labelUk: "Обробка", labelJa: "仕上げ", valueEn: "Bare aluminium, uncoated", valueUk: "Алюміній без покриття", valueJa: "素地アルミニウム、無塗装" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", labelJa: "加熱時間", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком", valueJa: "ウインドカバー使用時 約6分" },
+        { labelEn: "Session duration", labelUk: "Тривалість сесії", labelJa: "セッション時間", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання", valueJa: "適切な使用で 90分以上" },
       ],
       features: [
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "90+ minutes", textUk: "90+ хвилин" },
-        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", textEn: "Zero coal fuss", textUk: "Жодної метушні" },
-        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", textEn: "Mild & consistent", textUk: "М'який і стабільний", textJa: "まろやかで安定" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", textEn: "90+ minutes", textUk: "90+ хвилин", textJa: "90分以上" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", textEn: "Zero coal fuss", textUk: "Жодної метушні", textJa: "炭いらずの手間なし" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分" },
       ],
     },
     tags: ["aluminium", "bare", "classic"],
@@ -180,8 +214,10 @@ export const products: Product[] = [
     nameEn: "HMD A.Craft",
     taglineUk: "Крафтове видання з твердим анодуванням.",
     taglineEn: "Hard anodised craft edition.",
+    taglineJa: "ハードアノダイズド仕上げのクラフトエディション。",
     descriptionUk: "Видання A.Craft з твердим анодованим покриттям алюмінію. Без кришки. Унікальна тактична естетика.",
     descriptionEn: "A.Craft edition with a hard anodised aluminium surface. Without lid. Unique tactical aesthetic.",
+    descriptionJa: "アルミニウムをハードアノダイズド処理した A.Craft エディション。リッドなし。独自のタクティカルな佇まい。",
     price: 24,
     priceUah: 900,
     currency: "EUR",
@@ -201,10 +237,13 @@ export const products: Product[] = [
       styleCode: "9E418",
       colourShownEn: "Tactical Grey",
       colourShownUk: "Тактичний сірий",
+      colourShownJa: "タクティカルグレー",
       shortEn:
         "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The A.Craft body is hard anodised — the finish is grown into the surface of the metal rather than laid on top of it, which is what lets it take heat and handling without marking. Set it and forget it — no constant coal manipulation required.",
       shortUk:
         "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Корпус A.Craft має тверде анодоване покриття — воно утворюється в самому металі, а не лежить зверху, тому витримує жар і щоденне користування без слідів. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+      shortJa:
+        "極端な温度変化を伴わない均一な熱分布のために設計されています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。A.Craft のボディはハードアノダイズド処理 — 被膜を上から載せるのではなく、金属の表面そのものを変化させて育てた仕上げです。だからこそ、熱にも日々の扱いにも跡を残さず耐えます。セットしたら、あとは任せるだけ — 炭を絶えず動かす必要はありません。",
       benefitsEn: [
         "Mildness of smoking with rich, consistent flavour",
         "Extended session duration (90+ minutes with proper use)",
@@ -219,6 +258,13 @@ export const products: Product[] = [
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
         "Час нагріву — близько 6 хвилин під ковпаком",
       ],
+      benefitsJa: [
+        "豊かで安定した香味と、まろやかな吸い心地",
+        "長いセッション（適切にお使いいただいた場合 90分以上）",
+        "ハードアノダイズド表面 — 摩耗、熱、傷に強い仕上げ",
+        "手間いらず — 炭を回したり調整し続ける必要がありません",
+        "ウインドカバー使用時の加熱時間は約6分",
+      ],
       tipsEn: [
         "Never cool the device with water",
         "Use only soft, non-abrasive cloths for cleaning",
@@ -229,17 +275,22 @@ export const products: Product[] = [
         "Для чищення використовуйте лише м'які неабразивні серветки",
         "Не розігрівайте HMD на плитці для вугілля",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "清掃には柔らかく研磨性のない布のみをお使いください",
+        "炭用のヒーターで HMD を予熱しないでください",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
-        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Hard anodised", valueUk: "Тверде анодування" },
-        { labelEn: "Heating time", labelUk: "Час нагріву", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком" },
-        { labelEn: "Session duration", labelUk: "Тривалість сесії", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній", valueJa: "航空アルミニウム" },
+        { labelEn: "Finish", labelUk: "Обробка", labelJa: "仕上げ", valueEn: "Hard anodised", valueUk: "Тверде анодування", valueJa: "ハードアノダイズド" },
+        { labelEn: "Heating time", labelUk: "Час нагріву", labelJa: "加熱時間", valueEn: "≈ 6 min under wind cover", valueUk: "≈ 6 хв під ковпаком", valueJa: "ウインドカバー使用時 約6分" },
+        { labelEn: "Session duration", labelUk: "Тривалість сесії", labelJa: "セッション時間", valueEn: "90+ min with proper use", valueUk: "90+ хв за належного використання", valueJa: "適切な使用で 90分以上" },
       ],
       features: [
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & consistent", textUk: "М'який і стабільний" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "90+ minutes", textUk: "90+ хвилин" },
-        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", textEn: "Zero coal fuss", textUk: "Жодної метушні" },
-        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", textEn: "Mild & consistent", textUk: "М'який і стабільний", textJa: "まろやかで安定" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", textEn: "90+ minutes", textUk: "90+ хвилин", textJa: "90分以上" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", textEn: "Zero coal fuss", textUk: "Жодної метушні", textJa: "炭いらずの手間なし" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分" },
       ],
     },
     tags: ["aluminium", "hard anodised"],
@@ -251,8 +302,10 @@ export const products: Product[] = [
     nameEn: "HMD TCT OP",
     taglineUk: "Антипригарна поверхня, без PFOA.",
     taglineEn: "Non-stick surface, PFOA-free.",
+    taglineJa: "非粘着表面、PFOA フリー。",
     descriptionUk: "Повністю антипригарна поверхня, 100% без PFOA. Запобігає прилипанню тютюну, легке очищення. Доступний у фіолетовому та чорному кольорах.",
     descriptionEn: "Fully non-stick surface, 100% PFOA-free. Prevents tobacco adhesion, easy cleaning. Available in purple and black.",
+    descriptionJa: "完全な非粘着表面、100% PFOA フリー。タバコの付着を防ぎ、お手入れも簡単です。パープルとブラックをご用意しています。",
     price: 30,
     priceUah: 1150,
     currency: "EUR",
@@ -296,6 +349,8 @@ export const products: Product[] = [
         "The HMD OP is built for overpack smoking. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. Its fully non-stick, 100% PFOA-free surface repels tobacco residue, which keeps heat distribution even and cleaning effortless — even through intensive sessions. Offered in black and purple.",
       shortUk:
         "HMD OP створений для куріння в стилі overpack. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки тютюну, завдяки чому тепло розподіляється рівномірно, а очищення не потребує зусиль навіть після інтенсивних сесій. Доступний у чорному та фіолетовому кольорах.",
+      shortJa:
+        "HMD OP はオーバーパック向けに作られています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。完全な非粘着かつ 100% PFOA フリーの表面がタバコの残りを寄せつけないため、熱が均一に伝わり、激しいセッションのあとでも手入れに手間がかかりません。ブラックとパープルの2色。",
       benefitsEn: [
         "Non-stick surface repels residue — bold overpacks without sticking or bitterness",
         "Optimised for overpacking — even heat for massive clouds and rich flavour",
@@ -310,6 +365,13 @@ export const products: Product[] = [
         "Довговічний і легкий в очищенні — залишки легко витираються",
         "Працює і як звичайний TCT HMD, але створений для overpack-стилю",
       ],
+      benefitsJa: [
+        "非粘着表面が残りを寄せつけません — 大胆なオーバーパックでも、貼りつきや苦みが出ません",
+        "オーバーパックに最適化 — 均一な熱で、豊かな煙と香味を引き出します",
+        "なめらかで扱いやすいセッションと、澄んだ軽い吸い込み",
+        "丈夫でお手入れも簡単 — 残りはさっと拭き取れます",
+        "通常の TCT HMD としても使えますが、本領はオーバーパックにあります",
+      ],
       tipsEn: [
         "Never cool the device with water",
         "Use only soft, non-abrasive cloths for cleaning",
@@ -320,6 +382,11 @@ export const products: Product[] = [
         "Для чищення використовуйте лише м'які неабразивні серветки",
         "Не розігрівайте HMD на плитці для вугілля",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "清掃には柔らかく研磨性のない布のみをお使いください",
+        "炭用のヒーターで HMD を予熱しないでください",
+      ],
       specs: [
         /* Material first and Finish second, same as the other two HMDs, because
            lib/field-card lifts exactly those two English labels onto the card.
@@ -328,16 +395,16 @@ export const products: Product[] = [
            English one collided with the real finish row. "Tactical-grade
            inspired" was not a material at all; it is the same aluminium body as
            the Classic and the A.Craft, and only the coating differs. */
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній" },
-        { labelEn: "Finish", labelUk: "Обробка", valueEn: "Fully non-stick", valueUk: "Повністю антипригарна" },
-        { labelEn: "Coating", labelUk: "Покриття", valueEn: "100% PFOA-free", valueUk: "100% без PFOA" },
-        { labelEn: "Colours", labelUk: "Кольори", valueEn: "Black & purple", valueUk: "Чорний і фіолетовий" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Aviation aluminium", valueUk: "Авіаційний алюміній", valueJa: "航空アルミニウム" },
+        { labelEn: "Finish", labelUk: "Обробка", labelJa: "仕上げ", valueEn: "Fully non-stick", valueUk: "Повністю антипригарна", valueJa: "完全非粘着" },
+        { labelEn: "Coating", labelUk: "Покриття", labelJa: "コーティング", valueEn: "100% PFOA-free", valueUk: "100% без PFOA", valueJa: "100% PFOA フリー" },
+        { labelEn: "Colours", labelUk: "Кольори", labelJa: "カラー", valueEn: "Black & purple", valueUk: "Чорний і фіолетовий", valueJa: "ブラックとパープル" },
       ],
       features: [
-        { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", textEn: "100% PFOA-free", textUk: "100% без PFOA" },
-        { icon: "flame", titleEn: "Overpack", titleUk: "Overpack", textEn: "Even heat", textUk: "Рівномірне тепло" },
-        { icon: "wave", titleEn: "Draw", titleUk: "Тяга", textEn: "Smooth & clean", textUk: "М'яка і чиста" },
-        { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", textEn: "Wipes clean", textUk: "Легко витерти" },
+        { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", titleJa: "表面", textEn: "100% PFOA-free", textUk: "100% без PFOA", textJa: "100% PFOA フリー" },
+        { icon: "flame", titleEn: "Overpack", titleUk: "Overpack", titleJa: "オーバーパック", textEn: "Even heat", textUk: "Рівномірне тепло", textJa: "均一な熱" },
+        { icon: "wave", titleEn: "Draw", titleUk: "Тяга", titleJa: "吸い込み", textEn: "Smooth & clean", textUk: "М'яка і чиста", textJa: "なめらかで澄んだ" },
+        { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", titleJa: "お手入れ", textEn: "Wipes clean", textUk: "Легко витерти", textJa: "拭くだけ" },
       ],
     },
     tags: ["non-stick", "PFOA free", "premium"],
@@ -349,8 +416,10 @@ export const products: Product[] = [
     nameEn: "Tactical Killer",
     taglineUk: "Ручна натуральна глина.",
     taglineEn: "Handmade natural clay.",
+    taglineJa: "手づくりの天然クレイ。",
     descriptionUk: "Класична форма ручної роботи з натуральної глини. Сильний та насичений дим. Оптимальна товщина стінок для стабільного утримання тепла.",
     descriptionEn: "Classic handmade bowl from natural clay. Strong and rich smoke. Optimal wall thickness for steady heat retention.",
+    descriptionJa: "天然クレイの手づくりクラシックボウル。力強く濃厚な煙。安定した保熱のための最適な肉厚。",
     price: 11,
     priceUah: 420,
     currency: "EUR",
@@ -372,10 +441,13 @@ export const products: Product[] = [
       ],
       colourShownEn: "Matte Black",
       colourShownUk: "Матовий чорний",
+      colourShownJa: "マットブラック",
       shortEn:
         "The classic shape of a hand-made Killer bowl in natural clay. A well-deserved name — your smoke is strong and rich, while the optimal wall thickness holds heat steadily without overheating your flavour, guaranteeing long sessions free of bitterness.",
       shortUk:
         "Класична форма killer-чаші ручної роботи з натуральної глини. Заслужена назва — дим міцний і насичений, а оптимальна товщина стінок стабільно утримує тепло, не перепалюючи смак, гарантуючи довгі сесії без гіркоти.",
+      shortJa:
+        "天然クレイで手づくりした Killer ボウルの、そのままの定番シェイプ。名前のとおり、煙は力強く濃厚です。最適な肉厚が熱を安定して保ち、香味を焼きすぎないため、苦みの出ない長いセッションをお約束します。",
       benefitsEn: [
         "Mildness of smoking with rich, consistent flavour",
         "Extended session duration (70+ minutes with proper use)",
@@ -386,6 +458,11 @@ export const products: Product[] = [
         "Подовжена тривалість сесії (70+ хвилин за правильного використання)",
         "Час нагріву — близько 6 хвилин під ковпаком",
       ],
+      benefitsJa: [
+        "豊かで安定した香味と、まろやかな吸い心地",
+        "長いセッション（適切にお使いいただいた場合 70分以上）",
+        "ウインドカバー使用時の加熱時間は約6分",
+      ],
       tipsEn: [
         "Never cool the device with water",
         "Handle with care — natural clay is fragile",
@@ -394,14 +471,18 @@ export const products: Product[] = [
         "Ніколи не охолоджуйте виріб водою",
         "Поводьтеся обережно — натуральна глина крихка",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "天然クレイは割れやすいため、取り扱いにご注意ください",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
-        { labelEn: "Surface", labelUk: "Поверхня", valueEn: "Glazed black matte", valueUk: "Чорна матова глазур" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Natural clay", valueUk: "Натуральна глина", valueJa: "天然クレイ" },
+        { labelEn: "Surface", labelUk: "Поверхня", labelJa: "表面", valueEn: "Glazed black matte", valueUk: "Чорна матова глазур", valueJa: "ブラックマットの釉薬" },
       ],
       features: [
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Mild & rich", textUk: "М'який і насичений" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "70+ minutes", textUk: "70+ хвилин" },
-        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", textEn: "Mild & rich", textUk: "М'який і насичений" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", textEn: "70+ minutes", textUk: "70+ хвилин" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分" },
         { icon: "hands", titleEn: "Craft", titleUk: "Крафт", textEn: "Handmade", textUk: "Ручна робота" },
       ],
     },
@@ -414,8 +495,10 @@ export const products: Product[] = [
     nameEn: "Tactical Livanka",
     taglineUk: "Яскраві, м'які соло-сесії.",
     taglineEn: "Bright, soft solo sessions.",
+    taglineJa: "明るくやわらかな、ひとりの時間に。",
     descriptionUk: "Ручна робота з натуральної глини. Яскравий та м'який дим 35–40 хвилин. Для індивідуального використання. Ємність 10–12 г.",
     descriptionEn: "Handmade from natural clay. Bright and soft smoke for 35–40 minutes. For solo use. Capacity 10–12g.",
+    descriptionJa: "天然クレイの手づくり。35〜40分の明るくやわらかな煙。おひとり用。容量 10〜12g。",
     price: 10,
     priceUah: 370,
     currency: "EUR",
@@ -429,10 +512,13 @@ export const products: Product[] = [
       photos: ["/images/livanka-hero.png", "/images/livanka-2.png", "/images/livanka-3.png"],
       colourShownEn: "Matte Black",
       colourShownUk: "Матовий чорний",
+      colourShownJa: "マットブラック",
       shortEn:
         "A hand-made bowl in natural clay, shaped for a bright, soft smoke that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
       shortUk:
         "Чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який дим протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
+      shortJa:
+        "天然クレイを手づくりしたボウル。35〜40分続く、明るくやわらかな煙のために形づくられています。内側の小さなリムが糖蜜を受け止め、最適な肉厚がミックスの焼けすぎを防ぎます。ひとりでじっくり向き合うセッションのために。",
       benefitsEn: [
         "Bright and soft smoke for 35–40 minutes",
         "Small internal rim that delays molasses",
@@ -447,6 +533,13 @@ export const products: Product[] = [
         "Створена для індивідуального використання",
         "Час нагріву — близько 5 хвилин під ковпаком (2–3 кубики)",
       ],
+      benefitsJa: [
+        "35〜40分続く、明るくやわらかな煙",
+        "糖蜜の落ちを抑える内側の小さなリム",
+        "最適な肉厚が焼けすぎを防ぎます",
+        "おひとり用に設計",
+        "ウインドカバー使用時の加熱時間は約5分（炭2〜3個）",
+      ],
       tipsEn: [
         "Never cool the device with water",
         "Handle with care — natural clay is fragile",
@@ -455,15 +548,19 @@ export const products: Product[] = [
         "Ніколи не охолоджуйте виріб водою",
         "Поводьтеся обережно — натуральна глина крихка",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "天然クレイは割れやすいため、取り扱いにご注意ください",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
-        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", valueEn: "10–12 g", valueUk: "10–12 г" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Natural clay", valueUk: "Натуральна глина", valueJa: "天然クレイ" },
+        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", labelJa: "タバコ容量", valueEn: "10–12 g", valueUk: "10–12 г", valueJa: "10〜12 g" },
       ],
       features: [
         { icon: "cloud", titleEn: "Smoke", titleUk: "Дим", textEn: "Bright & soft", textUk: "Яскравий і м'який" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", textEn: "35–40 minutes", textUk: "35–40 хвилин" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", textEn: "35–40 minutes", textUk: "35–40 хвилин" },
         { icon: "user", titleEn: "Made for", titleUk: "Формат", textEn: "Solo use", textUk: "Соло-сесії" },
-        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин" },
       ],
     },
     tags: ["clay", "handmade", "solo"],
@@ -475,8 +572,10 @@ export const products: Product[] = [
     nameEn: "Tactical 0.66 F.CK THE PHUNNEL",
     taglineUk: "Ручна натуральна глина.",
     taglineEn: "Handmade natural clay.",
+    taglineJa: "手づくりの天然クレイ。",
     descriptionUk: "Класичний фанель з унікальною вставкою. Неймовірна насиченість та м'якість диму. Для тих, хто цінує процес.",
     descriptionEn: "Classic phunnel with unique insert. Incredible richness and mildness of smoke. For those who value the process.",
+    descriptionJa: "独自のインサートを備えたクラシックなファンネル。驚くほど濃厚でまろやかな煙。過程を大切にする方へ。",
     price: 13,
     priceUah: 500,
     currency: "EUR",
@@ -494,10 +593,13 @@ export const products: Product[] = [
       photos: ["/images/ftp-hero-v2.png", "/images/ftp-2.png", "/images/ftp-3.png"],
       colourShownEn: "Matte Black",
       colourShownUk: "Матовий чорний",
+      colourShownJa: "マットブラック",
       shortEn:
         "The FTP is a hand-made clay phunnel with a clever 2-in-1 design and two interchangeable inserts. Drop in the aluminium sleeve for a true phunnel — no molasses down the stem, just clean, even airflow — or the stainless-steel mesh screen for the open, powerful draw of a killer bowl. Deep, rich flavour with an effortless, mild pull, whether you're chasing clouds or settling in for a long session.",
       shortUk:
         "FTP — це фанель ручної роботи з глини з розумним дизайном 2-в-1 та двома змінними вставками. Встановіть алюмінієву гільзу для справжнього фанеля — жодної патоки в шахті, лише чистий рівномірний потік повітря — або вставку зі сталевою сіткою для відкритої, потужної тяги killer-чаші. Глибокий насичений смак і легка м'яка тяга — чи то ви ганяєтеся за хмарами, чи налаштувалися на довгу сесію.",
+      shortJa:
+        "FTP は、2-in-1 の巧みな設計と2種類の交換式インサートを備えた、クレイ製の手づくりファンネルです。アルミニウムスリーブを入れれば本格的なファンネル — 糖蜜がステムに落ちず、澄んだ均一な気流だけが残ります。ステンレスメッシュのスクリーンに替えれば、killer ボウルのような開いた力強い吸い込みに。深く豊かな香味と、力のいらないまろやかな吸い込みを、大きな煙を求めるときにも、長くくつろぐときにも。",
       benefitsEn: [
         "2-in-1 design with interchangeable inserts",
         "Classic Phunnel Mode — no molasses dripping down the stem",
@@ -512,6 +614,13 @@ export const products: Product[] = [
         "Глибокий насичений смак і легка м'яка тяга",
         "Підходить і для хмар, і для довгих спокійних сесій",
       ],
+      benefitsJa: [
+        "交換式インサートによる 2-in-1 設計",
+        "クラシックなファンネルモード — 糖蜜がステムに落ちません",
+        "メッシュスクリーンのタクティカルモード — 開いた気流と力強い吸い込み",
+        "深く豊かな香味と、力のいらないまろやかな吸い込み",
+        "大きな煙にも、長くゆったりしたセッションにも",
+      ],
       tipsEn: [
         "Never cool the device with water",
         "Handle with care — natural clay is fragile",
@@ -520,17 +629,21 @@ export const products: Product[] = [
         "Ніколи не охолоджуйте виріб водою",
         "Поводьтеся обережно — натуральна глина крихка",
       ],
+      tipsJa: [
+        "水で本体を冷やさないでください",
+        "天然クレイは割れやすいため、取り扱いにご注意ください",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Natural clay", valueUk: "Натуральна глина" },
-        { labelEn: "Design", labelUk: "Дизайн", valueEn: "2-in-1 (interchangeable inserts)", valueUk: "2-в-1 (змінні вставки)" },
-        { labelEn: "Insert 1", labelUk: "Вставка 1", valueEn: "Aluminium phunnel sleeve", valueUk: "Алюмінієва вставка-фанел" },
-        { labelEn: "Insert 2", labelUk: "Вставка 2", valueEn: "Stainless steel mesh screen", valueUk: "Сітка з нержавіючої сталі" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Natural clay", valueUk: "Натуральна глина", valueJa: "天然クレイ" },
+        { labelEn: "Design", labelUk: "Дизайн", labelJa: "設計", valueEn: "2-in-1 (interchangeable inserts)", valueUk: "2-в-1 (змінні вставки)", valueJa: "2-in-1（交換式インサート）" },
+        { labelEn: "Insert 1", labelUk: "Вставка 1", labelJa: "インサート 1", valueEn: "Aluminium phunnel sleeve", valueUk: "Алюмінієва вставка-фанел", valueJa: "アルミニウム製ファンネルスリーブ" },
+        { labelEn: "Insert 2", labelUk: "Вставка 2", labelJa: "インサート 2", valueEn: "Stainless steel mesh screen", valueUk: "Сітка з нержавіючої сталі", valueJa: "ステンレスメッシュスクリーン" },
       ],
       features: [
-        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", textEn: "2-in-1 inserts", textUk: "2-в-1 вставки" },
+        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", titleJa: "設計", textEn: "2-in-1 inserts", textUk: "2-в-1 вставки" },
         { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанель", textEn: "No molasses drip", textUk: "Без патоки в шахті" },
         { icon: "mesh", titleEn: "Tactical", titleUk: "Тактичний", textEn: "Mesh screen", textUk: "Сталева сітка" },
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
       ],
     },
     tags: ["phunnel", "handmade"],
@@ -542,6 +655,7 @@ export const products: Product[] = [
     nameEn: "Windcover Detonator",
     taglineUk: "Металевий ковпак у тактичному стилі.",
     taglineEn: "Metal wind cover in tactical style.",
+    taglineJa: "タクティカルスタイルのメタルウインドカバー。",
     /* THE CATALOGUE PRICE IS THE COVER WITHOUT THE TIMER. The timer is an
        add-on selected on the product page (see lib/windcover-options), which is
        why the description no longer promises one — a card quoting ₴850 while
@@ -549,6 +663,7 @@ export const products: Product[] = [
        the bare price. */
     descriptionUk: "Суцільнометалевий ковпак із порошковим покриттям і лазерним гравіюванням. Таймер — опційно, кріпиться магнітом.",
     descriptionEn: "Solid metal wind cover with powder coating and laser engraving. Timer optional, attaches magnetically.",
+    descriptionJa: "粉体塗装とレーザー刻印を施した無垢のメタルウインドカバー。タイマーは別売、マグネットで装着します。",
     price: 23,
     priceUah: 850,
     currency: "EUR",
@@ -577,6 +692,8 @@ export const products: Product[] = [
         "A precision-engineered metal wind cover designed in a bold tactical style. Made from solid metal with a durable powder-coated finish and crisp laser engraving, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
         "Металевий ковпак точного виготовлення у виразному тактичному стилі. Суцільний метал, стійке порошкове покриття та чітке лазерне гравіювання — надійний захист від вітру, який водночас робить сетап помітним.",
+      shortJa:
+        "大胆なタクティカルスタイルで設計された、精密なメタルウインドカバー。無垢の金属に耐久性の高い粉体塗装と、くっきりとしたレーザー刻印。確かな防風性能とともに、どんなセットにも際立つ佇まいを添えます。",
       benefitsEn: [
         "Solid metal construction with powder coating for heat and scratch resistance, finished with permanent laser engraving",
         "Effective wind protection that maintains proper airflow for consistent heat and longer sessions",
@@ -593,10 +710,18 @@ export const products: Product[] = [
         "Зручно для завантажених кальянних: таймер і звук допомагають персоналу та гостям одразу зрозуміти, який кальян готовий",
         "Дві версії: стандартний ковпак або ковпак із таймером на магнітному кріпленні",
       ],
+      benefitsJa: [
+        "熱と傷に強い粉体塗装を施した無垢メタル構造に、消えないレーザー刻印",
+        "適切な気流を保ちながら風を防ぎ、安定した熱と長いセッションを支えます",
+        "USB Type-C 充電式のカウントダウンタイマー（別売）。LED 表示と爆発音風のサウンドで、炭を置いたときに時間を設定すれば、理想の加熱時間を追えます",
+        "マグネット装着で、タイマーの取り付け・取り外しが素早く確実",
+        "忙しいラウンジに最適：タイマーと音で、どのシーシャが仕上がったかをスタッフもお客様もすぐに把握できます",
+        "2つの仕様をご用意：標準のウインドカバー、またはマグネット装着タイマー付き",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання" },
-        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", valueEn: "USB Type-C", valueUk: "USB Type-C" },
-        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", valueEn: "Magnetic", valueUk: "Магнітне" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Metal + powder coating + laser engraving", valueUk: "Метал + порошкове покриття + лазерне гравіювання", valueJa: "メタル + 粉体塗装 + レーザー刻印" },
+        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", labelJa: "充電（タイマー仕様）", valueEn: "USB Type-C", valueUk: "USB Type-C", valueJa: "USB Type-C" },
+        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", labelJa: "装着（タイマー仕様）", valueEn: "Magnetic", valueUk: "Магнітне", valueJa: "マグネット式" },
       ],
       statementEn: "Never miss the perfect heat-up window — and never wonder which bowl is ready.",
       statementUk: "Не пропустіть ідеальний момент розпалу — і більше не гадайте, який кальян готовий.",
@@ -614,8 +739,10 @@ export const products: Product[] = [
     nameEn: "Windcover KH",
     taglineUk: "Металевий ковпак із камуфляжем.",
     taglineEn: "Metal wind cover with camo finish.",
+    taglineJa: "カモフラージュ仕上げのメタルウインドカバー。",
     descriptionUk: "Суцільнометалевий ковпак із камуфляжним принтом і UV-друком. Таймер — опційно, кріпиться магнітом.",
     descriptionEn: "Solid metal wind cover with a camouflage finish and UV print. Timer optional, attaches magnetically.",
+    descriptionJa: "カモフラージュ仕上げと UV プリントを施した無垢のメタルウインドカバー。タイマーは別売、マグネットで装着します。",
     price: 23,
     priceUah: 850,
     currency: "EUR",
@@ -636,6 +763,8 @@ export const products: Product[] = [
         "A precision-engineered metal wind cover in a camouflage finish. Made from solid metal with a durable powder-coated body and a crisp UV print, it provides reliable wind protection while adding a distinctive look to any setup.",
       shortUk:
         "Металевий ковпак точного виготовлення у камуфляжному оздобленні. Суцільний метал, стійке порошкове покриття та чіткий UV-друк — надійний захист від вітру, який водночас робить сетап помітним.",
+      shortJa:
+        "カモフラージュ仕上げの、精密なメタルウインドカバー。無垢の金属に耐久性の高い粉体塗装のボディと、くっきりとした UV プリント。確かな防風性能とともに、どんなセットにも際立つ佇まいを添えます。",
       benefitsEn: [
         "Solid metal construction with powder coating for heat and scratch resistance, finished with a permanent UV print",
         "Camouflage face panel with the TCT roundel on the reverse",
@@ -652,11 +781,19 @@ export const products: Product[] = [
         "Магнітне кріплення — таймер приєднується швидко та надійно",
         "Дві версії: стандартний ковпак або ковпак із таймером на магнітному кріпленні",
       ],
+      benefitsJa: [
+        "熱と傷に強い粉体塗装を施した無垢メタル構造に、消えない UV プリント",
+        "前面はカモフラージュ、背面には TCT のラウンデル",
+        "適切な気流を保ちながら風を防ぎ、安定した熱と長いセッションを支えます",
+        "USB Type-C 充電式のカウントダウンタイマー（別売）。LED 表示と爆発音風のサウンドで、炭を置いたときに時間を設定すれば、理想の加熱時間を追えます",
+        "マグネット装着で、タイマーの取り付け・取り外しが素早く確実",
+        "2つの仕様をご用意：標準のウインドカバー、またはマグネット装着タイマー付き",
+      ],
       specs: [
-        { labelEn: "Material", labelUk: "Матеріал", valueEn: "Metal + powder coating + UV print", valueUk: "Метал + порошкове покриття + UV-друк" },
-        { labelEn: "Finish", labelUk: "Оздоблення", valueEn: "Camouflage face panel", valueUk: "Камуфляжна лицьова панель" },
-        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", valueEn: "USB Type-C", valueUk: "USB Type-C" },
-        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", valueEn: "Magnetic", valueUk: "Магнітне" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", valueEn: "Metal + powder coating + UV print", valueUk: "Метал + порошкове покриття + UV-друк", valueJa: "メタル + 粉体塗装 + UV プリント" },
+        { labelEn: "Finish", labelUk: "Оздоблення", labelJa: "仕上げ", valueEn: "Camouflage face panel", valueUk: "Камуфляжна лицьова панель", valueJa: "カモフラージュのフェイスパネル" },
+        { labelEn: "Charging (timer version)", labelUk: "Заряджання (версія з таймером)", labelJa: "充電（タイマー仕様）", valueEn: "USB Type-C", valueUk: "USB Type-C", valueJa: "USB Type-C" },
+        { labelEn: "Attachment (timer version)", labelUk: "Кріплення (версія з таймером)", labelJa: "装着（タイマー仕様）", valueEn: "Magnetic", valueUk: "Магнітне", valueJa: "マグネット式" },
       ],
       statementEn: "Never miss the perfect heat-up window — and never wonder which bowl is ready.",
       statementUk: "Не пропустіть ідеальний момент розпалу — і більше не гадайте, який кальян готовий.",

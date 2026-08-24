@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,7 +13,7 @@ import { money } from "@/lib/currency";
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const router = useRouter();
   const name = product.tileTitle ?? (locale === "uk" ? product.nameUk : product.nameEn);
-  const subtitle = locale === "uk" ? product.taglineUk : product.taglineEn;
+  const subtitle = t(locale, { uk: product.taglineUk, en: product.taglineEn, ja: product.taglineJa });
   const variants = product.variants;
   const multi = !!variants && variants.length > 1;
 

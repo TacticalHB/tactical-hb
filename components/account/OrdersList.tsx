@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { t } from "@/lib/i18n-text";
 import { orderTotalText, type CustomerOrder } from "@/lib/account-orders";
 import { formatWhen, statusLabel } from "@/lib/orders-display";
 
@@ -35,15 +36,13 @@ export default function OrdersList({
   const uk = locale === "uk";
 
   const L = {
-    title: uk ? "Замовлення" : "Orders",
-    empty: uk ? "Замовлень поки немає" : "No orders yet",
-    emptyHint: uk
-      ? "Коли ви зробите замовлення, воно з'явиться тут — зі статусом, накладною та нарахованими XP."
-      : "Once you place an order it'll appear here — with its status, tracking, and the XP you earned.",
-    browse: uk ? "Переглянути колекцію" : "Explore the collection",
-    buildSetup: uk ? "Зібрати сет" : "Build a setup",
+    title: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文" }),
+    empty: t(locale, { uk: "Замовлень поки немає", en: "No orders yet", ja: "ご注文はまだありません" }),
+    emptyHint: t(locale, { uk: "Коли ви зробите замовлення, воно з'явиться тут — зі статусом, накладною та нарахованими XP.", en: "Once you place an order it'll appear here — with its status, tracking, and the XP you earned.", ja: "ご注文いただくと、状況、追跡番号、獲得した XP とあわせてここに表示されます。" }),
+    browse: t(locale, { uk: "Переглянути колекцію", en: "Explore the collection", ja: "コレクションを見る" }),
+    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
     items: (n: number) => (uk ? `${n} позицій` : `${n} item${n === 1 ? "" : "s"}`),
-    order: uk ? "Замовлення" : "Order",
+    order: t(locale, { uk: "Замовлення", en: "Order", ja: "ご注文" }),
   };
 
   return (
@@ -98,7 +97,7 @@ export default function OrdersList({
                       {L.order} {o.reference}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {formatWhen(o.createdAt, uk)} · {L.items(count)}
+                      {formatWhen(o.createdAt, locale)} · {L.items(count)}
                     </div>
                   </div>
 
@@ -109,7 +108,7 @@ export default function OrdersList({
                       borderColor: live ? "var(--accent-line)" : "var(--border)",
                     }}
                   >
-                    {statusLabel(o.status, uk)}
+                    {statusLabel(o.status, locale)}
                   </span>
 
                   <div className="text-base font-semibold tabular-nums shrink-0" style={{ color: "#111" }}>

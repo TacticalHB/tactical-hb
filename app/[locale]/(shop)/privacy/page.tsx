@@ -109,7 +109,6 @@ function Bullets({ items }: { items: string[] }) {
 
 function PrivacyContent({ locale }: { locale: string }) {
   const t = useTranslations("privacy");
-  const uk = locale === "uk";
 
   return (
     <div style={{ background: "var(--bg)" }}>
@@ -123,7 +122,7 @@ function PrivacyContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {uk ? "ДАНІ" : "PRIVACY"}
+            {t(locale, { uk: "ДАНІ", en: "PRIVACY", ja: "プライバシー" })}
           </span>
         </div>
         <div className="page-container relative">

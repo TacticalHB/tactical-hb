@@ -56,6 +56,24 @@ const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
    visitor was actually reading. aria-hidden is deliberately NOT used either —
    the words are real content, they just are not news.
 ------------------------------------------------------------------------- */
+/* ---- The strip's own colours -------------------------------------------
+
+   #ffee8c, asked for by name, and it decided the ground under it. On the
+   off-white the bar used to be it measured 1.08:1 — pale yellow on near-white,
+   which is not a low-contrast style, it is text nobody can read. On the brand
+   ink it is 16.03:1.
+
+   ONLY THE 40px STRIP IS DARK. It is a band across the top of an otherwise
+   white page, which is what the colour was always going to require: a light
+   line on a light page has nowhere to live. Every other surface on the PDP is
+   untouched.
+
+   Not tokens, because this bar is deliberately its own thing rather than a
+   dark-mode surface — the console's token set would drag the whole page's
+   palette in behind it. */
+const BANNER_BG = "#111114";
+const BANNER_FG = "#ffee8c";
+
 /* Kept in step with the keyframe durations in globals.css (.promo-in/.promo-out
    are 360ms each). The travel distance lives there too. */
 const BANNER_IN_MS = 360;
@@ -100,7 +118,7 @@ function Banner() {
   }, [onStage, reduced, lines.length]);
 
   return (
-    <div className="h-10 relative overflow-hidden" style={{ background: "#f5f5f5" }}>
+    <div className="h-10 relative overflow-hidden" style={{ background: BANNER_BG }}>
       {lines.map((line, k) => {
         const isActive = k === i && onStage;
         const isExiting = k === i && !onStage;
@@ -116,7 +134,7 @@ function Banner() {
             key={line}
             className={`promo-line ${motion} absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium`}
             style={{
-              color: "#111",
+              color: BANNER_FG,
               /* Only the line on stage may take the pointer, or the stack would
                  put three invisible paragraphs over the top of it. */
               pointerEvents: isActive ? undefined : "none",

@@ -1,4 +1,5 @@
 import Price from "./Price";
+import { t } from "@/lib/i18n-text";
 import type { Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
@@ -33,13 +34,14 @@ export function WasPrice({
   locale: string;
   className?: string;
 }) {
-  const uk = locale === "uk";
   return (
     <s
       className={`text-[13px] tabular-nums ${className}`}
       style={{ color: "var(--text-faint)", textDecorationThickness: "1px" }}
     >
-      {uk ? "Було " : "Was "}
+      {/* 通常 = "usually/normally", which is how a Japanese shop marks the
+          former figure. A literal "was" would read as a tense, not a price. */}
+      {t(locale, { uk: "Було ", en: "Was ", ja: "通常 " })}
       <Price money={money} locale={locale} />
     </s>
   );
@@ -47,12 +49,13 @@ export function WasPrice({
 
 /** One muted line saying why the figure moved. Names the three pieces. */
 export function SetupNote({ locale, className = "" }: { locale: string; className?: string }) {
-  const uk = locale === "uk";
   return (
     <p className={`text-[12px] leading-snug ${className}`} style={{ color: "var(--text-faint)" }}>
-      {uk
-        ? "Повний сет — чаша, пристрій для нагріву та ковпак."
-        : "Full setup — bowl, heat device and wind cover."}
+      {t(locale, {
+        uk: "Повний сет — чаша, пристрій для нагріву та ковпак.",
+        en: "Full setup — bowl, heat device and wind cover.",
+        ja: "フルセット — ボウル、ヒートデバイス、ウインドカバー。",
+      })}
     </p>
   );
 }

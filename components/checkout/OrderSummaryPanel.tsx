@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { pick, t } from "@/lib/i18n-text";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
@@ -34,7 +35,6 @@ export default function OrderSummaryPanel({
   shippingPending?: boolean;
 }) {
   const { lines, subtotal, subtotalFull, bundle, count } = useCart();
-  const uk = locale === "uk";
   const goods = discount ? subtractMoney(subtotal, discount) : subtotal;
   // Carriers quote shipping in UAH; the summary shows ONE currency, so the
   // quote is converted at the display rate and the total includes it on BOTH
@@ -45,26 +45,37 @@ export default function OrderSummaryPanel({
   const total: Money = shipping ? addMoney(goods, shipping) : goods;
 
   const L = {
-    title: uk ? "Підсумок замовлення" : "Order Summary",
-    items: uk ? "товарів" : "items",
-    subtotal: uk ? "Проміжний підсумок" : "Subtotal",
-    discount: uk ? "Ваучер" : "Voucher",
-    rankDiscount: uk ? `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%` : `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
-    shipping: uk ? "Доставка" : "Shipping",
-    shippingNote: uk ? "Розраховується згодом" : "Calculated later",
-    shippingAfter: uk ? "Підтвердимо листом" : "Confirmed by email",
-    total: uk ? "Разом" : "Total",
-    totalNote: uk ? "Без вартості доставки" : "Excludes delivery",
-    // The FOP-2 brief's checkout microcopy, verbatim (§4). Shown once shipping
-    // is actually inside the figure above it — never sooner.
-    totalIncludes: uk
-      ? "До суми замовлення включено доставку до обраного напрямку."
-      : "Order total includes shipping to your destination.",
-    // International: nothing is charged at this step; one total follows by email.
-    totalIntl: uk
-      ? "Точну суму замовлення з доставкою підтвердимо листом — оплата одним платежем."
-      : "We'll confirm your order total including delivery by email — one single payment.",
-    qty: uk ? "К-сть" : "Qty",
+    ...pick(locale, {
+      title: { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容" },
+      items: { uk: "товарів", en: "items", ja: "点" },
+      subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計" },
+      discount: { uk: "Ваучер", en: "Voucher", ja: "バウチャー" },
+      shipping: { uk: "Доставка", en: "Shipping", ja: "配送" },
+      shippingNote: { uk: "Розраховується згодом", en: "Calculated later", ja: "後ほど計算します" },
+      shippingAfter: { uk: "Підтвердимо листом", en: "Confirmed by email", ja: "メールでご確認します" },
+      total: { uk: "Разом", en: "Total", ja: "合計" },
+      totalNote: { uk: "Без вартості доставки", en: "Excludes delivery", ja: "配送料は含みません" },
+      // The FOP-2 brief's checkout microcopy, verbatim (§4). Shown once shipping
+      // is actually inside the figure above it — never sooner.
+      totalIncludes: {
+        uk: "До суми замовлення включено доставку до обраного напрямку.",
+        en: "Order total includes shipping to your destination.",
+        ja: "ご注文の合計金額には、お届け先までの配送料が含まれています。",
+      },
+      // International: nothing is charged at this step; one total follows by email.
+      totalIntl: {
+        uk: "Точну суму замовлення з доставкою підтвердимо листом — оплата одним платежем.",
+        en: "We'll confirm your order total including delivery by email — one single payment.",
+        ja: "配送料を含むご注文の合計金額はメールでご確認いただきます — お支払いは一度きりです。",
+      },
+      qty: { uk: "К-сть", en: "Qty", ja: "数量" },
+    }),
+    /* Interpolated, so it cannot live in the record above. */
+    rankDiscount: t(locale, {
+      uk: `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+      en: `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+      ja: `ランク特典 · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+    }),
   };
 
   return (

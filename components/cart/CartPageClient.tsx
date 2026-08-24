@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { pick, t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
@@ -35,36 +36,40 @@ export default function CartPageClient({
   const rankPerk = permanentDiscount(rankDiscountRate, subtotal);
   const goods = subtractMoney(subtotal, rankPerk);
   const router = useRouter();
-  const uk = locale === "uk";
-
   const L = {
-    title: uk ? "Ваш кошик" : "Your Shopping Bag",
-    empty: uk ? "У вашому кошику поки що порожньо." : "Your shopping bag is currently empty.",
-    emptyHint: uk
-      ? "Додайте окрему річ — або зберіть повний сет за один раз."
-      : "Add a piece, or build a full setup in one flow.",
-    buildSetup: uk ? "Зібрати сет" : "Build a setup",
-    browse: uk ? "Перейти до товарів" : "Continue shopping",
-    summary: uk ? "Підсумок замовлення" : "Order Summary",
-    subtotal: uk ? "Проміжний підсумок" : "Subtotal",
-    rankDiscount: uk
-      ? `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`
-      : `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
-    shipping: uk ? "Доставка" : "Shipping",
-    shippingNote: uk ? "Розраховується далі" : "Calculated at checkout",
-    total: uk ? "Разом" : "Total",
-    // True at this stage — and the second half says where it stops being so:
-    // delivery joins the ONE order total at checkout, per the FOP-2 model.
-    totalNote: uk
-      ? "Доставку буде розраховано на оформленні та включено до суми замовлення."
-      : "Delivery is calculated at checkout and included in your order total.",
-    checkout: uk ? "Перейти до оформлення" : "Proceed to checkout",
-    remove: uk ? "Видалити" : "Remove",
-    colour: uk ? "Колір" : "Colour",
-    material: uk ? "Матеріал" : "Materials",
-    qty: uk ? "Кількість" : "Quantity",
-    dec: uk ? "Зменшити кількість" : "Decrease quantity",
-    inc: uk ? "Збільшити кількість" : "Increase quantity",
+    ...pick(locale, {
+      title: { uk: "Ваш кошик", en: "Your Shopping Bag", ja: "ショッピングバッグ" },
+      empty: { uk: "У вашому кошику поки що порожньо.", en: "Your shopping bag is currently empty.", ja: "バッグにはまだ何も入っていません。" },
+      emptyHint: {
+        uk: "Додайте окрему річ — або зберіть повний сет за один раз.",
+        en: "Add a piece — or build a full setup in one go.",
+        ja: "単品を選ぶか、フルセットを一度に組むこともできます。",
+      },
+      buildSetup: { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" },
+      browse: { uk: "Перейти до товарів", en: "Continue shopping", ja: "買い物を続ける" },
+      summary: { uk: "Підсумок замовлення", en: "Order Summary", ja: "ご注文内容" },
+      subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計" },
+      shipping: { uk: "Доставка", en: "Shipping", ja: "配送" },
+      shippingNote: { uk: "Розраховується далі", en: "Calculated at checkout", ja: "お会計時に計算します" },
+      total: { uk: "Разом", en: "Total", ja: "合計" },
+      totalNote: {
+        uk: "Доставку буде розраховано на оформленні та включено до суми замовлення.",
+        en: "Delivery is calculated at checkout and included in your order total.",
+        ja: "配送料はお会計時に計算し、ご注文の合計金額に含めます。",
+      },
+      checkout: { uk: "Перейти до оформлення", en: "Proceed to checkout", ja: "お会計に進む" },
+      remove: { uk: "Видалити", en: "Remove", ja: "削除" },
+      colour: { uk: "Колір", en: "Colour", ja: "カラー" },
+      material: { uk: "Матеріал", en: "Materials", ja: "素材" },
+      qty: { uk: "Кількість", en: "Quantity", ja: "数量" },
+      dec: { uk: "Зменшити кількість", en: "Decrease quantity", ja: "数量を減らす" },
+      inc: { uk: "Збільшити кількість", en: "Increase quantity", ja: "数量を増やす" },
+    }),
+    rankDiscount: t(locale, {
+      uk: `Знижка за звання · –${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+      en: `Rank discount · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+      ja: `ランク特典 · ${Math.round(COLONEL_DISCOUNT_RATE * 100)}%`,
+    }),
   };
 
   // Don't flash "your bag is empty" at someone whose cart is still loading.

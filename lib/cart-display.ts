@@ -1,4 +1,5 @@
 import { products, type Product } from "@/lib/products";
+import { t } from "@/lib/i18n-text";
 import type { CartLine } from "@/components/CartContext";
 
 /* ---------------------------------------------------------------------------
@@ -42,11 +43,12 @@ export function describeAddons(
   options: CartLine["options"],
   locale: string
 ): string | null {
-  const uk = locale === "uk";
   const addons: string[] = [];
-  if (options?.lid) addons.push(uk ? "З кришкою" : "With Lid");
-  if (options?.rubber) addons.push(uk ? "З FEAR 9E418" : "With FEAR 9E418");
-  if (options?.timer) addons.push(uk ? "З таймером" : "With Timer");
+  /* FEAR 9E418 is a product name and stays Latin in every language — only the
+     word around it changes. */
+  if (options?.lid) addons.push(t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き" }));
+  if (options?.rubber) addons.push(t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き" }));
+  if (options?.timer) addons.push(t(locale, { uk: "З таймером", en: "With Timer", ja: "タイマー付き" }));
   return addons.length ? addons.join(" + ") : null;
 }
 
@@ -64,6 +66,8 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
   // Show the picked colour's photo, not the default one.
   const image = chosen?.image || product.tileImage || product.gridImage || product.image;
 
+  /* No Japanese colour-shown field on the catalogue yet, so ja reads the
+     English one — a colour name, and the honest fallback. */
   const colourShown = uk ? product.pdp?.colourShownUk : product.pdp?.colourShownEn;
   const colour = chosen
     ? uk

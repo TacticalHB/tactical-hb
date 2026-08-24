@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { t } from "@/lib/i18n-text";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -308,25 +309,27 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   /* The card follows the live selection, so choosing a lid or a timer moves
      the weight and adds the configuration row rather than leaving the page
      describing a product the customer is no longer buying. */
-  const fieldRows = buildFieldCard({ product, uk, material, windcover });
+  const fieldRows = buildFieldCard({ product, locale, material, windcover });
   const shortDesc = pdp ? (uk ? pdp.shortUk : pdp.shortEn) : (uk ? product.descriptionUk : product.descriptionEn);
   const benefits = pdp ? (uk ? pdp.benefitsUk : pdp.benefitsEn) ?? [] : [];
   const tips = pdp ? (uk ? pdp.tipsUk : pdp.tipsEn) ?? [] : [];
   const colourShown = pdp ? (uk ? pdp.colourShownUk : pdp.colourShownEn) : undefined;
 
   const catLabel =
-    product.category === "hmd" ? (uk ? "Пристрій для нагріву" : "Heat Management Device")
-    : product.category === "bowl" ? (uk ? "Чаша" : "Bowl")
-    : (uk ? "Аксесуар" : "Accessory");
+    product.category === "hmd"
+      ? t(locale, { uk: "Пристрій для нагріву", en: "Heat Management Device", ja: "ヒートマネジメントデバイス" })
+      : product.category === "bowl"
+        ? t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル" })
+        : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー" });
 
   const L = {
-    addToBag: uk ? "Додати в кошик" : "Add to Shopping Bag",
-    favourite: uk ? "В обране" : "Favourite",
-    colour: uk ? "Колір" : "Colour Shown",
-    style: uk ? "Модель" : "Style",
-    specs: uk ? "Характеристики" : "Tech Specs",
-    tips: uk ? "Поради з використання" : "Tips for Use",
-    delivery: uk ? "Доставка та повернення" : "Delivery & Returns",
+    addToBag: t(locale, { uk: "Додати в кошик", en: "Add to Shopping Bag", ja: "バッグに追加" }),
+    favourite: t(locale, { uk: "В обране", en: "Favourite", ja: "お気に入り" }),
+    colour: t(locale, { uk: "Колір", en: "Colour Shown", ja: "カラー" }),
+    style: t(locale, { uk: "Модель", en: "Style", ja: "品番" }),
+    specs: t(locale, { uk: "Характеристики", en: "Tech Specs", ja: "仕様" }),
+    tips: t(locale, { uk: "Поради з використання", en: "Tips for Use", ja: "ご使用のヒント" }),
+    delivery: t(locale, { uk: "Доставка та повернення", en: "Delivery & Returns", ja: "配送と返品" }),
     deliveryText: uk
       /* One string for the whole catalogue, which is the point: it used to
          promise "Europe & the Middle East" while the shop ships worldwide, and
@@ -335,7 +338,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
          policy — do not change it here alone. */
       ? "Доставляємо по всьому світу. Повернення — протягом 14 днів з обґрунтованої причини."
       : "We ship worldwide. Returns accepted within 14 days where the reason is justified.",
-    benefits: uk ? "Ключові переваги" : "Key Benefits",
+    benefits: t(locale, { uk: "Ключові переваги", en: "Key Benefits", ja: "主な特長" }),
   };
 
   /* favourites — shared state: localStorage for guests, Supabase once signed in */
@@ -396,7 +399,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="15" rx="2" /><circle cx="8.5" cy="9.5" r="1.6" /><path d="M21 16l-5-5-9 8" />
                   </svg>
-                  <span className="text-sm tracking-wide">{uk ? "Фото незабаром" : "Photos coming soon"}</span>
+                  <span className="text-sm tracking-wide">{t(locale, { uk: "Фото незабаром", en: "Photos coming soon", ja: "写真は準備中です" })}</span>
                 </div>
               )}
               {/* prev / next */}
@@ -435,7 +438,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             {variants && (
               <div className="mt-6">
                 <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
-                  {uk ? "Колір" : "Colour"}: <span style={{ color: "#111" }}>{variantLabel(variants[variantIdx].name)}</span>
+                  {t(locale, { uk: "Колір", en: "Colour", ja: "カラー" })}: <span style={{ color: "#111" }}>{variantLabel(variants[variantIdx].name)}</span>
                 </div>
                 <div className="flex gap-3">
                   {variants.map((v, i) => (

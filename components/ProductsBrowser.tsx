@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { products as ALL, Product } from "@/lib/products";
 import { currencyForLocale, formatMoney, type Currency } from "@/lib/currency";
@@ -61,24 +62,24 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const uk = locale === "uk";
   const currency = currencyForLocale(locale);
   const L = {
-    title: uk ? "Продукти" : "Products",
-    hide: uk ? "Сховати фільтри" : "Hide Filters",
-    show: uk ? "Показати фільтри" : "Show Filters",
-    sortBy: uk ? "Сортувати" : "Sort By",
-    featured: uk ? "Рекомендовані" : "Featured",
-    lowHigh: uk ? "Ціна: зростання" : "Price: Low–High",
-    highLow: uk ? "Ціна: спадання" : "Price: High–Low",
-    category: uk ? "Категорія" : "Category",
-    price: uk ? "Ціна" : "Shop by Price",
+    title: t(locale, { uk: "Продукти", en: "Products", ja: "製品" }),
+    hide: t(locale, { uk: "Сховати фільтри", en: "Hide Filters", ja: "絞り込みを隠す" }),
+    show: t(locale, { uk: "Показати фільтри", en: "Show Filters", ja: "絞り込む" }),
+    sortBy: t(locale, { uk: "Сортувати", en: "Sort By", ja: "並び替え" }),
+    featured: t(locale, { uk: "Рекомендовані", en: "Featured", ja: "おすすめ" }),
+    lowHigh: t(locale, { uk: "Ціна: зростання", en: "Price: Low–High", ja: "価格：安い順" }),
+    highLow: t(locale, { uk: "Ціна: спадання", en: "Price: High–Low", ja: "価格：高い順" }),
+    category: t(locale, { uk: "Категорія", en: "Category", ja: "カテゴリー" }),
+    price: t(locale, { uk: "Ціна", en: "Shop by Price", ja: "価格から探す" }),
     cats: {
-      all: uk ? "Усі продукти" : "All Products",
-      hmd: uk ? "Пристрої для нагріву" : "Heat Devices",
-      bowl: uk ? "Чаші" : "Bowls",
-      windcover: uk ? "Ковпаки" : "Windcovers",
-      accessory: uk ? "Аксесуари" : "Accessories",
+      all: t(locale, { uk: "Усі продукти", en: "All Products", ja: "すべての製品" }),
+      hmd: t(locale, { uk: "Пристрої для нагріву", en: "Heat Devices", ja: "ヒートデバイス" }),
+      bowl: t(locale, { uk: "Чаші", en: "Bowls", ja: "ボウル" }),
+      windcover: t(locale, { uk: "Ковпаки", en: "Windcovers", ja: "ウインドカバー" }),
+      accessory: t(locale, { uk: "Аксесуари", en: "Accessories", ja: "アクセサリー" }),
     } as Record<CatKey, string>,
-    incoming: uk ? "Скоро" : "Incoming",
-    buildSetup: uk ? "Зібрати сет" : "Build a setup",
+    incoming: t(locale, { uk: "Скоро", en: "Incoming", ja: "近日入荷" }),
+    buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" }),
   };
 
   /* ACCESSORIES ARE NOT PRODUCTS HERE. The category now holds the three add-ons

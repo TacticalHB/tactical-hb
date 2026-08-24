@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import { currencyForLocale, formatMoney, type Money } from "@/lib/currency";
 import { MATERIAL_PRICE, type HmdMaterial } from "@/lib/hmd-options";
 import { TIMER_PRICE } from "@/lib/windcover-options";
@@ -30,23 +31,26 @@ import { TIMER_PRICE } from "@/lib/windcover-options";
 
 export type OptionSpec = {
   key: string;
+  /* The label, per storefront. Shaped like lib/i18n-text's Text so it can be
+     handed straight to t() — ja optional, falling back to English. */
   en: string;
   uk: string;
+  ja?: string;
   glyph: "disc" | "ring" | "clock";
   price: Money;
 };
 
 export const HMD_OPTIONS: OptionSpec[] = [
-  { key: "lid", en: "With Lid", uk: "З кришкою", glyph: "disc", price: MATERIAL_PRICE.lid },
+  { key: "lid", en: "With Lid", uk: "З кришкою", ja: "リッド付き", glyph: "disc", price: MATERIAL_PRICE.lid },
   /* The KEY stays `rubber` — it is written into cart lines, order rows
      (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
      would orphan every order already placed. Only the two labels are the
      product's name. */
-  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber },
+  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", glyph: "ring", price: MATERIAL_PRICE.rubber },
 ];
 
 export const WINDCOVER_OPTIONS: OptionSpec[] = [
-  { key: "timer", en: "With Timer", uk: "З таймером", glyph: "clock", price: TIMER_PRICE },
+  { key: "timer", en: "With Timer", uk: "З таймером", ja: "タイマー付き", glyph: "clock", price: TIMER_PRICE },
 ];
 
 function Glyph({ kind, size = 14 }: { kind: "disc" | "ring" | "clock"; size?: number }) {
@@ -91,10 +95,10 @@ export function ConfigSelector({
   const uk = locale === "uk";
   const isPdp = variant === "pdp";
   const [hoverKey, setHoverKey] = useState<string | null>(null);
-  const label = uk ? "Комплектація" : "Configuration";
+  const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成" });
   const OPTIONS = options;
-  const names = OPTIONS.filter((o) => value[o.key]).map((o) => (uk ? o.uk : o.en));
-  const summary = names.length ? names.join(" + ") : uk ? "Базова" : "Base";
+  const names = OPTIONS.filter((o) => value[o.key]).map((o) => t(locale, o));
+  const summary = names.length ? names.join(" + ") : t(locale, { uk: "Базова", en: "Base", ja: "ベース" });
 
   /* ---- PDP: Rimowa-style option list ----
      Rimowa's is a single-select dropdown; ours must allow none/one/both, so the
@@ -115,7 +119,7 @@ export function ConfigSelector({
         >
           {OPTIONS.map((o, i) => {
             const active = value[o.key];
-            const name = uk ? o.uk : o.en;
+            const name = t(locale, o);
             const price = formatMoney(o.price, currencyForLocale(locale));
             const hovered = hoverKey === o.key;
             return (
@@ -169,7 +173,7 @@ export function ConfigSelector({
       <div className="flex gap-1.5" role="group" aria-label={label}>
         {OPTIONS.map((o) => {
           const active = value[o.key];
-          const name = uk ? o.uk : o.en;
+          const name = t(locale, o);
           const price = formatMoney(o.price, currencyForLocale(locale));
           return (
             <button

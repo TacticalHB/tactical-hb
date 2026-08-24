@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { t } from "@/lib/i18n-text";
 import Modal from "@/components/Modal";
 
 /* ---------------------------------------------------------------------------
@@ -48,30 +49,30 @@ export default function CartInfoSections({ locale }: { locale: string }) {
     {
       id: "payment",
       icon: <CardIcon />,
-      title: uk ? "Захищена оплата" : "Secured Payment",
+      title: t(locale, { uk: "Захищена оплата", en: "Secured Payment", ja: "安全なお支払い" }),
       /* APPLE PAY AND GOOGLE PAY ARE NOT CLAIMED HERE, and must not be until
          they are confirmed live on the Monobank invoice flow. This row is read
          at the highest-intent moment on the site; a payment method that turns
          out not to be there is the most expensive kind of wrong copy. */
-      sub: uk ? "Plata by Mono (Monobank)" : "Plata by Mono (Monobank)",
+      sub: "Plata by Mono (Monobank)",
     },
     {
       id: "delivery",
       icon: <TruckIcon />,
-      title: uk ? "Доставка" : "Delivery",
-      sub: uk ? "Нова Пошта та Укрпошта" : "Nova Poshta and Ukrposhta",
+      title: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }),
+      sub: t(locale, { uk: "Нова Пошта та Укрпошта", en: "Nova Poshta and Ukrposhta", ja: "Nova Poshta / Ukrposhta" }),
     },
     {
       id: "returns",
       icon: <BoxIcon />,
-      title: uk ? "Повернення та обмін" : "Returns & Exchanges",
-      sub: uk ? "14 днів, без винятків" : "14 days, no excluded items",
+      title: t(locale, { uk: "Повернення та обмін", en: "Returns & Exchanges", ja: "返品・交換" }),
+      sub: t(locale, { uk: "14 днів, без винятків", en: "14 days, no excluded items", ja: "14日間、対象外なし" }),
     },
   ];
 
   const content: Record<SectionId, { title: string; body: React.ReactNode }> = {
     payment: {
-      title: uk ? "Захищена оплата" : "Secured Payment",
+      title: t(locale, { uk: "Захищена оплата", en: "Secured Payment", ja: "安全なお支払い" }),
       body: uk ? (
         <>
           <p className="mb-4">
@@ -111,7 +112,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       ),
     },
     delivery: {
-      title: uk ? "Доставка" : "Delivery",
+      title: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送" }),
       body: uk ? (
         <>
           <p className="mb-4">
@@ -164,7 +165,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       ),
     },
     returns: {
-      title: uk ? "Повернення та обмін" : "Returns & Exchanges",
+      title: t(locale, { uk: "Повернення та обмін", en: "Returns & Exchanges", ja: "返品・交換" }),
       body: uk ? (
         <>
           <p className="mb-5">
@@ -247,7 +248,7 @@ export default function CartInfoSections({ locale }: { locale: string }) {
         open={open !== null}
         onClose={() => setOpen(null)}
         title={active?.title ?? ""}
-        closeLabel={uk ? "Закрити" : "Close"}
+        closeLabel={t(locale, { uk: "Закрити", en: "Close", ja: "閉じる" })}
       >
         {active?.body}
       </Modal>

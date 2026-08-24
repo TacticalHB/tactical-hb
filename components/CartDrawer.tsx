@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { pick } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useCart, lineKey, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
@@ -19,25 +20,26 @@ import CartSuggestion from "./CartSuggestion";
 
 export default function CartDrawer({ locale }: { locale: string }) {
   const { cartOpen, setCartOpen, lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count } = useCart();
-  const uk = locale === "uk";
 
-  const L = {
-    title: uk ? "Ваш кошик" : "Your Shopping Bag",
-    empty: uk ? "Ваш кошик порожній" : "Your shopping bag is empty",
-    emptyHint: uk
-      ? "Додайте окрему річ або зберіть повний сет."
-      : "Add a piece, or build a full setup.",
-    buildSetup: uk ? "Зібрати сет" : "Build a setup",
-    browse: uk ? "Перейти до товарів" : "Browse products",
-    total: uk ? "Разом" : "Total",
-    view: uk ? "Переглянути кошик" : "View your shopping bag",
-    remove: uk ? "Видалити" : "Remove",
-    close: uk ? "Закрити" : "Close",
-    colour: uk ? "Колір" : "Colour",
-    material: uk ? "Матеріал" : "Materials",
-    dec: uk ? "Зменшити кількість" : "Decrease quantity",
-    inc: uk ? "Збільшити кількість" : "Increase quantity",
-  };
+  const L = pick(locale, {
+    title: { uk: "Ваш кошик", en: "Your Shopping Bag", ja: "ショッピングバッグ" },
+    empty: { uk: "Ваш кошик порожній", en: "Your shopping bag is empty", ja: "バッグは空です" },
+    emptyHint: {
+      uk: "Додайте окрему річ або зберіть повний сет.",
+      en: "Add a piece, or build a full setup.",
+      ja: "単品で選ぶか、フルセットを組んでみてください。",
+    },
+    buildSetup: { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む" },
+    browse: { uk: "Перейти до товарів", en: "Browse products", ja: "製品を見る" },
+    total: { uk: "Разом", en: "Total", ja: "合計" },
+    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る" },
+    remove: { uk: "Видалити", en: "Remove", ja: "削除" },
+    close: { uk: "Закрити", en: "Close", ja: "閉じる" },
+    colour: { uk: "Колір", en: "Colour", ja: "カラー" },
+    material: { uk: "Матеріал", en: "Materials", ja: "素材" },
+    dec: { uk: "Зменшити кількість", en: "Decrease quantity", ja: "数量を減らす" },
+    inc: { uk: "Збільшити кількість", en: "Increase quantity", ja: "数量を増やす" },
+  });
 
   const close = () => setCartOpen(false);
 

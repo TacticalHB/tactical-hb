@@ -1,4 +1,5 @@
 import type { Product } from "./products";
+import { t, type Text } from "@/lib/i18n-text";
 import { LID_WEIGHT_G, type HmdMaterial } from "./hmd-options";
 import { TIMER_WEIGHT_G, type WindcoverOptions } from "./windcover-options";
 
@@ -25,7 +26,10 @@ export type FieldRow = { key: string; label: string; value: string };
 
 export type FieldCardInput = {
   product: Product;
-  uk: boolean;
+  /* THE LOCALE, not a `uk` boolean. A boolean can only answer "Ukrainian or
+     not", which was true of this shop for exactly as long as it had two
+     languages. */
+  locale: string;
   material?: HmdMaterial;
   windcover?: WindcoverOptions;
 };
@@ -45,17 +49,17 @@ export function selectedWeightG(
 /** The add-ons currently chosen, named. Empty when the product takes none. */
 export function selectedConfig(
   product: Product,
-  uk: boolean,
+  locale: string,
   material?: HmdMaterial,
   windcover?: WindcoverOptions
 ): string[] {
   const out: string[] = [];
   if (product.category === "hmd") {
-    if (material?.lid) out.push(uk ? "з кришкою" : "with lid");
-    if (material?.rubber) out.push(uk ? "з FEAR 9E418" : "with FEAR 9E418");
+    if (material?.lid) out.push(t(locale, { uk: "з кришкою", en: "with lid", ja: "リッド付き" }));
+    if (material?.rubber) out.push(t(locale, { uk: "з FEAR 9E418", en: "with FEAR 9E418", ja: "FEAR 9E418 付き" }));
   }
   if (product.category === "windcover" && windcover?.timer) {
-    out.push(uk ? "з таймером" : "with timer");
+    out.push(t(locale, { uk: "з таймером", en: "with timer", ja: "タイマー付き" }));
   }
   return out;
 }
@@ -71,27 +75,28 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
   accessory: [],
 };
 
-const CATEGORY_NAME: Record<Product["category"], { en: string; uk: string }> = {
-  bowl: { en: "bowls", uk: "чаші" },
-  hmd: { en: "heat devices", uk: "пристрої нагріву" },
-  windcover: { en: "wind covers", uk: "ковпаки" },
-  accessory: { en: "accessories", uk: "аксесуари" },
+const CATEGORY_NAME: Record<Product["category"], Text> = {
+  bowl: { en: "bowls", uk: "чаші", ja: "ボウル" },
+  hmd: { en: "heat devices", uk: "пристрої нагріву", ja: "ヒートデバイス" },
+  windcover: { en: "wind covers", uk: "ковпаки", ja: "ウインドカバー" },
+  accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー" },
 };
 
-export function buildFieldCard({ product, uk, material, windcover }: FieldCardInput): FieldRow[] {
+export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {
+  const uk = locale === "uk";
   const rows: FieldRow[] = [];
-  const g = uk ? "г" : "g";
+  const g = t(locale, { uk: "г", en: "g", ja: "g" });
 
   rows.push({
     key: "weight",
-    label: uk ? "Вага" : "Weight",
+    label: t(locale, { uk: "Вага", en: "Weight", ja: "重量" }),
     value: `${selectedWeightG(product, material, windcover)} ${g}`,
   });
 
   rows.push({
     key: "dimensions",
-    label: uk ? "Розміри" : "Dimensions",
-    value: `${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${uk ? "мм" : "mm"}`,
+    label: t(locale, { uk: "Розміри", en: "Dimensions", ja: "サイズ" }),
+    value: `${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${t(locale, { uk: "мм", en: "mm", ja: "mm" })}`,
   });
 
   /* Material and finish are lifted from the product's own spec table rather
@@ -111,17 +116,17 @@ export function buildFieldCard({ product, uk, material, windcover }: FieldCardIn
   if (product.pdp?.styleCode) {
     rows.push({
       key: "style",
-      label: uk ? "Артикул" : "Style",
+      label: t(locale, { uk: "Артикул", en: "Style", ja: "品番" }),
       value: product.pdp.styleCode,
     });
   }
 
-  const config = selectedConfig(product, uk, material, windcover);
+  const config = selectedConfig(product, locale, material, windcover);
   if (config.length > 0) {
     rows.push({
       key: "configuration",
-      label: uk ? "Конфігурація" : "Configuration",
-      value: config.join(uk ? ", " : ", "),
+      label: t(locale, { uk: "Конфігурація", en: "Configuration", ja: "構成" }),
+      value: config.join(", "),
     });
   }
 
@@ -129,8 +134,8 @@ export function buildFieldCard({ product, uk, material, windcover }: FieldCardIn
   if (pairs.length > 0) {
     rows.push({
       key: "compatible",
-      label: uk ? "Сумісність" : "Compatible with",
-      value: pairs.map((c) => (uk ? CATEGORY_NAME[c].uk : CATEGORY_NAME[c].en)).join(uk ? " · " : " · "),
+      label: t(locale, { uk: "Сумісність", en: "Compatible with", ja: "組み合わせ" }),
+      value: pairs.map((c) => t(locale, CATEGORY_NAME[c])).join(" · "),
     });
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { pick } from "@/lib/i18n-text";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
@@ -111,10 +112,13 @@ export default function CheckoutClient({
   const [showAccount, setShowAccount] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
 
-  // Ukrainian shoppers get the country code pre-filled; English-language
-  // visitors may be anywhere, so they only get the "+".
+  /* The dialling code is pre-filled where the storefront implies a country.
+     /uk sells inside Ukraine and /ja is read by people in Japan, so both start
+     with theirs; /en is read anywhere, so it gets the "+" and nothing more —
+     a guessed prefix on that one would be wrong more often than right. */
+  const phonePrefix = uk ? "+380" : locale === "ja" ? "+81" : "+";
   const [form, setForm] = useState<DeliveryDetails>({
-    email: "", firstName: "", surname: "", phone: uk ? "+380" : "+",
+    email: "", firstName: "", surname: "", phone: phonePrefix,
     address: "", apartment: "", city: "", postcode: "", country: "",
   });
 
@@ -339,104 +343,158 @@ export default function CheckoutClient({
     if (hydrated && lines.length === 0) router.replace(`/${locale}/cart`);
   }, [hydrated, lines.length, locale, router]);
 
-  const L = {
-    identification: uk ? "Ідентифікація" : "Identification",
-    identLead: uk
-      ? "Оформіть замовлення як гість або створіть акаунт — це займе хвилину."
-      : "Check out as a guest, or create an account in under a minute.",
-    signedInAs: uk ? "Ви увійшли як" : "You're signed in as",
-    notYou: uk ? "Це не ви?" : "Not you?",
-    email: uk ? "Електронна пошта" : "Email address",
-    emailHint: uk ? "Ми надішлемо підтвердження замовлення на цю адресу." : "We'll send your order confirmation here.",
-    guest: uk ? "Оформити як гість" : "Continue as guest",
-    guestNote: uk ? "Без реєстрації. Ви зможете створити акаунт пізніше." : "No account needed. You can always create one later.",
-    account: uk ? "Створити акаунт" : "Create an account",
-    accountNote: uk
-      ? "Відстежуйте замовлення, збирайте бонуси та оформлюйте швидше наступного разу."
-      : "Track orders, collect loyalty rewards and check out faster next time.",
-    haveAcc: uk ? "Вже маєте акаунт?" : "Already have an account?",
-    signIn: uk ? "Увійти" : "Sign in",
-    continue: uk ? "Продовжити" : "Continue",
-    delivery: uk ? "Доставка" : "Delivery",
-    contact: uk ? "Контактні дані" : "Contact details",
-    address: uk ? "Адреса доставки" : "Shipping address",
-    method: uk ? "Спосіб доставки" : "Delivery method",
-    otherStorefront: uk
-      ? "Відкрити англійську версію"
-      : locale === "ja"
-        ? "ウクライナ語版サイトへ"
-        : "Go to the Ukrainian site",
-    destUkraine: uk ? "Україна — Нова Пошта" : "Ukraine — Nova Poshta",
-    destUkraineNote: uk
-      ? "Доставка у відділення. Вартість розраховується одразу."
-      : "Delivery to a branch. Cost calculated instantly.",
-    destIntl: uk ? "Міжнародна доставка" : "International delivery",
-    destIntlNote: uk
-      ? "Доставка за адресою за межі України."
-      : "Address delivery outside Ukraine.",
+  const L = pick(locale, {
+    identification: { uk: "Ідентифікація", en: "Identification", ja: "お客様情報" },
+    identLead: {
+      uk: "Оформіть замовлення як гість або створіть акаунт — це займе хвилину.",
+      en: "Check out as a guest, or create an account in under a minute.",
+      ja: "ゲストのままご購入いただくか、1分ほどでアカウントを作成できます。",
+    },
+    signedInAs: { uk: "Ви увійшли як", en: "You're signed in as", ja: "ログイン中" },
+    notYou: { uk: "Це не ви?", en: "Not you?", ja: "別のアカウントですか？" },
+    email: { uk: "Електронна пошта", en: "Email address", ja: "メールアドレス" },
+    emailHint: {
+      uk: "Ми надішлемо підтвердження замовлення на цю адресу.",
+      en: "We'll send your order confirmation here.",
+      ja: "ご注文の確認をこちらへお送りします。",
+    },
+    guest: { uk: "Оформити як гість", en: "Continue as guest", ja: "ゲストとして続ける" },
+    guestNote: {
+      uk: "Без реєстрації. Ви зможете створити акаунт пізніше.",
+      en: "No account needed. You can always create one later.",
+      ja: "登録は不要です。あとからアカウントを作成することもできます。",
+    },
+    account: { uk: "Створити акаунт", en: "Create an account", ja: "アカウントを作成" },
+    accountNote: {
+      uk: "Відстежуйте замовлення, збирайте бонуси та оформлюйте швидше наступного разу.",
+      en: "Track orders, collect loyalty rewards and check out faster next time.",
+      ja: "ご注文の追跡、ポイントの獲得、次回以降のスムーズなお会計にご利用いただけます。",
+    },
+    haveAcc: { uk: "Вже маєте акаунт?", en: "Already have an account?", ja: "すでにアカウントをお持ちですか？" },
+    signIn: { uk: "Увійти", en: "Sign in", ja: "ログイン" },
+    continue: { uk: "Продовжити", en: "Continue", ja: "次へ" },
+    delivery: { uk: "Доставка", en: "Delivery", ja: "配送" },
+    contact: { uk: "Контактні дані", en: "Contact details", ja: "ご連絡先" },
+    address: { uk: "Адреса доставки", en: "Shipping address", ja: "お届け先住所" },
+    method: { uk: "Спосіб доставки", en: "Delivery method", ja: "配送方法" },
+    otherStorefront: {
+      uk: "Відкрити англійську версію",
+      en: "Go to the Ukrainian site",
+      ja: "ウクライナ語版サイトへ",
+    },
+    destUkraine: { uk: "Україна — Нова Пошта", en: "Ukraine — Nova Poshta", ja: "ウクライナ国内 — Nova Poshta" },
+    destUkraineNote: {
+      uk: "Доставка у відділення. Вартість розраховується одразу.",
+      en: "Delivery to a branch. Cost calculated instantly.",
+      ja: "営業所受け取り。送料はその場で計算されます。",
+    },
+    destIntl: { uk: "Міжнародна доставка", en: "International delivery", ja: "海外配送" },
+    destIntlNote: {
+      uk: "Доставка за адресою за межі України.",
+      en: "Address delivery outside Ukraine.",
+      ja: "ウクライナ国外のご住所へお届けします。",
+    },
     // The one-total model: nothing is charged now; the exact order total —
     // goods delivered to the destination — is confirmed by email, then paid in
     // ONE payment. Never reintroduce "invoice delivery separately" here.
-    intlNotice: uk
-      ? "Зараз оплата не знімається. Ми підтвердимо точну суму замовлення — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем."
-      : "Nothing is charged yet. We'll confirm your exact order total — goods including delivery to your destination — by email, and you'll pay it in a single payment.",
+    intlNotice: {
+      uk: "Зараз оплата не знімається. Ми підтвердимо точну суму замовлення — товар разом із доставкою до вашого напрямку — електронною поштою, і ви сплатите її одним платежем.",
+      en: "Nothing is charged yet. We'll confirm your exact order total — goods including delivery to your destination — by email, and you'll pay it in a single payment.",
+      ja: "この時点では請求は発生しません。商品代金とお届け先までの配送料を含むご注文の合計金額をメールでご確認いただき、一度のお支払いで完了します。",
+    },
     /* Shown once Nova Post HAS priced the destination: this order is paid for
        now, like a domestic one, and the total already contains the delivery. */
-    intlPriced: uk
-      ? "Доставку до вашої країни розраховано та вже включено до суми замовлення. Ви сплачуєте одну суму — товар із доставкою."
-      : "Delivery to your country has been calculated and is already included in your order total. You pay one amount — goods including delivery.",
-    calculating: uk ? "Розрахунок…" : "Calculating…",
+    intlPriced: {
+      uk: "Доставку до вашої країни розраховано та вже включено до суми замовлення. Ви сплачуєте одну суму — товар із доставкою.",
+      en: "Delivery to your country has been calculated and is already included in your order total. You pay one amount — goods including delivery.",
+      ja: "お住まいの国までの配送料を計算し、ご注文の合計金額にすでに含めています。お支払いは商品代金と送料を合わせた一つの金額のみです。",
+    },
+    calculating: { uk: "Розрахунок…", en: "Calculating…", ja: "計算中…" },
     /* The carrier choice. Only shown when there is genuinely a choice — one
        offer renders as a plain line, because a radio group of one is a
        decision nobody was asked to make. */
-    carrierHeading: uk ? "Спосіб доставки" : "Delivery service",
-    carrierCheapest: uk ? "Найдешевше" : "Cheapest",
-    carrierIncluded: uk ? "Включено до суми замовлення" : "Included in your order total",
-    needCity: uk ? "Оберіть місто доставки." : "Please choose a delivery city.",
-    needBranch: uk ? "Оберіть відділення Нової Пошти." : "Please choose a Nova Poshta branch.",
-    needAddress: uk ? "Вкажіть вулицю та будинок для кур'єрської доставки." : "Please enter the street and building for courier delivery.",
-    methodName: "Nova Poshta / Ukrposhta",
-    methodNote: uk ? "Вартість розраховується згодом" : "Calculated later",
-    methodHint: uk
-      ? "Ми зв'яжемося з вами, щоб узгодити відділення та вартість доставки."
-      : "We'll contact you to confirm the branch and delivery cost.",
-    firstName: uk ? "Ім'я" : "First name",
-    surname: uk ? "Прізвище" : "Surname",
-    phone: uk ? "Телефон" : "Telephone",
-    street: uk ? "Адреса" : "Address",
-    apartment: uk ? "Квартира, під'їзд (необов'язково)" : "Apartment, suite (optional)",
-    city: uk ? "Місто" : "City",
-    postcode: uk ? "Поштовий індекс" : "Postcode",
-    country: uk ? "Країна" : "Country",
-    countrySelect: uk ? "Оберіть країну" : "Select a country",
-    countryOther: uk ? "Інша (вказати)" : "Other (type it)",
-    countryOtherLabel: uk ? "Назва країни" : "Country name",
-    needCountry: uk ? "Оберіть країну доставки." : "Please choose a delivery country.",
-    countryBlocked: uk ? "На жаль, ми не доставляємо в цю країну." : "We're unable to ship to that destination.",
-    toPayment: uk ? "Продовжити до оплати" : "Continue to payment",
-    payment: uk ? "Оплата" : "Payment",
-    payMethod: uk ? "Спосіб оплати" : "Payment method",
-    card: uk ? "Картка / Plata by Mono" : "Card / Plata by Mono",
-    cardNote: uk
-      ? "Оплата карткою через захищену сторінку Monobank."
-      : "Pay by card through Monobank's secure page.",
-    place: uk ? "Перейти до оплати" : "Continue to payment",
-    placeRequest: uk ? "Оформити замовлення" : "Place order",
-    notLive: uk
-      ? "Ви перейдете на захищену сторінку Monobank, щоб завершити оплату карткою."
-      : "You'll be taken to Monobank's secure page to complete your card payment.",
-    payFailed: uk
-      ? "Не вдалося створити платіж. Спробуйте ще раз або напишіть на admin@tactical-hb.com."
-      : "We couldn't start the payment. Please try again, or email admin@tactical-hb.com.",
-    payUnavailable: uk
-      ? "Оплата карткою тимчасово недоступна. Спробуйте пізніше."
-      : "Card payment is temporarily unavailable. Please try again shortly.",
-    backDelivery: uk ? "Назад до доставки" : "Back to delivery",
-    required: uk ? "Заповніть усі обов'язкові поля." : "Please fill in all required fields.",
-    badEmail: uk ? "Введіть дійсну електронну пошту." : "Enter a valid email address.",
-    badPhone: uk ? "Введіть номер телефону." : "Enter your telephone number.",
-    secure: uk ? "Ваші дані передаються захищено." : "Your details are transmitted securely.",
-  };
+    carrierHeading: { uk: "Спосіб доставки", en: "Delivery service", ja: "配送サービス" },
+    carrierCheapest: { uk: "Найдешевше", en: "Cheapest", ja: "最安" },
+    carrierIncluded: {
+      uk: "Включено до суми замовлення",
+      en: "Included in your order total",
+      ja: "ご注文の合計金額に含まれています",
+    },
+    needCity: { uk: "Оберіть місто доставки.", en: "Please choose a delivery city.", ja: "お届け先の都市をお選びください。" },
+    needBranch: {
+      uk: "Оберіть відділення Нової Пошти.",
+      en: "Please choose a Nova Poshta branch.",
+      ja: "Nova Poshta の営業所をお選びください。",
+    },
+    needAddress: {
+      uk: "Вкажіть вулицю та будинок для кур'єрської доставки.",
+      en: "Please enter the street and building for courier delivery.",
+      ja: "宅配のため、通り名と建物番号をご入力ください。",
+    },
+    methodName: { uk: "Nova Poshta / Ukrposhta", en: "Nova Poshta / Ukrposhta" },
+    methodNote: { uk: "Вартість розраховується згодом", en: "Calculated later", ja: "後ほど計算します" },
+    methodHint: {
+      uk: "Ми зв'яжемося з вами, щоб узгодити відділення та вартість доставки.",
+      en: "We'll contact you to confirm the branch and delivery cost.",
+      ja: "受け取り場所と送料について、あらためてご連絡します。",
+    },
+    firstName: { uk: "Ім'я", en: "First name", ja: "名" },
+    surname: { uk: "Прізвище", en: "Surname", ja: "姓" },
+    phone: { uk: "Телефон", en: "Telephone", ja: "電話番号" },
+    street: { uk: "Адреса", en: "Address", ja: "住所" },
+    apartment: {
+      uk: "Квартира, під'їзд (необов'язково)",
+      en: "Apartment, suite (optional)",
+      ja: "建物名・部屋番号（任意）",
+    },
+    city: { uk: "Місто", en: "City", ja: "市区町村" },
+    postcode: { uk: "Поштовий індекс", en: "Postcode", ja: "郵便番号" },
+    country: { uk: "Країна", en: "Country", ja: "国" },
+    countrySelect: { uk: "Оберіть країну", en: "Select a country", ja: "国をお選びください" },
+    countryOther: { uk: "Інша (вказати)", en: "Other (type it)", ja: "その他（入力する）" },
+    countryOtherLabel: { uk: "Назва країни", en: "Country name", ja: "国名" },
+    needCountry: { uk: "Оберіть країну доставки.", en: "Please choose a delivery country.", ja: "お届け先の国をお選びください。" },
+    countryBlocked: {
+      uk: "На жаль, ми не доставляємо в цю країну.",
+      en: "We're unable to ship to that destination.",
+      ja: "申し訳ありませんが、そのお届け先へは発送できません。",
+    },
+    toPayment: { uk: "Продовжити до оплати", en: "Continue to payment", ja: "お支払いへ進む" },
+    payment: { uk: "Оплата", en: "Payment", ja: "お支払い" },
+    payMethod: { uk: "Спосіб оплати", en: "Payment method", ja: "お支払い方法" },
+    card: { uk: "Картка / Plata by Mono", en: "Card / Plata by Mono", ja: "カード / Plata by Mono" },
+    cardNote: {
+      uk: "Оплата карткою через захищену сторінку Monobank.",
+      en: "Pay by card through Monobank's secure page.",
+      ja: "Monobank の安全な決済ページでカード決済を行います。",
+    },
+    place: { uk: "Перейти до оплати", en: "Continue to payment", ja: "お支払いへ進む" },
+    placeRequest: { uk: "Оформити замовлення", en: "Place order", ja: "注文を確定する" },
+    notLive: {
+      uk: "Ви перейдете на захищену сторінку Monobank, щоб завершити оплату карткою.",
+      en: "You'll be taken to Monobank's secure page to complete your card payment.",
+      ja: "カード決済を完了するため、Monobank の安全なページへ移動します。",
+    },
+    payFailed: {
+      uk: "Не вдалося створити платіж. Спробуйте ще раз або напишіть на admin@tactical-hb.com.",
+      en: "We couldn't start the payment. Please try again, or email admin@tactical-hb.com.",
+      ja: "お支払いを開始できませんでした。もう一度お試しいただくか、admin@tactical-hb.com までご連絡ください。",
+    },
+    payUnavailable: {
+      uk: "Оплата карткою тимчасово недоступна. Спробуйте пізніше.",
+      en: "Card payment is temporarily unavailable. Please try again shortly.",
+      ja: "カード決済を一時的にご利用いただけません。しばらくしてからお試しください。",
+    },
+    backDelivery: { uk: "Назад до доставки", en: "Back to delivery", ja: "配送に戻る" },
+    required: { uk: "Заповніть усі обов'язкові поля.", en: "Please fill in all required fields.", ja: "必須項目をすべてご入力ください。" },
+    badEmail: { uk: "Введіть дійсну електронну пошту.", en: "Enter a valid email address.", ja: "有効なメールアドレスをご入力ください。" },
+    badPhone: { uk: "Введіть номер телефону.", en: "Enter your telephone number.", ja: "電話番号をご入力ください。" },
+    secure: {
+      uk: "Ваші дані передаються захищено.",
+      en: "Your details are transmitted securely.",
+      ja: "お客様の情報は安全に送信されます。",
+    },
+  });
 
   const set = (k: keyof DeliveryDetails) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -773,7 +831,7 @@ export default function CheckoutClient({
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
-                    placeholder={uk ? "+380 00 000 0000" : "+00 000 000 000"}
+                    placeholder={uk ? "+380 00 000 0000" : locale === "ja" ? "+81 00 0000 0000" : "+00 000 000 000"}
                     value={form.phone}
                     onChange={set("phone")}
                     required

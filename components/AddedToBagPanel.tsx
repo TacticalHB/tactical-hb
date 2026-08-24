@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { pick } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useCart, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
@@ -18,18 +19,17 @@ import CartSuggestion from "./CartSuggestion";
 
 export default function AddedToBagPanel({ locale }: { locale: string }) {
   const { addedOpen, setAddedOpen, lastAdded } = useCart();
-  const uk = locale === "uk";
   const d = lastAdded ? describeLine(lastAdded, locale) : null;
 
-  const L = {
-    title: uk ? "Додано в кошик" : "Added to Shopping Bag",
-    view: uk ? "Переглянути кошик" : "View your shopping bag",
-    keep: uk ? "Продовжити покупки" : "Continue shopping",
-    close: uk ? "Закрити" : "Close",
-    colour: uk ? "Колір" : "Colour",
-    material: uk ? "Матеріал" : "Materials",
-    config: uk ? "Комплектація" : "Configuration",
-  };
+  const L = pick(locale, {
+    title: { uk: "Додано в кошик", en: "Added to Shopping Bag", ja: "バッグに追加しました" },
+    view: { uk: "Переглянути кошик", en: "View your shopping bag", ja: "バッグを見る" },
+    keep: { uk: "Продовжити покупки", en: "Continue shopping", ja: "買い物を続ける" },
+    close: { uk: "Закрити", en: "Close", ja: "閉じる" },
+    colour: { uk: "Колір", en: "Colour", ja: "カラー" },
+    material: { uk: "Матеріал", en: "Materials", ja: "素材" },
+    config: { uk: "Комплектація", en: "Configuration", ja: "構成" },
+  });
 
   const close = () => setAddedOpen(false);
 

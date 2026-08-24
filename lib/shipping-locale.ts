@@ -1,15 +1,21 @@
 /* ---------------------------------------------------------------------------
    Which storefront ships where.
 
-     /uk  →  inside Ukraine only    (Nova Poshta branch or courier)
-     /en  →  outside Ukraine only   (Nova Poshta or Ukrposhta cross-border)
+     /uk        →  inside Ukraine only    (Nova Poshta branch or courier)
+     /en, /ja   →  outside Ukraine only   (Nova Poshta or Ukrposhta cross-border)
 
    THE LOCALE DECIDES, AND NOTHING ELSE DOES. Not the browser's language, not a
    guess from the address, not a radio button the customer can change. Each
    storefront is a shop with one delivery model: the Ukrainian one quotes in
-   hryvnia against a branch network, the English one quotes in euro against a
+   hryvnia against a branch network, the export ones quote in euro against a
    customs declaration. Letting either offer the other's options produced
    checkouts that could not be priced and totals that could not be explained.
+
+   THE TEST IS "IS THIS UKRAINIAN", NOT "IS THIS ENGLISH", and that is why
+   adding Japanese needed no change here: everything below asks whether the
+   locale is uk and treats every other storefront as an export one. A rule
+   written the other way round — listing the export locales — would have
+   silently put /ja on the domestic path the day it was added.
 
    THIS FILE IS THE ONLY PLACE THAT KNOWS THE RULE, and it has no imports on
    purpose — the checkout imports it in the browser, and the quote route, the
@@ -72,13 +78,20 @@ export function countryAllowedOn(locale: string, iso2: string | null | undefined
  * banner on every page.
  */
 export function wrongStorefrontMessage(locale: string): string {
-  return locale === "uk"
-    ? "Доставка лише по Україні. Для міжнародної доставки відкрийте англійську версію сайту."
-    : "International delivery only on this storefront. For shipping within Ukraine, use the Ukrainian site.";
+  if (locale === "uk") {
+    return "Доставка лише по Україні. Для міжнародної доставки відкрийте англійську версію сайту.";
+  }
+  if (locale === "ja") {
+    return "このストアは海外配送のみです。ウクライナ国内へのお届けはウクライナ語版サイトをご利用ください。";
+  }
+  return "International delivery only on this storefront. For shipping within Ukraine, use the Ukrainian site.";
 }
 
 /** Where that message should send them. */
 export function otherStorefrontPath(locale: string, path = "/checkout"): string {
+  /* Whichever storefront can actually serve what this one cannot: the
+     Ukrainian shop sends people abroad to English, and both export shops send
+     people shipping inside Ukraine to Ukrainian. */
   return `/${locale === "uk" ? "en" : "uk"}${path}`;
 }
 

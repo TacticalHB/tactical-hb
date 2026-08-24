@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAppLocale } from "@/i18n/routing";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
@@ -65,7 +66,14 @@ export async function POST(request: NextRequest) {
 
   const delivery = (b.delivery ?? {}) as Record<string, unknown>;
   const email = String(delivery.email ?? "").trim();
-  const locale = String(b.locale ?? "uk") === "uk" ? "uk" : "en";
+  /* THE LOCALE SURVIVES INTACT, all three of them. It used to be flattened to
+     "uk" or "en", which was harmless while those were the only two and would
+     now silently turn every Japanese order into an English one — wrong emails,
+     wrong storefront rules downstream. Currency and destination are derived
+     from it (lib/currency, lib/shipping-locale) and both already treat ja the
+     same as en: euro, and shipped outside Ukraine. */
+  const rawLocale = String(b.locale ?? "");
+  const locale = isAppLocale(rawLocale) ? rawLocale : "uk";
 
   if (!/^\S+@\S+\.\S+$/.test(email)) {
     return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });

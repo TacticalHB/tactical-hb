@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
+import { isAppLocale } from "@/i18n/routing";
 import { AuthProvider } from "@/components/AuthContext";
 
 /* ---------------------------------------------------------------------------
@@ -22,7 +22,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!routing.locales.includes(locale as "uk" | "en")) {
+  if (!isAppLocale(locale)) {
     notFound();
   }
 

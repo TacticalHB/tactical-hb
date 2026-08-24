@@ -30,7 +30,7 @@ export const SITE_NAME = "Tactical HB";
 /** No trailing slash, ever — every URL here is built by concatenation. */
 export const SITE_URL = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
 
-export const LOCALES = ["uk", "en"] as const;
+export const LOCALES = ["uk", "en", "ja"] as const;
 export type SeoLocale = (typeof LOCALES)[number];
 
 /**
@@ -66,6 +66,10 @@ export const siteMetadata = {
     description:
       "Преміальні аксесуари для кальяну з України — пристрої для керування жаром, чаші та ковпаки, зроблені з точністю зброї.",
   },
+  ja: {
+    description:
+      "ウクライナ発のプレミアムシーシャアクセサリー。HMD（ヒートマネジメントデバイス）、ボウル、ウインドカバーを、武器づくりの精度で仕上げています。",
+  },
 };
 
 /** Both language versions of one page, plus the x-default a crawler needs. */
@@ -74,9 +78,10 @@ export function alternatesFor(path: string) {
   return {
     uk: `${SITE_URL}/uk${clean}`,
     en: `${SITE_URL}/en${clean}`,
+    ja: `${SITE_URL}/ja${clean}`,
     /* x-default points at Ukrainian: this is a Ukrainian brand shipping
        domestically first, so an unmatched language should land there rather
-       than on the export-facing English page. */
+       than on either export-facing page. */
     "x-default": `${SITE_URL}/uk${clean}`,
   };
 }
@@ -188,7 +193,11 @@ export function organizationJsonLd(locale: string) {
     url: `${SITE_URL}/${locale}`,
     logo: `${SITE_URL}/tct-logo.svg`,
     description:
-      locale === "uk" ? siteMetadata.uk.description : siteMetadata.en.description,
+      locale === "uk"
+        ? siteMetadata.uk.description
+        : locale === "ja"
+          ? siteMetadata.ja.description
+          : siteMetadata.en.description,
     address: {
       "@type": "PostalAddress",
       addressLocality: "Kharkiv",

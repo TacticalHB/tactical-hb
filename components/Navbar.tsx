@@ -9,7 +9,7 @@ import CartDrawer from "./CartDrawer";
 import AddedToBagPanel from "./AddedToBagPanel";
 import SearchOverlay from "./SearchOverlay";
 import AccountMenu from "./AccountMenu";
-import { localeLabel, otherLocale as pickOther } from "@/lib/locale-label";
+import LocaleSwitch from "@/components/LocaleSwitch";
 
 function SearchIcon() {
   return (
@@ -40,8 +40,6 @@ export default function Navbar({ locale }: { locale: string }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const { count, setCartOpen, registerCartIcon, bump } = useCart();
 
-  const otherLocale = pickOther(locale);
-  const otherLocalePath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   // Checkout runs on its own minimal chrome — every nav link there is a way to
   // lose someone mid-purchase. Declared after the hooks so hook order is stable.
@@ -139,13 +137,8 @@ export default function Navbar({ locale }: { locale: string }) {
             </button>
             {bag}
             <AccountMenu locale={locale} />
-            <Link
-              href={otherLocalePath}
-              className="nav-lang text-xs tracking-[0.2em] uppercase px-3 py-1.5 border"
-              lang={otherLocale}
-            >
-              {localeLabel(otherLocale)}
-            </Link>
+            {/* All three languages, not a toggle — see LocaleSwitch. */}
+            <LocaleSwitch locale={locale} className="ml-1" />
           </nav>
 
           {/* Mobile right cluster. gap-1 rather than gap-5: the buttons now
@@ -196,10 +189,14 @@ export default function Navbar({ locale }: { locale: string }) {
                 {link.label}
               </Link>
             ))}
-            <Link href={otherLocalePath} onClick={() => setMenuOpen(false)}
-              className="nav-link text-xs tracking-[0.2em] uppercase flex items-center h-11" lang={otherLocale}>
-              {localeLabel(otherLocale)}
-            </Link>
+            {/* The phone menu gets the same three, labelled — there is room
+                for a word here and none in the header bar. */}
+            <div className="flex items-center gap-3 h-11">
+              <span className="text-xs tracking-[0.2em] uppercase" style={{ color: "#5c5a55" }}>
+                Language / 言語
+              </span>
+              <LocaleSwitch locale={locale} onNavigate={() => setMenuOpen(false)} />
+            </div>
           </div>
         )}
       </header>

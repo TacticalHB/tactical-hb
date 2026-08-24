@@ -361,7 +361,11 @@ export default function CheckoutClient({
     contact: uk ? "Контактні дані" : "Contact details",
     address: uk ? "Адреса доставки" : "Shipping address",
     method: uk ? "Спосіб доставки" : "Delivery method",
-    otherStorefront: uk ? "Відкрити англійську версію" : "Go to the Ukrainian site",
+    otherStorefront: uk
+      ? "Відкрити англійську версію"
+      : locale === "ja"
+        ? "ウクライナ語版サイトへ"
+        : "Go to the Ukrainian site",
     destUkraine: uk ? "Україна — Нова Пошта" : "Ukraine — Nova Poshta",
     destUkraineNote: uk
       ? "Доставка у відділення. Вартість розраховується одразу."

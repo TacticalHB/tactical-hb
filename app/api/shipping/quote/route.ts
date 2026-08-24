@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAppLocale } from "@/i18n/routing";
 import { getDeliveryPrice, NovaPoshtaError } from "@/lib/nova-poshta";
 import { quoteInternational as quoteNovaPost, NovaPostError } from "@/lib/novapost";
 import {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
      shop that has quietly stopped delivering somewhere. Both callers send it;
      the checkout and the Nova Poshta picker are the only two. */
   const rawLocale = String(b.locale ?? "").trim();
-  if (rawLocale !== "uk" && rawLocale !== "en") {
+  if (!isAppLocale(rawLocale)) {
     return NextResponse.json({ ok: false, error: "locale_required" }, { status: 400 });
   }
   const locale = rawLocale;

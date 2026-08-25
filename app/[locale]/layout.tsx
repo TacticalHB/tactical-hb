@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isAppLocale } from "@/i18n/routing";
 import { AuthProvider } from "@/components/AuthContext";
+import HtmlLocaleSync from "@/components/HtmlLocaleSync";
 
 /* ---------------------------------------------------------------------------
    Locale root: only what BOTH faces of the app need — messages and a session.
@@ -30,6 +31,11 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      {/* <html lang/dir> is set by the ROOT layout, which Next preserves across
+          a soft navigation — so switching locale by link never updated it.
+          This sits inside [locale], which does re-render per locale, and
+          corrects the two attributes before paint. See the component. */}
+      <HtmlLocaleSync locale={locale} />
       <AuthProvider>{children}</AuthProvider>
     </NextIntlClientProvider>
   );

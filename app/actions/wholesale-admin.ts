@@ -25,6 +25,17 @@ import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 
 export type AdminResult = { ok: true } | { ok: false; error: string };
 
+export type RequestStatusResult =
+  | {
+      ok: true;
+      /** Stock lines moved by this change, so the card can say so. */
+      applied?: number;
+      restored?: number;
+      /** Skus the request needed that the shelf has no row for. */
+      unmatched?: string[];
+    }
+  | { ok: false; error: string };
+
 /** Approve, reject or suspend a partner's portal access. */
 export async function setPartnerAccountStatus(
   partnerId: string,
@@ -108,7 +119,7 @@ export async function setPartnerPriceBook(
 export async function updateRequestStatus(
   requestId: string,
   status: string
-): Promise<AdminResult> {
+): Promise<RequestStatusResult> {
   const actor = await requireAdminActor();
   if (!actor) return { ok: false, error: "forbidden" };
 
@@ -116,9 +127,15 @@ export async function updateRequestStatus(
   const id = String(requestId ?? "").trim();
   if (!id) return { ok: false, error: "not_found" };
 
-  const ok = await setRequestStatus(id, status);
-  if (!ok) return { ok: false, error: "write_failed" };
+  const res = await setRequestStatus(id, status);
+  if (!res.ok) return { ok: false, error: "write_failed" };
+
+  console.info(`[wholesale] ${actor} set request ${id} to ${status}`);
 
   revalidatePath("/[locale]/admin/wholesale", "page");
-  return { ok: true };
+  /* Stock is revalidated too: marking a request paid changes on_hand, and an
+     admin who flips to the stock page expecting the new number should find it
+     rather than a cached one. */
+  revalidatePath("/[locale]/admin/stock", "page");
+  return { ok: true, applied: res.applied, restored: res.restored, unmatched: res.unmatched };
 }

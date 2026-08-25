@@ -704,19 +704,77 @@ export async function setPartnerType(
   return true;
 }
 
-/** Move a request along its ladder. Admin-only callers. */
-export async function setRequestStatus(requestId: string, status: RequestStatus): Promise<boolean> {
-  const db = createAdminClient();
-  const { error } = await db
-    .from("wholesale_requests")
-    .update({ status })
-    .eq("id", requestId);
+export type StatusChange = {
+  ok: boolean;
+  /** Stock lines taken off the shelf by this change, if any. */
+  applied?: number;
+  /** Stock lines put back by this change, if any. */
+  restored?: number;
+  /** Skus the request needed that nothing on the shelf answers to. */
+  unmatched?: string[];
+};
 
+/**
+ * Move a request along its ladder, and move stock with it.
+ *
+ * PAID IS THE MOMENT THE GOODS LEAVE. Retail has decremented on the payment
+ * webhook since 0015; a paid wholesale request is the same event, and until
+ * now it was the one way stock could leave without the ledger noticing.
+ *
+ * Off paid puts it back — see 0036 for why this direction exists here and not
+ * in retail: a dropdown with five options is a great deal easier to mis-click
+ * than a Monobank webhook is to fire twice.
+ *
+ * Stock moves AFTER the status write and never blocks it. A request that is
+ * genuinely paid is paid whether or not the shelf has a row for every sku, and
+ * the unmatched list is how the caller surfaces the gap instead of pretending
+ * the money did not arrive.
+ */
+export async function setRequestStatus(
+  requestId: string,
+  status: RequestStatus
+): Promise<StatusChange> {
+  const db = createAdminClient();
+
+  const { data: before } = await db
+    .from("wholesale_requests")
+    .select("status")
+    .eq("id", requestId)
+    .maybeSingle();
+  const wasPaid = before?.status === "paid";
+
+  const { error } = await db.from("wholesale_requests").update({ status }).eq("id", requestId);
   if (error) {
     console.error("[wholesale] request status write failed:", error.message);
-    return false;
+    return { ok: false };
   }
-  return true;
+
+  if (status === "paid" && !wasPaid) {
+    const { data, error: rpcErr } = await db.rpc("apply_wholesale_stock", { p_request_id: requestId });
+    if (rpcErr) {
+      console.error("[wholesale] stock NOT applied for", requestId, "-", rpcErr.message);
+      return { ok: true };
+    }
+    const r = (data ?? {}) as { applied?: number; unmatched?: string[]; replayed?: boolean };
+    if (r.unmatched?.length) {
+      console.warn("[wholesale] paid but no stock row for:", r.unmatched.join(", "));
+    }
+    console.info(`[wholesale] ${requestId} paid — ${r.applied ?? 0} stock line(s) decremented`);
+    return { ok: true, applied: r.applied ?? 0, unmatched: r.unmatched ?? [] };
+  }
+
+  if (wasPaid && status !== "paid") {
+    const { data, error: rpcErr } = await db.rpc("reverse_wholesale_stock", { p_request_id: requestId });
+    if (rpcErr) {
+      console.error("[wholesale] stock NOT restored for", requestId, "-", rpcErr.message);
+      return { ok: true };
+    }
+    const r = (data ?? {}) as { restored?: number };
+    console.info(`[wholesale] ${requestId} moved off paid — ${r.restored ?? 0} stock line(s) restored`);
+    return { ok: true, restored: r.restored ?? 0 };
+  }
+
+  return { ok: true };
 }
 
 /** The partner rows behind the admin inbox, keyed by id. */

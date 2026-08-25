@@ -49,15 +49,36 @@ export default function WholesaleRequestCard({
     product: uk ? "Товар" : "Product",
     amount: uk ? "Сума" : "Amount",
     failed: uk ? "Не вдалося оновити." : "Couldn't update.",
+    stockOut: (n: number) =>
+      uk ? `Списано зі складу: ${n} позицій` : `${n} stock line${n === 1 ? "" : "s"} taken off the shelf`,
+    stockBack: (n: number) =>
+      uk ? `Повернуто на склад: ${n} позицій` : `${n} stock line${n === 1 ? "" : "s"} put back`,
+    noStockRow: (skus: string[]) =>
+      uk
+        ? `Немає на складі: ${skus.join(", ")} — залишок не змінено`
+        : `Not on the shelf yet: ${skus.join(", ")} — nothing decremented for those`,
   };
+
+  const [note, setNote] = useState<string | null>(null);
 
   async function onStatus(next: RequestStatus) {
     setBusy(true);
     setError(null);
+    setNote(null);
     const res = await updateRequestStatus(r.id, next);
     setBusy(false);
-    if (res.ok) router.refresh();
-    else setError(L.failed);
+    if (!res.ok) return setError(L.failed);
+
+    /* SAY WHAT HAPPENED TO STOCK. Marking a request paid quietly moves real
+       numbers on the stock page; an admin who sees nothing has no way to tell
+       a working deduction from a broken one, and no reason to go and look. */
+    const lines: string[] = [];
+    if (res.applied) lines.push(L.stockOut(res.applied));
+    if (res.restored) lines.push(L.stockBack(res.restored));
+    if (res.unmatched?.length) lines.push(L.noStockRow(res.unmatched));
+    setNote(lines.length ? lines.join(" · ") : null);
+
+    router.refresh();
   }
 
   const inputStyle: React.CSSProperties = {
@@ -137,6 +158,12 @@ export default function WholesaleRequestCard({
       {error && (
         <p className="px-5 pb-2 text-[12.5px]" style={{ color: "var(--console-alert)" }}>
           {error}
+        </p>
+      )}
+
+      {note && (
+        <p className="px-5 pb-2 text-[12.5px]" style={{ color: "var(--console-accent)" }}>
+          {note}
         </p>
       )}
 

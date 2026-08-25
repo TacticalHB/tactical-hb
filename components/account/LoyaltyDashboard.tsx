@@ -227,7 +227,7 @@ export default function LoyaltyDashboard({
             </Link>
             <Link
               href={`/${locale}/setup`}
-              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{ color: "var(--text-muted)" }}
             >
               {L.startSetup}

@@ -61,7 +61,7 @@ export default async function NotFoundPanel({ locale }: { locale: string }) {
           </Link>
           <Link
             href={`/${locale}`}
-            className="text-[14px] underline underline-offset-4 transition-opacity hover:opacity-70"
+            className="inline-flex items-center h-11 text-[14px] underline underline-offset-4 transition-opacity hover:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
             {t("home")}

@@ -53,7 +53,13 @@ export default function CookieConsent({ locale }: { locale: string }) {
 
   const L = {
     title: t(locale, { uk: "Ми використовуємо файли cookie", en: "We use cookies", ja: "Cookie を使用しています", ar: "نستخدم ملفات تعريف الارتباط" }),
-    body: t(locale, { uk: "Необхідні cookie тримають сайт робочим (вхід, кошик). За вашою згодою ми також використовуємо аналітику та маркетинг.", en: "Necessary cookies keep the site working (sign-in, bag). With your consent we also use analytics and marketing cookies.", ja: "必須 Cookie はサイトの動作（ログイン、バッグ）に必要です。ご同意いただける場合は、分析とマーケティングの Cookie も使用します。", ar: "ملفات تعريف الارتباط الضرورية تُبقي الموقع يعمل (تسجيل الدخول، الحقيبة). وبموافقتك نستخدم أيضًا ملفات التحليلات والتسويق." }),
+    /* SHORT ON PURPOSE. This used to name the examples — sign-in, bag — and
+       ran to four lines on a phone, which is most of why the sheet owned a
+       third of the screen. Every one of those details is one tap away in
+       Customize, which lists each category with its own description, and in
+       the privacy policy this paragraph links to. A consent prompt has to be
+       readable at a glance to be read at all. */
+    body: t(locale, { uk: "Необхідні cookie тримають сайт робочим. Аналітика та маркетинг — за вашим вибором.", en: "Necessary cookies keep the site working. Analytics and marketing are optional.", ja: "必須 Cookie はサイトの動作に必要です。分析とマーケティングは任意です。", ar: "ملفات تعريف الارتباط الضرورية تُبقي الموقع يعمل. أما التحليلات والتسويق فاختيارية." }),
     acceptAll: t(locale, { uk: "Прийняти все", en: "Accept all", ja: "すべて許可", ar: "قبول الكل" }),
     rejectAll: t(locale, { uk: "Відхилити все", en: "Reject all", ja: "すべて拒否", ar: "رفض الكل" }),
     customize: t(locale, { uk: "Налаштувати", en: "Customize", ja: "設定する", ar: "تخصيص" }),
@@ -88,7 +94,12 @@ export default function CookieConsent({ locale }: { locale: string }) {
         <div
           role="dialog"
           aria-label={L.title}
-          className="fixed bottom-0 left-0 right-0 z-[90] p-4 sm:p-5 max-h-[70dvh] overflow-y-auto overscroll-contain"
+          /* TIGHTER PADDING AND A LOWER CEILING ON A PHONE. Measured at
+             375×667 the old sheet was 241px — 36% of the screen, with the
+             action buttons wrapping onto a second row. The cap drops from 70%
+             to 45% of the viewport so it can never take more than it needs,
+             and stays scrollable for the rare landscape case. */
+          className="fixed bottom-0 left-0 right-0 z-[90] px-4 py-3.5 sm:p-5 max-h-[45dvh] sm:max-h-[70dvh] overflow-y-auto overscroll-contain"
           style={{
             background: "#fff",
             borderTop: "1px solid var(--border)",
@@ -105,10 +116,10 @@ export default function CookieConsent({ locale }: { locale: string }) {
             paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
           }}
         >
-          <div className="page-container flex flex-col md:flex-row md:items-center gap-4">
-            <div className="flex-1">
+          <div className="page-container flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold" style={{ color: "#111" }}>{L.title}</div>
-              <p className="text-[13px] mt-1 leading-snug" style={{ color: "var(--text-muted)" }}>
+              <p className="text-[13px] mt-0.5 leading-snug" style={{ color: "var(--text-muted)" }}>
                 {L.body}{" "}
                 {/* The banner implied a privacy policy long before one existed.
                     Now it links to it — a consent request that cannot be read
@@ -122,17 +133,29 @@ export default function CookieConsent({ locale }: { locale: string }) {
                 </a>
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <button onClick={() => persist({ analytics: true, marketing: true })}
-                className="h-11 px-5 rounded-full text-xs font-medium" style={{ background: "#111", color: "#fff" }}>
-                {L.acceptAll}
-              </button>
-              <button onClick={() => persist({ analytics: false, marketing: false })}
-                className="h-11 px-5 rounded-full text-xs font-medium border" style={{ borderColor: "var(--border-strong)", color: "#111" }}>
-                {L.rejectAll}
-              </button>
+            {/* THE TWO ANSWERS SHARE ONE ROW AND SPLIT IT EVENLY. They used
+                to be three pills in a wrap container, which on a phone put
+                Accept and Reject on one line and Customize alone on a second —
+                a whole extra row for the option almost nobody takes, and the
+                Ukrainian labels made the wrap unpredictable across locales.
+                flex-1 makes the two decisions equal-width at any label length;
+                on sm+ they return to their natural size beside Customize. */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 shrink-0">
+              <div className="flex gap-2">
+                <button onClick={() => persist({ analytics: true, marketing: true })}
+                  className="flex-1 sm:flex-none h-11 px-5 rounded-full text-xs font-medium whitespace-nowrap"
+                  style={{ background: "#111", color: "#fff" }}>
+                  {L.acceptAll}
+                </button>
+                <button onClick={() => persist({ analytics: false, marketing: false })}
+                  className="flex-1 sm:flex-none h-11 px-5 rounded-full text-xs font-medium border whitespace-nowrap"
+                  style={{ borderColor: "var(--border-strong)", color: "#111" }}>
+                  {L.rejectAll}
+                </button>
+              </div>
               <button onClick={() => setShowModal(true)}
-                className="h-11 px-5 rounded-full text-xs font-medium underline underline-offset-2" style={{ color: "#111" }}>
+                className="h-11 px-2 sm:px-5 rounded-full text-xs font-medium underline underline-offset-2 whitespace-nowrap"
+                style={{ color: "#111" }}>
                 {L.customize}
               </button>
             </div>

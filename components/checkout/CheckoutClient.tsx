@@ -1100,7 +1100,7 @@ export default function CheckoutClient({
               <div className="mt-5">
                 <button
                   onClick={() => setStep("delivery")}
-                  className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+                  className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {L.backDelivery}

@@ -142,8 +142,10 @@ export default function Navbar({ locale }: { locale: string }) {
             </button>
             {bag}
             <AccountMenu locale={locale} />
-            {/* All four languages, not a toggle — see LocaleSwitch. */}
-            <LocaleSwitch locale={locale} className="ml-1" />
+            {/* One compact trigger that opens the four — see LocaleSwitch.
+                It used to be the four badges inline, which at four locales was
+                eight glyphs and three dots wedged against the bag icon. */}
+            <LocaleSwitch locale={locale} className="ms-1" />
           </nav>
 
           {/* Mobile right cluster. gap-1 rather than gap-5: the buttons now
@@ -194,13 +196,31 @@ export default function Navbar({ locale }: { locale: string }) {
                 {link.label}
               </Link>
             ))}
-            {/* The phone menu gets the same three, labelled — there is room
-                for a word here and none in the header bar. */}
-            <div className="flex items-center gap-3 h-11">
-              <span className="text-xs tracking-[0.2em] uppercase" style={{ color: "#5c5a55" }}>
-                Language / 言語
+            {/* THE MENU GETS ROWS, NOT A POPOVER. A dropdown opening inside
+                an already-open sheet is a layer on a layer, and on a phone the
+                panel would have to decide whether to cover the links it just
+                sat under. Four full-width 44px rows are easier to hit and read
+                as part of the menu rather than as a control bolted into it.
+
+                Each language names ITSELF — a visitor stranded on the wrong
+                storefront is looking for the word they recognise, and
+                "Українська" is that word in a way "UA" is not. */}
+            <div
+              className="mt-2 pt-3"
+              style={{ borderTop: "1px solid var(--border-dark)" }}
+            >
+              <span
+                className="block text-xs tracking-[0.2em] uppercase mb-1"
+                style={{ color: "#5c5a55" }}
+                lang="en"
+              >
+                {t("language")}
               </span>
-              <LocaleSwitch locale={locale} onNavigate={() => setMenuOpen(false)} />
+              <LocaleSwitch
+                locale={locale}
+                variant="list"
+                onNavigate={() => setMenuOpen(false)}
+              />
             </div>
           </div>
         )}

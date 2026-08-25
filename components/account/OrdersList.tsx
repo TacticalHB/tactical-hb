@@ -70,7 +70,7 @@ export default function OrdersList({
           <div className="mt-5">
             <Link
               href={`/${locale}/setup`}
-              className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{ color: "var(--text-muted)" }}
             >
               {L.buildSetup}

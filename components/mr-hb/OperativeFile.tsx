@@ -491,7 +491,7 @@ export default function OperativeFile({ locale }: { locale: string }) {
                   </Link>
                   <Link
                     href={`/${locale}/setup`}
-                    className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+                    className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
                     style={{ color: "rgba(255,255,255,0.55)" }}
                   >
                     {t("b4_secondary")}

@@ -86,15 +86,26 @@ export default function SearchOverlay({
               <circle cx="10" cy="10" r="7" />
               <path d="M15 15l5 5" />
             </svg>
+            {/* h-11 so the field itself is a 44px target — it was 28px, which
+                on a phone is a thin band to land a thumb in, and this is the
+                first thing anyone touches after opening search. */}
             <input
               ref={inputRef}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={t(locale, { uk: "Пошук продуктів…", en: "Search products…", ja: "製品を検索…", ar: "ابحث في المنتجات…" })}
-              className="flex-1 bg-transparent outline-none text-lg"
+              className="flex-1 min-w-0 h-11 bg-transparent outline-none text-lg"
               style={{ color: "var(--text)" }}
             />
-            <button onClick={onClose} aria-label={a11y("search_close")} style={{ color: "var(--text-muted)" }}>
+            {/* The ✕ was a 20×20 glyph. -me-2.5 keeps it visually in the
+                corner while the box grows around it, the same trick the navbar
+                icons and the cookie modal's close button already use. */}
+            <button
+              onClick={onClose}
+              aria-label={a11y("search_close")}
+              className="flex items-center justify-center w-11 h-11 -me-2.5 shrink-0"
+              style={{ color: "var(--text-muted)" }}
+            >
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <path d="M5 5l10 10M15 5L5 15" />
               </svg>

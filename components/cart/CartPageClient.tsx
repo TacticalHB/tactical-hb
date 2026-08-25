@@ -99,7 +99,11 @@ export default function CartPageClient({
           </Link>
           <Link
             href={`/${locale}/setup`}
-            className="text-[14px] underline underline-offset-4 transition-opacity hover:opacity-70"
+            /* inline-flex + h-11: this was a 21px line of text, which is the
+               smallest thing on the empty-cart screen and one of only two ways
+               forward from it. The underline still sits on the text, so it
+               looks identical — the box around it just got thumb-sized. */
+            className="inline-flex items-center h-11 text-[14px] underline underline-offset-4 transition-opacity hover:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
             {L.buildSetup}

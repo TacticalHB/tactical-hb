@@ -218,7 +218,7 @@ export default function AccountCreatingScreen({
         <button
           type="button"
           onClick={onSkip}
-          className="text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
+          className="inline-flex items-center h-11 text-[13px] underline underline-offset-4 transition-opacity hover:opacity-70"
           style={{ color: "var(--text-muted)" }}
         >
           {L.skip}

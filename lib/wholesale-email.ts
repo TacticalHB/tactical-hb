@@ -165,7 +165,7 @@ const REG_COPY: Record<string, RegCopy> = {
     paragraphs: [
       "Thank you for registering for a Tactical HB wholesale account.",
       "Your account has been created, but it is not active yet. To open it, please complete the attached Wholesale Partnership Application Form and email it back to us with the supporting documents it asks for.",
-      "Once your completed form is with us, our team reviews it within 2–3 business days. We will email you as soon as your account is approved, and dealer pricing and ordering become available the next time you sign in.",
+      "Once your completed form is with us, our team reviews it within 2–3 business days. We will email you as soon as your account is approved, and wholesale pricing and ordering become available the next time you sign in.",
       "If you have any questions, simply reply to this email.",
     ],
     signOff: "Best regards,",

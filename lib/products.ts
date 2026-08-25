@@ -372,7 +372,7 @@ export const products: Product[] = [
     descriptionJa: "完全な非粘着表面、100% PFOA フリー。タバコの付着を防ぎ、お手入れも簡単です。パープルとブラックをご用意しています。",
     descriptionAr: "سطح غير لاصق تمامًا، خالٍ من PFOA بنسبة 100٪. يمنع التصاق المعسّل ويسهّل التنظيف. متوفر بالبنفسجي والأسود.",
     price: 30,
-    priceUah: 1150,
+    priceUah: 1220,
     currency: "EUR",
     weightG: 125,
     dims: { l: 122, w: 122, h: 42 },
@@ -390,7 +390,7 @@ export const products: Product[] = [
         swatch: "#1c1c1e",
         image: "/images/hmd-op-black.png",
         price: 30,
-        priceUah: 1150,
+        priceUah: 1220,
         /* Black's own gallery: the cut-out it has always had, then the
            packaging shot. Declared PER COLOUR rather than on the product,
            because a product-level list would replace the swatch-driven gallery
@@ -401,7 +401,7 @@ export const products: Product[] = [
           "/images/hmd-op-black-2.jpg", // 2nd — boxed, with the PFOA-free mark
         ],
       },
-      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1200 },
+      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1250 },
     ],
     pdp: {
       /* No `photos` key on purpose: a list here outranks everything and would
@@ -502,7 +502,7 @@ export const products: Product[] = [
     descriptionJa: "天然クレイの手づくりクラシックボウル。力強く濃厚な煙。安定した保熱のための最適な肉厚。",
     descriptionAr: "رأس كلاسيكي مصنوع يدويًا من طين طبيعي. دخان قوي وغني. سماكة جدران مثالية لاحتفاظ ثابت بالحرارة.",
     price: 11,
-    priceUah: 420,
+    priceUah: 430,
     currency: "EUR",
     weightG: 325,
     dims: { l: 109, w: 82, h: 82 },
@@ -595,7 +595,7 @@ export const products: Product[] = [
     descriptionJa: "天然クレイの手づくり。35〜40分の明るくやわらかな煙。おひとり用。容量 10〜12g。",
     descriptionAr: "مصنوع يدويًا من طين طبيعي. دخان مشرق وناعم لمدة 35–40 دقيقة. للاستخدام الفردي. السعة 10–12 غ.",
     price: 10,
-    priceUah: 370,
+    priceUah: 380,
     currency: "EUR",
     weightG: 300,
     dims: { l: 109, w: 82, h: 82 },
@@ -688,7 +688,7 @@ export const products: Product[] = [
     descriptionJa: "独自のインサートを備えたクラシックなファンネル。驚くほど濃厚でまろやかな煙。過程を大切にする方へ。",
     descriptionAr: "فانل كلاسيكي بقطعة داخلية مميّزة. دخان غني ولطيف إلى حد مذهل. لمن يقدّر التجربة.",
     price: 13,
-    priceUah: 500,
+    priceUah: 510,
     currency: "EUR",
     weightG: 345,
     dims: { l: 109, w: 82, h: 82 },

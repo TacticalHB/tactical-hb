@@ -94,7 +94,7 @@ const APPROVED: Record<string, Copy> = {
     greeting: "Hi,",
     paragraphs: [
       "Your application has been reviewed and approved. Thank you for the paperwork.",
-      "Dealer pricing and ordering are available now. Sign in and set the quantities you need, then send the list — we confirm availability and email you the payment details. Nothing is charged on the site.",
+      "Wholesale pricing and ordering are available now. Sign in and set the quantities you need, then send the list — we confirm availability and email you the payment details. Nothing is charged on the site.",
     ],
     cta: "Open the trade portal",
     signOff: "Best regards,",

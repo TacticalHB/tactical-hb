@@ -107,7 +107,7 @@ export function buildWholesaleApplicationStaffMail(
     rows,
     blocks: f.note ? [staffQuote("What they told us", f.note)] : [],
     cta: { label: "Approve or decline", url: adminUrl(siteUrl, "/en/admin/partners") },
-    status: "They cannot see dealer prices or submit anything until approved.",
+    status: "They cannot see wholesale prices or submit anything until approved.",
   });
 
   const text = [
@@ -117,7 +117,7 @@ export function buildWholesaleApplicationStaffMail(
     f.note ?? "",
     "",
     `Approve or decline: ${adminUrl(siteUrl, "/en/admin/partners")}`,
-    "They cannot see dealer prices or submit anything until approved.",
+    "They cannot see wholesale prices or submit anything until approved.",
   ]
     .filter(Boolean)
     .join("\n");

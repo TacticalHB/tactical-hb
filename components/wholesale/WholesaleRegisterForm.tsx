@@ -95,7 +95,7 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
       ar: "تم استلام طلبك",
     }),
     doneBody: t(locale, {
-      en: "Our team will review your details and email you once your account is open. Dealer prices and ordering stay locked until then.",
+      en: "Our team will review your details and email you once your account is open. Wholesale prices and ordering stay locked until then.",
       uk: "Ми розглянемо ваші дані й напишемо, щойно акаунт буде відкрито. До того часу оптові ціни та замовлення недоступні.",
       ja: "内容を確認のうえ、アカウント開設時にメールでご連絡します。それまで卸価格とご注文はご利用いただけません。",
       ar: "سيراجع فريقنا بياناتك ويراسلك بمجرد فتح حسابك. وتبقى أسعار الجملة والطلب مقفلة حتى ذلك الحين.",

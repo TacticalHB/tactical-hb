@@ -17,14 +17,14 @@ export type LineDisplay = {
   image: string;
   colour: string | null;
   material: string | null;
-  /** "With Lid + With FEAR 9E418", or null when the line is the base config. */
+  /** "With Lid 9E418 + With FEAR 9E418", or null when the line is the base config. */
   addons: string | null;
 };
 
 const VARIANT_UK: Record<string, string> = { Black: "Чорний", Purple: "Фіолетовий" };
 
 /**
- * How a line's chosen add-ons are named — "With Lid + With Timer", or null for
+ * How a line's chosen add-ons are named — "With Lid 9E418 + With Timer", or null for
  * a base configuration.
  *
  * THE NAMES LIVE HERE AND NOWHERE ELSE for the bag, the checkout and the
@@ -46,7 +46,7 @@ export function describeAddons(
   const addons: string[] = [];
   /* FEAR 9E418 is a product name and stays Latin in every language — only the
      word around it changes. */
-  if (options?.lid) addons.push(t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き", ar: "مع الغطاء" }));
+  if (options?.lid) addons.push(t(locale, { uk: "З Lid 9E418", en: "With Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418" }));
   if (options?.rubber) addons.push(t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }));
   if (options?.timer) addons.push(t(locale, { uk: "З таймером", en: "With Timer", ja: "タイマー付き", ar: "مع المؤقّت" }));
   return addons.length ? addons.join(" + ") : null;

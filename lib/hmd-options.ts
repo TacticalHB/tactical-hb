@@ -14,9 +14,9 @@ import { addMoney, money, type Money } from "./currency";
    either from the other would silently reprice it, so both are passed
    explicitly — the same reasoning the wind cover's timer already followed.
 
-     lid    €4.00 / ₴210
-     rubber €3.50 / ₴160     (FEAR 9E418 — the key stayed `rubber`, see 0029)
-     both   €7.50 / ₴370     (purely additive in both currencies)
+     Lid 9E418   €4.00 / ₴210
+     FEAR 9E418  €3.50 / ₴160   (the keys stayed `lid` and `rubber` — 0029, 0037)
+     both        €7.50 / ₴370   (purely additive in both currencies)
 --------------------------------------------------------------------------- */
 
 export type HmdMaterial = { lid: boolean; rubber: boolean };

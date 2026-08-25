@@ -54,7 +54,7 @@ export type EmailProductRow = {
   /** Absolute HTTPS URL. A row with no image renders without one. */
   imageUrl?: string;
   name: string;
-  /** "With Lid + With Rubber", "With Timer" — whatever the line actually is. */
+  /** "With Lid 9E418 + With FEAR 9E418", "With Timer" — whatever the line is. */
   variant?: string;
   /** Already formatted for the locale by the caller. Never built here. */
   priceLabel: string;

@@ -102,7 +102,7 @@ export type AddonKey = keyof LineAddons;
    onto the row and read by staff — the partner sees their own language in the
    portal and in their copy of the letter. */
 const ADDON_LABEL: Record<AddonKey, string> = {
-  lid: "With Lid",
+  lid: "With Lid 9E418",
   rubber: "With FEAR 9E418",
   timer: "With Timer",
 };

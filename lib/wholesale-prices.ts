@@ -15,9 +15,9 @@ import type { LineAddons } from "@/lib/wholesale-display";
    writing to somebody who will hold you to it, which is why partner_type has
    no default and no fallback (0034).
 
-   SHOPS AND DISTRIBUTORS SHARE THE SHOP BOOK, as the list itself says:
-   "SHOP / DISTRIBUTION — dealer book for specialty shops, online retailers and
-   distributors".
+   SHOPS AND DISTRIBUTORS SHARE THE SHOP BOOK, as the printed list says:
+   "SHOP / DISTRIBUTION — wholesale book for specialty shops, online retailers
+   and distributors".
 
    ---- Two places the list and the catalogue do not line up 1:1 -------------
 

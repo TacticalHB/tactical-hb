@@ -55,7 +55,7 @@ export function selectedConfig(
 ): string[] {
   const out: string[] = [];
   if (product.category === "hmd") {
-    if (material?.lid) out.push(t(locale, { uk: "з кришкою", en: "with lid", ja: "リッド付き", ar: "مع الغطاء" }));
+    if (material?.lid) out.push(t(locale, { uk: "з Lid 9E418", en: "with Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418" }));
     if (material?.rubber) out.push(t(locale, { uk: "з FEAR 9E418", en: "with FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }));
   }
   if (product.category === "windcover" && windcover?.timer) {

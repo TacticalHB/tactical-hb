@@ -78,7 +78,7 @@ export default async function OrderDetailPage({
     help: t(locale, { uk: "Питання щодо замовлення? Просто відповідайте на лист із підтвердженням — він приходить із адреси, яку ми читаємо.", en: "Questions about this order? Reply to your confirmation email — it comes from an address we read.", ja: "このご注文についてのご質問は、確認メールにご返信ください。こちらで確認しております。", ar: "أسئلة عن هذا الطلب؟ ردّ على رسالة التأكيد — فهي من عنوان نقرأه." }),
     /* Kept in step with describeAddons in lib/cart-display — this page reads
        stored order rows, not cart lines, so it names the add-ons itself. */
-    addons: { lid: t(locale, { uk: "З кришкою", en: "With Lid", ja: "リッド付き", ar: "مع الغطاء" }), rubber: t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }) },
+    addons: { lid: t(locale, { uk: "З Lid 9E418", en: "With Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418" }), rubber: t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }) },
   };
 
   const money = (eur: number | null, uah: number | null) =>

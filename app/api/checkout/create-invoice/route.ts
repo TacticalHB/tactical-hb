@@ -481,7 +481,7 @@ export async function POST(request: NextRequest) {
         material: d?.material ?? null,
         addons: d?.addons ?? null,
         // The choice itself, kept apart from the strings above: colour/addons
-        // are translated for the customer's eye ("Чорний", "З кришкою") and so
+        // are translated for the customer's eye ("Чорний", "З Lid 9E418") and so
         // can never be matched back to a product. These three are stable, and
         // they are what stock is decremented from.
         variant: l.options.variant,

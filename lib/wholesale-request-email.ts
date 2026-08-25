@@ -95,7 +95,7 @@ function linesTable(req: WholesaleRequest, locale: string): string {
          "HMD TCT OP — Purple" carries a neutral em-dash that an RTL box would
          happily move to the wrong end. */
       /* Name on one line, configuration muted under it. Two facts, two lines
-         — a single run of "HMD TCT Classic With Lid + With FEAR 9E418" is
+         — a single run of "HMD TCT Classic With Lid 9E418 + With FEAR 9E418" is
          where a picker stops reading. */
       const product = i.optionsLabel
         ? `<td align="${startAlign}" dir="ltr" style="padding:10px;border-bottom:1px solid ${LINE};font:14px ${FONT};color:${INK}">${esc(

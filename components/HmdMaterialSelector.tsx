@@ -42,7 +42,7 @@ export type OptionSpec = {
 };
 
 export const HMD_OPTIONS: OptionSpec[] = [
-  { key: "lid", en: "With Lid", uk: "З кришкою", ja: "リッド付き", ar: "مع الغطاء", glyph: "disc", price: MATERIAL_PRICE.lid },
+  { key: "lid", en: "With Lid 9E418", uk: "З Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418", glyph: "disc", price: MATERIAL_PRICE.lid },
   /* The KEY stays `rubber` — it is written into cart lines, order rows
      (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
      would orphan every order already placed. Only the two labels are the

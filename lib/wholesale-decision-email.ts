@@ -2,6 +2,43 @@ import "server-only";
 import { esc } from "@/lib/email";
 import { CARD, INK, MUTED, FONT, ACCENT_FILL, ACCENT_TEXT, emailShell } from "@/lib/email-theme";
 import type { AccountStatus } from "@/lib/wholesale-display";
+import enMsg from "@/messages/en.json";
+import ukMsg from "@/messages/uk.json";
+import jaMsg from "@/messages/ja.json";
+import arMsg from "@/messages/ar.json";
+
+/* ---- Which kind of business did they say they were? -----------------------
+
+   business_type is stored as the LABEL the applicant picked, in the language
+   they picked it in — "Shisha Lounge / Bar", "Кальянна / Бар", "لاونج شيشة /
+   بار". That is deliberate (0032): the enquiry form emails the label too, so
+   sales reads identical words from both doors.
+
+   It does mean the decline letter has to work backwards from a label to a
+   category. Matching against every locale's own labels rather than hardcoding
+   strings here keeps the two in step — if a label is ever reworded in
+   messages/*.json, this follows it instead of quietly stopping matching.
+--------------------------------------------------------------------------- */
+
+export type BizCategory = "shop" | "distribution" | "lounge";
+
+const LABELS: Record<BizCategory, string[]> = {
+  shop: [enMsg, ukMsg, jaMsg, arMsg].map((m) => m.wholesale.biz_shop),
+  distribution: [enMsg, ukMsg, jaMsg, arMsg].map((m) => m.wholesale.biz_distribution),
+  lounge: [enMsg, ukMsg, jaMsg, arMsg].map((m) => m.wholesale.biz_lounge),
+};
+
+export function resolveBizCategory(stored: string | null | undefined): BizCategory | null {
+  const v = (stored ?? "").trim().toLowerCase();
+  if (!v) return null;
+  for (const key of Object.keys(LABELS) as BizCategory[]) {
+    if (LABELS[key].some((label) => label.trim().toLowerCase() === v)) return key;
+  }
+  // A row typed by hand in the CRM, or an older label. The letter falls back
+  // to wording that asks for evidence without naming a category — better than
+  // guessing wrong and telling a distributor to send photographs of a shop.
+  return null;
+}
 
 /* ---------------------------------------------------------------------------
    What a partner hears when a human decides.
@@ -29,6 +66,23 @@ type Copy = {
   greeting: string;
   paragraphs: string[];
   cta?: string;
+  signOff: string;
+  signature: string;
+};
+
+/* The decline letter is assembled rather than fixed, because the useful part
+   of it is category-specific. `trading` completes "we could not confirm you
+   are trading as …" and `evidence` completes "reply with …". The null row is
+   the fallback when the category could not be resolved. */
+type DeclineCopy = {
+  subject: string;
+  headline: string;
+  greeting: string;
+  opening: string;
+  reason: (trading: string) => string;
+  invite: (evidence: string) => string;
+  trading: Record<BizCategory | "unknown", string>;
+  evidence: Record<BizCategory | "unknown", string>;
   signOff: string;
   signature: string;
 };
@@ -84,15 +138,31 @@ const APPROVED: Record<string, Copy> = {
   },
 };
 
-const DECLINED: Record<string, Copy> = {
+const DECLINED: Record<string, DeclineCopy> = {
   en: {
     subject: "About your wholesale application | Tactical HB",
     headline: "About your wholesale application",
     greeting: "Hi,",
-    paragraphs: [
+    opening:
       "Thank you for applying for a Tactical HB wholesale account, and for the time you put into the application.",
-      "We are not able to open a trade account on this application. If your circumstances change, or you think we have missed something, do reply to this email and we will take another look.",
-    ],
+    reason: (trading) =>
+      `From what we received we weren't able to confirm that you are trading as ${trading}, so we can't open a trade account on this application as it stands.`,
+    invite: (evidence) =>
+      `That may simply be a gap in the paperwork rather than the whole picture. If you can reply to this email with ${evidence}, we'll gladly look at it again.`,
+    trading: {
+      shop: "a retail shop or online store",
+      distribution: "a distributor",
+      lounge: "a shisha lounge or bar",
+      unknown: "a trade business",
+    },
+    evidence: {
+      shop: "photographs of your shop, or a link to your online store, along with your business registration",
+      distribution:
+        "your business registration and details of the brands or territories you currently distribute",
+      lounge: "photographs of your venue and its trading address, along with your business registration",
+      unknown:
+        "your business registration and either photographs or a link to your shop, venue or online store",
+    },
     signOff: "Best regards,",
     signature: "Tactical HB Team.",
   },
@@ -100,10 +170,26 @@ const DECLINED: Record<string, Copy> = {
     subject: "Щодо вашої заявки на оптовий акаунт | Tactical HB",
     headline: "Щодо вашої заявки",
     greeting: "Вітаємо,",
-    paragraphs: [
+    opening:
       "Дякуємо за заявку на оптовий акаунт Tactical HB і за час, який ви на неї витратили.",
-      "За цією заявкою ми не можемо відкрити оптовий акаунт. Якщо обставини зміняться або ви вважаєте, що ми щось не врахували — дайте відповідь на цей лист, і ми подивимося ще раз.",
-    ],
+    reason: (trading) =>
+      `З наданих матеріалів ми не змогли підтвердити, що ви працюєте як ${trading}, тому за цією заявкою відкрити оптовий акаунт не можемо.`,
+    invite: (evidence) =>
+      `Можливо, це лише брак документів, а не повна картина. Якщо надішлете у відповідь на цей лист ${evidence}, ми з радістю розглянемо заявку ще раз.`,
+    trading: {
+      shop: "роздрібний або онлайн-магазин",
+      distribution: "дистриб'ютор",
+      lounge: "кальянна або бар",
+      unknown: "оптовий бізнес",
+    },
+    evidence: {
+      shop: "фотографії магазину або посилання на ваш онлайн-магазин разом із реєстраційними документами",
+      distribution:
+        "реєстраційні документи та інформацію про бренди чи території, які ви наразі представляєте",
+      lounge: "фотографії закладу та його адресу разом із реєстраційними документами",
+      unknown:
+        "реєстраційні документи та фотографії або посилання на ваш магазин, заклад чи онлайн-магазин",
+    },
     signOff: "З повагою,",
     signature: "Команда Tactical HB.",
   },
@@ -111,10 +197,24 @@ const DECLINED: Record<string, Copy> = {
     subject: "卸売アカウントのお申し込みについて | Tactical HB",
     headline: "お申し込みについて",
     greeting: "お世話になっております。",
-    paragraphs: [
+    opening:
       "Tactical HB の卸売アカウントにお申し込みいただき、またお時間を割いてご準備いただき、ありがとうございました。",
-      "今回のお申し込みでは取引アカウントの開設を見送らせていただきました。状況が変わった場合や、行き違いがあるとお考えの場合は、このメールにご返信ください。あらためて確認いたします。",
-    ],
+    reason: (trading) =>
+      `いただいた資料からは、${trading}として営業されていることを確認できませんでした。そのため、今回のお申し込みでは取引アカウントを開設いたしかねます。`,
+    invite: (evidence) =>
+      `書類が揃っていないだけということも考えられます。${evidence}をこのメールへのご返信でお送りいただければ、あらためて審査いたします。`,
+    trading: {
+      shop: "小売店またはオンラインショップ",
+      distribution: "ディストリビューター",
+      lounge: "シーシャラウンジまたはバー",
+      unknown: "卸売のお取引先",
+    },
+    evidence: {
+      shop: "店舗の写真またはオンラインショップの URL と、事業者登録の書類",
+      distribution: "事業者登録の書類と、現在お取り扱いのブランドまたは地域の詳細",
+      lounge: "店舗の写真と営業所在地、および事業者登録の書類",
+      unknown: "事業者登録の書類と、店舗・施設・オンラインショップの写真または URL",
+    },
     signOff: "何卒よろしくお願いいたします。",
     signature: "Tactical HB チーム",
   },
@@ -122,10 +222,26 @@ const DECLINED: Record<string, Copy> = {
     subject: "بخصوص طلبك للحصول على حساب جملة | Tactical HB",
     headline: "بخصوص طلبك",
     greeting: "مرحبًا،",
-    paragraphs: [
+    opening:
       "شكرًا لتقدّمك بطلب حساب جملة لدى Tactical HB، وعلى الوقت الذي خصّصته لإعداده.",
-      "لا يمكننا فتح حساب تجاري بناءً على هذا الطلب. وإن تغيّرت ظروفك أو رأيت أننا أغفلنا شيئًا، فردّ على هذه الرسالة وسننظر في الأمر مجددًا.",
-    ],
+    reason: (trading) =>
+      `لم نتمكّن من التأكّد، بناءً على ما وصلنا، من أن نشاطك هو ${trading}، ولذلك لا يمكننا فتح حساب تجاري بناءً على هذا الطلب بصيغته الحالية.`,
+    invite: (evidence) =>
+      `وقد يكون الأمر مجرد نقص في المستندات لا أكثر. فإن أرسلت ردًّا على هذه الرسالة ${evidence}، سيسعدنا مراجعة طلبك من جديد.`,
+    /* Nominative, because the sentence above is now "…that your business IS
+       X" rather than "…that you work X". */
+    trading: {
+      shop: "متجر للبيع بالتجزئة أو متجر إلكتروني",
+      distribution: "التوزيع",
+      lounge: "لاونج شيشة أو بار",
+      unknown: "نشاط تجاري",
+    },
+    evidence: {
+      shop: "صورًا لمتجرك أو رابطًا لمتجرك الإلكتروني، مع السجل التجاري",
+      distribution: "السجل التجاري وتفاصيل العلامات أو المناطق التي توزّعها حاليًا",
+      lounge: "صورًا للمكان وعنوان مزاولة النشاط، مع السجل التجاري",
+      unknown: "السجل التجاري وصورًا أو رابطًا لمتجرك أو مكانك أو متجرك الإلكتروني",
+    },
     signOff: "مع خالص التقدير،",
     signature: "فريق Tactical HB",
   },
@@ -143,12 +259,30 @@ export type DecisionMail = { subject: string; html: string; text: string } | nul
 export function buildDecisionMail(
   status: AccountStatus,
   locale: string,
-  siteUrl: string
+  siteUrl: string,
+  /** What they applied as — decides which evidence the decline asks for. */
+  businessType?: string | null
 ): DecisionMail {
-  const table = status === "approved" ? APPROVED : status === "rejected" ? DECLINED : null;
-  if (!table) return null;
+  if (status !== "approved" && status !== "rejected") return null;
 
-  const t = table[locale] ?? table.en;
+  /* The decline is assembled from its parts; the approval is a fixed letter.
+     Keeping them separate rather than forcing one shape means the approval
+     never has to carry an empty "reason" it does not have. */
+  const t: Copy =
+    status === "approved"
+      ? APPROVED[locale] ?? APPROVED.en
+      : (() => {
+          const d = DECLINED[locale] ?? DECLINED.en;
+          const cat = resolveBizCategory(businessType) ?? "unknown";
+          return {
+            subject: d.subject,
+            headline: d.headline,
+            greeting: d.greeting,
+            paragraphs: [d.opening, d.reason(d.trading[cat]), d.invite(d.evidence[cat])],
+            signOff: d.signOff,
+            signature: d.signature,
+          };
+        })();
   const dir = locale === "ar" ? "rtl" : "ltr";
   const base = siteUrl.replace(/\/$/, "");
   const portal = `${base}/${locale}/wholesale/portal`;

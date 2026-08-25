@@ -56,7 +56,7 @@ export async function setPartnerAccountStatus(
      Suspension sends nothing by design — see lib/wholesale-decision-email. */
   if (result.previous !== status && result.email) {
     const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
-    const letter = buildDecisionMail(status, result.locale ?? "en", site);
+    const letter = buildDecisionMail(status, result.locale ?? "en", site, result.businessType);
     if (letter) {
       const sent = await sendMail({
         to: result.email,

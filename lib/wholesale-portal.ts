@@ -511,12 +511,19 @@ export async function setAccountStatus(
   partnerId: string,
   status: AccountStatus,
   actorEmail: string
-): Promise<{ ok: boolean; previous?: AccountStatus; email?: string | null; locale?: string }> {
+): Promise<{
+  ok: boolean;
+  previous?: AccountStatus;
+  email?: string | null;
+  locale?: string;
+  /** Carried out so the decline letter can ask for the right evidence. */
+  businessType?: string | null;
+}> {
   const db = createAdminClient();
 
   const { data: before } = await db
     .from("wholesale_partners")
-    .select("account_status, email, locale, approved_at")
+    .select("account_status, email, locale, approved_at, business_type")
     .eq("id", partnerId)
     .maybeSingle();
 
@@ -550,6 +557,7 @@ export async function setAccountStatus(
     previous: isAccountStatus(before?.account_status) ? before.account_status : undefined,
     email: text(before?.email),
     locale: String(before?.locale ?? "en"),
+    businessType: text(before?.business_type),
   };
 }
 

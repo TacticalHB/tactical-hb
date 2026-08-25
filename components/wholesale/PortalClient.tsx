@@ -551,62 +551,64 @@ export default function PortalClient({
                           colour only. */}
                       {hasColours && (
                         <ul
-                          className="mt-3 ms-20 flex flex-col gap-2 ps-4"
+                          className="mt-3 ms-20 flex flex-col gap-3 ps-4"
                           style={{ borderInlineStart: "1px solid var(--border)" }}
                         >
                           {p.lines.map((line) => (
-                            <li key={line.key} className="flex items-center gap-3">
-                              {/* The swatch is decorative: the colour's NAME is
-                                  right beside it, so nothing here is carried by
-                                  colour alone. */}
-                              <span
-                                aria-hidden="true"
-                                className="w-5 h-5 rounded-full shrink-0"
-                                style={{
-                                  background: line.swatch ?? "transparent",
-                                  boxShadow: "0 0 0 1px var(--border-strong)",
-                                }}
-                              />
-                              <span className="text-[14px] min-w-0 flex-1" style={{ color: "var(--text)" }}>
-                                {line.label}
-                                <span className="ms-2 text-[12.5px] tabular-nums" style={{ color: "var(--text-muted)" }}>
-                                  {unitLabel(p, line) ?? L.noPrice}
+                            <li key={line.key}>
+                              <div className="flex items-center gap-3">
+                                {/* The swatch is decorative: the colour's NAME
+                                    is right beside it, so nothing here is
+                                    carried by colour alone. */}
+                                <span
+                                  aria-hidden="true"
+                                  className="w-5 h-5 rounded-full shrink-0"
+                                  style={{
+                                    background: line.swatch ?? "transparent",
+                                    boxShadow: "0 0 0 1px var(--border-strong)",
+                                  }}
+                                />
+                                <span className="text-[14px] min-w-0 flex-1" style={{ color: "var(--text)" }}>
+                                  {line.label}
+                                  <span className="ms-2 text-[12.5px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+                                    {unitLabel(p, line) ?? L.noPrice}
+                                  </span>
                                 </span>
-                              </span>
-                              <QtyBox
-                                id={line.key}
-                                label={`${L.qtyLabel} — ${p.name} — ${line.label}`}
-                                value={qty[line.key] ?? 0}
-                                onChange={(raw) => setQuantity(line.key, raw)}
-                              />
+                                <QtyBox
+                                  id={line.key}
+                                  label={`${L.qtyLabel} — ${p.name} — ${line.label}`}
+                                  value={qty[line.key] ?? 0}
+                                  onChange={(raw) => setQuantity(line.key, raw)}
+                                />
+                              </div>
+
+                              {/* EACH COLOUR CARRIES ITS OWN OPTIONS, and they
+                                  sit inside the colour's own row — visible from
+                                  the first look, like they are on a product
+                                  with no colours.
+
+                                  They used to live in a separate list below,
+                                  revealed only once a quantity had been typed.
+                                  The intent was less clutter; the effect was
+                                  that HMD TCT OP appeared to have no lid and no
+                                  FEAR 9E418 at all, which is the one thing an
+                                  options control must never do. Black with a
+                                  lid and Purple without is an ordinary trade
+                                  order, and you have to be able to SEE that it
+                                  is possible before you type anything. */}
+                              <div className="ms-8">
+                                <AddonChips
+                                  addons={p.addons}
+                                  chosen={opts[line.key] ?? NO_ADDONS}
+                                  locale={locale}
+                                  onToggle={(a) => toggleAddon(line.key, a)}
+                                />
+                              </div>
                             </li>
                           ))}
                         </ul>
                       )}
 
-                      {/* Each colour carries its OWN options: black with a lid
-                          and purple without is an ordinary trade order. */}
-                      {hasColours && p.addons.length > 0 && (
-                        <ul className="mt-1 ms-20 ps-4 flex flex-col gap-1">
-                          {p.lines.map((line) => (
-                            <li key={`${line.key}-opts`}>
-                              {(qty[line.key] ?? 0) > 0 && (
-                                <div className="flex items-baseline gap-2 flex-wrap">
-                                  <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
-                                    {line.label}
-                                  </span>
-                                  <AddonChips
-                                    addons={p.addons}
-                                    chosen={opts[line.key] ?? NO_ADDONS}
-                                    locale={locale}
-                                    onToggle={(a) => toggleAddon(line.key, a)}
-                                  />
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </li>
                   );
                 })}

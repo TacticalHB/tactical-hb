@@ -35,21 +35,21 @@ import type { LineAddons } from "@/lib/wholesale-display";
    that single line here. If they are ever meant to differ, this is the place
    that has to change, not the caller.
 
-   HMD TCT OP IS PRICED PER COLOUR, ON BOTH BOOKS. The printed list quotes it
-   once; these figures were set afterwards by Mario and are a deliberate
-   departure from it:
+   HMD TCT OP IS PRICED PER COLOUR, ON BOTH BOOKS AND IN BOTH CURRENCIES. The
+   printed list quotes it once; these eight figures were set afterwards by
+   Mario and are a deliberate departure from it:
 
-     shop    Black €19.00   Purple €20.00    (list quoted €19.50)
-     lounge  Black €25.50   Purple €27.00    (list quoted €25.50)
+     shop    Black €19.00 / ₴820    Purple €20.00 / ₴890    (list: €19.50 / ₴860)
+     lounge  Black €25.50 / ₴1080   Purple €27.00 / ₴1125   (list: €25.50 / ₴1035)
+
+   Each was given explicitly. None is a conversion of another — the hryvnia
+   gaps (₴70 and ₴45) do not track the euro ones (€1.00 and €1.50), which is
+   exactly what you would expect from two lists set independently, and is why
+   this file never derives one currency from the other.
 
    They live here rather than in the PDF because this file is what the portal
    actually reads. If the list is ever reissued, these are the numbers it
    should carry.
-
-   THE HRYVNIA IS NOT SPLIT. Both colours stay on the listed ₴860 / ₴1035,
-   because no per-colour Ukrainian prices have been set and the two currency
-   lists have always been independent — deriving one from the other would be
-   inventing a number, which is the one thing this file does not do.
 --------------------------------------------------------------------------- */
 
 export const PARTNER_TYPES = ["shop", "lounge"] as const;
@@ -81,8 +81,8 @@ const BOOKS: Record<PartnerType, Book> = {
          same money to a shop, the way they are not at retail. The bare slug
          stays as the fallback for any colour not listed. */
       "hmd-tct-op": m(19.5, 860),
-      "hmd-tct-op__black": m(19.0, 860),
-      "hmd-tct-op__purple": m(20.0, 860),
+      "hmd-tct-op__black": m(19.0, 820),
+      "hmd-tct-op__purple": m(20.0, 890),
       "bowl-killer": m(6.9, 320),
       "bowl-livanka": m(6.0, 280),
       "bowl-phunnel": m(8.0, 375),
@@ -105,8 +105,8 @@ const BOOKS: Record<PartnerType, Book> = {
          equals the fallback: writing it out means the pair is visible as a
          pair, and changing the fallback later cannot move Black by accident. */
       "hmd-tct-op": m(25.5, 1035),
-      "hmd-tct-op__black": m(25.5, 1035),
-      "hmd-tct-op__purple": m(27.0, 1035),
+      "hmd-tct-op__black": m(25.5, 1080),
+      "hmd-tct-op__purple": m(27.0, 1125),
       "bowl-killer": m(9.5, 390),
       "bowl-livanka": m(8.5, 340),
       "bowl-phunnel": m(11.0, 460),

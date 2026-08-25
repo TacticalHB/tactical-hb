@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { t } from "@/lib/i18n-text";
 import { currencyForLocale, formatMoney, money, type Money } from "@/lib/currency";
 import { submitWholesaleRequest } from "@/app/actions/wholesale";
+import { NO_ADDONS, type LineAddons } from "@/lib/wholesale-display";
+import type { AddonKey } from "@/lib/wholesale-portal";
 import type { PortalPartner } from "@/lib/wholesale-display";
+import { HMD_OPTIONS, WINDCOVER_OPTIONS, type OptionSpec } from "@/components/HmdMaterialSelector";
 
 /* ---------------------------------------------------------------------------
    The request builder.
@@ -46,14 +49,122 @@ export type PortalProduct = {
   category: string;
   image: string;
   lines: PortalLine[];
+  /** Which add-ons this product takes — decided by category, as retail does. */
+  addons: AddonKey[];
 };
 
 type Qty = Record<string, number>;
+type Opts = Record<string, LineAddons>;
 
 /** A chosen line, flattened out of the grouped catalogue for the summary. */
-type Chosen = { product: PortalProduct; line: PortalLine; qty: number };
+type Chosen = { product: PortalProduct; line: PortalLine; qty: number; addons: LineAddons };
+
+/* The option labels come from the retail selector's own specs, in all four
+   languages. Retyping "With FEAR 9E418" here would be a second copy of a
+   product name that has already been renamed once (0029). */
+const ADDON_SPEC: Record<AddonKey, OptionSpec> = {
+  lid: HMD_OPTIONS.find((o) => o.key === "lid")!,
+  rubber: HMD_OPTIONS.find((o) => o.key === "rubber")!,
+  timer: WINDCOVER_OPTIONS.find((o) => o.key === "timer")!,
+};
 
 const CATEGORY_ORDER = ["bowl", "hmd", "windcover", "accessory"] as const;
+
+/* ---------------------------------------------------------------------------
+   Both of these live at module scope, NOT inside PortalClient.
+
+   They were defined in the render body, which makes them a NEW component type
+   on every render — so React unmounted and remounted them on each keystroke
+   and each toggle. The quantity boxes survived that because a controlled input
+   is rebuilt from its prop, but the chips did not behave: a click landed on a
+   node that the next render had already replaced, and the second option on a
+   row simply would not stick.
+--------------------------------------------------------------------------- */
+
+/* The add-on chips.
+
+   Checkboxes in everything but name: aria-pressed, 44px tall, and the label
+   spelled out rather than reduced to the PDP's glyphs — a dense list has no
+   room for a legend, and "With FEAR 9E418" has to be readable at a glance when
+   it is the difference between two otherwise identical lines.
+
+   One configuration per row, deliberately. A partner wanting forty with a lid
+   and ten without says so in the note, the same way a colour split used to go
+   there before colours became rows. Expanding every combination would be four
+   rows per HMD before colours are even counted. */
+function AddonChips({
+  addons,
+  chosen,
+  locale,
+  onToggle,
+}: {
+  addons: AddonKey[];
+  chosen: LineAddons;
+  locale: string;
+  onToggle: (addon: AddonKey) => void;
+}) {
+  if (addons.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {addons.map((key) => {
+        const on = chosen[key];
+        return (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onToggle(key)}
+            className="inline-flex items-center h-11 px-3 rounded-full text-[12.5px] transition-colors"
+            style={{
+              background: on ? "var(--text)" : "transparent",
+              color: on ? "#ffffff" : "var(--text-muted)",
+              border: `1px solid ${on ? "var(--text)" : "var(--border-strong)"}`,
+            }}
+          >
+            {t(locale, ADDON_SPEC[key])}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* The quantity box, shared by plain products and colour rows so the two can
+   never drift apart in size or behaviour. */
+function QtyBox({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: number;
+  onChange: (raw: string) => void;
+}) {
+  return (
+    <div className="shrink-0">
+      <label className="sr-only" htmlFor={`qty-${id}`}>
+        {label}
+      </label>
+      <input
+        id={`qty-${id}`}
+        className="w-[84px] h-11 text-center text-[15px] tabular-nums rounded-[4px]"
+        style={{
+          border: `1px solid ${value > 0 ? "var(--text)" : "var(--border-strong)"}`,
+          background: "#ffffff",
+          color: "var(--text)",
+        }}
+        dir="ltr"
+        inputMode="numeric"
+        type="text"
+        value={value === 0 ? "" : String(value)}
+        placeholder="0"
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
 
 export default function PortalClient({
   locale,
@@ -65,6 +176,7 @@ export default function PortalClient({
   products: PortalProduct[];
 }) {
   const [qty, setQty] = useState<Qty>({});
+  const [opts, setOpts] = useState<Opts>({});
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,11 +264,11 @@ export default function PortalClient({
     for (const product of products) {
       for (const line of product.lines) {
         const n = qty[line.key] ?? 0;
-        if (n > 0) out.push({ product, line, qty: n });
+        if (n > 0) out.push({ product, line, qty: n, addons: opts[line.key] ?? NO_ADDONS });
       }
     }
     return out;
-  }, [products, qty]);
+  }, [products, qty, opts]);
 
   const units = chosen.reduce((s, c) => s + c.qty, 0);
 
@@ -174,6 +286,12 @@ export default function PortalClient({
     );
   }, [chosen]);
 
+  const toggleAddon = (key: string, addon: AddonKey) =>
+    setOpts((o) => {
+      const current = o[key] ?? NO_ADDONS;
+      return { ...o, [key]: { ...current, [addon]: !current[addon] } };
+    });
+
   const setQuantity = (key: string, raw: string) => {
     // Integers, never negative. An empty box means zero rather than NaN.
     const n = Math.floor(Number(raw.replace(/[^\d]/g, "")));
@@ -185,7 +303,12 @@ export default function PortalClient({
     if (chosen.length === 0) return setError(L.empty);
     setBusy(true);
     const result = await submitWholesaleRequest(
-      chosen.map((c) => ({ slug: c.product.slug, variant: c.line.variant, qty: c.qty })),
+      chosen.map((c) => ({
+        slug: c.product.slug,
+        variant: c.line.variant,
+        qty: c.qty,
+        addons: c.addons,
+      })),
       note
     );
     setBusy(false);
@@ -196,6 +319,7 @@ export default function PortalClient({
     }
     setDone(result.reference ?? "");
     setQty({});
+    setOpts({});
     setNote("");
   };
 
@@ -234,34 +358,6 @@ export default function PortalClient({
     line && line.priceEur !== null && line.priceUah !== null
       ? formatMoney(money(line.priceEur, line.priceUah), currency)
       : null;
-
-  /* The quantity box, shared by plain products and colour rows so the two can
-     never drift apart in size or behaviour. */
-  const QtyBox = ({ line, label }: { line: PortalLine; label: string }) => {
-    const n = qty[line.key] ?? 0;
-    return (
-      <div className="shrink-0">
-        <label className="sr-only" htmlFor={`qty-${line.key}`}>
-          {`${L.qtyLabel} — ${label}`}
-        </label>
-        <input
-          id={`qty-${line.key}`}
-          className="w-[84px] h-11 text-center text-[15px] tabular-nums rounded-[4px]"
-          style={{
-            border: `1px solid ${n > 0 ? "var(--text)" : "var(--border-strong)"}`,
-            background: "#ffffff",
-            color: "var(--text)",
-          }}
-          dir="ltr"
-          inputMode="numeric"
-          type="text"
-          value={n === 0 ? "" : String(n)}
-          placeholder="0"
-          onChange={(e) => setQuantity(line.key, e.target.value)}
-        />
-      </div>
-    );
-  };
 
   const grouped = CATEGORY_ORDER.map((c) => ({
     key: c,
@@ -332,8 +428,28 @@ export default function PortalClient({
                             </p>
                           )}
                         </div>
-                        {!hasColours && p.lines[0] && <QtyBox line={p.lines[0]} label={p.name} />}
+                        {!hasColours && p.lines[0] && (
+                          <QtyBox
+                            id={p.lines[0].key}
+                            label={`${L.qtyLabel} — ${p.name}`}
+                            value={qty[p.lines[0].key] ?? 0}
+                            onChange={(raw) => setQuantity(p.lines[0].key, raw)}
+                          />
+                        )}
                       </div>
+
+                      {/* Options for a product with no colours sit under the
+                          row, indented past the thumbnail. */}
+                      {!hasColours && p.lines[0] && (
+                        <div className="ms-20">
+                          <AddonChips
+                            addons={p.addons}
+                            chosen={opts[p.lines[0].key] ?? NO_ADDONS}
+                            locale={locale}
+                            onToggle={(a) => toggleAddon(p.lines[0].key, a)}
+                          />
+                        </div>
+                      )}
 
                       {/* ---- The colour picker -----------------------------
                           Every colour is on screen with its own box, rather
@@ -366,7 +482,36 @@ export default function PortalClient({
                                   {priceOf(line) ?? L.quote}
                                 </span>
                               </span>
-                              <QtyBox line={line} label={`${p.name} — ${line.label}`} />
+                              <QtyBox
+                                id={line.key}
+                                label={`${L.qtyLabel} — ${p.name} — ${line.label}`}
+                                value={qty[line.key] ?? 0}
+                                onChange={(raw) => setQuantity(line.key, raw)}
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Each colour carries its OWN options: black with a lid
+                          and purple without is an ordinary trade order. */}
+                      {hasColours && p.addons.length > 0 && (
+                        <ul className="mt-1 ms-20 ps-4 flex flex-col gap-1">
+                          {p.lines.map((line) => (
+                            <li key={`${line.key}-opts`}>
+                              {(qty[line.key] ?? 0) > 0 && (
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                  <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                                    {line.label}
+                                  </span>
+                                  <AddonChips
+                                    addons={p.addons}
+                                    chosen={opts[line.key] ?? NO_ADDONS}
+                                    locale={locale}
+                                    onToggle={(a) => toggleAddon(line.key, a)}
+                                  />
+                                </div>
+                              )}
                             </li>
                           ))}
                         </ul>
@@ -409,6 +554,18 @@ export default function PortalClient({
                           in the summary the partner checks before sending. */}
                       {c.line.variant && (
                         <span style={{ color: "var(--text-faint)" }}> · {c.line.variant}</span>
+                      )}
+                      {/* What this line is configured as — the summary is the
+                          last thing they read before sending, so it has to
+                          carry every choice the row above captured. */}
+                      {c.product.addons.filter((k) => c.addons[k]).length > 0 && (
+                        <span style={{ color: "var(--text-faint)" }}>
+                          {" · "}
+                          {c.product.addons
+                            .filter((k) => c.addons[k])
+                            .map((k) => t(locale, ADDON_SPEC[k]))
+                            .join(" + ")}
+                        </span>
                       )}
                     </span>
                     <span className="shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>

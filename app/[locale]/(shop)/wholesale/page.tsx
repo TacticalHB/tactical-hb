@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { metadataFor } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { partnerForUser } from "@/lib/wholesale-portal";
 import WholesaleForm from "@/components/WholesaleForm";
 import Reveal from "@/components/Reveal";
 import { SALES_EMAIL } from "@/lib/contact-info";
@@ -22,6 +25,36 @@ export default async function WholesalePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
+  /* ---- WHO IS ASKING DECIDES WHAT THIS PAGE IS ---------------------------
+
+     Anyone with a partner row goes to the portal, whatever their status. The
+     portal already renders every one of those states — approved gets the
+     catalogue, pending/rejected/suspended get their own status screen with no
+     prices and no quantity boxes — so sending them here would mean a second
+     copy of all four, and two copies of an access decision is one too many.
+
+     It also fixes the thing that made this page feel broken to an approved
+     partner: the nav says "Wholesale", they click it, and they land on
+     "Become a partner" with a Register button. They already are one.
+
+     REDIRECT RATHER THAN CONDITIONAL RENDER, chosen once and applied here and
+     in the nav: there is exactly one URL that serves dealer prices, which is
+     the URL the access check lives on.
+
+     Somebody signed in WITHOUT a partner row — a retail customer — still gets
+     the marketing page, because for them it is the right page: it carries the
+     story and the enquiry form they need in order to become one.
+
+     The lookup only runs when there is a session cookie to read, so an
+     anonymous visitor pays a cookie parse and nothing else. */
+  const supabase = await createClient();
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (user) {
+    const partner = await partnerForUser(user.id);
+    if (partner) redirect(`/${locale}/wholesale/portal`);
+  }
+
   return <WholesaleContent locale={locale} />;
 }
 

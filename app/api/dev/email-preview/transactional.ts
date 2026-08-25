@@ -3,6 +3,10 @@ import { buildOrderEmail } from "@/lib/order-email";
 import { buildShippedEmail } from "@/lib/shipping-email";
 import { buildWholesaleReply, buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
+import {
+  buildWholesaleApplicationStaffMail,
+  buildWholesaleEnquiryStaffMail,
+} from "@/lib/wholesale-staff-email";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
 import type { WholesaleRequest } from "@/lib/wholesale-display";
 import { buildFollowUpMail } from "@/lib/followup-email";
@@ -133,6 +137,8 @@ export type TransactionalKind =
   | "wholesale-declined"
   | "wholesale-request"
   | "wholesale-staff"
+  | "wholesale-staff-enquiry"
+  | "wholesale-staff-application"
   | "followup";
 
 export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
@@ -145,6 +151,8 @@ export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "wholesale-declined",
   "wholesale-request",
   "wholesale-staff",
+  "wholesale-staff-enquiry",
+  "wholesale-staff-application",
   "followup",
 ];
 
@@ -166,17 +174,27 @@ function sampleRequest(locale: string): WholesaleRequest {
     subtotalUah: null,
     itemCount: 35,
     createdAt: "2026-08-25T14:54:00.000Z",
+    /* Deliberately mixed: an HMD with both add-ons, a colour with one, a bare
+       bowl, and a wind cover with its timer — so the preview shows every way a
+       line can read. */
     items: [
       { productSlug: "hmd-tct-classic", sku: "hmd-tct-classic", variant: null,
+        addons: { lid: true, rubber: true, timer: false },
+        optionsLabel: "With Lid + With FEAR 9E418",
         name: "HMD TCT Classic", qty: 5,
         unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
       { productSlug: "hmd-tct-op", sku: "hmd-tct-op__purple", variant: "Purple",
+        addons: { lid: true, rubber: false, timer: false },
+        optionsLabel: "With Lid",
         name: "HMD TCT OP — Purple", qty: 2,
         unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
       { productSlug: "bowl-livanka", sku: "bowl-livanka", variant: null,
+        addons: { lid: false, rubber: false, timer: false }, optionsLabel: null,
         name: "Tactical Livanka", qty: 3,
         unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
       { productSlug: "windcover-detonator", sku: "windcover-detonator", variant: null,
+        addons: { lid: false, rubber: false, timer: true },
+        optionsLabel: "With Timer",
         name: "Windcover Detonator", qty: 25,
         unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
     ],
@@ -231,6 +249,39 @@ export function renderTransactional(
        asked for — that is the point of it, not an oversight. */
     case "wholesale-staff":
       return buildStaffRequestMail(sampleRequest(locale));
+
+    case "wholesale-staff-enquiry":
+      return buildWholesaleEnquiryStaffMail(
+        {
+          name: "Marek Gazo",
+          company: "Arc Ltd",
+          email: "partner@example.com",
+          phone: "+380 66 707 33 07",
+          country: "United Kingdom",
+          city: "London",
+          businessType: "Distribution",
+          message:
+            "We stock premium shisha across 40 venues in the UK and would like to discuss trade terms and lead times.",
+          locale,
+        },
+        SITE
+      );
+
+    case "wholesale-staff-application":
+      return buildWholesaleApplicationStaffMail(
+        {
+          company: "Arc Ltd",
+          contactName: "Marek Gazo",
+          email: "partner@example.com",
+          phone: "+380 66 707 33 07",
+          country: "United Kingdom",
+          city: "London",
+          businessType: "Distribution",
+          note: "Distributing across the UK and Ireland. Happy to send shop photos and our registration.",
+          locale,
+        },
+        SITE
+      );
 
     case "followup":
       return buildFollowUpMail({

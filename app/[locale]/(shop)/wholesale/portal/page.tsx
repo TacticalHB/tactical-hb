@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n-text";
 import {
+  addonsFor,
   dealerPrice,
   lineSku,
   partnerForUser,
@@ -77,6 +78,10 @@ export default async function WholesalePortalPage({
       name: p.nameEn,
       category: p.category,
       image: p.gridImage || p.image,
+      /* Which add-ons this product takes, read from the catalogue on the
+         server. The client renders what it is given rather than deciding for
+         itself, so a bowl can never be shown a timer toggle. */
+      addons: addonsFor(p),
     };
     if (!p.variants?.length) {
       const price = dealerPrice(p);

@@ -47,12 +47,24 @@ export function isRequestStatus(v: unknown): v is RequestStatus {
   return typeof v === "string" && (REQUEST_STATUSES as readonly string[]).includes(v);
 }
 
+/* The add-ons a line can carry, named exactly as retail names them: the same
+   keys as the cart's line options, the same columns as order_items, and the
+   same part__ skus in stock. `rubber` is the FEAR 9E418 ring — the product was
+   renamed in 0029 and the key deliberately was not, because it is written into
+   orders that already exist. */
+export type LineAddons = { lid: boolean; rubber: boolean; timer: boolean };
+
+export const NO_ADDONS: LineAddons = { lid: false, rubber: false, timer: false };
+
 export type RequestItem = {
   productSlug: string;
   /** `<slug>` or `<slug>__<variant>` — the same key stock is counted by (0015). */
   sku: string | null;
   /** Colour as the catalogue names it, or null when the product has none. */
   variant: string | null;
+  addons: LineAddons;
+  /** How the add-ons read at submit time, or null when there are none. */
+  optionsLabel: string | null;
   name: string;
   qty: number;
   unitPriceUah: number | null;

@@ -10,6 +10,7 @@ import {
   type AccountStatus,
   type PortalPartner,
   type RequestItem,
+  type LineAddons,
   type RequestStatus,
   type WholesaleRequest,
 } from "@/lib/wholesale-display";
@@ -83,6 +84,54 @@ export function lineSku(slug: string, variant?: string | null): string {
     excluded here; today the whole catalogue is sellable to trade. */
 export function wholesaleCatalogue(): Product[] {
   return products;
+}
+
+/* ---- Add-ons ---------------------------------------------------------------
+   WHICH PRODUCT TAKES WHAT IS RETAIL'S RULE, read from the same place retail
+   reads it: category. HMDs take a lid and a FEAR 9E418 ring, wind covers take
+   a timer, and nothing else takes anything. Inventing a wholesale-only option
+   set would be a second answer to a question the PDP already answers.
+--------------------------------------------------------------------------- */
+
+export type AddonKey = keyof LineAddons;
+
+/* The add-ons as a human reads them, in a fixed order so two identical lines
+   never produce two different strings. English, because this is snapshotted
+   onto the row and read by staff — the partner sees their own language in the
+   portal and in their copy of the letter. */
+const ADDON_LABEL: Record<AddonKey, string> = {
+  lid: "With Lid",
+  rubber: "With FEAR 9E418",
+  timer: "With Timer",
+};
+
+export function addonLabel(a: LineAddons): string | null {
+  const on = (Object.keys(ADDON_LABEL) as AddonKey[]).filter((k) => a[k]);
+  return on.length ? on.map((k) => ADDON_LABEL[k]).join(" + ") : null;
+}
+
+export function addonsFor(p: Product): AddonKey[] {
+  if (p.category === "hmd") return ["lid", "rubber"];
+  if (p.category === "windcover") return ["timer"];
+  return [];
+}
+
+/**
+ * Narrow a requested set to what this product can actually carry.
+ *
+ * Anything the category does not offer is dropped rather than refused: a
+ * client sending `timer: true` on a bowl is a stale form or a probe, and
+ * silently ignoring the impossible flag is kinder to the first and useless to
+ * the second. What must never happen is storing it — a packing list saying a
+ * clay bowl has a timer is worse than one that never mentioned it.
+ */
+export function sanitiseAddons(p: Product, wanted?: Partial<LineAddons> | null): LineAddons {
+  const allowed = new Set(addonsFor(p));
+  return {
+    lid: allowed.has("lid") && wanted?.lid === true,
+    rubber: allowed.has("rubber") && wanted?.rubber === true,
+    timer: allowed.has("timer") && wanted?.timer === true,
+  };
 }
 
 /* ---- Who is asking --------------------------------------------------------- */
@@ -237,7 +286,13 @@ export async function applyForAccount(input: ApplyInput): Promise<ApplyResult> {
 
 /* ---- Submitting a request --------------------------------------------------- */
 
-export type SubmitLine = { slug: string; variant?: string | null; qty: number };
+export type SubmitLine = {
+  slug: string;
+  variant?: string | null;
+  qty: number;
+  /** Same keys as the retail cart line — see lib/wholesale-display. */
+  addons?: Partial<LineAddons> | null;
+};
 
 export type SubmitResult =
   | { ok: true; request: WholesaleRequest }
@@ -295,11 +350,21 @@ export async function submitRequest(
     }
 
     const price = dealerPrice(product, variant);
+    /* The client sends flags; what this product can actually carry is decided
+       here from the catalogue. A bowl arriving with `timer: true` loses it. */
+    const addons = sanitiseAddons(product, line.addons);
+    const optionsLabel = addonLabel(addons);
+
     items.push({
       productSlug: product.slug,
       sku: lineSku(product.slug, variant?.name),
       variant: variant?.name ?? null,
-      // The name as it will be read on a packing list, colour included.
+      addons,
+      optionsLabel,
+      /* WHAT it is, snapshotted. The add-ons are NOT folded in here — they
+         have their own column, and embedding them too would print the same
+         fact twice on every surface that shows both. Each renderer joins the
+         two; the row keeps them apart. */
       name: variant ? `${product.nameEn} — ${variant.name}` : product.nameEn,
       qty,
       unitPriceEur: price ? price.eur : null,
@@ -351,6 +416,10 @@ export async function submitRequest(
       product_slug: i.productSlug,
       sku: i.sku,
       variant: i.variant,
+      addon_lid: i.addons.lid,
+      addon_rubber: i.addons.rubber,
+      addon_timer: i.addons.timer,
+      options_label: i.optionsLabel,
       name: i.name,
       qty: i.qty,
       unit_price_eur: i.unitPriceEur,
@@ -403,6 +472,12 @@ function mapItems(rows: Row[]): RequestItem[] {
     productSlug: String(r.product_slug ?? ""),
     sku: text(r.sku),
     variant: text(r.variant),
+    addons: {
+      lid: r.addon_lid === true,
+      rubber: r.addon_rubber === true,
+      timer: r.addon_timer === true,
+    },
+    optionsLabel: text(r.options_label),
     name: String(r.name ?? ""),
     qty: Number(r.qty ?? 0),
     unitPriceEur: num(r.unit_price_eur),

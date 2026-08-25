@@ -86,7 +86,15 @@ function linesTable(req: WholesaleRequest, locale: string): string {
       /* The product name is pinned LTR: it is Latin in every locale, and
          "HMD TCT OP — Purple" carries a neutral em-dash that an RTL box would
          happily move to the wrong end. */
-      return `<tr>${cell(i.name, startAlign, true)}${cell(String(i.qty), endAlign)}${cell(amount, endAlign)}</tr>`;
+      /* Name on one line, configuration muted under it. Two facts, two lines
+         — a single run of "HMD TCT Classic With Lid + With FEAR 9E418" is
+         where a picker stops reading. */
+      const product = i.optionsLabel
+        ? `<td align="${startAlign}" dir="ltr" style="padding:10px;border-bottom:1px solid ${LINE};font:14px ${FONT};color:${INK}">${esc(
+            i.name
+          )}<div style="font:13px ${FONT};color:${MUTED};padding-top:2px">${esc(i.optionsLabel)}</div></td>`
+        : cell(i.name, startAlign, true);
+      return `<tr>${product}${cell(String(i.qty), endAlign)}${cell(amount, endAlign)}</tr>`;
     })
     .join("");
 
@@ -148,7 +156,9 @@ export function buildStaffRequestMail(req: WholesaleRequest): {
     ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
     "",
     ...req.items.map(
-      (i) => `${i.qty} × ${i.name}${i.lineTotalEur !== null ? ` — €${i.lineTotalEur.toFixed(2)}` : " — quote on request"}`
+      (i) =>
+        `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""}` +
+        (i.lineTotalEur !== null ? ` — €${i.lineTotalEur.toFixed(2)}` : " — quote on request")
     ),
     "",
     req.note ? `Note: ${req.note}` : "",
@@ -261,7 +271,7 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
     "",
     `${L.ref}: ${req.reference}`,
     "",
-    ...req.items.map((i) => `${i.qty} × ${i.name}`),
+    ...req.items.map((i) => `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""}`),
     "",
     L.next,
     L.questions,

@@ -149,6 +149,14 @@ export default function WholesaleRequestCard({
                 <tr key={i.sku ?? i.productSlug} style={{ borderTop: "1px solid var(--console-border)" }}>
                   <td className="py-2" style={{ color: "var(--console-text)" }}>
                     {i.name}
+                    {/* The configuration, on its own line: this table is the
+                        packing list, and "with a lid" is the difference
+                        between two otherwise identical rows. */}
+                    {i.optionsLabel && (
+                      <span className="block text-[12px]" style={{ color: "var(--console-accent)" }}>
+                        {i.optionsLabel}
+                      </span>
+                    )}
                     {/* The stock key, because this table is what gets picked
                         against — `hmd-tct-op__black` is the row in stock_items,
                         and reading it here saves deriving it by hand. */}

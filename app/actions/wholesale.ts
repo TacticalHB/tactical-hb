@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendMail } from "@/lib/email";
-import { buildStaffLetter, staffQuote } from "@/lib/staff-email";
+import { buildWholesaleApplicationStaffMail } from "@/lib/wholesale-staff-email";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { applyForAccount, submitRequest, type SubmitLine } from "@/lib/wholesale-portal";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
@@ -94,47 +94,26 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
      an application gets acted on quickly; sales NOT finding out is a delay,
      whereas a failed write would be a lost applicant. */
   const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
-  const contact = clean(fields.contactName, LIMITS.contactName);
-  const phone = clean(fields.phone, LIMITS.phone);
-  const country = clean(fields.country, LIMITS.country);
-  const city = clean(fields.city, LIMITS.city);
-  const biz = clean(fields.businessType, LIMITS.businessType);
-  const applicantNote = clean(fields.note, LIMITS.note);
-
-  const rows: [string, string | null | undefined][] = [
-    ["Company", company],
-    ["Contact", contact],
-    ["Email", user.email],
-    ["Telephone", phone],
-    ["Business type", biz],
-    ["Country", country],
-    ["City", city],
-    ["Language", locale.toUpperCase()],
-  ];
-
+  const staff = buildWholesaleApplicationStaffMail(
+    {
+      company,
+      contactName: clean(fields.contactName, LIMITS.contactName),
+      email: user.email,
+      phone: clean(fields.phone, LIMITS.phone),
+      country: clean(fields.country, LIMITS.country),
+      city: clean(fields.city, LIMITS.city),
+      businessType: clean(fields.businessType, LIMITS.businessType),
+      note: clean(fields.note, LIMITS.note),
+      locale,
+    },
+    site
+  );
   const mail = await sendMail({
     to: SALES_EMAIL,
     replyTo: user.email,
-    subject: `Wholesale account application — ${company}`,
-    html: buildStaffLetter({
-      title: "New wholesale application",
-      lead: `${company} has registered and is awaiting approval.`,
-      rows,
-      blocks: applicantNote ? [staffQuote("What they told us", applicantNote)] : [],
-      cta: { label: "Approve or decline", url: `${site}/en/admin/partners` },
-      status: "They cannot see dealer prices or submit anything until approved.",
-    }),
-    text: [
-      `${company} has registered for a wholesale account and is awaiting approval.`,
-      ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
-      "",
-      applicantNote,
-      "",
-      `Approve or decline: ${site}/en/admin/partners`,
-      "They cannot see dealer prices or submit anything until approved.",
-    ]
-      .filter(Boolean)
-      .join("\n"),
+    subject: staff.subject,
+    html: staff.html,
+    text: staff.text,
   });
   if (!mail.ok) console.error("[wholesale] application alert not sent:", mail.error);
 

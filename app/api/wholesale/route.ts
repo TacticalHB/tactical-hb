@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { sendMail } from "@/lib/email";
-import { buildStaffLetter, staffQuote } from "@/lib/staff-email";
+import { buildWholesaleEnquiryStaffMail } from "@/lib/wholesale-staff-email";
 import { screen } from "@/lib/anti-spam";
 import { buildWholesaleReply } from "@/lib/wholesale-email";
 
@@ -63,38 +63,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "too_long" }, { status: 400 });
   }
 
-  const rows: [string, string | null | undefined][] = [
-    ["Name", f.name],
-    ["Company", f.company],
-    ["Email", f.email],
-    ["Telephone", f.phone],
-    ["Business type", f.businessType],
-    ["Country", f.country],
-    ["City", f.city],
-    // Tells sales which language to answer in, and which form the customer got.
-    ["Language", locale === "uk" ? "Ukrainian" : "English"],
-  ];
-
-  const text = [
-    ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
-    "",
-    f.message,
-  ].join("\n");
+  const staff = buildWholesaleEnquiryStaffMail(
+    { ...f, locale },
+    process.env.SITE_URL || "https://tactical-hb.com"
+  );
 
   const result = await sendMail({
     to: SALES_EMAIL,
     replyTo: f.email,
-    subject: `Wholesale enquiry — ${f.company}`,
-    text,
-    html: buildStaffLetter({
-      title: "New wholesale enquiry",
-      lead: `${f.company} got in touch through the website.`,
-      rows,
-      blocks: [staffQuote("Their message", f.message)],
-      cta: { label: "Open partners", url: `${siteUrl()}/en/admin/partners` },
-      status:
-        "The application form has been sent to them automatically. No account exists yet — they have not registered.",
-    }),
+    subject: staff.subject,
+    text: staff.text,
+    html: staff.html,
   });
 
   if (!result.ok) {

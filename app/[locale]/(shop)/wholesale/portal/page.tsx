@@ -83,7 +83,6 @@ export default async function WholesalePortalPage({
   const book = partner.partnerType;
 
   const items: PortalProduct[] = wholesaleCatalogue().map((p) => {
-    const base = book ? bookPrice(book, p.slug) : null;
     const addons = addonsFor(p);
     /* Add-on surcharges travel with the product so the client can price a
        configuration live without another round trip — and without ever being
@@ -104,12 +103,18 @@ export default async function WholesalePortalPage({
       addonPrices,
     };
 
-    const priced = { priceEur: base ? base.eur : null, priceUah: base ? base.uah : null };
+    /* PRICED PER LINE, NOT PER PRODUCT. A colour can carry its own trade
+       price, so each variant is looked up on its own key and only falls back
+       to the product's when the book does not name it. */
+    const priceFor = (variant?: string | null) => {
+      const b = book ? bookPrice(book, p.slug, variant) : null;
+      return { priceEur: b ? b.eur : null, priceUah: b ? b.uah : null };
+    };
 
     if (!p.variants?.length) {
       return {
         ...shell,
-        lines: [{ key: lineSku(p.slug), variant: null, swatch: null, label: p.nameEn, ...priced }],
+        lines: [{ key: lineSku(p.slug), variant: null, swatch: null, label: p.nameEn, ...priceFor() }],
       };
     }
     return {
@@ -119,7 +124,7 @@ export default async function WholesalePortalPage({
         variant: v.name,
         swatch: v.swatch,
         label: v.name,
-        ...priced,
+        ...priceFor(v.name),
       })),
     };
   });

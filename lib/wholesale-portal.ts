@@ -377,9 +377,9 @@ export async function submitRequest(
        SubmitLine, and if there were it would be ignored. A browser's opinion
        of what a thing costs is not evidence.
 
-       Note this prices by SLUG, not by variant: the wholesale list gives one
-       figure for HMD TCT OP whatever the colour, unlike retail. */
-    const price = unitPrice(book, product.slug, addons);
+       Priced by colour where the book names one — bookPrice looks for the
+       `slug__variant` key first and falls back to the bare product. */
+    const price = unitPrice(book, product.slug, addons, variant?.name);
     if (!price) {
       /* An unpriced line cannot ride along quietly — the partner would submit
          a list whose total silently excluded it. */

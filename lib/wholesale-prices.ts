@@ -35,8 +35,21 @@ import type { LineAddons } from "@/lib/wholesale-display";
    that single line here. If they are ever meant to differ, this is the place
    that has to change, not the caller.
 
-   HMD TCT OP is one price for both colours. Retail charges €2 more for
-   Purple; the wholesale list does not, so neither does this.
+   HMD TCT OP IS PRICED PER COLOUR, ON BOTH BOOKS. The printed list quotes it
+   once; these figures were set afterwards by Mario and are a deliberate
+   departure from it:
+
+     shop    Black €19.00   Purple €20.00    (list quoted €19.50)
+     lounge  Black €25.50   Purple €27.00    (list quoted €25.50)
+
+   They live here rather than in the PDF because this file is what the portal
+   actually reads. If the list is ever reissued, these are the numbers it
+   should carry.
+
+   THE HRYVNIA IS NOT SPLIT. Both colours stay on the listed ₴860 / ₴1035,
+   because no per-colour Ukrainian prices have been set and the two currency
+   lists have always been independent — deriving one from the other would be
+   inventing a number, which is the one thing this file does not do.
 --------------------------------------------------------------------------- */
 
 export const PARTNER_TYPES = ["shop", "lounge"] as const;
@@ -47,7 +60,10 @@ export function isPartnerType(v: unknown): v is PartnerType {
 }
 
 type Book = {
-  /** Keyed by product slug. A slug absent from here has no trade price. */
+  /* Keyed by product slug, OR by the stock key `slug__variant` where a colour
+     is priced apart from its product. The variant key wins when present, so a
+     product can price most colours together and one of them differently
+     without listing every colour. A key absent from here has no trade price. */
   products: Record<string, Money>;
   /** Surcharges, added to the unit price when the flag is on. */
   addons: Record<keyof LineAddons, Money>;
@@ -61,7 +77,12 @@ const BOOKS: Record<PartnerType, Book> = {
     products: {
       "hmd-tct-classic": m(12.0, 550),
       "hmd-a-craft": m(13.0, 590),
+      /* OP is priced per colour on this book — Black and Purple are not the
+         same money to a shop, the way they are not at retail. The bare slug
+         stays as the fallback for any colour not listed. */
       "hmd-tct-op": m(19.5, 860),
+      "hmd-tct-op__black": m(19.0, 860),
+      "hmd-tct-op__purple": m(20.0, 860),
       "bowl-killer": m(6.9, 320),
       "bowl-livanka": m(6.0, 280),
       "bowl-phunnel": m(8.0, 375),
@@ -80,7 +101,12 @@ const BOOKS: Record<PartnerType, Book> = {
     products: {
       "hmd-tct-classic": m(19.5, 765),
       "hmd-a-craft": m(20.4, 810),
+      /* Priced per colour here too. Black is listed explicitly even though it
+         equals the fallback: writing it out means the pair is visible as a
+         pair, and changing the fallback later cannot move Black by accident. */
       "hmd-tct-op": m(25.5, 1035),
+      "hmd-tct-op__black": m(25.5, 1035),
+      "hmd-tct-op__purple": m(27.0, 1035),
       "bowl-killer": m(9.5, 390),
       "bowl-livanka": m(8.5, 340),
       "bowl-phunnel": m(11.0, 460),
@@ -102,8 +128,15 @@ const BOOKS: Record<PartnerType, Book> = {
  * it reaches the price list simply has no trade price yet, and the portal
  * shows "—" against it rather than inventing one or falling back to retail.
  */
-export function bookPrice(type: PartnerType, slug: string): Money | null {
-  return BOOKS[type].products[slug] ?? null;
+export function bookPrice(type: PartnerType, slug: string, variant?: string | null): Money | null {
+  const book = BOOKS[type].products;
+  /* The colour first, the product second. Looked up by the same
+     `slug__variant` key stock uses, so one spelling serves both. */
+  if (variant) {
+    const keyed = book[`${slug}__${variant.toLowerCase()}`];
+    if (keyed) return keyed;
+  }
+  return book[slug] ?? null;
 }
 
 /** What one add-on costs in one book. Always priced — the list gives all three. */
@@ -122,9 +155,10 @@ export function addonPrice(type: PartnerType, addon: keyof LineAddons): Money {
 export function unitPrice(
   type: PartnerType,
   slug: string,
-  addons: LineAddons
+  addons: LineAddons,
+  variant?: string | null
 ): Money | null {
-  const base = bookPrice(type, slug);
+  const base = bookPrice(type, slug, variant);
   if (!base) return null;
   let eur = base.eur;
   let uah = base.uah;

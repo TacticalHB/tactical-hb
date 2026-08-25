@@ -97,7 +97,7 @@ export async function setPartnerPriceBook(
   const next = type ? (isPartnerType(type) ? type : null) : null;
   if (type && !next) return { ok: false, error: "bad_type" };
 
-  if (!(await setPartnerType(id, next))) return { ok: false, error: "write_failed" };
+  if (!(await setPartnerType(id, next, actor))) return { ok: false, error: "write_failed" };
   console.info(`[wholesale] ${actor} set partner_type=${next ?? "none"} for partner ${id}`);
 
   revalidatePath("/[locale]/admin/partners", "page");

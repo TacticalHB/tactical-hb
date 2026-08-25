@@ -681,12 +681,21 @@ export async function setAccountStatus(
  */
 export async function setPartnerType(
   partnerId: string,
-  type: PartnerType | null
+  type: PartnerType | null,
+  /* Who decided. Stamped on every change including a clear — "who took this
+     partner off pricing" is as much a question as who put them on it. Callers
+     that are not a person pass a marker, following the created_by convention
+     already in the register (e.g. "self-registration"). */
+  actor: string
 ): Promise<boolean> {
   const db = createAdminClient();
   const { error } = await db
     .from("wholesale_partners")
-    .update({ partner_type: type })
+    .update({
+      partner_type: type,
+      partner_type_changed_at: new Date().toISOString(),
+      partner_type_changed_by: actor,
+    })
     .eq("id", partnerId);
   if (error) {
     console.error("[wholesale] partner_type write failed:", error.message);

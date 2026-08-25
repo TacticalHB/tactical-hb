@@ -76,6 +76,9 @@ export type Partner = {
   businessType: string | null;
   /** Which price book they buy from — 0034. Null = no prices, cannot submit. */
   partnerType: PartnerType | null;
+  /** Who last set the book, and when — 0035. */
+  partnerTypeChangedAt: string | null;
+  partnerTypeChangedBy: string | null;
   /** Who last moved account_status, and when — 0032. */
   statusChangedAt: string | null;
   statusChangedBy: string | null;

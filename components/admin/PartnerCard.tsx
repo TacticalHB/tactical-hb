@@ -101,7 +101,8 @@ export default function PartnerCard({
       ? "Спершу оберіть прайс — без нього партнер не побачить цін."
       : "Choose a price book first — without one the partner sees no prices.",
     registered: uk ? "Зареєстровано" : "Registered",
-    changedBy: uk ? "Змінив" : "Changed by",
+    changedBy: uk ? "Змінив доступ" : "Access changed by",
+    bookBy: uk ? "Прайс змінив" : "Price book set by",
     noOrders: uk ? "Ще немає прив'язаних замовлень." : "No linked orders yet.",
     unlink: uk ? "Відв'язати" : "Unlink",
     remove: uk ? "Видалити партнера" : "Delete partner",
@@ -352,6 +353,14 @@ export default function PartnerCard({
               {p.businessType && !p.partnerType && (
                 <span className="text-[12px]" style={{ color: "var(--console-faint)" }}>
                   {p.businessType}
+                </span>
+              )}
+              {/* Who put them on this book. Sits beside the control that
+                  changes it, not down with the access record — they are two
+                  decisions and the reader is usually checking one of them. */}
+              {p.partnerTypeChangedAt && (
+                <span className="text-[12px] ms-auto" style={{ color: "var(--console-faint)" }}>
+                  {L.bookBy} {p.partnerTypeChangedBy ?? "—"} · {p.partnerTypeChangedAt.slice(0, 10)}
                 </span>
               )}
             </div>

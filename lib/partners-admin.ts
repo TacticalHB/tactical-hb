@@ -64,7 +64,7 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
       admin
         .from("wholesale_partners")
         .select(
-          "id, company, contact_name, email, phone, country, city, business_type, locale, status, next_follow_up, notes, created_at, user_id, account_status, application_note, account_status_changed_at, account_status_changed_by, partner_type"
+          "id, company, contact_name, email, phone, country, city, business_type, locale, status, next_follow_up, notes, created_at, user_id, account_status, application_note, account_status_changed_at, account_status_changed_by, partner_type, partner_type_changed_at, partner_type_changed_by"
         ),
       admin
         .from("orders")
@@ -128,6 +128,8 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
         hasLogin: Boolean(row.user_id),
         applicationNote: text(row.application_note),
         partnerType: isPartnerType(row.partner_type) ? row.partner_type : null,
+        partnerTypeChangedAt: text(row.partner_type_changed_at),
+        partnerTypeChangedBy: text(row.partner_type_changed_by),
         city: text(row.city),
         businessType: text(row.business_type),
         statusChangedAt: text(row.account_status_changed_at),

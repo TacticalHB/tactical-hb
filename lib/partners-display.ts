@@ -1,5 +1,6 @@
 import type { AppLocale } from "@/i18n/routing";
 import type { AccountStatus } from "@/lib/wholesale-display";
+import type { PartnerType } from "@/lib/wholesale-prices";
 /* ---------------------------------------------------------------------------
    How a wholesale partner reads. Pure and I/O-free, like every *-display
    module: no Supabase client, no server-only. lib/partners-admin.ts does the
@@ -73,6 +74,8 @@ export type Partner = {
   city: string | null;
   /** As the applicant chose it, e.g. "Shop / Online Retailer". */
   businessType: string | null;
+  /** Which price book they buy from — 0034. Null = no prices, cannot submit. */
+  partnerType: PartnerType | null;
   /** Who last moved account_status, and when — 0032. */
   statusChangedAt: string | null;
   statusChangedBy: string | null;

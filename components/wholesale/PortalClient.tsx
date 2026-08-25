@@ -51,13 +51,24 @@ export type PortalProduct = {
   lines: PortalLine[];
   /** Which add-ons this product takes — decided by category, as retail does. */
   addons: AddonKey[];
+  /* What each add-on costs in this partner's book, so a configuration can be
+     priced live. Null throughout when the partner has no book. Advisory only:
+     the server recomputes every figure from the database on submit. */
+  addonPrices: Partial<Record<AddonKey, Money | null>>;
 };
 
 type Qty = Record<string, number>;
 type Opts = Record<string, LineAddons>;
 
 /** A chosen line, flattened out of the grouped catalogue for the summary. */
-type Chosen = { product: PortalProduct; line: PortalLine; qty: number; addons: LineAddons };
+type Chosen = {
+  product: PortalProduct;
+  line: PortalLine;
+  qty: number;
+  addons: LineAddons;
+  /** Effective unit for THIS configuration, or null when unpriced. */
+  unit: Money | null;
+};
 
 /* The option labels come from the retail selector's own specs, in all four
    languages. Retyping "With FEAR 9E418" here would be a second copy of a
@@ -80,6 +91,28 @@ const CATEGORY_ORDER = ["bowl", "hmd", "windcover", "accessory"] as const;
    node that the next render had already replaced, and the second option on a
    row simply would not stick.
 --------------------------------------------------------------------------- */
+
+/**
+ * What one unit of a configured line costs, or null when it has no price.
+ *
+ * The same arithmetic the server does in lib/wholesale-prices — base plus each
+ * ticked surcharge. Duplicated here on purpose: a live total that waits for a
+ * round trip is a total nobody watches change. Nothing computed here is ever
+ * sent or stored.
+ */
+function effectiveUnit(product: PortalProduct, line: PortalLine, chosen: LineAddons): Money | null {
+  if (line.priceEur === null || line.priceUah === null) return null;
+  let eur = line.priceEur;
+  let uah = line.priceUah;
+  for (const key of product.addons) {
+    if (!chosen[key]) continue;
+    const a = product.addonPrices[key];
+    if (!a) return null;
+    eur += a.eur;
+    uah += a.uah;
+  }
+  return { eur: Math.round(eur * 100) / 100, uah: Math.round(uah) };
+}
 
 /* The add-on chips.
 
@@ -183,6 +216,9 @@ export default function PortalClient({
   const [done, setDone] = useState<string | null>(null);
 
   const currency = currencyForLocale(locale);
+  /* One product carries the answer for all of them: the book is a property of
+     the partner, so if any line is priced they all are. */
+  const hasBook = partner.partnerType !== null;
 
   const L = {
     title: t(locale, { en: "Wholesale ordering", uk: "Оптове замовлення", ja: "卸売のご注文", ar: "الطلب بالجملة" }),
@@ -192,7 +228,28 @@ export default function PortalClient({
       ja: "必要な数量を入力してリストをお送りください。在庫を確認のうえ、お支払い方法をメールでご案内します。この画面でのご請求はありません。",
       ar: "حدّد الكميات التي تحتاجها وأرسل القائمة. سنؤكّد التوفّر ونرسل تفاصيل الدفع عبر البريد الإلكتروني — ولا يُخصم شيء هنا.",
     }),
-    quote: t(locale, { en: "Quote on request", uk: "Ціна за запитом", ja: "お見積り", ar: "السعر عند الطلب" }),
+    /* "—" rather than "quote on request": a priced book is the normal state
+       now, so a blank line means something is missing at our end, and saying
+       "we'll quote it" would promise a follow-up nobody has queued. */
+    noPrice: "—",
+    noBookTitle: t(locale, {
+      en: "Your prices aren't set yet",
+      uk: "Ваші ціни ще не встановлено",
+      ja: "価格の設定がまだ完了していません",
+      ar: "لم تُحدَّد أسعارك بعد",
+    }),
+    noBookBody: t(locale, {
+      en: "Your account is open, but we haven't finished setting your trade prices. We'll email you as soon as they're ready — usually the same working day.",
+      uk: "Ваш акаунт відкрито, але ми ще не завершили налаштування оптових цін. Напишемо, щойно все буде готово — зазвичай того ж робочого дня.",
+      ja: "アカウントは開設済みですが、卸価格の設定がまだ完了していません。準備ができ次第メールでご連絡します（通常は同じ営業日中です）。",
+      ar: "حسابك مفتوح، لكننا لم ننتهِ بعد من ضبط أسعارك التجارية. سنراسلك بمجرد جاهزيتها — عادةً في يوم العمل نفسه.",
+    }),
+    unpricedLine: t(locale, {
+      en: "One of the products you've chosen has no price yet. Remove it, or email us and we'll sort it out.",
+      uk: "Для одного з обраних товарів ще немає ціни. Приберіть його або напишіть нам.",
+      ja: "選択された製品のうち 1 点にまだ価格が設定されていません。その行を削除いただくか、メールでご連絡ください。",
+      ar: "أحد المنتجات التي اخترتها لا يحمل سعرًا بعد. أزِله أو راسلنا وسنعالج الأمر.",
+    }),
     qtyLabel: t(locale, { en: "Quantity", uk: "Кількість", ja: "数量", ar: "الكمية" }),
     note: t(locale, {
       en: "Notes — PO number, delivery preference, anything we should know (optional)",
@@ -203,7 +260,13 @@ export default function PortalClient({
     summary: t(locale, { en: "Your request", uk: "Ваш запит", ja: "リクエスト内容", ar: "طلبك" }),
     units: t(locale, { en: "units", uk: "одиниць", ja: "点", ar: "وحدة" }),
     lines: t(locale, { en: "lines", uk: "позицій", ja: "品目", ar: "بند" }),
-    estimate: t(locale, { en: "Indicative total", uk: "Орієнтовна сума", ja: "参考合計", ar: "الإجمالي التقديري" }),
+    estimate: t(locale, { en: "Total", uk: "Разом", ja: "合計", ar: "الإجمالي" }),
+    exShipping: t(locale, {
+      en: "Excludes shipping. Nothing is charged here.",
+      uk: "Без вартості доставки. Тут нічого не списується.",
+      ja: "送料は含みません。この画面でのご請求はありません。",
+      ar: "لا يشمل الشحن. ولا يُخصم شيء هنا.",
+    }),
     willQuote: t(locale, {
       en: "We'll quote this request by email.",
       uk: "Ми надішлемо прорахунок листом.",
@@ -264,7 +327,10 @@ export default function PortalClient({
     for (const product of products) {
       for (const line of product.lines) {
         const n = qty[line.key] ?? 0;
-        if (n > 0) out.push({ product, line, qty: n, addons: opts[line.key] ?? NO_ADDONS });
+        if (n > 0) {
+          const addons = opts[line.key] ?? NO_ADDONS;
+          out.push({ product, line, qty: n, addons, unit: effectiveUnit(product, line, addons) });
+        }
       }
     }
     return out;
@@ -272,15 +338,16 @@ export default function PortalClient({
 
   const units = chosen.reduce((s, c) => s + c.qty, 0);
 
-  /* Only when every chosen line is priced — see the header comment. */
+  /* Only when every chosen line is priced. A partial sum would read as the
+     cost of the request when it is the cost of the priced half — and the
+     server refuses such a request outright, so the button is disabled too. */
+  const unpriced = chosen.some((c) => c.unit === null);
   const total: Money | null = useMemo(() => {
-    if (chosen.length === 0 || chosen.some((c) => c.line.priceEur === null || c.line.priceUah === null)) {
-      return null;
-    }
+    if (chosen.length === 0 || chosen.some((c) => c.unit === null)) return null;
     return chosen.reduce(
       (acc, c) => ({
-        eur: acc.eur + (c.line.priceEur ?? 0) * c.qty,
-        uah: acc.uah + (c.line.priceUah ?? 0) * c.qty,
+        eur: Math.round((acc.eur + (c.unit?.eur ?? 0) * c.qty) * 100) / 100,
+        uah: acc.uah + (c.unit?.uah ?? 0) * c.qty,
       }),
       money(0, 0)
     );
@@ -315,6 +382,8 @@ export default function PortalClient({
     if (!result.ok) {
       if (result.error === "rate_limited") return setError(L.rateLimited);
       if (result.error === "not_approved") return setError(L.notApproved);
+      if (result.error === "no_price_book") return setError(L.noBookBody);
+      if (result.error === "unpriced_line") return setError(L.unpricedLine);
       return setError(L.failed);
     }
     setDone(result.reference ?? "");
@@ -353,11 +422,12 @@ export default function PortalClient({
     );
   }
 
-  /** One line's unit price, or null when no dealer price is set for it. */
-  const priceOf = (line?: PortalLine) =>
-    line && line.priceEur !== null && line.priceUah !== null
-      ? formatMoney(money(line.priceEur, line.priceUah), currency)
-      : null;
+  /** The configured unit price as a string, or null when it has none. */
+  const unitLabel = (product: PortalProduct, line?: PortalLine) => {
+    if (!line) return null;
+    const u = effectiveUnit(product, line, opts[line.key] ?? NO_ADDONS);
+    return u ? formatMoney(u, currency) : null;
+  };
 
   const grouped = CATEGORY_ORDER.map((c) => ({
     key: c,
@@ -378,6 +448,23 @@ export default function PortalClient({
           {L.intro}
         </p>
       </header>
+
+      {/* NO BOOK, NO NUMBERS. Said once at the top rather than repeated as a
+          dash on forty rows — the partner needs to know it is our side that is
+          unfinished, not that we sell nothing. */}
+      {!hasBook && (
+        <div
+          className="mb-8 p-5 rounded-[6px]"
+          style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
+        >
+          <p className="text-[15px] font-medium mb-1" style={{ color: "var(--text)" }}>
+            {L.noBookTitle}
+          </p>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            {L.noBookBody}
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-6 text-sm px-4 py-3 rounded-lg" style={{ background: "#fdecec", color: "#b42318" }}>
@@ -418,8 +505,12 @@ export default function PortalClient({
                               row below; only a plain product shows a price
                               here. */}
                           {!hasColours && (
-                            <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                              {priceOf(p.lines[0]) ?? L.quote}
+                            <p className="text-[12.5px] mt-0.5 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                              {/* Follows the toggles: ticking a lid moves this
+                                  figure, so the partner sees what a unit of
+                                  the thing they are actually configuring
+                                  costs rather than the bare product. */}
+                              {unitLabel(p, p.lines[0]) ?? L.noPrice}
                             </p>
                           )}
                           {hasColours && (
@@ -478,8 +569,8 @@ export default function PortalClient({
                               />
                               <span className="text-[14px] min-w-0 flex-1" style={{ color: "var(--text)" }}>
                                 {line.label}
-                                <span className="ms-2 text-[12.5px]" style={{ color: "var(--text-muted)" }}>
-                                  {priceOf(line) ?? L.quote}
+                                <span className="ms-2 text-[12.5px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+                                  {unitLabel(p, line) ?? L.noPrice}
                                 </span>
                               </span>
                               <QtyBox
@@ -569,8 +660,8 @@ export default function PortalClient({
                       )}
                     </span>
                     <span className="shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
-                      {c.line.priceEur !== null && c.line.priceUah !== null
-                        ? formatMoney(money(c.line.priceEur * c.qty, c.line.priceUah * c.qty), currency)
+                      {c.unit
+                        ? formatMoney(money(Math.round(c.unit.eur * c.qty * 100) / 100, c.unit.uah * c.qty), currency)
                         : "—"}
                     </span>
                   </li>
@@ -587,17 +678,22 @@ export default function PortalClient({
               </div>
 
               {total ? (
-                <div className="flex items-baseline justify-between gap-3 mb-5">
-                  <span className="text-[13px]" style={{ color: "var(--text-muted)" }}>
-                    {L.estimate}
-                  </span>
-                  <span className="text-[17px] font-medium tabular-nums" style={{ color: "var(--text)" }}>
-                    {formatMoney(total, currency)}
-                  </span>
-                </div>
+                <>
+                  <div className="flex items-baseline justify-between gap-3 mb-1">
+                    <span className="text-[14px]" style={{ color: "var(--text)" }}>
+                      {L.estimate}
+                    </span>
+                    <span className="text-[19px] font-medium tabular-nums" style={{ color: "var(--text)" }}>
+                      {formatMoney(total, currency)}
+                    </span>
+                  </div>
+                  <p className="text-[12px] leading-snug mb-5" style={{ color: "var(--text-faint)" }}>
+                    {L.exShipping}
+                  </p>
+                </>
               ) : (
-                <p className="text-[12.5px] leading-relaxed mb-5 mt-2" style={{ color: "var(--text-faint)" }}>
-                  {L.willQuote}
+                <p className="text-[12.5px] leading-relaxed mb-5 mt-2" style={{ color: "var(--accent-ink)" }}>
+                  {L.unpricedLine}
                 </p>
               )}
             </>
@@ -616,7 +712,7 @@ export default function PortalClient({
 
           <button
             onClick={send}
-            disabled={busy || chosen.length === 0}
+            disabled={busy || chosen.length === 0 || !hasBook || unpriced}
             className="w-full h-12 mt-4 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 disabled:opacity-40"
             style={{ background: "var(--accent)", color: "#111114" }}
           >

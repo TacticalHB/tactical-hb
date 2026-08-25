@@ -3,7 +3,7 @@
 import { isAppLocale, locales, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setPartnerAccountStatus } from "@/app/actions/wholesale-admin";
+import { setPartnerAccountStatus, setPartnerPriceBook } from "@/app/actions/wholesale-admin";
 import {
   deletePartner,
   linkMatchingOrders,
@@ -93,6 +93,13 @@ export default function PartnerCard({
     suspend: uk ? "Призупинити" : "Suspend",
     restore: uk ? "Відновити" : "Restore",
     application: uk ? "Заявка партнера" : "Partner's application",
+    priceBook: uk ? "Прайс" : "Price book",
+    bookNone: uk ? "Не задано" : "Not set",
+    bookShop: uk ? "Магазин / Дистрибуція" : "Shop / Distribution",
+    bookLounge: uk ? "Кальянна / Бар" : "Lounge / Bar",
+    needBook: uk
+      ? "Спершу оберіть прайс — без нього партнер не побачить цін."
+      : "Choose a price book first — without one the partner sees no prices.",
     registered: uk ? "Зареєстровано" : "Registered",
     changedBy: uk ? "Змінив" : "Changed by",
     noOrders: uk ? "Ще немає прив'язаних замовлень." : "No linked orders yet.",
@@ -181,6 +188,19 @@ export default function PartnerCard({
      else on this card is an annotation, and this one decides whether a company
      can see dealer prices at all. It should never ride along with a typo fix
      in the phone number. */
+  /* The book is its own write, not folded into Save: it decides which of two
+     lists that differ by 60% this partner is quoted, and that should never
+     ride along with a typo fix in the phone number. */
+  async function onBook(next: string) {
+    setBusy("book");
+    setError(null);
+    setInfo(null);
+    const res = await setPartnerPriceBook(p.id, next);
+    setBusy(null);
+    if (res.ok) router.refresh();
+    else report(res.error);
+  }
+
   async function onAccount(next: AccountStatus) {
     setBusy("account");
     setError(null);
@@ -305,6 +325,37 @@ export default function PartnerCard({
             className="mb-4 p-3 rounded"
             style={{ background: "var(--console-panel-2)", border: "1px solid var(--console-border)" }}
           >
+            {/* WHICH BOOK, FIRST. Approve is disabled until this is set, so
+                nobody can open an account that shows a partner no prices —
+                which is the state that generates the "your portal is broken"
+                email. The applicant's own claim is only a hint: business_type
+                is what they said, partner_type is what we sell them at. */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-[12px] font-medium" style={{ color: "var(--console-muted)" }}>
+                {L.priceBook}:
+              </span>
+              <select
+                value={p.partnerType ?? ""}
+                disabled={busy === "book"}
+                onChange={(e) => onBook(e.target.value)}
+                aria-label={`${L.priceBook} — ${p.company}`}
+                className={inputClass}
+                style={{
+                  ...inputStyle,
+                  borderColor: p.partnerType ? "var(--console-border)" : "var(--console-alert)",
+                }}
+              >
+                <option value="">{L.bookNone}</option>
+                <option value="shop">{L.bookShop}</option>
+                <option value="lounge">{L.bookLounge}</option>
+              </select>
+              {p.businessType && !p.partnerType && (
+                <span className="text-[12px]" style={{ color: "var(--console-faint)" }}>
+                  {p.businessType}
+                </span>
+              )}
+            </div>
+
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[12px] font-medium" style={{ color: "var(--console-muted)" }}>
                 {L.account}:
@@ -317,7 +368,8 @@ export default function PartnerCard({
                   {p.accountStatus !== "approved" && (
                     <button
                       type="button"
-                      disabled={busy === "account"}
+                      disabled={busy === "account" || !p.partnerType}
+                      title={p.partnerType ? undefined : L.needBook}
                       onClick={() => onAccount("approved")}
                       className="h-9 px-4 text-[13px] rounded font-medium transition-opacity hover:opacity-85 disabled:opacity-50"
                       style={{ background: "var(--console-accent)", color: "#111114" }}

@@ -5,13 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { t } from "@/lib/i18n-text";
 import {
   addonsFor,
-  dealerPrice,
   lineSku,
   partnerForUser,
   requestsForUser,
   wholesaleCatalogue,
 } from "@/lib/wholesale-portal";
 import { ACCOUNT_STATUS_TEXT, canAccessPortal } from "@/lib/wholesale-display";
+import { addonPrice, bookPrice } from "@/lib/wholesale-prices";
 import PortalClient, { type PortalProduct } from "@/components/wholesale/PortalClient";
 import RequestHistory from "@/components/wholesale/RequestHistory";
 import { SALES_EMAIL } from "@/lib/contact-info";
@@ -72,8 +72,27 @@ export default async function WholesalePortalPage({
      stock sku and its own price, because that is what a trade order is placed
      against. A product without colours is a single line, and renders exactly
      as it did before. */
+  /* THE BOOK DECIDES THE NUMBERS, and the book comes from the partner row.
+     A partner with no book gets nulls all the way down — the portal prints
+     "—" against every line and disables submit, which is the same refusal the
+     server applies on the write path.
+
+     Note the base price is looked up by SLUG, not by variant: the wholesale
+     list quotes one figure for HMD TCT OP whatever the colour, unlike retail
+     where Purple costs €2 more. */
+  const book = partner.partnerType;
+
   const items: PortalProduct[] = wholesaleCatalogue().map((p) => {
-    const base = {
+    const base = book ? bookPrice(book, p.slug) : null;
+    const addons = addonsFor(p);
+    /* Add-on surcharges travel with the product so the client can price a
+       configuration live without another round trip — and without ever being
+       trusted: the server recomputes all of it on submit. */
+    const addonPrices = Object.fromEntries(
+      addons.map((a) => [a, book ? addonPrice(book, a) : null])
+    ) as PortalProduct["addonPrices"];
+
+    const shell = {
       slug: p.slug,
       name: p.nameEn,
       category: p.category,
@@ -81,37 +100,27 @@ export default async function WholesalePortalPage({
       /* Which add-ons this product takes, read from the catalogue on the
          server. The client renders what it is given rather than deciding for
          itself, so a bowl can never be shown a timer toggle. */
-      addons: addonsFor(p),
+      addons,
+      addonPrices,
     };
+
+    const priced = { priceEur: base ? base.eur : null, priceUah: base ? base.uah : null };
+
     if (!p.variants?.length) {
-      const price = dealerPrice(p);
       return {
-        ...base,
-        lines: [
-          {
-            key: lineSku(p.slug),
-            variant: null,
-            swatch: null,
-            label: p.nameEn,
-            priceEur: price ? price.eur : null,
-            priceUah: price ? price.uah : null,
-          },
-        ],
+        ...shell,
+        lines: [{ key: lineSku(p.slug), variant: null, swatch: null, label: p.nameEn, ...priced }],
       };
     }
     return {
-      ...base,
-      lines: p.variants.map((v) => {
-        const price = dealerPrice(p, v);
-        return {
-          key: lineSku(p.slug, v.name),
-          variant: v.name,
-          swatch: v.swatch,
-          label: v.name,
-          priceEur: price ? price.eur : null,
-          priceUah: price ? price.uah : null,
-        };
-      }),
+      ...shell,
+      lines: p.variants.map((v) => ({
+        key: lineSku(p.slug, v.name),
+        variant: v.name,
+        swatch: v.swatch,
+        label: v.name,
+        ...priced,
+      })),
     };
   });
 

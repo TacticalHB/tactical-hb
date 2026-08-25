@@ -66,10 +66,15 @@ export default function WholesaleRequestCard({
     background: "var(--console-panel-2)",
   };
 
-  // Staff read hryvnia — the console's own currency, whatever storefront the
-  // request came from. The partner's copy of the same figures is in their
-  // own currency; these two are for different readers.
-  const total = r.subtotalUah !== null ? formatUah(r.subtotalUah) : null;
+  /* SHOWN IN THE CURRENCY THE PARTNER WAS QUOTED, not the console's. This used
+     to force hryvnia on the reasoning that staff read hryvnia — but the figure
+     that matters here is what we told THEM, and quoting it back in a currency
+     nobody agreed is how a €753.50 request gets chased for ₴34,460. */
+  const inUah = r.currency ? r.currency === "UAH" : r.locale === "uk";
+  const fmt = (eur: number | null, uah: number | null) =>
+    inUah ? (uah === null ? null : formatUah(uah)) : eur === null ? null : `€${eur.toFixed(2)}`;
+
+  const total = fmt(r.subtotalEur, r.subtotalUah);
 
   return (
     <div style={{ borderTop: "1px solid var(--console-border)" }}>
@@ -95,6 +100,13 @@ export default function WholesaleRequestCard({
         <span className="text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--console-faint)" }}>
           {r.locale}
         </span>
+        {/* Which book priced it — the one fact that explains why these numbers
+            and not the other set. */}
+        {r.partnerType && (
+          <span className="text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--console-accent)" }}>
+            {r.partnerType}
+          </span>
+        )}
 
         <span className="ml-auto flex items-center gap-3">
           <select
@@ -172,9 +184,9 @@ export default function WholesaleRequestCard({
                   <td
                     align="right"
                     className="py-2 tabular-nums"
-                    style={{ color: i.lineTotalUah !== null ? "var(--console-muted)" : "var(--console-faint)" }}
+                    style={{ color: i.lineTotalEur !== null ? "var(--console-muted)" : "var(--console-faint)" }}
                   >
-                    {i.lineTotalUah !== null ? formatUah(i.lineTotalUah) : "—"}
+                    {fmt(i.lineTotalEur, i.lineTotalUah) ?? "—"}
                   </td>
                 </tr>
               ))}

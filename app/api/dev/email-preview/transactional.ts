@@ -168,10 +168,15 @@ function sampleRequest(locale: string): WholesaleRequest {
     email: "partner@example.com",
     phone: "+380 66 707 33 07",
     locale,
+    /* Priced from the SHOP book, which is where these figures come from:
+       Classic 12.00 + lid 2.50 + FEAR 2.30, OP 19.50 + lid 2.50, Livanka
+       6.00, Detonator 14.30 + timer 10.00. */
+    partnerType: "shop",
+    currency: locale === "uk" ? "UAH" : "EUR",
     note: "PO-4471 — please confirm lead time on the wind covers.",
     status: "submitted",
-    subtotalEur: null,
-    subtotalUah: null,
+    subtotalEur: 753.5,
+    subtotalUah: 34460,
     itemCount: 35,
     createdAt: "2026-08-25T14:54:00.000Z",
     /* Deliberately mixed: an HMD with both add-ons, a colour with one, a bare
@@ -182,21 +187,21 @@ function sampleRequest(locale: string): WholesaleRequest {
         addons: { lid: true, rubber: true, timer: false },
         optionsLabel: "With Lid + With FEAR 9E418",
         name: "HMD TCT Classic", qty: 5,
-        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+        unitPriceEur: 16.8, unitPriceUah: 820, lineTotalEur: 84.0, lineTotalUah: 4100 },
       { productSlug: "hmd-tct-op", sku: "hmd-tct-op__purple", variant: "Purple",
         addons: { lid: true, rubber: false, timer: false },
         optionsLabel: "With Lid",
         name: "HMD TCT OP — Purple", qty: 2,
-        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+        unitPriceEur: 22.0, unitPriceUah: 1010, lineTotalEur: 44.0, lineTotalUah: 2020 },
       { productSlug: "bowl-livanka", sku: "bowl-livanka", variant: null,
         addons: { lid: false, rubber: false, timer: false }, optionsLabel: null,
         name: "Tactical Livanka", qty: 3,
-        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+        unitPriceEur: 6.0, unitPriceUah: 280, lineTotalEur: 18.0, lineTotalUah: 840 },
       { productSlug: "windcover-detonator", sku: "windcover-detonator", variant: null,
         addons: { lid: false, rubber: false, timer: true },
         optionsLabel: "With Timer",
         name: "Windcover Detonator", qty: 25,
-        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+        unitPriceEur: 24.3, unitPriceUah: 1100, lineTotalEur: 607.5, lineTotalUah: 27500 },
     ],
   };
 }

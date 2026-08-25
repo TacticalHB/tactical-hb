@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminActor } from "@/lib/admin-guard";
-import { setAccountStatus, setRequestStatus } from "@/lib/wholesale-portal";
+import { setAccountStatus, setPartnerType, setRequestStatus } from "@/lib/wholesale-portal";
+import { isPartnerType } from "@/lib/wholesale-prices";
 import { isAccountStatus, isRequestStatus } from "@/lib/wholesale-display";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
 import { sendMail } from "@/lib/email";
@@ -76,6 +77,30 @@ export async function setPartnerAccountStatus(
 
   revalidatePath("/[locale]/admin/partners", "page");
   revalidatePath("/[locale]/admin/wholesale", "page");
+  return { ok: true };
+}
+
+/** Assign the price book. Admin-only, and the portal is worthless without it. */
+export async function setPartnerPriceBook(
+  partnerId: string,
+  type: string | null
+): Promise<AdminResult> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "forbidden" };
+
+  const id = String(partnerId ?? "").trim();
+  if (!id) return { ok: false, error: "not_found" };
+
+  /* Empty string clears it — which is a legitimate thing to want: a partner
+     whose channel is under review should see no prices rather than the last
+     ones somebody guessed at. Anything else must be a real book. */
+  const next = type ? (isPartnerType(type) ? type : null) : null;
+  if (type && !next) return { ok: false, error: "bad_type" };
+
+  if (!(await setPartnerType(id, next))) return { ok: false, error: "write_failed" };
+  console.info(`[wholesale] ${actor} set partner_type=${next ?? "none"} for partner ${id}`);
+
+  revalidatePath("/[locale]/admin/partners", "page");
   return { ok: true };
 }
 

@@ -2,6 +2,8 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { products, type Product, type Variant } from "@/lib/products";
+import { currencyForLocale } from "@/lib/currency";
+import { isPartnerType, unitPrice, type PartnerType } from "@/lib/wholesale-prices";
 import {
   canAccessPortal,
   isAccountStatus,
@@ -151,7 +153,7 @@ export async function partnerForUser(userId: string): Promise<PortalPartner | nu
   const db = createAdminClient();
   const { data, error } = await db
     .from("wholesale_partners")
-    .select("id, company, contact_name, email, phone, locale, account_status")
+    .select("id, company, contact_name, email, phone, locale, account_status, partner_type")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -171,6 +173,8 @@ export async function partnerForUser(userId: string): Promise<PortalPartner | nu
     locale: String(data.locale ?? "en"),
     // An unrecognised value fails closed rather than being trusted through.
     accountStatus: isAccountStatus(status) ? status : ("pending" as AccountStatus),
+    // Same posture for the book: anything unrecognised is no book at all.
+    partnerType: isPartnerType(data.partner_type) ? data.partner_type : null,
   };
 }
 
@@ -296,7 +300,7 @@ export type SubmitLine = {
 
 export type SubmitResult =
   | { ok: true; request: WholesaleRequest }
-  | { ok: false; error: "not_approved" | "empty" | "failed" };
+  | { ok: false; error: "not_approved" | "empty" | "failed" | "no_price_book" | "unpriced_line" };
 
 const MAX_LINES = 60;
 const MAX_QTY = 100_000;
@@ -324,6 +328,20 @@ export async function submitRequest(
     return { ok: false, error: "not_approved" };
   }
 
+  /* NO BOOK, NO ORDER. An approved partner nobody assigned a price book to
+     cannot submit — the alternative is guessing which of two lists that differ
+     by 60% they buy from, in writing. The portal already shows them "—"
+     against every line; this is the same refusal on the write path. */
+  const book = partner.partnerType;
+  if (!book) {
+    console.warn("[wholesale] submit refused: partner", partner.id, "has no price book");
+    return { ok: false, error: "no_price_book" };
+  }
+
+  /* The currency follows the STOREFRONT, not the partner — a Ukrainian
+     partner ordering from /en is quoted in euro, the same rule retail uses. */
+  const currency = currencyForLocale(partner.locale);
+
   const bySlug = new Map(products.map((p) => [p.slug, p]));
   const items: RequestItem[] = [];
 
@@ -349,11 +367,25 @@ export async function submitRequest(
       continue;
     }
 
-    const price = dealerPrice(product, variant);
     /* The client sends flags; what this product can actually carry is decided
        here from the catalogue. A bowl arriving with `timer: true` loses it. */
     const addons = sanitiseAddons(product, line.addons);
     const optionsLabel = addonLabel(addons);
+
+    /* THE PRICE IS COMPUTED HERE, FROM THE BOOK THE DATABASE NAMES. Nothing
+       the client sent about money is read — there is no field for it on
+       SubmitLine, and if there were it would be ignored. A browser's opinion
+       of what a thing costs is not evidence.
+
+       Note this prices by SLUG, not by variant: the wholesale list gives one
+       figure for HMD TCT OP whatever the colour, unlike retail. */
+    const price = unitPrice(book, product.slug, addons);
+    if (!price) {
+      /* An unpriced line cannot ride along quietly — the partner would submit
+         a list whose total silently excluded it. */
+      console.warn("[wholesale] refused: no", book, "price for", product.slug);
+      return { ok: false, error: "unpriced_line" };
+    }
 
     items.push({
       productSlug: product.slug,
@@ -367,21 +399,19 @@ export async function submitRequest(
          two; the row keeps them apart. */
       name: variant ? `${product.nameEn} — ${variant.name}` : product.nameEn,
       qty,
-      unitPriceEur: price ? price.eur : null,
-      unitPriceUah: price ? price.uah : null,
-      lineTotalEur: price ? round2(price.eur * qty) : null,
-      lineTotalUah: price ? round2(price.uah * qty) : null,
+      unitPriceEur: price.eur,
+      unitPriceUah: price.uah,
+      lineTotalEur: round2(price.eur * qty),
+      lineTotalUah: Math.round(price.uah * qty),
     });
   }
 
   if (items.length === 0) return { ok: false, error: "empty" };
 
-  /* A subtotal only when EVERY line has one. A partial total invites the
-     reader to treat it as the price of the request, and it is not — it is the
-     price of the priced half. Null says "we will quote", which is true. */
-  const allPriced = items.every((i) => i.lineTotalEur !== null);
-  const subtotalEur = allPriced ? round2(items.reduce((s, i) => s + (i.lineTotalEur ?? 0), 0)) : null;
-  const subtotalUah = allPriced ? round2(items.reduce((s, i) => s + (i.lineTotalUah ?? 0), 0)) : null;
+  /* Every line is priced or the whole request was refused above, so the
+     "priced half" problem this used to guard against cannot arise. */
+  const subtotalEur = round2(items.reduce((s, i) => s + (i.lineTotalEur ?? 0), 0));
+  const subtotalUah = Math.round(items.reduce((s, i) => s + (i.lineTotalUah ?? 0), 0));
 
   const db = createAdminClient();
   const reference = makeReference((max) => randomInt(max));
@@ -398,6 +428,8 @@ export async function submitRequest(
       locale: partner.locale,
       note: note.trim() ? note.trim().slice(0, 2000) : null,
       status: "submitted",
+      partner_type: book,
+      currency,
       subtotal_eur: subtotalEur,
       subtotal_uah: subtotalUah,
       item_count: items.reduce((s, i) => s + i.qty, 0),
@@ -448,6 +480,8 @@ export async function submitRequest(
       email: partner.email,
       phone: partner.phone,
       locale: partner.locale,
+      partnerType: book,
+      currency,
       note: note.trim() || null,
       status: "submitted",
       subtotalEur,
@@ -497,6 +531,8 @@ function mapRequest(r: Row, items: RequestItem[]): WholesaleRequest {
     email: text(r.email),
     phone: text(r.phone),
     locale: String(r.locale ?? "en"),
+    partnerType: isPartnerType(r.partner_type) ? r.partner_type : null,
+    currency: r.currency === "UAH" || r.currency === "EUR" ? r.currency : null,
     note: text(r.note),
     status: isRequestStatus(status) ? status : "submitted",
     subtotalEur: num(r.subtotal_eur),
@@ -634,6 +670,29 @@ export async function setAccountStatus(
     locale: String(before?.locale ?? "en"),
     businessType: text(before?.business_type),
   };
+}
+
+/**
+ * Set (or clear) which price book a partner buys from. Admin-only callers.
+ *
+ * Separate from setAccountStatus even though the admin form sets both at once:
+ * the book can be changed later without touching access, and access can be
+ * suspended without forgetting which book they were on.
+ */
+export async function setPartnerType(
+  partnerId: string,
+  type: PartnerType | null
+): Promise<boolean> {
+  const db = createAdminClient();
+  const { error } = await db
+    .from("wholesale_partners")
+    .update({ partner_type: type })
+    .eq("id", partnerId);
+  if (error) {
+    console.error("[wholesale] partner_type write failed:", error.message);
+    return false;
+  }
+  return true;
 }
 
 /** Move a request along its ladder. Admin-only callers. */

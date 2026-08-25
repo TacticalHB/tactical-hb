@@ -40,9 +40,17 @@ function siteUrl(): string {
   return (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
 }
 
-/** UAH for the Ukrainian storefront, EUR everywhere else — the site's rule. */
+/**
+ * The currency this request was QUOTED in, snapshotted at submit (0034).
+ *
+ * Reading it from the row rather than re-deriving it from the locale matters:
+ * a partner who submits from /uk is quoted hryvnia, and if they later switch
+ * storefronts the letter in their inbox must still say what it said. Falls
+ * back to the locale rule for rows written before the column existed.
+ */
 function money(req: WholesaleRequest, eur: number | null, uah: number | null): string | null {
-  if (req.locale === "uk") return uah === null ? null : `₴${Math.round(uah).toLocaleString("uk-UA")}`;
+  const inUah = req.currency ? req.currency === "UAH" : req.locale === "uk";
+  if (inUah) return uah === null ? null : `₴${Math.round(uah).toLocaleString("uk-UA")}`;
   return eur === null ? null : `€${eur.toFixed(2)}`;
 }
 
@@ -271,7 +279,17 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
     "",
     `${L.ref}: ${req.reference}`,
     "",
-    ...req.items.map((i) => `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""}`),
+    /* The plain-text part carries the money too. It is what a text-only
+       client, a screen reader in plain mode and every "show original" view
+       renders — a copy that lists quantities but no prices is a different
+       letter from the one in the HTML. */
+    ...req.items.map((i) => {
+      const amount = money(req, i.lineTotalEur, i.lineTotalUah) ?? quoteOnRequest(locale);
+      return `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""} — ${amount}`;
+    }),
+    ...(money(req, req.subtotalEur, req.subtotalUah)
+      ? ["", `${t(locale, { en: "Total", uk: "Разом", ja: "合計", ar: "الإجمالي" })}: ${money(req, req.subtotalEur, req.subtotalUah)}`]
+      : []),
     "",
     L.next,
     L.questions,

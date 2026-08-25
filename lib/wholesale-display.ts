@@ -1,4 +1,5 @@
 import type { Text } from "@/lib/i18n-text";
+import type { PartnerType } from "@/lib/wholesale-prices";
 
 /* ---------------------------------------------------------------------------
    Wholesale accounts and requests — the shapes and the words for them.
@@ -77,6 +78,9 @@ export type WholesaleRequest = {
   id: string;
   reference: string;
   partnerId: string;
+  /** The book it was priced from, and the currency quoted — both snapshots. */
+  partnerType: PartnerType | null;
+  currency: "EUR" | "UAH" | null;
   company: string;
   email: string | null;
   phone: string | null;
@@ -99,6 +103,10 @@ export type PortalPartner = {
   phone: string | null;
   locale: string;
   accountStatus: AccountStatus;
+  /* Which price book. NULL IS A REAL STATE and it means no prices at all —
+     an approved partner nobody has assigned a book to sees "—" everywhere and
+     cannot submit. Deliberately not defaulted: see 0034. */
+  partnerType: PartnerType | null;
 };
 
 /* ---- Reference ------------------------------------------------------------

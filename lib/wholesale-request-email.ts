@@ -1,5 +1,14 @@
 import "server-only";
 import { esc } from "@/lib/email";
+import {
+  CARD,
+  FAINT,
+  FONT,
+  INK,
+  LINE,
+  MUTED,
+  emailShell,
+} from "@/lib/email-theme";
 import { t } from "@/lib/i18n-text";
 import type { WholesaleRequest } from "@/lib/wholesale-display";
 
@@ -22,10 +31,9 @@ import type { WholesaleRequest } from "@/lib/wholesale-display";
    screen.
 --------------------------------------------------------------------------- */
 
-const INK = "#1A1915";
-const MUTED = "#6B6862";
-const LINE = "#E7E3DC";
-const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+/* The palette comes from lib/email-theme, not a private copy of the same hex
+   values. The old local constants happened to match, which is exactly how two
+   sets of "the same" colours drift apart the first time one is adjusted. */
 
 function siteUrl(): string {
   return (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
@@ -47,10 +55,23 @@ function quoteOnRequest(locale: string): string {
 }
 
 function linesTable(req: WholesaleRequest, locale: string): string {
-  const head = (s: string) =>
-    `<th align="left" style="padding:8px 10px;border-bottom:1px solid ${LINE};font:600 12px ${FONT};color:${MUTED};text-transform:uppercase;letter-spacing:.06em">${esc(s)}</th>`;
-  const cell = (s: string, align = "left") =>
-    `<td align="${align}" style="padding:10px;border-bottom:1px solid ${LINE};font:14px ${FONT};color:${INK}">${esc(s)}</td>`;
+  /* THE TABLE HAS TO MIRROR TOO. Without dir on the table itself the Arabic
+     letter kept the columns in Latin order — Product on the left, the Arabic
+     header text right-aligned inside it — and the full stop on the closing
+     sentence migrated to the front of the line, which is the classic sign of
+     Arabic text sitting in a left-to-right box.
+
+     `align` takes physical values that email clients actually honour, so the
+     logical start/end are computed here rather than left to CSS that half of
+     them would drop. */
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  const startAlign = dir === "rtl" ? "right" : "left";
+  const endAlign = dir === "rtl" ? "left" : "right";
+
+  const head = (s: string, align = startAlign) =>
+    `<th align="${align}" style="padding:8px 10px;border-bottom:1px solid ${LINE};font:600 12px ${FONT};color:${MUTED};text-transform:uppercase;letter-spacing:.06em">${esc(s)}</th>`;
+  const cell = (s: string, align = startAlign, ltr = false) =>
+    `<td align="${align}"${ltr ? ' dir="ltr"' : ""} style="padding:10px;border-bottom:1px solid ${LINE};font:14px ${FONT};color:${INK}">${esc(s)}</td>`;
 
   const L = {
     product: t(locale, { en: "Product", uk: "Товар", ja: "製品", ar: "المنتج" }),
@@ -61,16 +82,19 @@ function linesTable(req: WholesaleRequest, locale: string): string {
   const rows = req.items
     .map((i) => {
       const amount = money(req, i.lineTotalEur, i.lineTotalUah) ?? quoteOnRequest(locale);
-      return `<tr>${cell(i.name)}${cell(String(i.qty), "right")}${cell(amount, "right")}</tr>`;
+      /* The product name is pinned LTR: it is Latin in every locale, and
+         "HMD TCT OP — Purple" carries a neutral em-dash that an RTL box would
+         happily move to the wrong end. */
+      return `<tr>${cell(i.name, startAlign, true)}${cell(String(i.qty), endAlign)}${cell(amount, endAlign)}</tr>`;
     })
     .join("");
 
   const total = money(req, req.subtotalEur, req.subtotalUah);
   const totalRow = total
-    ? `<tr><td colspan="2" align="right" style="padding:12px 10px;font:600 14px ${FONT};color:${INK}">${esc(
+    ? `<tr><td colspan="2" align="${endAlign}" style="padding:12px 10px;font:600 14px ${FONT};color:${INK}">${esc(
         t(locale, { en: "Total", uk: "Разом", ja: "合計", ar: "الإجمالي" })
-      )}</td><td align="right" style="padding:12px 10px;font:600 14px ${FONT};color:${INK}">${esc(total)}</td></tr>`
-    : `<tr><td colspan="3" style="padding:12px 10px;font:14px ${FONT};color:${MUTED}">${esc(
+      )}</td><td align="${endAlign}" style="padding:12px 10px;font:600 14px ${FONT};color:${INK}">${esc(total)}</td></tr>`
+    : `<tr><td colspan="3" dir="${dir}" align="${startAlign}" style="padding:12px 10px;font:14px ${FONT};color:${MUTED}">${esc(
         t(locale, {
           en: "We will quote this request by email.",
           uk: "Ми надішлемо прорахунок цього запиту листом.",
@@ -79,8 +103,11 @@ function linesTable(req: WholesaleRequest, locale: string): string {
         })
       )}</td></tr>`;
 
-  return `<table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;margin:0 0 20px">
-    <tr>${head(L.product)}${head(L.qty)}${head(L.amount)}</tr>${rows}${totalRow}</table>`;
+  /* No bottom margin: the partner's letter puts this inside a padded card, so
+     a margin here just left a band of dead white under the last row. The staff
+     letter is a bare div and spaces itself around the table instead. */
+  return `<table cellpadding="0" cellspacing="0" width="100%" dir="${dir}" style="border-collapse:collapse">
+    <tr>${head(L.product)}${head(L.qty, endAlign)}${head(L.amount, endAlign)}</tr>${rows}${totalRow}</table>`;
 }
 
 /* ---- To staff ------------------------------------------------------------- */
@@ -124,7 +151,7 @@ export function buildStaffRequestMail(req: WholesaleRequest): {
   const html = `<div style="font:15px/1.6 ${FONT};color:${INK}">
     <p style="margin:0 0 16px"><strong>Wholesale request ${esc(req.reference)}</strong></p>
     <table cellpadding="0" cellspacing="0" style="margin:0 0 20px">${infoRows}</table>
-    ${table}
+    <div style="margin:0 0 20px">${table}</div>
     ${note}
     <p style="margin:0 0 8px"><a href="${esc(admin)}" style="color:#C45A1A">Open in admin →</a></p>
     <p style="margin:0;font:13px ${FONT};color:${MUTED}">
@@ -159,6 +186,7 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
   text: string;
 } {
   const locale = req.locale;
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   const L = {
     subject: t(locale, {
@@ -167,7 +195,16 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
       ja: `リクエスト ${req.reference} を受け付けました`,
       ar: `استلمنا طلبك ${req.reference}`,
     }),
-    heading: t(locale, {
+    /* Short, because it sits at 27px under the wordmark. The thank-you moved
+       into the card below — a headline that runs to two lines competes with
+       the reference, which is the thing they will come back looking for. */
+    headline: t(locale, {
+      en: "Request received",
+      uk: "Запит отримано",
+      ja: "リクエストを受け付けました",
+      ar: "استلمنا طلبك",
+    }),
+    thanks: t(locale, {
       en: "Thank you — your request is with our team.",
       uk: "Дякуємо — ваш запит уже в роботі.",
       ja: "ありがとうございます。担当チームが確認いたします。",
@@ -191,19 +228,52 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
     }),
   };
 
-  const dir = locale === "ar" ? "rtl" : "ltr";
+  const inner = `
+        <!-- Headline -->
+        <tr><td align="center" style="padding-bottom:6px">
+          <h1 style="margin:0;font-family:${FONT};font-size:27px;line-height:1.25;font-weight:700;color:${INK}">
+            ${esc(L.headline)}
+          </h1>
+        </td></tr>
 
-  const html = `<div dir="${dir}" style="font:15px/1.6 ${FONT};color:${INK}">
-    <p style="margin:0 0 16px;font-size:17px">${esc(L.heading)}</p>
-    <p style="margin:0 0 6px;font:13px ${FONT};color:${MUTED}">${esc(L.ref)}</p>
-    <p style="margin:0 0 20px;font:600 18px ${FONT};letter-spacing:.04em">${esc(req.reference)}</p>
-    ${linesTable(req, locale)}
-    <p style="margin:0 0 16px">${esc(L.next)}</p>
-    <p style="margin:0;font:13px ${FONT};color:${MUTED}">${esc(L.questions)}</p>
-  </div>`;
+        <!-- The reference, given the weight an order number gets: this is what
+             they quote back on the phone and search their inbox for. -->
+        <tr><td align="center" style="padding-bottom:4px">
+          <div style="font-family:${FONT};font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT}">
+            ${esc(L.ref)}
+          </div>
+        </td></tr>
+        <tr><td align="center" style="padding-bottom:28px">
+          <div dir="ltr" style="font-family:${FONT};font-size:22px;font-weight:700;letter-spacing:0.05em;color:${INK}">
+            ${esc(req.reference)}
+          </div>
+        </td></tr>
+
+        <!-- The lines -->
+        <tr><td style="background:${CARD};border-radius:14px;padding:20px 22px">
+          ${linesTable(req, locale)}
+        </td></tr>
+
+        <!-- What happens next -->
+        <tr><td style="padding-top:14px">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                 style="background:${CARD};border-radius:14px">
+            <tr><td style="padding:20px 22px">
+              <p dir="${dir}" style="margin:0;font-family:${FONT};font-size:15px;line-height:1.65;color:${INK}">
+                ${esc(L.thanks)}
+              </p>
+              <p dir="${dir}" style="margin:14px 0 0;font-family:${FONT};font-size:15px;line-height:1.65;color:${INK}">
+                ${esc(L.next)}
+              </p>
+              <p dir="${dir}" style="margin:14px 0 0;font-family:${FONT};font-size:13px;line-height:1.6;color:${MUTED}">
+                ${esc(L.questions)}
+              </p>
+            </td></tr>
+          </table>
+        </td></tr>`;
 
   const text = [
-    L.heading,
+    L.thanks,
     "",
     `${L.ref}: ${req.reference}`,
     "",
@@ -211,7 +281,9 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
     "",
     L.next,
     L.questions,
+    "",
+    "TACTICAL HB",
   ].join("\n");
 
-  return { subject: L.subject, html, text };
+  return { subject: L.subject, html: emailShell({ lang: locale, title: esc(L.subject), inner }), text };
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderEmail, renderEmailText } from "@/lib/email/template";
+import { isAppLocale } from "@/i18n/routing";
 import {
   CART,
   CART_LINKS,
@@ -73,7 +74,19 @@ export async function GET(request: NextRequest) {
 
   const q = new URL(request.url).searchParams;
   const raw = q.get("step") || "W1";
+  /* TWO LOCALE VARIABLES, ON PURPOSE.
+
+     The marketing flows (W1, C1 …) exist in English and Ukrainian only, so
+     `locale` stays narrowed to those two and everything below is unchanged.
+
+     The transactional letters have all four, and this route used to collapse
+     ja and ar to en before they ever reached the builder — which meant the
+     Arabic letters could not be looked at at all, and an RTL mistake in one
+     had nowhere to show itself. `previewLocale` keeps whatever was asked for
+     when it is a real storefront. */
   const locale: Locale = q.get("locale") === "uk" ? "uk" : "en";
+  const asked = q.get("locale") ?? "";
+  const previewLocale = isAppLocale(asked) ? asked : "en";
   const asText = q.get("format") === "text";
 
   const localiseOut = (out: string) =>
@@ -82,7 +95,7 @@ export async function GET(request: NextRequest) {
   // The transactional letters build themselves end to end, so they short-
   // circuit everything below.
   if (TRANSACTIONAL_KINDS.includes(raw.toLowerCase() as TransactionalKind)) {
-    const built = renderTransactional(raw.toLowerCase() as TransactionalKind, locale);
+    const built = renderTransactional(raw.toLowerCase() as TransactionalKind, previewLocale);
     const body = asText ? `Subject: ${built.subject}\n\n${built.text}` : built.html;
     return new NextResponse(localiseOut(body), {
       headers: {

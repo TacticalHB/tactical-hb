@@ -1,7 +1,10 @@
 import "server-only";
 import { buildOrderEmail } from "@/lib/order-email";
 import { buildShippedEmail } from "@/lib/shipping-email";
-import { buildWholesaleReply } from "@/lib/wholesale-email";
+import { buildWholesaleReply, buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
+import { buildDecisionMail } from "@/lib/wholesale-decision-email";
+import { buildPartnerAckMail } from "@/lib/wholesale-request-email";
+import type { WholesaleRequest } from "@/lib/wholesale-display";
 import { buildFollowUpMail } from "@/lib/followup-email";
 import type { PaymentRow } from "@/lib/fulfilment";
 
@@ -120,15 +123,63 @@ function legacyPayment(locale: string): PaymentRow {
   };
 }
 
-export type TransactionalKind = "order" | "order-legacy" | "shipping" | "wholesale" | "followup";
+export type TransactionalKind =
+  | "order"
+  | "order-legacy"
+  | "shipping"
+  | "wholesale"
+  | "wholesale-register"
+  | "wholesale-approved"
+  | "wholesale-declined"
+  | "wholesale-request"
+  | "followup";
 
 export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "order",
   "order-legacy",
   "shipping",
   "wholesale",
+  "wholesale-register",
+  "wholesale-approved",
+  "wholesale-declined",
+  "wholesale-request",
   "followup",
 ];
+
+/* A submitted request, priced the way the catalogue actually is today: no
+   dealer prices set, so every line reads "quote on request" and there is no
+   total. Set unitPrice/lineTotal here to preview the priced version. */
+function sampleRequest(locale: string): WholesaleRequest {
+  return {
+    id: "preview",
+    reference: "WH-69V9CP",
+    partnerId: "preview",
+    company: "Arc Ltd",
+    email: "partner@example.com",
+    phone: "+380 66 707 33 07",
+    locale,
+    note: "PO-4471 — please confirm lead time on the wind covers.",
+    status: "submitted",
+    subtotalEur: null,
+    subtotalUah: null,
+    itemCount: 35,
+    createdAt: "2026-08-25T14:54:00.000Z",
+    items: [
+      { productSlug: "hmd-tct-classic", sku: "hmd-tct-classic", variant: null,
+        name: "HMD TCT Classic", qty: 5,
+        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+      { productSlug: "hmd-tct-op", sku: "hmd-tct-op__purple", variant: "Purple",
+        name: "HMD TCT OP — Purple", qty: 2,
+        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+      { productSlug: "bowl-livanka", sku: "bowl-livanka", variant: null,
+        name: "Tactical Livanka", qty: 3,
+        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+      { productSlug: "windcover-detonator", sku: "windcover-detonator", variant: null,
+        name: "Windcover Detonator", qty: 25,
+        unitPriceEur: null, unitPriceUah: null, lineTotalEur: null, lineTotalUah: null },
+    ],
+  };
+}
 
 export function renderTransactional(
   kind: TransactionalKind,
@@ -157,6 +208,22 @@ export function renderTransactional(
       const r = buildWholesaleReply(locale, SITE);
       return { subject: r.subject, html: r.html, text: r.text };
     }
+
+    case "wholesale-register": {
+      const r = buildWholesaleRegistrationReply(locale, SITE);
+      return { subject: r.subject, html: r.html, text: r.text };
+    }
+
+    case "wholesale-approved":
+      return buildDecisionMail("approved", locale, SITE)!;
+
+    /* Declined against a lounge, because that is the variant whose evidence
+       list differs most from the generic one — see wholesale-decision-email. */
+    case "wholesale-declined":
+      return buildDecisionMail("rejected", locale, SITE, "Shisha Lounge / Bar")!;
+
+    case "wholesale-request":
+      return buildPartnerAckMail(sampleRequest(locale));
 
     case "followup":
       return buildFollowUpMail({

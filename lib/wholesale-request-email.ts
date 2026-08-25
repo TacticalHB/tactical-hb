@@ -168,6 +168,9 @@ export function buildStaffRequestMail(req: WholesaleRequest): {
         `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""}` +
         (i.lineTotalEur !== null ? ` — €${i.lineTotalEur.toFixed(2)}` : " — quote on request")
     ),
+    ...(money(req, req.subtotalEur, req.subtotalUah)
+      ? [`Total: ${money(req, req.subtotalEur, req.subtotalUah)}`]
+      : []),
     "",
     req.note ? `Note: ${req.note}` : "",
     "",

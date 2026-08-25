@@ -99,5 +99,18 @@ export const currencyForLocale = (locale: string): Currency => (locale === "uk" 
 export function formatMoney(m: Money, currency: Currency): string {
   return currency === "UAH"
     ? `₴${Math.round(m.uah).toLocaleString("uk-UA")}`
-    : `€${m.eur.toFixed(2)}`;
+    /* THE LOCALE IS HARDCODED, AND THAT IS THE POINT. It is not the page's
+       locale — passing that would give a reader on the Arabic storefront
+       Arabic-Indic digits, and the whole storefront deliberately prints Latin
+       numerals (see i18n: dates are pinned to ar-u-nu-latn for the same
+       reason). "en-GB" here is a formatting recipe, not a language: comma
+       thousands, dot decimal, Western digits, whoever is reading.
+
+       The grouping was added when wholesale started quoting four figures —
+       €1026.00 is a number you have to count. Retail never reaches a thousand,
+       so nothing there looks any different. */
+    : `€${m.eur.toLocaleString("en-GB", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
 }

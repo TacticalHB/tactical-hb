@@ -9,6 +9,7 @@ import {
   MUTED,
   emailShell,
 } from "@/lib/email-theme";
+import { buildStaffLetter, staffQuote } from "@/lib/staff-email";
 import { t } from "@/lib/i18n-text";
 import type { WholesaleRequest } from "@/lib/wholesale-display";
 
@@ -118,50 +119,33 @@ export function buildStaffRequestMail(req: WholesaleRequest): {
   text: string;
 } {
   const admin = `${siteUrl()}/en/admin/wholesale`;
-  const rows: [string, string][] = [
-    ["Reference", req.reference],
+  /* No Reference row: the title already is the reference, and printing it
+     twice in the first two inches of the letter reads as a mistake. */
+  const rows: [string, string | null | undefined][] = [
     ["Company", req.company],
-    ["Email", req.email ?? "—"],
-    ["Telephone", req.phone ?? "—"],
+    ["Email", req.email],
+    ["Telephone", req.phone],
     ["Language", req.locale.toUpperCase()],
     ["Units", String(req.itemCount)],
   ];
 
-  const infoRows = rows
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:4px 16px 4px 0;font:13px ${FONT};color:${MUTED}">${esc(
-          k
-        )}</td><td style="padding:4px 0;font:14px ${FONT};color:${INK}">${esc(v)}</td></tr>`
-    )
-    .join("");
-
   // Staff read in English regardless of the partner's storefront — the admin
   // console is English and Ukrainian, and a Japanese request should not arrive
   // in an inbox nobody there reads.
-  const table = linesTable({ ...req, locale: "en" }, "en");
+  const blocks = [linesTable({ ...req, locale: "en" }, "en")];
+  if (req.note) blocks.push(staffQuote("Partner's note", req.note));
 
-  const note = req.note
-    ? `<div style="border-top:1px solid ${LINE};padding-top:14px;margin-bottom:20px">
-         <p style="margin:0 0 6px;font:600 13px ${FONT};color:${MUTED}">Partner's note</p>
-         <div style="white-space:pre-wrap;font:14px ${FONT};color:${INK}">${esc(req.note)}</div>
-       </div>`
-    : "";
-
-  const html = `<div style="font:15px/1.6 ${FONT};color:${INK}">
-    <p style="margin:0 0 16px"><strong>Wholesale request ${esc(req.reference)}</strong></p>
-    <table cellpadding="0" cellspacing="0" style="margin:0 0 20px">${infoRows}</table>
-    <div style="margin:0 0 20px">${table}</div>
-    ${note}
-    <p style="margin:0 0 8px"><a href="${esc(admin)}" style="color:#C45A1A">Open in admin →</a></p>
-    <p style="margin:0;font:13px ${FONT};color:${MUTED}">
-      No payment has been taken. Reply to the partner with payment details when you are ready.
-    </p>
-  </div>`;
+  const html = buildStaffLetter({
+    title: `Wholesale request ${req.reference}`,
+    rows,
+    blocks,
+    cta: { label: "Open in admin", url: admin },
+    status: "No payment has been taken. Reply to the partner with payment details when you are ready.",
+  });
 
   const text = [
     `Wholesale request ${req.reference}`,
-    ...rows.map(([k, v]) => `${k}: ${v}`),
+    ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
     "",
     ...req.items.map(
       (i) => `${i.qty} × ${i.name}${i.lineTotalEur !== null ? ` — €${i.lineTotalEur.toFixed(2)}` : " — quote on request"}`

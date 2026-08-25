@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { esc, rowsHtml, sendMail } from "@/lib/email";
+import { sendMail } from "@/lib/email";
+import { buildStaffLetter, staffQuote } from "@/lib/staff-email";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { applyForAccount, submitRequest, type SubmitLine } from "@/lib/wholesale-portal";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
@@ -93,45 +94,47 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
      an application gets acted on quickly; sales NOT finding out is a delay,
      whereas a failed write would be a lost applicant. */
   const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
-  const rows: [string, string][] = [
+  const contact = clean(fields.contactName, LIMITS.contactName);
+  const phone = clean(fields.phone, LIMITS.phone);
+  const country = clean(fields.country, LIMITS.country);
+  const city = clean(fields.city, LIMITS.city);
+  const biz = clean(fields.businessType, LIMITS.businessType);
+  const applicantNote = clean(fields.note, LIMITS.note);
+
+  const rows: [string, string | null | undefined][] = [
     ["Company", company],
-    ["Contact", clean(fields.contactName, LIMITS.contactName) || "—"],
+    ["Contact", contact],
     ["Email", user.email],
-    ["Telephone", clean(fields.phone, LIMITS.phone) || "—"],
-    ["Business type", clean(fields.businessType, LIMITS.businessType) || "—"],
-    ["Country", clean(fields.country, LIMITS.country) || "—"],
-    ["City", clean(fields.city, LIMITS.city) || "—"],
+    ["Telephone", phone],
+    ["Business type", biz],
+    ["Country", country],
+    ["City", city],
     ["Language", locale.toUpperCase()],
   ];
-  const applicantNote = clean(fields.note, LIMITS.note);
+
   const mail = await sendMail({
     to: SALES_EMAIL,
     replyTo: user.email,
     subject: `Wholesale account application — ${company}`,
-    html: `
-      <div style="font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6;color:#111">
-        <p style="margin:0 0 16px"><strong>${esc(company)}</strong> has registered for a wholesale account and is awaiting approval.</p>
-        <table cellpadding="0" cellspacing="0" style="margin:0 0 18px">${rowsHtml(rows)}</table>
-        ${applicantNote ? `<div style="white-space:pre-wrap;border-top:1px solid #e5e5e5;padding-top:16px;margin-bottom:18px">${esc(applicantNote)}</div>` : ""}
-        <p style="margin:0 0 8px"><a href="${esc(site)}/en/admin/partners" style="color:#C45A1A">Approve or decline →</a></p>
-        <p style="margin:0;font-size:13px;color:#6B6862">They cannot see dealer prices or submit anything until approved.</p>
-      </div>
-    `,
+    html: buildStaffLetter({
+      title: "New wholesale application",
+      lead: `${company} has registered and is awaiting approval.`,
+      rows,
+      blocks: applicantNote ? [staffQuote("What they told us", applicantNote)] : [],
+      cta: { label: "Approve or decline", url: `${site}/en/admin/partners` },
+      status: "They cannot see dealer prices or submit anything until approved.",
+    }),
     text: [
       `${company} has registered for a wholesale account and is awaiting approval.`,
-      `Contact: ${clean(fields.contactName, LIMITS.contactName) || "—"}`,
-      `Email: ${user.email}`,
-      `Telephone: ${clean(fields.phone, LIMITS.phone) || "—"}`,
-      `Business type: ${clean(fields.businessType, LIMITS.businessType) || "—"}`,
-      `Country: ${clean(fields.country, LIMITS.country) || "—"}`,
-      `City: ${clean(fields.city, LIMITS.city) || "—"}`,
-      `Language: ${locale.toUpperCase()}`,
+      ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
       "",
-      clean(fields.note, LIMITS.note),
+      applicantNote,
       "",
       `Approve or decline: ${site}/en/admin/partners`,
       "They cannot see dealer prices or submit anything until approved.",
-    ].join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
   });
   if (!mail.ok) console.error("[wholesale] application alert not sent:", mail.error);
 

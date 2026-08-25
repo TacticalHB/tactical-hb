@@ -3,7 +3,7 @@ import { buildOrderEmail } from "@/lib/order-email";
 import { buildShippedEmail } from "@/lib/shipping-email";
 import { buildWholesaleReply, buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
-import { buildPartnerAckMail } from "@/lib/wholesale-request-email";
+import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
 import type { WholesaleRequest } from "@/lib/wholesale-display";
 import { buildFollowUpMail } from "@/lib/followup-email";
 import type { PaymentRow } from "@/lib/fulfilment";
@@ -132,6 +132,7 @@ export type TransactionalKind =
   | "wholesale-approved"
   | "wholesale-declined"
   | "wholesale-request"
+  | "wholesale-staff"
   | "followup";
 
 export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
@@ -143,6 +144,7 @@ export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "wholesale-approved",
   "wholesale-declined",
   "wholesale-request",
+  "wholesale-staff",
   "followup",
 ];
 
@@ -224,6 +226,11 @@ export function renderTransactional(
 
     case "wholesale-request":
       return buildPartnerAckMail(sampleRequest(locale));
+
+    /* The staff copy of the same request. Always English whatever locale is
+       asked for — that is the point of it, not an oversight. */
+    case "wholesale-staff":
+      return buildStaffRequestMail(sampleRequest(locale));
 
     case "followup":
       return buildFollowUpMail({

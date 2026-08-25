@@ -7,6 +7,7 @@ import { esc, rowsHtml, sendMail } from "@/lib/email";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { applyForAccount, submitRequest, type SubmitLine } from "@/lib/wholesale-portal";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
+import { buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
 import { isAppLocale } from "@/i18n/routing";
 
 /* ---------------------------------------------------------------------------
@@ -23,9 +24,11 @@ import { isAppLocale } from "@/i18n/routing";
    behind requireAdminActor(). See app/actions/wholesale-admin.ts.
 --------------------------------------------------------------------------- */
 
-export type WholesaleResult = { ok: true; reference?: string } | { ok: false; error: string };
+export type WholesaleResult =
+  | { ok: true; reference?: string; formSent?: boolean }
+  | { ok: false; error: string };
 
-const LIMITS = { company: 150, contactName: 100, phone: 40, country: 80, note: 2000 };
+const LIMITS = { company: 150, contactName: 100, phone: 40, country: 80, city: 80, businessType: 60, note: 2000 };
 
 function clean(v: unknown, max: number): string {
   return String(v ?? "").trim().slice(0, max);
@@ -46,6 +49,8 @@ export type ApplyFields = {
   contactName: string;
   phone: string;
   country: string;
+  city: string;
+  businessType: string;
   note: string;
   locale: string;
 };
@@ -76,6 +81,8 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
     email: user.email,
     phone: clean(fields.phone, LIMITS.phone),
     country: clean(fields.country, LIMITS.country),
+    city: clean(fields.city, LIMITS.city),
+    businessType: clean(fields.businessType, LIMITS.businessType),
     note: clean(fields.note, LIMITS.note),
     locale,
   });
@@ -91,7 +98,9 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
     ["Contact", clean(fields.contactName, LIMITS.contactName) || "—"],
     ["Email", user.email],
     ["Telephone", clean(fields.phone, LIMITS.phone) || "—"],
+    ["Business type", clean(fields.businessType, LIMITS.businessType) || "—"],
     ["Country", clean(fields.country, LIMITS.country) || "—"],
+    ["City", clean(fields.city, LIMITS.city) || "—"],
     ["Language", locale.toUpperCase()],
   ];
   const applicantNote = clean(fields.note, LIMITS.note);
@@ -113,7 +122,9 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
       `Contact: ${clean(fields.contactName, LIMITS.contactName) || "—"}`,
       `Email: ${user.email}`,
       `Telephone: ${clean(fields.phone, LIMITS.phone) || "—"}`,
+      `Business type: ${clean(fields.businessType, LIMITS.businessType) || "—"}`,
       `Country: ${clean(fields.country, LIMITS.country) || "—"}`,
+      `City: ${clean(fields.city, LIMITS.city) || "—"}`,
       `Language: ${locale.toUpperCase()}`,
       "",
       clean(fields.note, LIMITS.note),
@@ -124,8 +135,31 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
   });
   if (!mail.ok) console.error("[wholesale] application alert not sent:", mail.error);
 
+  /* THE FORM GOES OUT HERE, and this is the step the whole flow turns on.
+     Registration creates an account that does nothing; the only thing that
+     turns it into a real one is a completed PDF coming back by email. An
+     applicant who never receives the form has no route forward at all, so a
+     failure here is logged loudly — sales can attach it by hand from the
+     alert above, which names the address. */
+  const reply = buildWholesaleRegistrationReply(locale, site);
+  const applicantMail = await sendMail({
+    to: user.email,
+    from: `Tactical HB <${ADMIN_EMAIL}>`,
+    replyTo: SALES_EMAIL,
+    subject: reply.subject,
+    html: reply.html,
+    text: reply.text,
+    attachments: reply.attachments,
+  });
+  if (!applicantMail.ok) {
+    console.error(
+      "[wholesale] APPLICATION FORM NOT SENT to", user.email, "-", applicantMail.error,
+      "— send it by hand; they cannot proceed without it"
+    );
+  }
+
   revalidatePath("/[locale]/admin/partners", "page");
-  return { ok: true };
+  return { ok: true, formSent: applicantMail.ok };
 }
 
 /* ---- Submitting ------------------------------------------------------------- */

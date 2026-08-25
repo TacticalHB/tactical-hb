@@ -70,6 +70,12 @@ export type Partner = {
   hasLogin: boolean;
   /** Free text the applicant wrote. Never mixed into the admin's `notes`. */
   applicationNote: string | null;
+  city: string | null;
+  /** As the applicant chose it, e.g. "Shop / Online Retailer". */
+  businessType: string | null;
+  /** Who last moved account_status, and when — 0032. */
+  statusChangedAt: string | null;
+  statusChangedBy: string | null;
   nextFollowUp: string | null; // YYYY-MM-DD
   notes: string | null;
   createdAt: string;

@@ -134,6 +134,12 @@ export type ApplyInput = {
   email: string;
   phone: string;
   country: string;
+  /* City and business type match what /api/wholesale has always asked an
+     enquiry for. A reviewer opening a trade account wants to know what kind
+     of business it is before anything else, and registration used to arrive
+     without it. */
+  city: string;
+  businessType: string;
   locale: string;
   note: string;
 };
@@ -187,6 +193,8 @@ export async function applyForAccount(input: ApplyInput): Promise<ApplyResult> {
         contact_name: input.contactName || null,
         phone: input.phone || null,
         country: input.country || null,
+        city: input.city || null,
+        business_type: input.businessType || null,
         locale: input.locale,
         application_note: input.note || null,
       })
@@ -206,6 +214,8 @@ export async function applyForAccount(input: ApplyInput): Promise<ApplyResult> {
       email,
       phone: input.phone || null,
       country: input.country || null,
+      city: input.city || null,
+      business_type: input.businessType || null,
       locale: input.locale,
       user_id: input.userId,
       account_status: "pending",
@@ -489,29 +499,58 @@ async function attachItems(
 
 /* ---- Admin writes ------------------------------------------------------------ */
 
-/** Approve, reject or suspend a partner's portal access. Admin-only callers. */
+/**
+ * Approve, reject or suspend a partner's portal access. Admin-only callers.
+ *
+ * Returns the row as it was BEFORE the change plus the locale, because the
+ * caller has to email the partner and would otherwise need a second read to
+ * find out which language to write in — and because "was this already
+ * approved" decides whether an approval is news.
+ */
 export async function setAccountStatus(
   partnerId: string,
   status: AccountStatus,
   actorEmail: string
-): Promise<boolean> {
+): Promise<{ ok: boolean; previous?: AccountStatus; email?: string | null; locale?: string }> {
   const db = createAdminClient();
-  const { error } = await db
+
+  const { data: before } = await db
     .from("wholesale_partners")
-    .update({
-      account_status: status,
-      // Stamped only on approval, and cleared otherwise, so "when were they
-      // let in" survives a later suspension being lifted and re-applied.
-      approved_at: status === "approved" ? new Date().toISOString() : null,
-      approved_by: status === "approved" ? actorEmail : null,
-    })
-    .eq("id", partnerId);
+    .select("account_status, email, locale, approved_at")
+    .eq("id", partnerId)
+    .maybeSingle();
+
+  const now = new Date().toISOString();
+  const patch: Record<string, unknown> = {
+    account_status: status,
+    /* EVERY change is attributable, in either direction. Rejection and
+       suspension are the two decisions that need explaining months later, and
+       neither used to leave a trace. */
+    account_status_changed_at: now,
+    account_status_changed_by: actorEmail,
+  };
+
+  /* approved_at / approved_by are FIRST approval, and are never cleared. They
+     used to be wiped on any non-approved status, which threw away the record
+     that a now-suspended partner had ever been let in — precisely the fact you
+     want when they write asking what happened. */
+  if (status === "approved" && !before?.approved_at) {
+    patch.approved_at = now;
+    patch.approved_by = actorEmail;
+  }
+
+  const { error } = await db.from("wholesale_partners").update(patch).eq("id", partnerId);
 
   if (error) {
     console.error("[wholesale] account status write failed:", error.message);
-    return false;
+    return { ok: false };
   }
-  return true;
+  return {
+    ok: true,
+    previous: isAccountStatus(before?.account_status) ? before.account_status : undefined,
+    email: text(before?.email),
+    locale: String(before?.locale ?? "en"),
+  };
 }
 
 /** Move a request along its ladder. Admin-only callers. */

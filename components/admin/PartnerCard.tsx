@@ -93,6 +93,8 @@ export default function PartnerCard({
     suspend: uk ? "Призупинити" : "Suspend",
     restore: uk ? "Відновити" : "Restore",
     application: uk ? "Заявка партнера" : "Partner's application",
+    registered: uk ? "Зареєстровано" : "Registered",
+    changedBy: uk ? "Змінив" : "Changed by",
     noOrders: uk ? "Ще немає прив'язаних замовлень." : "No linked orders yet.",
     unlink: uk ? "Відв'язати" : "Unlink",
     remove: uk ? "Видалити партнера" : "Delete partner",
@@ -243,7 +245,23 @@ export default function PartnerCard({
             {ADMIN_ACCOUNT_STATUS[p.accountStatus][uk ? "uk" : "en"]}
           </span>
         )}
-        {p.country && <span style={{ color: "var(--console-muted)" }}>{p.country}</span>}
+        {/* Where they are, and when they arrived. A reviewer triaging a
+            pending list sorts on "how long has this been sitting". */}
+        {(p.city || p.country) && (
+          <span style={{ color: "var(--console-muted)" }}>
+            {[p.city, p.country].filter(Boolean).join(", ")}
+          </span>
+        )}
+        {p.businessType && (
+          <span className="text-[12.5px]" style={{ color: "var(--console-muted)" }}>
+            {p.businessType}
+          </span>
+        )}
+        {p.hasLogin && (
+          <span className="tabular-nums text-[12.5px]" style={{ color: "var(--console-faint)" }}>
+            {L.registered} {p.createdAt.slice(0, 10)}
+          </span>
+        )}
         {p.email && (
           <span className="font-mono text-[12px]" style={{ color: "var(--console-muted)" }}>
             {p.email}
@@ -332,6 +350,14 @@ export default function PartnerCard({
                 </span>
               )}
             </div>
+            {/* Attribution for the decision — 0032. Only shown once there
+                has been one, so a fresh application does not display an empty
+                field pretending to be a record. */}
+            {p.statusChangedAt && (
+              <p className="mt-2 text-[12px]" style={{ color: "var(--console-faint)" }}>
+                {L.changedBy} {p.statusChangedBy ?? "—"} · {p.statusChangedAt.slice(0, 10)}
+              </p>
+            )}
             {p.applicationNote && (
               <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--console-border)" }}>
                 <div className="text-[11px] tracking-[0.1em] uppercase mb-1" style={{ color: "var(--console-faint)" }}>

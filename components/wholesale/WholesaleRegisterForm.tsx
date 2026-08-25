@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n-text";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/AuthContext";
 import { applyForWholesaleAccount } from "@/app/actions/wholesale";
 
@@ -31,6 +32,11 @@ const pwRules = (pw: string) => ({
 export default function WholesaleRegisterForm({ locale }: { locale: string }) {
   const { supabase } = useAuth();
   const router = useRouter();
+  /* The business-type labels come from the `wholesale` namespace the enquiry
+     form already uses, rather than being retyped here. Two spellings of
+     "Shisha Lounge / Bar" reaching sales from two forms is how a filter stops
+     matching. */
+  const w = useTranslations("wholesale");
 
   const [step, setStep] = useState<"email" | "details" | "done">("email");
   const [email, setEmail] = useState("");
@@ -39,6 +45,8 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [businessType, setBusinessType] = useState("");
   const [note, setNote] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,6 +74,10 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     contact: t(locale, { en: "Contact name", uk: "Контактна особа", ja: "ご担当者名", ar: "اسم جهة الاتصال" }),
     phone: t(locale, { en: "Telephone", uk: "Телефон", ja: "電話番号", ar: "رقم الهاتف" }),
     country: t(locale, { en: "Country", uk: "Країна", ja: "国", ar: "الدولة" }),
+    city: t(locale, { en: "City", uk: "Місто", ja: "都市", ar: "المدينة" }),
+    businessType: t(locale, { en: "Type of business", uk: "Тип бізнесу", ja: "事業形態", ar: "نوع النشاط" }),
+    choose: t(locale, { en: "Please choose one", uk: "Оберіть варіант", ja: "ひとつお選びください", ar: "اختر واحدًا" }),
+    needType: t(locale, { en: "Please choose your type of business.", uk: "Оберіть тип бізнесу.", ja: "事業形態をお選びください。", ar: "يرجى اختيار نوع نشاطك." }),
     note: t(locale, {
       en: "Tell us about your business (optional)",
       uk: "Розкажіть про ваш бізнес (необов'язково)",
@@ -145,6 +157,7 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     const r = pwRules(password);
     if (!code.trim()) return setError(L.needCode);
     if (!company.trim()) return setError(L.needCompany);
+    if (!businessType) return setError(L.needType);
     if (!(r.len && r.cases && r.num)) return setError(L.weakPw);
 
     setLoading(true);
@@ -172,6 +185,8 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
       contactName: contactName.trim(),
       phone: phone.trim(),
       country: country.trim(),
+      city: city.trim(),
+      businessType,
       note: note.trim(),
       locale,
     });
@@ -345,16 +360,53 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
             </div>
           </div>
 
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div>
+              <label className={label} style={labelStyle} htmlFor="wh-country">
+                {L.country}
+              </label>
+              <input
+                id="wh-country"
+                className="field"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className={label} style={labelStyle} htmlFor="wh-city">
+                {L.city}
+              </label>
+              <input
+                id="wh-city"
+                className="field"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div>
-            <label className={label} style={labelStyle} htmlFor="wh-country">
-              {L.country}
+            <label className={label} style={labelStyle} htmlFor="wh-biz">
+              {L.businessType}
             </label>
-            <input
-              id="wh-country"
+            {/* A select rather than the enquiry form's button row: this form is
+                already long, and the label text is what gets stored either
+                way. The VALUE is the label, so sales reads the same words from
+                both doors — see the note on business_type in 0032. */}
+            <select
+              id="wh-biz"
               className="field"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+              required
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value)}
+            >
+              <option value="">{L.choose}</option>
+              {[w("biz_shop"), w("biz_distribution"), w("biz_lounge")].map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

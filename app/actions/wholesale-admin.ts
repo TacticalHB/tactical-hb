@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { requireAdminActor } from "@/lib/admin-guard";
 import { setAccountStatus, setRequestStatus } from "@/lib/wholesale-portal";
 import { isAccountStatus, isRequestStatus } from "@/lib/wholesale-display";
+import { buildDecisionMail } from "@/lib/wholesale-decision-email";
+import { sendMail } from "@/lib/email";
+import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 
 /* ---------------------------------------------------------------------------
    The two verbs only an admin has.
@@ -33,12 +36,43 @@ export async function setPartnerAccountStatus(
   const id = String(partnerId ?? "").trim();
   if (!id) return { ok: false, error: "not_found" };
 
-  const ok = await setAccountStatus(id, status, actor);
-  if (!ok) return { ok: false, error: "write_failed" };
+  const result = await setAccountStatus(id, status, actor);
+  if (!result.ok) return { ok: false, error: "write_failed" };
 
   // Named so it is greppable: this line is the moment a partner gains or
   // loses dealer pricing, and it should be findable in the logs.
-  console.info(`[wholesale] ${actor} set account_status=${status} for partner ${id}`);
+  console.info(
+    `[wholesale] ${actor} set account_status=${status} (was ${result.previous ?? "unknown"}) for partner ${id}`
+  );
+
+  /* THE PARTNER IS TOLD, because approving unlocks the portal silently. They
+     posted a form days ago and went back to work — without this the flow ends
+     in a door that quietly unlocked and nobody knocked on.
+
+     Only when the status actually CHANGED: re-approving an already-approved
+     partner (a stray double click, a status set back after a suspension that
+     was itself an accident) must not send "congratulations" twice.
+
+     Suspension sends nothing by design — see lib/wholesale-decision-email. */
+  if (result.previous !== status && result.email) {
+    const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
+    const letter = buildDecisionMail(status, result.locale ?? "en", site);
+    if (letter) {
+      const sent = await sendMail({
+        to: result.email,
+        from: `Tactical HB <${ADMIN_EMAIL}>`,
+        replyTo: SALES_EMAIL,
+        subject: letter.subject,
+        html: letter.html,
+        text: letter.text,
+      });
+      // Loud but not fatal: the status change is already saved, and the whole
+      // point of this letter is that nobody is watching the screen.
+      if (!sent.ok) {
+        console.error(`[wholesale] ${status} letter NOT sent to ${result.email} -`, sent.error);
+      }
+    }
+  }
 
   revalidatePath("/[locale]/admin/partners", "page");
   revalidatePath("/[locale]/admin/wholesale", "page");

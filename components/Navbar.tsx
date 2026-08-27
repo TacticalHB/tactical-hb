@@ -100,7 +100,29 @@ export default function Navbar({ locale }: { locale: string }) {
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50"
-        style={{ background: "var(--fog)", borderBottom: "1px solid var(--border-dark)" }}
+        /* THE RIB FIELD, and it is the packaging's, not a texture for its own
+           sake: fine vertical slats in the matt black the pouch is printed on.
+
+           DARK ON DARKER, NOT LIGHT ON DARK. A white-alpha rib would lighten
+           the ground, and .nav-link (#9a978f) already sits at about 4.6:1 here
+           — barely over AA. Lightening the bar would push it under. Darkening
+           it moves the other way, so the ribs make the links slightly EASIER
+           to read than the flat bar did, never harder.
+
+           AMPLITUDE IS THE DIAL. If this ever reads as busy, lower the alpha
+           rather than widening the pitch: wider slats start to look like bars
+           behind the type, which is the failure mode to avoid.
+
+           Static, so there is nothing for prefers-reduced-motion to turn off. */
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(90deg," +
+            " rgba(0,0,0,0.20) 0px," +
+            " rgba(0,0,0,0.00) 5px," +
+            " rgba(0,0,0,0.00) 9px," +
+            " rgba(0,0,0,0.20) 14px), var(--fog)",
+          borderBottom: "1px solid var(--border-dark)",
+        }}
       >
         {/* The TCT mark used to sit pinned to the very left edge here. It was
             removed deliberately — the wordmark alone carries the brand in the
@@ -120,15 +142,38 @@ export default function Navbar({ locale }: { locale: string }) {
             href={`/${locale}`}
             /* flex + h-11 so the home link is a full-height target rather than
                a 28px band of text in the middle of the bar. */
-            className="font-display text-xl md:text-2xl tracking-widest whitespace-nowrap flex items-center gap-[0.3em] h-11 shrink-0"
+            /* THE PACKAGING LOCKUP, not the display face. Bebas is condensed
+               and the printed mark is not — it is a plain sans with the letters
+               opened right out, so this drops font-display and rides the body
+               face at a wider track. Tighter on mobile so it cannot collide
+               with the four icons at 375px, but the same lockup either way. */
+            className="text-[15px] md:text-[17px] font-medium uppercase
+                       tracking-[0.2em] md:tracking-[0.32em]
+                       whitespace-nowrap flex items-center gap-[0.2em] md:gap-[0.32em] h-11 shrink-0"
+            style={{ color: "#f4f3f0" }}
             /* dir="ltr" PINS THE WORDMARK. This is a flex row of two spans,
                so on the Arabic storefront the base direction reversed them and
                the brand read "HB TACTICAL". A logotype is not a sentence — it
                does not translate and it does not mirror, in any script. */
             dir="ltr"
-            style={{ color: "#f4f3f0" }}
           >
-            TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
+            {/* THE GAP IS FLEX `gap`, AND IT HAS TO BE. This is a flex row, so
+                the literal space before the span is stripped by flex layout —
+                its advance measures 0. Two attempts died on that: a spacer
+                element (which made the accessible name "TACTICALHB", one token
+                read aloud and copied as one) and word-spacing (which has
+                nothing left to act on). The real space stays in the markup so
+                textContent is still "TACTICAL HB"; the gap is drawn beside it.
+
+                SIZED AGAINST THE TRACKING, not picked by eye: letter-spacing
+                already leaves a sliver after the L, so a gap of one more
+                letter-space puts HB at about twice the inter-letter distance —
+                a separate unit, which is the lockup, rather than glued to the L.
+
+                HB IS #F48140 — the packaging orange, given exactly. It sits two
+                points off --accent (#FA8246), and that is deliberate here: this
+                mark is matched to a printed lockup, not to the UI accent. */}
+            TACTICAL <span style={{ color: "#F48140" }}>HB</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-9">

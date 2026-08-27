@@ -1096,9 +1096,14 @@ export const products: Product[] = [
 
      THE PICTURE IS MR HB, NOT THE HOOKAH. Derived from the existing poster
      artwork with the MR.HB text and the TCT mark masked out, so the card shows
-     the character and gives away nothing about the product. It sits on the
-     /mr-hb cover ink rather than the photography plate — this is white line on
-     black and cannot be lifted onto cream without becoming a different drawing.
+     the character and gives away nothing about the product.
+
+     INK ON NOTHING, NOT A TILE. The first cut shipped it as a black square and
+     that is what it looked like — a black box floating on the light plate every
+     other card uses. The poster draws Mr HB in white on black, so putting him on
+     a light ground means inverting: what was lit becomes ink, the black ground
+     becomes transparent, and the mark sits directly on the plate like every
+     other product does. PNG rather than WEBP for the alpha channel.
 
      PRICE, WEIGHT AND CARTON ARE ZERO because it has none of them yet, and
      `incoming` is what stops any of those zeros ever being read as a price of
@@ -1125,11 +1130,11 @@ export const products: Product[] = [
     category: "hookah",
     featured: false,
     incoming: true,
-    image: "/images/incoming-hookah.webp",
-    gridImage: "/images/incoming-hookah.webp",
+    image: "/images/incoming-hookah.png",
+    gridImage: "/images/incoming-hookah.png",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],
     pdp: {
-      photos: ["/images/incoming-hookah.webp"],
+      photos: ["/images/incoming-hookah.png"],
       /* NOT the stamp's line repeated — the PDP prints "Release pending" under
          the stamp already, and the same sentence twice on one short page reads
          as a template that nobody finished. */

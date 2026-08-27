@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "@/components/CartContext";
+import Wordmark from "@/components/Wordmark";
 
 /* ---------------------------------------------------------------------------
    Where Monobank returns the customer after payment (redirectUrl).
@@ -46,8 +47,8 @@ export default function CheckoutSuccessClient({ locale }: { locale: string }) {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
       <div className="px-6 md:px-12 lg:px-16 pt-28 pb-16 flex flex-col flex-1">
-        <Link href={`/${locale}`} className="font-display text-xl tracking-widest mb-20" style={{ color: "var(--text)" }}>
-          TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
+        <Link href={`/${locale}`} className="mb-20 self-start">
+          <Wordmark className="text-lg" tone="light" />
         </Link>
 
         <span

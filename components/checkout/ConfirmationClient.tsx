@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { loadOrder, type OrderSnapshot } from "@/lib/checkout";
 import { formatMoney, currencyForLocale, scaleMoney } from "@/lib/currency";
+import Wordmark from "@/components/Wordmark";
 
 /* ---------------------------------------------------------------------------
    Order confirmation.
@@ -94,8 +95,8 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
     <div className="grid lg:grid-cols-[1fr_420px] min-h-screen" style={{ background: "var(--bg)" }}>
       {/* Message */}
       <div className="px-6 md:px-12 lg:px-16 pt-28 pb-16 flex flex-col">
-        <Link href={`/${locale}`} className="font-display text-xl tracking-widest mb-20" style={{ color: "var(--text)" }}>
-          TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
+        <Link href={`/${locale}`} className="mb-20 self-start">
+          <Wordmark className="text-lg" tone="light" />
         </Link>
 
         <h1 className="font-display text-3xl md:text-5xl leading-[1.15] max-w-[620px]" style={{ color: "var(--text)" }}>

@@ -40,7 +40,38 @@ export const WORDMARK_HB = "#F48140";
 /** The off-white the mark is set in on every dark ground the site has. */
 export const WORDMARK_INK = "#f4f3f0";
 
-export default function Wordmark({ className = "" }: { className?: string }) {
+/* ---- Two grounds, two weights of the same orange ---------------------------
+
+   THE LOCKUP IS THE TRACKING, NOT THE COLOUR. Header and footer sit on the dark
+   bar; the checkout chrome sits on cream. Painting the dark tone onto cream
+   would put the off-white at 1.02:1 against the ground — the mark would simply
+   not be there — so the colours switch with the ground while every proportion
+   stays identical.
+
+   AND THE BRIGHT ORANGE CANNOT GO ON CREAM EITHER. #F48140 measures 2.39:1
+   there. That is the house rule this site already had before this component
+   existed: one accent, two weights, bright on dark and deep on light. The deep
+   weight (--accent-ink) reaches 4.00:1 — not a pass at body size, but a real
+   improvement on the 2.31:1 the checkout has been shipping with --accent, and
+   the honest ceiling for an orange on cream. If it ever has to pass outright,
+   the answer is a darker orange token, not a different mark.
+--------------------------------------------------------------------------- */
+type Tone = "dark" | "light";
+
+const TONES: Record<Tone, { ink: string; hb: string }> = {
+  dark: { ink: WORDMARK_INK, hb: WORDMARK_HB },
+  light: { ink: "var(--text)", hb: "var(--accent-ink)" },
+};
+
+export default function Wordmark({
+  className = "",
+  tone = "dark",
+}: {
+  className?: string;
+  /** Which ground it sits on. `light` is the cream checkout chrome. */
+  tone?: Tone;
+}) {
+  const c = TONES[tone];
   return (
     <span
       dir="ltr"
@@ -49,9 +80,9 @@ export default function Wordmark({ className = "" }: { className?: string }) {
         "tracking-[0.2em] md:tracking-[0.32em] gap-[0.2em] md:gap-[0.32em] " +
         className
       }
-      style={{ color: WORDMARK_INK }}
+      style={{ color: c.ink }}
     >
-      TACTICAL <span style={{ color: WORDMARK_HB }}>HB</span>
+      TACTICAL <span style={{ color: c.hb }}>HB</span>
     </span>
   );
 }

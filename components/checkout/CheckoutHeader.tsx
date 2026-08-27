@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { t } from "@/lib/i18n-text";
+import Wordmark from "@/components/Wordmark";
 
 /* ---------------------------------------------------------------------------
    Minimal checkout chrome — logo, secure mark, step progress. No nav, no
@@ -31,8 +32,9 @@ export default function CheckoutHeader({
     <header style={{ borderBottom: "1px solid var(--border)", background: "var(--bg)" }}>
       <div className="page-container">
         <div className="flex items-center justify-between h-[72px]">
-          <Link href={`/${locale}`} dir="ltr" className="font-display text-xl tracking-widest flex items-center gap-[0.3em] h-11 shrink-0" style={{ color: "var(--text)" }}>
-            TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
+          {/* Light tone: this bar is cream, not the shop's dark one. */}
+          <Link href={`/${locale}`} className="flex items-center h-11 shrink-0">
+            <Wordmark className="text-lg" tone="light" />
           </Link>
           <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-muted)" }}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">

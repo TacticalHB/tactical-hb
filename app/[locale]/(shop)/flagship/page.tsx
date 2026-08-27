@@ -146,7 +146,10 @@ function FlagshipFile({ locale }: { locale: string }) {
   /* Three legible rows and seven bars. The ratio is the honest one, not a
      designed one — see the note at the top of this file. */
   const specs: { label: string; value?: string }[] = [
-    { label: t("spec_category"), value: t("spec_category_v") },
+    /* THE CLASSIFICATION IS WITHHELD NOW TOO. It used to read "Hookah —
+       flagship", which named the product on the page built to withhold it. No
+       value means SpecRow renders the bar, same as the other eight. */
+    { label: t("spec_category") },
     { label: t("spec_origin"), value: t("spec_origin_v") },
     { label: t("spec_release"), value: t("spec_release_v") },
     { label: t("spec_material") },
@@ -173,7 +176,25 @@ function FlagshipFile({ locale }: { locale: string }) {
             </span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-7xl mb-6">{t("file_title")}</h1>
+          {/* THE NAME IS THE REDACTION. The headline read "TACTICAL HOOKAH" —
+              the one fact this whole page exists not to give away, set in the
+              largest type on it. The brand word stays and the product noun is
+              blacked out, which is what the rest of the file already does to
+              every figure it cannot state.
+
+              INVERTED AGAINST THE COVER: Redacted() below is built for the
+              paper section — ink on cream — and this band is near-black, so the
+              bar is the cream one here. A dark bar on a dark cover is not a
+              redaction, it is a hole. */}
+          <h1 className="font-display text-5xl md:text-7xl mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span>{t("file_title")}</span>
+            <span
+              className="inline-flex items-center px-3 h-8 md:h-11 text-[11px] md:text-[13px] tracking-[0.28em] uppercase select-none"
+              style={{ background: "#f4f3f0", color: "#0a0b0d" }}
+            >
+              {t("spec_withheld")}
+            </span>
+          </h1>
 
           <p className="text-[15px] md:text-[17px] leading-relaxed max-w-xl" style={{ color: "rgba(255,255,255,0.62)" }}>
             {t("file_standfirst")}

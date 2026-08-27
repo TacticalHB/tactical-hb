@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -57,9 +57,15 @@ export default function SearchOverlay({
     });
   }, [q]);
 
-  /* The add-ons are searchable even though they are deliberately absent from
-     the catalogue — someone hunting for "lid" should find it. Each row lands on
-     the product where the option is chosen; they have no page of their own. */
+  /* What is left here is the timer alone, which is still an option with no page
+     of its own, so its row lands on the wind cover where it is chosen.
+
+     FEAR 9E418 and LID 9E418 are NOT in this list any more. They are catalogue
+     products, so the product search above finds them and sends them to their
+     own pages — and the terms someone would actually type ("rubber", "гумка",
+     "ring", "9e418") are carried in their `tags`, which is what that search
+     reads. A row here would send them to an HMD instead, which is exactly the
+     behaviour these products exist to end. */
   const addonResults = useMemo(() => searchAddons(q), [q]);
 
   const go = (slug: string) => {
@@ -155,7 +161,7 @@ export default function SearchOverlay({
                       <li key={p.slug}>
                         <button onClick={() => go(p.slug)} className="w-full flex items-center gap-4 py-3 text-left hover:opacity-70 transition-opacity">
                           <div className="relative w-12 h-12 shrink-0" style={{ background: "var(--bg-soft)", borderRadius: 6 }}>
-                            <Image src={thumb} alt={name} fill sizes="48px" className="object-contain p-1" />
+                            <ProductThumb src={thumb} name={name} sizes="48px" className="object-contain p-1" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>

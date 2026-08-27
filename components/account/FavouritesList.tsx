@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { t } from "@/lib/i18n-text";
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { products } from "@/lib/products";
 import Price from "@/components/Price";
 import { money } from "@/lib/currency";
@@ -117,7 +117,7 @@ export default function FavouritesList({ locale }: { locale: string }) {
           {items.map((p) => (
             <div key={p.slug} data-fav-item className="rounded-2xl border overflow-hidden group" style={{ borderColor: "var(--border)" }}>
               <Link href={`/${locale}/products/${p.slug}`} className="block relative aspect-square" style={{ background: "#f5f5f5" }}>
-                <Image src={p.gridImage || p.image} alt={uk ? p.nameUk : p.nameEn} fill sizes="(max-width:640px) 100vw, 33vw" className="object-contain p-6" />
+                <ProductThumb src={p.gridImage || p.image} name={uk ? p.nameUk : p.nameEn} sizes="(max-width:640px) 100vw, 33vw" className="object-contain p-6" />
               </Link>
               <div className="p-4">
                 <Link href={`/${locale}/products/${p.slug}`} className="block text-[15px] font-medium hover:opacity-70" style={{ color: "#111" }}>

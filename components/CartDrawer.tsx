@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { pick } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useCart, lineKey, linePrice } from "./CartContext";
@@ -94,7 +94,7 @@ export default function CartDrawer({ locale }: { locale: string }) {
                 >
                   {/* The studio plate — see CartPageClient. */}
                   <div className="relative w-20 h-20 shrink-0" style={{ background: "#f5f5f5" }}>
-                    <Image src={d.image} alt={d.name} fill sizes="80px" className="object-contain p-1.5" />
+                    <ProductThumb src={d.image} name={d.name} sizes="80px" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3">

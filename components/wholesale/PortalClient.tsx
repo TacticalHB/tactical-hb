@@ -492,8 +492,26 @@ export default function PortalClient({
                       style={{ borderTop: i > 0 ? "1px solid var(--border)" : "none" }}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="relative w-16 h-16 shrink-0" style={{ background: "#f5f5f5" }}>
-                          <Image src={p.image} alt={p.name} fill sizes="64px" className="object-contain p-1.5" />
+                        {/* NO PHOTOGRAPH IS A REAL STATE, not a bug to guard
+                            against later. The accessories are sold before they
+                            are shot, and next/image throws on an empty src —
+                            so an unphotographed product would take the whole
+                            portal down rather than render a gap. Same fallback
+                            the retail grid uses: the name on the plate. */}
+                        <div
+                          className="relative w-16 h-16 shrink-0 grid place-items-center overflow-hidden"
+                          style={{ background: "#f5f5f5" }}
+                        >
+                          {p.image ? (
+                            <Image src={p.image} alt={p.name} fill sizes="64px" className="object-contain p-1.5" />
+                          ) : (
+                            <span
+                              className="px-1 text-[8px] leading-tight text-center tracking-[0.12em] uppercase"
+                              style={{ color: "#a8a8ab" }}
+                            >
+                              {p.name}
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           {/* Product names are never translated — same rule as

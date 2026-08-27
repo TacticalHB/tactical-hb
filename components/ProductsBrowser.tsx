@@ -82,26 +82,28 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
     buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
   };
 
-  /* ACCESSORIES ARE NOT PRODUCTS HERE. The category now holds the three add-ons
-     — lid, rubber, timer — which are options on a parent, not things with a SKU
-     of their own (see lib/addons). Nothing in `products` carries the accessory
-     category any more, so the grid below renders add-on cards for this filter
-     and product cards for every other one.
+  /* ACCESSORIES ARE REAL PRODUCTS AND STILL NOT IN ALL PRODUCTS.
 
-     They are also absent from All Products by construction rather than by an
-     exclusion rule: they were never in the product list. Search reaches them
-     through lib/addons separately. */
+     FEAR 9E418 and LID 9E418 carry the accessory category and have their own
+     routes, so this filter renders ordinary product cards for them. The wind
+     cover's timer is still an option with no page, so its card is appended
+     below and still points at the cover.
+
+     THE EXCLUSION FROM "ALL" IS NOW EXPLICIT, and it has to be. It used to be
+     free — nothing in `products` was an accessory, so nothing could leak in.
+     Now that two things are, "all" would sweep them into the main grid unless
+     it says otherwise, which is the rule this shop has always had: accessories
+     are found through this filter, through search, and by their own URL. */
   const showingAddons = cat === "accessory";
 
   const list = useMemo(() => {
-    if (showingAddons) return [];
-    let l = ALL.filter((p) => cat === "all" || p.category === cat);
+    let l = ALL.filter((p) => (cat === "all" ? p.category !== "accessory" : p.category === cat));
     if (bands.length)
       l = l.filter((p) => bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
     if (sort === "price-asc") l = [...l].sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") l = [...l].sort((a, b) => b.price - a.price);
     return l;
-  }, [cat, bands, sort, currency, showingAddons]);
+  }, [cat, bands, sort, currency]);
 
   /* The third wind-cover slot. A real third cover exists but has no name, no
      photograph and no price, so it is shown as a tile rather than invented as a
@@ -112,8 +114,8 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const showIncoming = (cat === "all" || cat === "windcover") && bands.length === 0;
 
   /** What the heading counts. The Incoming tile is not a product and is not
-      counted; the add-on cards are what the Accessories view actually shows. */
-  const shownCount = showingAddons ? ADDONS.length : list.length;
+      counted; on Accessories the real products and the timer card both are. */
+  const shownCount = list.length + (showingAddons ? ADDONS.length : 0);
 
   const toggleBand = (k: string) =>
     setBands((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));

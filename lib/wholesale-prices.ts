@@ -128,7 +128,28 @@ const BOOKS: Record<PartnerType, Book> = {
  * it reaches the price list simply has no trade price yet, and the portal
  * shows "—" against it rather than inventing one or falling back to retail.
  */
+/* ---------------------------------------------------------------------------
+   The two accessories that are sold BOTH ways.
+
+   FEAR 9E418 and LID 9E418 are catalogue products now, so a partner can put
+   them on a request as their own rows — and the trade price of a ring is the
+   trade price of a ring whether it arrives fitted to a device or in its own
+   pouch. These map the product slug onto the add-on figure the book already
+   carries, rather than restating the numbers as product entries.
+
+   That is the whole point: one number per book per part. A second copy would
+   drift the first time one book was repriced, and the partner would be quoted
+   one figure for a fitted ring and another for a loose one on the same order.
+--------------------------------------------------------------------------- */
+const ACCESSORY_AS_ADDON: Record<string, keyof LineAddons> = {
+  "lid-9e418": "lid",
+  "fear-9e418": "rubber",
+};
+
 export function bookPrice(type: PartnerType, slug: string, variant?: string | null): Money | null {
+  const asAddon = ACCESSORY_AS_ADDON[slug];
+  if (asAddon) return BOOKS[type].addons[asAddon];
+
   const book = BOOKS[type].products;
   /* The colour first, the product second. Looked up by the same
      `slug__variant` key stock uses, so one spelling serves both. */

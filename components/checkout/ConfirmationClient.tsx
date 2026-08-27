@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -187,7 +187,7 @@ export default function ConfirmationClient({ locale }: { locale: string }) {
           {order.lines.map((l, i) => (
             <li key={`${l.slug}-${i}`} className="flex gap-4 py-5" style={{ borderTop: "1px solid var(--border)" }}>
               <div className="relative w-[72px] h-[88px] shrink-0" style={{ background: "var(--bg-card)" }}>
-                <Image src={l.image} alt={l.name} fill sizes="72px" className="object-contain p-1.5" />
+                <ProductThumb src={l.image} name={l.name} sizes="72px" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] font-medium leading-snug" style={{ color: "var(--text)" }}>{l.name}</div>

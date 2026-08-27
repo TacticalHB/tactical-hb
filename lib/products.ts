@@ -1,3 +1,5 @@
+import { MATERIAL_PRICE, LID_WEIGHT_G } from "./hmd-options";
+
 export type Variant = {
   name: string;
   swatch: string;
@@ -949,6 +951,121 @@ export const products: Product[] = [
     },
     tags: ["timer", "Type-C", "windcover", "camo"],
   },
+  /* ---- Accessories sold on their own -------------------------------------
+
+     THE LID AND THE RING ARE PRODUCTS NOW, and that is a deliberate reversal.
+     They used to live in lib/addons as browsable-but-not-buyable cards whose
+     only job was to send you to an HMD page, on the reasoning that an option
+     is not a SKU. That reasoning held while they were only ever fitted to a
+     device. It stopped holding the moment they became packaged goods with a QR
+     code printed on the pouch: a code that opens a heat device is a broken
+     shop, and the customer scanning it is holding the thing they scanned.
+
+     THEY REMAIN ADD-ONS AS WELL. Nothing about the HMD selectors changes — a
+     lid can still be ticked while configuring a Classic, at the same price,
+     and that path still records `addon_lid` on the order line. These entries
+     add a second door, they do not replace the first.
+
+     PRICES ARE READ FROM MATERIAL_PRICE, never restated. The add-on chip on an
+     HMD page and the price on this page are the same money by construction, so
+     the two cannot drift the way the printed price list drifted from the book.
+
+     THE TIMER DID NOT GRADUATE. It stays in lib/addons: it is not packaged, has
+     no QR, and nobody asked for it to be sold alone.
+
+     NO PHOTOGRAPHY YET, deliberately. `gridImage` is unset and there is no
+     `pdp.photos`, so the card falls back to the name on the photography plate
+     and the PDP renders its "Photos coming soon" state — both of which already
+     existed. An invented render would be worse than an honest blank.
+  --------------------------------------------------------------------------- */
+  {
+    id: "fear-9e418",
+    slug: "fear-9e418",
+    /* A product name, so it is the same string in every language — the same
+       rule 0029 set when the ring stopped being called a rubber. */
+    nameUk: "FEAR 9E418",
+    nameEn: "FEAR 9E418",
+    taglineUk: "Ущільнювальне кільце для пристроїв нагріву Tactical HB.",
+    taglineEn: "Seal and fitment accessory for Tactical HB heat devices.",
+    taglineJa: "Tactical HB ヒートデバイス用のシーリングリング。",
+    taglineAr: "حلقة إحكام لأجهزة الحرارة من Tactical HB.",
+    descriptionUk:
+      "Ущільнювальне кільце для пристроїв нагріву Tactical HB. Сідає між пристроєм і чашею та тримає посадку рівною. Продається окремо. Те саме кільце можна додати під час налаштування пристрою нагріву.",
+    descriptionEn:
+      "A sealing ring for Tactical HB heat devices. It sits between the device and the bowl and keeps the fit even. Sold separately. The same ring can be added while configuring a heat device.",
+    descriptionJa:
+      "Tactical HB ヒートデバイス用のシーリングリング。デバイスとボウルの間に収まり、装着を安定させます。単品販売。ヒートデバイスの設定時に追加することもできます。",
+    descriptionAr:
+      "حلقة إحكام لأجهزة الحرارة من Tactical HB. توضع بين الجهاز والرأس وتحافظ على ثبات التركيب. تُباع منفصلة. ويمكن إضافة الحلقة نفسها عند تجهيز جهاز الحرارة.",
+    price: MATERIAL_PRICE.rubber.eur,
+    priceUah: MATERIAL_PRICE.rubber.uah,
+    currency: "EUR",
+    /* ESTIMATED, AND ERRING HIGH. The lid's 30 g is on the spec sheet; the
+       ring's weight is not recorded anywhere. Shipping bills the greater of
+       real and volumetric weight, so a figure that is a little heavy costs
+       nothing and a figure that is light under-charges the parcel. Replace it
+       with a scale reading when there is one. */
+    weightG: 15,
+    /* The carton it posts in on its own, not the part. */
+    dims: { l: 130, w: 130, h: 15 },
+    category: "accessory",
+    featured: false,
+    image: "",
+    /* Findable by what the part used to be called, without the old word
+       appearing anywhere on the page. Someone who knows it as a гумка still
+       lands on it — `tags` is what site search reads. */
+    tags: ["accessory", "fear", "9e418", "rubber", "ring", "seal", "гумка", "гумове кільце", "кільце"],
+    pdp: {
+      shortEn:
+        "The sealing ring for Tactical HB heat devices, sold on its own. It seats between the device and the bowl so the two meet evenly, and it is the same ring offered as an option when you configure a heat device.",
+      shortUk:
+        "Ущільнювальне кільце для пристроїв нагріву Tactical HB, окремо. Сідає між пристроєм і чашею, щоб посадка була рівною. Це те саме кільце, яке пропонується як опція під час налаштування пристрою.",
+      shortJa:
+        "Tactical HB ヒートデバイス用のシーリングリングを単品で。デバイスとボウルの間に収まり、両者が均等に噛み合います。ヒートデバイスの設定時に選べるものと同じリングです。",
+      shortAr:
+        "حلقة الإحكام لأجهزة الحرارة من Tactical HB، تُباع منفصلة. تستقر بين الجهاز والرأس ليلتقيا بشكل متساوٍ، وهي الحلقة نفسها المتاحة كخيار عند تجهيز جهاز الحرارة.",
+    },
+  },
+  {
+    id: "lid-9e418",
+    slug: "lid-9e418",
+    nameUk: "LID 9E418",
+    nameEn: "LID 9E418",
+    taglineUk: "Кришка для пристроїв нагріву Tactical HB.",
+    taglineEn: "Lid accessory for Tactical HB heat devices.",
+    taglineJa: "Tactical HB ヒートデバイス用のリッド。",
+    taglineAr: "غطاء لأجهزة الحرارة من Tactical HB.",
+    descriptionUk:
+      "Кришка для пристроїв нагріву Tactical HB. Продається окремо. HMD TCT Classic продається без кришки, якщо її не додано під час замовлення. Ту саму кришку можна додати під час налаштування пристрою нагріву.",
+    descriptionEn:
+      "A lid for Tactical HB heat devices. Sold separately. HMD TCT Classic ships without a lid unless one is added at checkout. The same lid can be added while configuring a heat device.",
+    descriptionJa:
+      "Tactical HB ヒートデバイス用のリッド。単品販売。HMD TCT Classic は、注文時に追加しない限りリッドなしで出荷されます。ヒートデバイスの設定時に同じリッドを追加することもできます。",
+    descriptionAr:
+      "غطاء لأجهزة الحرارة من Tactical HB. يُباع منفصلاً. يُشحن HMD TCT Classic دون غطاء ما لم يُضف عند الطلب. ويمكن إضافة الغطاء نفسه عند تجهيز جهاز الحرارة.",
+    price: MATERIAL_PRICE.lid.eur,
+    priceUah: MATERIAL_PRICE.lid.uah,
+    currency: "EUR",
+    /* The one add-on weight that IS on the spec sheet: an HMD goes from 125 g
+       to 155 g with the lid on. Read from there so the two agree. */
+    weightG: LID_WEIGHT_G,
+    dims: { l: 130, w: 130, h: 25 },
+    category: "accessory",
+    featured: false,
+    image: "",
+    tags: ["accessory", "lid", "9e418", "cap", "cover", "кришка"],
+    pdp: {
+      shortEn:
+        "The lid for Tactical HB heat devices, sold on its own. HMD TCT Classic ships without one unless it is added at checkout, and this is the same lid offered there.",
+      shortUk:
+        "Кришка для пристроїв нагріву Tactical HB, окремо. HMD TCT Classic постачається без кришки, якщо її не додати при оформленні, — і це та сама кришка.",
+      shortJa:
+        "Tactical HB ヒートデバイス用のリッドを単品で。HMD TCT Classic は注文時に追加しない限りリッドなしで出荷されます。そこで選べるものと同じリッドです。",
+      shortAr:
+        "غطاء أجهزة الحرارة من Tactical HB، يُباع منفصلاً. يُشحن HMD TCT Classic دونه ما لم يُضف عند الطلب، وهو الغطاء نفسه المتاح هناك.",
+    },
+  },
+
 ];
 
 const bySlug = (slug: string) => products.find((p) => p.slug === slug)!;

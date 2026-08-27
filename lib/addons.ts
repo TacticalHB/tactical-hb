@@ -1,27 +1,31 @@
-import { MATERIAL_PRICE } from "./hmd-options";
 import { TIMER_PRICE } from "./windcover-options";
 import type { Money } from "./currency";
 
 /* ---------------------------------------------------------------------------
-   The add-ons, as things a customer can BROWSE — the lid, the rubber ring and
-   the wind cover's timer.
+   The add-ons that are ONLY add-ons — which, since the lid and the ring became
+   products, means the wind cover's timer alone.
 
-   THEY ARE NOT PRODUCTS AND MUST NOT BECOME ONE. Each is priced only as part of
-   a parent line (see lib/pricing), has no SKU in the Checkbox cabinet, and no
-   weight or carton of its own. Putting them in `products` would make them
-   orderable on their own, which would invent three SKUs nobody stocks and hand
-   the fiscal integration a receipt line it cannot map.
+   WHAT THIS FILE IS FOR. An option that a customer might search for by name but
+   which has no page of its own: enough to render a card and answer a search,
+   and deliberately not enough to add to a basket. The card sends the customer
+   to the product where the option is actually chosen.
 
-   So they live here instead: enough to render a card and answer a search, and
-   deliberately not enough to add to a basket. Each card sends the customer to
-   the product where the option is actually chosen.
+   WHY THE LID AND THE RING LEFT. They became packaged goods with a QR code on
+   the pouch, and a code that opens a heat device is a broken shop. They are
+   real entries in lib/products now, with their own routes, and they are still
+   selectable as options on an HMD — the second door did not close the first.
+   Anything reaching for them here should reach for the catalogue instead.
+
+   THE TIMER STAYS because none of that is true of it: it is not packaged, it
+   carries no code, and nobody has asked to sell it alone. If that changes it
+   should graduate the same way, not be special-cased here.
 
    Prices are READ from the pricing modules rather than restated, so a card can
    never quote a figure the cart disagrees with.
 --------------------------------------------------------------------------- */
 
 export type Addon = {
-  key: "lid" | "rubber" | "timer";
+  key: "timer";
   nameEn: string;
   nameUk: string;
   /** Extra search terms. Never rendered — see the rubber entry. */
@@ -37,34 +41,6 @@ export type Addon = {
 };
 
 export const ADDONS: Addon[] = [
-  {
-    key: "lid",
-    nameEn: "Lid",
-    nameUk: "Кришка",
-    taglineEn: "Heat device lid.",
-    taglineUk: "Кришка для пристрою нагріву.",
-    price: MATERIAL_PRICE.lid,
-    parentSlug: "hmd-tct-op",
-    parentEn: "Choose it on any heat device",
-    parentUk: "Обирається на сторінці пристрою",
-  },
-  {
-    key: "rubber",
-    /* A name, so it is the same string in both languages and is not
-       translated. The key stays `rubber` because orders and stock are keyed
-       on it. */
-    nameEn: "FEAR 9E418",
-    nameUk: "FEAR 9E418",
-    taglineEn: "Heat device sealing ring.",
-    taglineUk: "Ущільнювальне кільце.",
-    /* Searchable by what it used to be called, without saying so anywhere on
-       the card. Someone who knows the part as a гумка still finds it. */
-    aliases: ["rubber", "гумка", "гумове кільце", "ring", "9e418"],
-    price: MATERIAL_PRICE.rubber,
-    parentSlug: "hmd-tct-op",
-    parentEn: "Choose it on any heat device",
-    parentUk: "Обирається на сторінці пристрою",
-  },
   {
     key: "timer",
     nameEn: "Timer",

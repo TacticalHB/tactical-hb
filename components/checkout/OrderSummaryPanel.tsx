@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { pick, t } from "@/lib/i18n-text";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
@@ -94,7 +94,7 @@ export default function OrderSummaryPanel({
             <li key={lineKey(l.slug, l.options)} className="flex gap-4">
               {/* The studio plate — see CartPageClient. */}
               <div className="relative w-14 h-14 shrink-0" style={{ background: "#f5f5f5" }}>
-                <Image src={d.image} alt={d.name} fill sizes="56px" className="object-contain p-1" />
+                <ProductThumb src={d.image} name={d.name} sizes="56px" className="object-contain p-1" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-medium leading-snug" style={{ color: "var(--text)" }}>{d.name}</div>

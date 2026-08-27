@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { pick } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useCart, linePrice } from "./CartContext";
@@ -48,7 +48,7 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
               /* The studio plate — see CartPageClient. */
               style={{ background: "#f5f5f5" }}
             >
-              <Image src={d.image} alt={d.name} fill sizes="104px" className="object-contain p-2" />
+              <ProductThumb src={d.image} name={d.name} sizes="104px" className="object-contain p-2" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-[15px] font-medium leading-snug" style={{ color: "var(--text)" }}>

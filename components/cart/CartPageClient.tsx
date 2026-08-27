@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductThumb from "@/components/ProductThumb";
 import { pick, t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -149,10 +149,9 @@ export default function CartPageClient({
                      is behind it and looks right on either. */
                   style={{ background: "#f5f5f5" }}
                 >
-                  <Image
+                  <ProductThumb
                     src={d.image}
-                    alt={d.name}
-                    fill
+                    name={d.name}
                     sizes="(max-width: 640px) 100vw, 168px"
                     className="object-contain p-3"
                   />

@@ -445,7 +445,14 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           {/* Info column */}
           <div className="w-full lg:w-[380px] shrink-0">
             <h1 className="text-2xl font-medium leading-tight">{name}</h1>
-            <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
+            {/* NOT ON A WITHHELD LISTING. The category is the last fact the
+                page was still volunteering, and naming it is the one thing the
+                page exists not to do — the stamp under it says everything the
+                file is willing to say. Kept for every other product, where it
+                is orientation rather than a disclosure. */}
+            {!product.incoming && (
+              <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
+            )}
             {/* Single currency here — the headline price reads cleaner on the
                 detail page. Currency follows the language (УКР → ₴, ENG → €).
                 Listing/cart/search still show both side by side.

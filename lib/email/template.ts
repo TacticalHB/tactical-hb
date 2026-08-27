@@ -12,6 +12,7 @@ import {
   MUTED,
   WORDMARK_TYPE,
   WORDMARK_HTML,
+  FONT_LINK,
 } from "@/lib/email-theme";
 
 /* ---------------------------------------------------------------------------
@@ -192,6 +193,7 @@ export function renderEmail(i: EmailTemplateInput): string {
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
 <title>${esc(i.headline)} | Tactical HB</title>
+${FONT_LINK}
 <style>
 html,body{margin:0!important;padding:0!important}
 img{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic}

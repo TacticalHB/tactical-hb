@@ -87,6 +87,35 @@ export const uah = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
    Short of AA at body size, and the honest ceiling for an orange on cream;
    the site's light-ground chrome sits at the same 4.00:1 for the same reason.
 --------------------------------------------------------------------------- */
+/* ---- The webfont, and exactly what it can and cannot do -------------------
+
+   WHO ACTUALLY GETS IT: Apple Mail and iOS Mail, plus Samsung Mail — WebKit
+   clients that honour a stylesheet link. That is a large share of opens and the
+   reason this is here at all. Gmail and Outlook.com strip the link outright and
+   render the Helvetica/Arial fallback, which is the closest ubiquitous match to
+   Inter and what every one of these letters looked like before today. Nobody
+   gets a broken mark; some readers get the exact one.
+
+   HIDDEN FROM OUTLOOK ON PURPOSE. The conditional wrapper means the Word engine
+   never sees the link. Left visible it can fail to resolve the face and fall
+   through to Times New Roman — a serif, in a mark that is the brand — which is
+   far worse than the Arial it falls back to cleanly when the link is not there.
+
+   ONE VARIABLE FILE, NOT FIVE STATICS. These letters use 400 through 800, and
+   the range asks css2 for a single variable font rather than five separate
+   downloads. `display=swap` means the text is readable in the fallback while it
+   loads and never invisible.
+
+   IT IS A REMOTE REQUEST ON OPEN, and that is a real cost, not a footnote: it
+   tells Google's CDN that this address opened this mail, roughly when. Mario
+   asked for it knowing that. If it should ever come out, deleting this constant
+   and its two uses restores exactly the previous behaviour.
+--------------------------------------------------------------------------- */
+export const FONT_LINK =
+  `<!--[if !mso]><!-->` +
+  `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap">` +
+  `<!--<![endif]-->`;
+
 export const WORDMARK_TYPE =
   `font-family:${FONT};font-size:14px;font-weight:500;letter-spacing:4.5px;color:#1B1B16`;
 
@@ -140,7 +169,8 @@ export function emailShell(opts: { lang: string; title: string; inner: string })
   return `<!doctype html>
 <html lang="${opts.lang}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${opts.title}</title></head>
+<title>${opts.title}</title>
+${FONT_LINK}</head>
 <body style="margin:0;padding:0;background:${BG}">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${BG}">
     <tr><td align="center" style="padding:36px 16px 48px">

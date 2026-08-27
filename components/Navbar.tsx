@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Wordmark from "@/components/Wordmark";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -142,38 +143,12 @@ export default function Navbar({ locale }: { locale: string }) {
             href={`/${locale}`}
             /* flex + h-11 so the home link is a full-height target rather than
                a 28px band of text in the middle of the bar. */
-            /* THE PACKAGING LOCKUP, not the display face. Bebas is condensed
-               and the printed mark is not — it is a plain sans with the letters
-               opened right out, so this drops font-display and rides the body
-               face at a wider track. Tighter on mobile so it cannot collide
-               with the four icons at 375px, but the same lockup either way. */
-            className="text-[15px] md:text-[17px] font-medium uppercase
-                       tracking-[0.2em] md:tracking-[0.32em]
-                       whitespace-nowrap flex items-center gap-[0.2em] md:gap-[0.32em] h-11 shrink-0"
-            style={{ color: "#f4f3f0" }}
-            /* dir="ltr" PINS THE WORDMARK. This is a flex row of two spans,
-               so on the Arabic storefront the base direction reversed them and
-               the brand read "HB TACTICAL". A logotype is not a sentence — it
-               does not translate and it does not mirror, in any script. */
-            dir="ltr"
+            /* Sizing only — the lockup itself lives in components/Wordmark,
+               shared with the footer so the two cannot drift apart again. */
+            className="flex items-center h-11 shrink-0"
+            /* dir="ltr" travels with the mark now, inside Wordmark. */
           >
-            {/* THE GAP IS FLEX `gap`, AND IT HAS TO BE. This is a flex row, so
-                the literal space before the span is stripped by flex layout —
-                its advance measures 0. Two attempts died on that: a spacer
-                element (which made the accessible name "TACTICALHB", one token
-                read aloud and copied as one) and word-spacing (which has
-                nothing left to act on). The real space stays in the markup so
-                textContent is still "TACTICAL HB"; the gap is drawn beside it.
-
-                SIZED AGAINST THE TRACKING, not picked by eye: letter-spacing
-                already leaves a sliver after the L, so a gap of one more
-                letter-space puts HB at about twice the inter-letter distance —
-                a separate unit, which is the lockup, rather than glued to the L.
-
-                HB IS #F48140 — the packaging orange, given exactly. It sits two
-                points off --accent (#FA8246), and that is deliberate here: this
-                mark is matched to a printed lockup, not to the UI accent. */}
-            TACTICAL <span style={{ color: "#F48140" }}>HB</span>
+            <Wordmark className="text-[15px] md:text-[17px]" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-9">

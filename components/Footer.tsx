@@ -8,6 +8,7 @@ import NewsletterPromo from "./NewsletterPromo";
 import PaymentMethods from "./PaymentMethods";
 import SocialLinks from "./SocialLinks";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
+import Wordmark from "@/components/Wordmark";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -20,9 +21,10 @@ export default function Footer() {
   return (
     <footer style={{ background: "var(--fog)" }}>
       <div className="page-container py-16 flex flex-col items-center text-center gap-8">
-        <div dir="ltr" className="font-display text-3xl tracking-widest" style={{ color: "#f4f3f0" }}>
-          TACTICAL <span style={{ color: "var(--accent)" }}>HB</span>
-        </div>
+        {/* The same lockup the bar carries, at footer size. It used to be the
+            condensed display face with the UI accent, which put two different
+            marks on one dark ground a few screens apart. */}
+        <Wordmark className="text-2xl sm:text-3xl" />
 
         {/* Social — ONE cluster, label above the marks.
 

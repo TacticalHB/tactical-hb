@@ -7,6 +7,7 @@ regenerate them, so the encoded URL always matches the catalogue.
 |---|---|---|---|
 | `qr-fear-9e418.png` / `.svg` | https://tactical-hb.com/en/products/fear-9e418 | 6 | 980x980 px |
 | `qr-lid-9e418.png` / `.svg` | https://tactical-hb.com/en/products/lid-9e418 | 6 | 980x980 px |
+| `qr-incoming-hookah.png` / `.svg` | https://tactical-hb.com/en/products/incoming-hookah | 6 | 980x980 px |
 
 ## For the printer
 

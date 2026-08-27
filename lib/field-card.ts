@@ -73,6 +73,9 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
   hmd: ["bowl", "windcover"],
   windcover: ["hmd", "bowl"],
   accessory: [],
+  /* Nothing is claimed to pair with it. What it fits is part of the withheld
+     file, and a compatibility note would be the first invented fact. */
+  hookah: [],
 };
 
 const CATEGORY_NAME: Record<Product["category"], Text> = {
@@ -80,9 +83,17 @@ const CATEGORY_NAME: Record<Product["category"], Text> = {
   hmd: { en: "heat devices", uk: "пристрої нагріву", ja: "ヒートデバイス", ar: "أجهزة الحرارة" },
   windcover: { en: "wind covers", uk: "ковпаки", ja: "ウインドカバー", ar: "أغطية الرياح" },
   accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー", ar: "الإكسسوارات" },
+  hookah: { en: "hookahs", uk: "кальяни", ja: "シーシャ", ar: "الشيشة" },
 };
 
 export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {
+  /* A WITHHELD LISTING HAS NO CARD. Its weight and carton are zero because
+     nobody has measured them, and this table would print "0 g" and
+     "0 x 0 x 0 mm" — two invented facts, stated with the authority of a spec
+     sheet, on the one page whose whole job is to say the file is closed.
+     Nothing is the honest row count here. */
+  if (product.incoming) return [];
+
   const rows: FieldRow[] = [];
   const g = t(locale, { uk: "г", en: "g", ja: "g", ar: "غ" });
 

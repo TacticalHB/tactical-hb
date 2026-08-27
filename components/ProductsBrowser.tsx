@@ -98,10 +98,17 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
 
   const list = useMemo(() => {
     let l = ALL.filter((p) => (cat === "all" ? p.category !== "accessory" : p.category === cat));
+    /* A withheld listing has no price, so it matches no band — the same call
+       the Incoming tile already makes. Filtering by price is asking about
+       money, and it has none to answer with. */
     if (bands.length)
-      l = l.filter((p) => bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
-    if (sort === "price-asc") l = [...l].sort((a, b) => a.price - b.price);
-    else if (sort === "price-desc") l = [...l].sort((a, b) => b.price - a.price);
+      l = l.filter((p) => !p.incoming && bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
+    /* And it sorts to the end either way rather than leading "low to high" on
+       a zero it does not really have. */
+    const byPrice = (dir: 1 | -1) => (a: Product, b: Product) =>
+      a.incoming || b.incoming ? Number(!!a.incoming) - Number(!!b.incoming) : (a.price - b.price) * dir;
+    if (sort === "price-asc") l = [...l].sort(byPrice(1));
+    else if (sort === "price-desc") l = [...l].sort(byPrice(-1));
     return l;
   }, [cat, bands, sort, currency]);
 

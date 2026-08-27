@@ -79,6 +79,14 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
     // Unknown slug: drop the line rather than price it at zero.
     if (!product) continue;
 
+    /* A WITHHELD LISTING IS NOT BUYABLE, AND THIS IS WHERE THAT IS TRUE. The
+       PDP renders no button for it, but the button was never the gate: every
+       amount this shop charges comes through here, so dropping the line here
+       is what makes a hand-made request for it come to nothing. Its price is
+       zero because it has no price yet, and a zero that reached a basket would
+       be a free order rather than a refused one. */
+    if (product.incoming) continue;
+
     const qty = Math.floor(Number(l.qty));
     if (!Number.isFinite(qty) || qty < 1) continue;
     const safeQty = Math.min(qty, MAX_QTY);

@@ -333,7 +333,12 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
       ? t(locale, { uk: "Пристрій для нагріву", en: "Heat Management Device", ja: "ヒートマネジメントデバイス", ar: "جهاز إدارة الحرارة" })
       : product.category === "bowl"
         ? t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" })
-        : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
+        : product.category === "hookah"
+          /* The category is a true thing to say and not a name — without it the
+             fallback below labelled the withheld listing "Accessory", which is
+             both wrong and the sort of small lie that makes a page look unread. */
+          ? t(locale, { uk: "Кальян", en: "Hookah", ja: "シーシャ", ar: "شيشة" })
+          : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
 
   const L = {
     addToBag: t(locale, { uk: "Додати в кошик", en: "Add to Shopping Bag", ja: "バッグに追加", ar: "أضف إلى الحقيبة" }),
@@ -443,10 +448,37 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
             {/* Single currency here — the headline price reads cleaner on the
                 detail page. Currency follows the language (УКР → ₴, ENG → €).
-                Listing/cart/search still show both side by side. */}
-            <p className="text-lg font-medium mt-4">
-              <Price money={price} locale={locale} />
-            </p>
+                Listing/cart/search still show both side by side.
+
+                A WITHHELD LISTING GETS THE STAMP INSTEAD. Not a price of zero
+                and not an empty gap: the slot every other product fills with a
+                figure is what tells a reader the page is finished, so it is
+                filled with the one true thing there is to say. The stamp is the
+                same string in every locale — it is a stamp, not a sentence —
+                and only the line under it translates. */}
+            {product.incoming ? (
+              <div className="mt-5">
+                <span
+                  dir="ltr"
+                  className="inline-block text-[12px] font-medium uppercase tracking-[0.26em] px-3 py-1.5"
+                  style={{ color: "#111", border: "1px solid #111" }}
+                >
+                  TOP SECRET
+                </span>
+                <p className="text-[15px] mt-3" style={{ color: "#707072" }}>
+                  {t(locale, {
+                    en: "Release pending.",
+                    uk: "Очікує оголошення.",
+                    ja: "公開待ち。",
+                    ar: "في انتظار الإعلان.",
+                  })}
+                </p>
+              </div>
+            ) : (
+              <p className="text-lg font-medium mt-4">
+                <Price money={price} locale={locale} />
+              </p>
+            )}
 
             {/* Colour variants — swatch selector (Black / Purple …) */}
             {variants && (
@@ -497,7 +529,11 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               </div>
             )}
 
-            {/* Buttons */}
+            {/* Buttons. A withheld listing has none: no bag, and no favourite
+                either — a saved item that can never be bought is a promise the
+                shop cannot keep. lib/pricing refuses the line regardless; this
+                is only what the reader sees. */}
+            {!product.incoming && (
             <div className="flex flex-col gap-3 mt-8">
               {/* The slide-over replaces the fly-to-cart animation here (passing
                   null as the source). */}
@@ -531,6 +567,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 </svg>
               </button>
             </div>
+            )}
 
             {/* Short description + meta */}
             <p className="text-[15px] leading-relaxed mt-9" style={{ color: "#111" }}>{shortDesc}</p>
@@ -550,7 +587,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 lib/field-card from the same catalogue entry the shop prices
                 and ships from, and the weight follows the selector because
                 that is the weight the courier is quoted on. */}
-            <dl className="mt-6 pt-5 flex flex-col gap-2 text-[15px]" style={{ borderTop: "1px solid #efefef" }}>
+            {/* Guarded, not just emptied: the rule carries a top border and its
+                own spacing, so zero rows would leave a stray hairline with a
+                gap under it — which reads as a section that failed to load. */}
+            <dl
+              className="mt-6 pt-5 flex-col gap-2 text-[15px]"
+              style={{ borderTop: "1px solid #efefef", display: fieldRows.length ? "flex" : "none" }}
+            >
               {fieldRows.map((row) => (
                 <div key={row.key} className="flex justify-between gap-4">
                   <dt

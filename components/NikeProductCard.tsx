@@ -33,7 +33,14 @@ export default function NikeProductCard({ product, locale }: { product: Product;
 
   return (
     <div onMouseLeave={() => setIdx(0)} className="relative">
-      {/* Heart — sits above the image link so it toggles instead of navigating */}
+      {/* Heart — sits above the image link so it toggles instead of navigating.
+
+          NOT ON A WITHHELD LISTING. The PDP already drops it, and leaving it on
+          the card would let one be saved from the grid into a favourites list
+          that renders every row's price — printing "€0.00" against a product
+          that has no price rather than no product at all. Saving a thing that
+          cannot be bought is a promise the shop cannot keep either way. */}
+      {!product.incoming && (
       <HeartButton
         productId={product.slug}
         /* 44px, up from 36. It sits over the photograph in the corner of the
@@ -43,6 +50,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
         className="absolute top-1.5 right-1.5 z-10 w-11 h-11 rounded-full backdrop-blur-sm"
         label={`Favourite ${name}`}
       />
+      )}
       {/* Image */}
       <Link href={href} className="block group">
         <div className="relative aspect-square overflow-hidden rounded-[20px]" style={{ background: "#f5f5f5" }}>
@@ -110,8 +118,18 @@ export default function NikeProductCard({ product, locale }: { product: Product;
               {subtitle}
             </div>
           )}
+          {/* A WITHHELD LISTING HAS NO PRICE, and printing its zero would read
+              as free. The status line takes the slot instead, so the card still
+              has something in the place every other card has a figure — an
+              empty row is what makes a grid look broken. */}
           <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
-            <Price money={price} locale={locale} />
+            {product.incoming ? (
+              <span className="text-[13px] tracking-[0.18em] uppercase" style={{ color: "#8a8a8d" }}>
+                {t(locale, { uk: "Очікується", en: "Incoming", ja: "近日公開", ar: "قريبًا" })}
+              </span>
+            ) : (
+              <Price money={price} locale={locale} />
+            )}
           </div>
         </Link>
       </div>

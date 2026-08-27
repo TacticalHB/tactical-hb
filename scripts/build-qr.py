@@ -55,6 +55,10 @@ LOCALE = os.environ.get("QR_LOCALE", "en")
 TARGETS = [
     ("fear-9e418", "qr-fear-9e418"),
     ("lid-9e418", "qr-lid-9e418"),
+    # The hookah's listing. It has no product in it yet and that is fine — the
+    # code is for the pouch and the eventual instructions, and what it needs is
+    # an address that will not move. The slug is fixed; the page can fill in.
+    ("incoming-hookah", "qr-incoming-hookah"),
 ]
 
 

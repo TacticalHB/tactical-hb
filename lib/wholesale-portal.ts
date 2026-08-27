@@ -85,7 +85,12 @@ export function lineSku(slug: string, variant?: string | null): string {
 /** Everything a partner may put on a request. Retail-only SKUs would be
     excluded here; today the whole catalogue is sellable to trade. */
 export function wholesaleCatalogue(): Product[] {
-  return products;
+  /* A withheld listing is not orderable by a partner either. It has no trade
+     price because it has no price at all, so it would render as a quantity row
+     against "quote on request" — inviting a partner to order a thing that does
+     not exist yet. Retail refuses it in lib/pricing; this is the same refusal
+     on the trade side. */
+  return products.filter((p) => !p.incoming);
 }
 
 /* ---- Add-ons ---------------------------------------------------------------

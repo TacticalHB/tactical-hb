@@ -75,7 +75,7 @@ export type Product = {
   /** Packed carton size in millimetres. Used both on the page and to keep the
       Nova Poshta volumetric weight honest. */
   dims: { l: number; w: number; h: number };
-  category: "hmd" | "bowl" | "accessory" | "windcover";
+  category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah";
   featured: boolean;
   image: string;
   photos?: string[];
@@ -126,6 +126,20 @@ export type Product = {
     features?: { icon: "flame" | "clock" | "hands" | "wave" | "cloud" | "user" | "droplet" | "mesh" | "layers" | "shield" | "sparkle"; titleEn: string; titleUk: string; titleJa?: string; titleAr?: string; textEn: string; textUk: string; textJa?: string; textAr?: string }[];
   };
   tags: string[];
+  /**
+   * A listing that exists to be a URL, not a purchase.
+   *
+   * WHAT IT TURNS OFF, and every one of these is somewhere a caller would
+   * otherwise happily sell it: priceCart drops the line so the server refuses
+   * it however the request was made, the PDP renders no buy controls and no
+   * option selectors, the card prints its status line where a price would go,
+   * the price-band filter skips it, and the wholesale portal does not list it.
+   *
+   * HIDING THE BUTTON IS NOT THE GATE — lib/pricing is. This flag is read
+   * there first and everywhere else second, the same way shipping-locale is
+   * enforced on the server and merely reflected in the UI.
+   */
+  incoming?: true;
 };
 
 export const products: Product[] = [
@@ -1063,6 +1077,66 @@ export const products: Product[] = [
         "Tactical HB ヒートデバイス用のリッドを単品で。HMD TCT Classic は注文時に追加しない限りリッドなしで出荷されます。そこで選べるものと同じリッドです。",
       shortAr:
         "غطاء أجهزة الحرارة من Tactical HB، يُباع منفصلاً. يُشحن HMD TCT Classic دونه ما لم يُضف عند الطلب، وهو الغطاء نفسه المتاح هناك.",
+    },
+  },
+
+  /* ---- The hookah, withheld ------------------------------------------------
+
+     A LISTING WITH NO PRODUCT IN IT, and that is the point. Packaging, a QR on
+     an insert and the eventual instructions all need one address that will not
+     move, and they need it before there is anything to photograph. So the slug
+     is fixed now — `incoming-hookah`, never renamed — and the page says plainly
+     that the file is closed rather than 404ing or, worse, bouncing to a device
+     that is not the thing on the pouch.
+
+     NO NAME IS PUBLISHED. `TOP SECRET` is a stamp, not a product name: it is
+     the same string in every locale for the same reason the wordmark is, and
+     only the line under it translates. Naming it "Mr HB Hookah" here would
+     invent the one fact this page exists to withhold.
+
+     THE PICTURE IS MR HB, NOT THE HOOKAH. Derived from the existing poster
+     artwork with the MR.HB text and the TCT mark masked out, so the card shows
+     the character and gives away nothing about the product. It sits on the
+     /mr-hb cover ink rather than the photography plate — this is white line on
+     black and cannot be lifted onto cream without becoming a different drawing.
+
+     PRICE, WEIGHT AND CARTON ARE ZERO because it has none of them yet, and
+     `incoming` is what stops any of those zeros ever being read as a price of
+     nothing or a parcel of nothing. See the flag's note on the type above.
+  --------------------------------------------------------------------------- */
+  {
+    id: "incoming-hookah",
+    slug: "incoming-hookah",
+    nameUk: "TOP SECRET",
+    nameEn: "TOP SECRET",
+    taglineUk: "Досьє закрито.",
+    taglineEn: "File withheld.",
+    taglineJa: "資料は非公開。",
+    taglineAr: "الملف محجوب.",
+    descriptionUk: "Матеріали цього виробу закриті до оголошення.",
+    descriptionEn: "The file on this piece is closed until release.",
+    descriptionJa: "この製品の資料は公開時まで非公開です。",
+    descriptionAr: "ملف هذه القطعة مغلق حتى الإعلان.",
+    price: 0,
+    priceUah: 0,
+    currency: "EUR",
+    weightG: 0,
+    dims: { l: 0, w: 0, h: 0 },
+    category: "hookah",
+    featured: false,
+    incoming: true,
+    image: "/images/incoming-hookah.webp",
+    gridImage: "/images/incoming-hookah.webp",
+    tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],
+    pdp: {
+      photos: ["/images/incoming-hookah.webp"],
+      /* NOT the stamp's line repeated — the PDP prints "Release pending" under
+         the stamp already, and the same sentence twice on one short page reads
+         as a template that nobody finished. */
+      shortEn: "The file on this piece is closed until release.",
+      shortUk: "Матеріали цього виробу закриті до оголошення.",
+      shortJa: "この製品の資料は公開時まで非公開です。",
+      shortAr: "ملف هذه القطعة مغلق حتى الإعلان.",
     },
   },
 

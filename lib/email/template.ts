@@ -10,6 +10,8 @@ import {
   LINE,
   MARK_URL,
   MUTED,
+  WORDMARK_TYPE,
+  WORDMARK_HTML,
 } from "@/lib/email-theme";
 
 /* ---------------------------------------------------------------------------
@@ -218,7 +220,10 @@ a{color:#3A3D40}
 <!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="wrap" width="600" style="width:600px;max-width:600px;border-collapse:collapse;background-color:${GROUND};">
     <tr><td class="px" style="padding:34px 24px 0;text-align:center;"><img src="${MARK_URL}" width="36" height="36" alt="TCT" style="display:inline-block;vertical-align:middle;"></td></tr>
-    <tr><td class="px" style="padding:12px 24px 26px;text-align:center;font-family:${SANS};font-size:14px;font-weight:700;letter-spacing:10px;color:#1B1B16;mso-line-height-rule:exactly;">TACTICAL <span style="color:${ACCENT};">HB</span></td></tr>
+    <!-- The lockup comes from email-theme so this shell and the transactional
+         one cannot carry two versions of it. Only the cell's padding and the
+         mso line-height rule belong to this template. -->
+    <tr><td class="px" style="padding:12px 24px 26px;text-align:center;${WORDMARK_TYPE};mso-line-height-rule:exactly;">${WORDMARK_HTML}</td></tr>
     <tr><td class="px" style="padding:0 24px;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#FFFFFF;border-radius:20px 20px 0 0;">
         <tr><td class="cardpad h1" style="padding:46px 44px 14px;text-align:center;font-family:${SANS};font-size:34px;line-height:40px;font-weight:800;letter-spacing:-.01em;color:${INK};mso-line-height-rule:exactly;">${esc(i.headline)}</td></tr>

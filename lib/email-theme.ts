@@ -47,7 +47,13 @@ export const ACCENT = "#C45A1A";
 export const ACCENT_FILL = "#FA8246";
 export const ACCENT_TEXT = "#111114";
 
-export const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+/* Inter first, because it is the site's face and the mark is now set in it.
+   NO WEBFONT IS LOADED, deliberately: Gmail and Outlook strip <link> anyway,
+   and a Google Fonts request on open is a remote call that reports the open.
+   So this renders in Inter where the reader already has it and falls back to
+   the same Helvetica/Arial as before everywhere else — which is the closest
+   ubiquitous match to Inter, and exactly what this stack was already doing. */
+export const FONT = "Inter,'Helvetica Neue',Helvetica,Arial,sans-serif";
 
 /** The hosted mark. A PNG, not the SVG: Gmail and Outlook refuse SVG outright. */
 export const MARK_URL = `${SITE}/email/tct-mark.png`;
@@ -61,15 +67,39 @@ export const uah = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
     allows them, so the wordmark underneath is TEXT and carries the brand on
     its own. The alt is "TCT" for the same reason: a blocked image should read
     as the mark's name, not as a broken tile. */
+/* ---- The lockup, matched to the site -------------------------------------
+
+   TWO SHELLS, ONE MARK. The transactional shell below and the marketing shell
+   in lib/email/template each used to spell this out, identically, and that is
+   how the palette drifted the last time. They now share these two constants,
+   so the mark can only be changed for both at once.
+
+   IT IS THE SITE'S LOCKUP AT EMAIL SCALE: the body face, medium rather than
+   bold, and the letters tracked at the same 0.32em the header and footer use
+   (4.5px at 14px). It used to be bold at 10px — 0.71em — which read as a
+   different, wider mark than the one on the site it links to.
+
+   HB IS THE DEEP ORANGE, AND THAT IS A FIX. This mark sits on the cream
+   ground, not on the white card, and it was set in ACCENT_FILL: the bright
+   tone measures 2.23:1 there. The rule at the top of this file already said
+   so — the bright tone is for blocks of fill, the deep tone is ink on light —
+   and the wordmark was the one place breaking it. ACCENT reaches 3.86:1.
+   Short of AA at body size, and the honest ceiling for an orange on cream;
+   the site's light-ground chrome sits at the same 4.00:1 for the same reason.
+--------------------------------------------------------------------------- */
+export const WORDMARK_TYPE =
+  `font-family:${FONT};font-size:14px;font-weight:500;letter-spacing:4.5px;color:#1B1B16`;
+
+/** The mark itself. `TACTICAL` inherits the colour; only HB is set. */
+export const WORDMARK_HTML = `TACTICAL <span style="color:${ACCENT}">HB</span>`;
+
 export const wordmarkRow = `
         <!-- Wordmark -->
         <tr><td align="center" style="padding-bottom:6px">
           <img src="${MARK_URL}" width="36" height="36" alt="TCT" style="display:inline-block;vertical-align:middle">
         </td></tr>
         <tr><td align="center" style="padding:12px 0 28px">
-          <span style="font-family:${FONT};font-size:14px;font-weight:700;letter-spacing:10px;color:#1B1B16">
-            TACTICAL <span style="color:${ACCENT_FILL}">HB</span>
-          </span>
+          <span style="${WORDMARK_TYPE}">${WORDMARK_HTML}</span>
         </td></tr>`;
 
 /** The small mark, site link and social row that closes every email.

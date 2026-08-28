@@ -178,7 +178,13 @@ function senderClientType(): string {
    old one is harmless, being just a directory entry rather than a shipment. */
 let senderCache: { clientUuid: string } | null = null;
 
-async function ensureSender(): Promise<{ clientUuid: string }> {
+/**
+ * Exported ONLY so the sandbox probe in app/api/dev/ukrposhta-sender can call
+ * it. Nothing in the shop should: creating the sender is a step of booking, and
+ * booking owns when that happens. The probe exists because the alternative way
+ * to test this is to book a real parcel.
+ */
+export async function ensureSender(): Promise<{ clientUuid: string }> {
   if (senderCache) return senderCache;
 
   const sender = await resolveSender();

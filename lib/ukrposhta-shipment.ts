@@ -335,18 +335,22 @@ export async function ensureSender(): Promise<{ clientUuid: string }> {
       `senderAddressId` exists precisely so a Latin address can be chosen for an
       international parcel. The workaround turns out to be the intended design.
 
-   ONE NUMBER IS STILL A JUDGEMENT CALL. The two documents disagree on the
-   length of a ФОП's ІПН: the domestic one (30.06.2026), which owns the /clients
-   table, says «тільки цифри, 10 символів» for both people and sole traders; the
-   international one (23.07.2026) says 10 for a person and 12 for a sole trader.
-   Ten is taken here, because a Ukrainian РНОКПП is ten digits and no
-   twelve-digit personal tax number exists — the international doc looks like an
-   error. If the API disagrees it will say so by checksum, which is a loud,
-   specific failure rather than a wrong parcel.
+   THE TEN-DIGIT QUESTION IS SETTLED, AND BY THE API. The two documents disagree
+   on the length of a ФОП's ІПН — the domestic one (30.06.2026), which owns the
+   /clients table, says «тільки цифри, 10 символів» for people and sole traders
+   alike; the international one (23.07.2026) says 10 for a person and 12 for a
+   sole trader. Ten was taken, on the reasoning that a Ukrainian РНОКПП is ten
+   digits and no twelve-digit personal tax number exists. Production accepted it:
+   the created client reads back type PRIVATE_ENTREPRENEUR with a ten-digit tin
+   and no edrpou. The international document is wrong on this point.
 
-   NOTHING HERE IS PROVEN AGAINST A REAL BOOKING YET. It is proven against the
-   specification, which is more than the guesses it replaces, and booking stays
-   behind UKRPOSHTA_BOOKING either way.
+   PROVEN AGAINST PRODUCTION ON 27 AUGUST 2026, not merely against the spec.
+   /api/dev/ukrposhta-sender created the sender on the live account and a
+   read-back confirmed the type and the field. Sandbox could not be used: its
+   bearer has expired and answers every call, real or fake, with the same 401.
+
+   What is still unproven is everything AFTER the sender — the shipment call
+   itself has never run. Booking stays behind UKRPOSHTA_BOOKING.
 --------------------------------------------------------------------------- */
 
 /**

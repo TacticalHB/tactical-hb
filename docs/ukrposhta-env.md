@@ -90,10 +90,16 @@ UKRPOSHTA_SENDER_POSTCODE=
 
 # THE SENDER'S TAX NUMBER — the ІПН/РНОКПП of the ФОП, ten digits.
 #
-# OPTIONAL, AND WORTH SETTING ANYWAY. Left blank, the code creates a throwaway
-# client just to read the number back off the account, and that throwaway is a
-# permanent record: Ukrposhta says a client's type cannot be changed after
-# creation. Setting this skips the round trip and the litter.
+# OPTIONAL, AND WORTH SETTING. Left blank, the code creates a throwaway client
+# just to read the number back off the account — proven on 27 August 2026, when
+# a single probe run against production created TWO clients instead of one.
+# Both were correctly typed, so nothing is broken, but the account collects one
+# extra permanent record per cold start for no reason. Setting this skips the
+# round trip and the litter.
+#
+# TEN DIGITS IS CONFIRMED. Production accepted a ten-digit tin and the client
+# reads back with it; the international PDF that says twelve for a sole trader
+# is wrong.
 #
 # IT IS `tin`, NOT `edrpou`. Ukrposhta keeps two fields — `edrpou` for a legal
 # entity's ЄДРПОУ (5-8 digits) and `tin` for a person's or a ФОП's ІПН (10).

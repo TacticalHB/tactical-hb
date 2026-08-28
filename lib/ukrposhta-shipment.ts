@@ -176,7 +176,7 @@ function senderClientType(): string {
    Cached in module scope. A serverless instance that is recycled simply makes
    it again, which is idempotent enough: Ukrposhta returns a fresh uuid and the
    old one is harmless, being just a directory entry rather than a shipment. */
-let senderCache: { clientUuid: string } | null = null;
+let senderCache: { clientUuid: string; addressId: number } | null = null;
 
 /**
  * Exported ONLY so the sandbox probe in app/api/dev/ukrposhta-sender can call
@@ -184,7 +184,7 @@ let senderCache: { clientUuid: string } | null = null;
  * booking owns when that happens. The probe exists because the alternative way
  * to test this is to book a real parcel.
  */
-export async function ensureSender(): Promise<{ clientUuid: string }> {
+export async function ensureSender(): Promise<{ clientUuid: string; addressId: number }> {
   if (senderCache) return senderCache;
 
   const sender = await resolveSender();
@@ -305,7 +305,14 @@ export async function ensureSender(): Promise<{ clientUuid: string }> {
     "create sender client"
   );
 
-  senderCache = { clientUuid: client.uuid };
+  /* THE ADDRESS ID TRAVELS WITH THE CLIENT, and it has to. Naming only the
+     sender client on a shipment lets Ukrposhta pick that client's own main
+     address — which is the one its index filled in, in Ukrainian. All the
+     transliteration above then counts for nothing, and a German parcel is
+     refused with "should include only latin characters at fields: Sender
+     address, Return address". Carrying the Latin address's id here is what
+     lets the shipment ask for it by name. */
+  senderCache = { clientUuid: client.uuid, addressId: address.id };
   return senderCache;
 }
 
@@ -398,15 +405,27 @@ export async function createShipment(opts: {
     "/clients",
     {
       addressId: recipientAddress.id,
+      /* THE RECIPIENT IS A PERSON, AND HAS TO SAY SO. Same trap the sender fell
+         into: sending no `type` does not mean "unspecified", it means COMPANY,
+         and a COMPANY must carry a ЄДРПОУ or an ІПН. The documentation is
+         precise about when that bites — «Якщо жодне з цих полів не заповнено,
+         виникне помилка при створенні відправлення» — so a defaulted recipient
+         does not fail here, it fails later, on the shipment, pointing at a
+         field nobody set.
+
+         INDIVIDUAL is neither a legal entity nor a sole trader, so the tax
+         number requirement does not apply — which is correct anyway: a customer
+         in Hamburg has no Ukrainian tax number to give. */
+      type: "INDIVIDUAL",
       phoneNumber: r.phone,
       firstName: r.firstName,
       lastName: r.lastName,
       /* Latin, because this is what a foreign postal service prints and reads.
-         middleName is documented "mandatory for individuals" and is NOT sent:
-         a patronymic is a Ukrainian convention and inventing one for a
-         customer in Hamburg would put a made-up name on a customs document.
-         If the API insists, the error says so and it becomes a real decision
-         rather than a silent fabrication. */
+         middleName is NOT sent, and the documentation agrees it need not be:
+         Табл. 3.1 marks it optional (Ні). An earlier note here said it was
+         mandatory for individuals, which was a guess. It would be wrong to send
+         anyway — a patronymic is a Ukrainian convention, and inventing one for
+         a customer in Hamburg would put a made-up name on a customs document. */
       /* Usually already Latin — the recipient is abroad — so this is a no-op
          for most orders. It runs anyway: nothing stops a customer typing their
          name in Cyrillic, and an umlaut or an accent would fail the same
@@ -422,6 +441,19 @@ export async function createShipment(opts: {
     {
       sender: { uuid: sender.clientUuid },
       recipient: { uuid: recipient.uuid },
+      /* PICK THE LATIN ADDRESS EXPLICITLY. The documentation says this field
+         exists for exactly this: «При створенні міжнародного відправлення
+         дозволяє вибрати адресу латиною». Without it the client's main address
+         wins, in Cyrillic, and Germany is refused. */
+      senderAddressId: sender.addressId,
+      recipientAddressId: recipientAddress.id,
+      /* AND THE RETURN ADDRESS, WHICH IS A SEPARATE FIELD AND A SEPARATE
+         FAILURE. Left out, it falls back to «основна адреса, у якої поле main
+         має значення true» — and the error names it separately from the sender
+         for a reason: they are resolved separately, so fixing one leaves the
+         other Cyrillic. A returned parcel comes back to the same door it left,
+         so this is the same Latin address either way. */
+      returnAddressId: sender.addressId,
       type: "INTERNATIONAL",
       international: true,
       packageType: "PARCEL",

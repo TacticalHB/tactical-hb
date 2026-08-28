@@ -71,6 +71,12 @@ UKRPOSHTA_BOOKING=off
 # risks a hold or a seizure. Ask the Ukrposhta manager or the accountant.
 UKRPOSHTA_HS_CODE=
 
+# THE STREET AND HOUSE ARE REQUIRED FOR INTERNATIONAL BOOKING — see the postcode
+# note below. They are the sender's and the RETURN address on a customs
+# declaration, so they must be the real dispatch address, in Latin characters.
+# UKRPOSHTA_SENDER_STREET=
+# UKRPOSHTA_SENDER_HOUSE=
+
 # NAME AND PHONE ARE OPTIONAL and normally left blank: lib/sender.ts reads them
 # from the Nova Poshta business cabinet, which is where that identity already
 # lives and is maintained. Set these two only to lodge Ukrposhta parcels under a
@@ -82,10 +88,14 @@ UKRPOSHTA_SENDER_PHONE=
 # created. Nova Poshta addresses a sender by warehouse uuid and holds no postal
 # code anywhere, so there is nothing to inherit. Quoting never needs it.
 #
-# The POSTCODE IS ENOUGH on its own, which was not obvious for a long time.
-# Table 2.1 of Ukrposhta's international documentation marks only `country` and
-# `postcode` as required; street, house, city, region and district are all
-# optional. A missing street address was never what blocked booking.
+# THE POSTCODE IS NOT ENOUGH FOR AN INTERNATIONAL PARCEL, and the documentation
+# is misleading here. Table 2.1 marks only `country` and `postcode` as required,
+# which is true of CREATING an address — but a shipment to Germany with a
+# street-less sender address is refused with "should include only latin
+# characters at fields: Sender address, Return address", an error that names the
+# wrong problem. Adding a Latin street and house number clears it. Confirmed
+# against production on 28 August 2026: same address, same everything, street
+# absent = refused, street present = booked.
 UKRPOSHTA_SENDER_POSTCODE=
 
 # THE SENDER'S TAX NUMBER — the ІПН/РНОКПП of the ФОП, ten digits.

@@ -32,18 +32,26 @@ export const runtime = "nodejs";
    can be exercised.
 --------------------------------------------------------------------------- */
 
-export async function GET() {
+export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const mode = ukrposhtaMode();
-  if (mode !== "sandbox") {
+
+  /* PRODUCTION NEEDS SAYING OUT LOUD. Sandbox runs on request; production runs
+     only when the caller spells out that it knows what it is doing, because
+     what it leaves behind cannot be tidied up: a client's type is fixed at
+     creation. The default is still refusal — this is an escape hatch with the
+     cost written on it, not a flag somebody flips by habit. */
+  const confirmed = new URL(req.url).searchParams.get("confirm") === "production-creates-a-permanent-client";
+  if (mode !== "sandbox" && !confirmed) {
     return NextResponse.json(
       {
         ok: false,
-        refused: "This probe only runs in sandbox.",
-        why: "A client's type cannot be changed after creation, so a run against production leaves a permanent record. Set UKRPOSHTA_API_MODE=sandbox.",
+        refused: `Mode is "${mode}". This probe runs freely only in sandbox.`,
+        why: "A client's type cannot be changed after creation, so a production run leaves a permanent record on the live account.",
+        toProceed: "?confirm=production-creates-a-permanent-client",
         mode,
       },
       { status: 409 }
@@ -55,9 +63,17 @@ export async function GET() {
     const { clientUuid } = await ensureSender();
     return NextResponse.json({
       ok: true,
+      /* Echoed back so the caller can PROVE which environment answered rather
+         than trusting the variable they thought they set. */
       mode,
       host: ukrposhtaBaseUrl(),
       clientUuid,
+      /* What this run left behind. With no UKRPOSHTA_SENDER_TIN the code reads
+         the number back off the account by creating a throwaway client first,
+         so a successful run without it means TWO clients exist, not one. The
+         number itself is never returned — it identifies a person. */
+      tinFromEnv: Boolean(process.env.UKRPOSHTA_SENDER_TIN?.trim()),
+      createdClients: process.env.UKRPOSHTA_SENDER_TIN?.trim() ? 1 : 2,
       ms: Date.now() - started,
     });
   } catch (err) {

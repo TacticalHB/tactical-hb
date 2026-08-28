@@ -81,7 +81,32 @@ UKRPOSHTA_SENDER_PHONE=
 # THE POSTCODE HAS NO FALLBACK AND MUST BE SUPPLIED before any shipment can be
 # created. Nova Poshta addresses a sender by warehouse uuid and holds no postal
 # code anywhere, so there is nothing to inherit. Quoting never needs it.
+#
+# The POSTCODE IS ENOUGH on its own, which was not obvious for a long time.
+# Table 2.1 of Ukrposhta's international documentation marks only `country` and
+# `postcode` as required; street, house, city, region and district are all
+# optional. A missing street address was never what blocked booking.
 UKRPOSHTA_SENDER_POSTCODE=
+
+# THE SENDER'S TAX NUMBER — the ІПН/РНОКПП of the ФОП, ten digits.
+#
+# OPTIONAL, AND WORTH SETTING ANYWAY. Left blank, the code creates a throwaway
+# client just to read the number back off the account, and that throwaway is a
+# permanent record: Ukrposhta says a client's type cannot be changed after
+# creation. Setting this skips the round trip and the litter.
+#
+# IT IS `tin`, NOT `edrpou`. Ukrposhta keeps two fields — `edrpou` for a legal
+# entity's ЄДРПОУ (5-8 digits) and `tin` for a person's or a ФОП's ІПН (10).
+# Pushing a ten-digit sole-trader number into the company field is what produced
+# "EDRPOU should contain 8-9 digits" for weeks; the number was fine, the field
+# was wrong. UKRPOSHTA_SENDER_EDRPOU is still read as a fallback for accounts
+# that really are companies.
+UKRPOSHTA_SENDER_TIN=
+
+# Optional. The sender is created as PRIVATE_ENTREPRENEUR (ФОП) unless this
+# says otherwise — COMPANY or INDIVIDUAL are the other two. Sending nothing at
+# all is NOT neutral: the API defaults to COMPANY, and then demands a ЄДРПОУ.
+# UKRPOSHTA_SENDER_CLIENT_TYPE=PRIVATE_ENTREPRENEUR
 
 # -----------------------------------------------------------------------------
 #  Optional. AVIA unless this says GROUND.

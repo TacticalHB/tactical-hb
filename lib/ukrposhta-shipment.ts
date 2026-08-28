@@ -149,6 +149,29 @@ async function call<T>(path: string, body: unknown, label: string): Promise<T> {
   return json as T;
 }
 
+/**
+ * What kind of client the sender is.
+ *
+ * PRIVATE_ENTREPRENEUR, because that is what Tactical HB is: a ФОП. Ukrposhta
+ * has three types and the documentation is explicit about all three —
+ * INDIVIDUAL is a private person, COMPANY a legal entity, PRIVATE_ENTREPRENEUR
+ * a sole trader (Документація API 30.06.2026, §3).
+ *
+ * THE DEFAULT IS WHAT BROKE THIS. Sending no `type` does not mean "let the
+ * account decide" — the API defaults it to COMPANY, and a COMPANY is required
+ * to carry a ЄДРПОУ. That is the whole of UPE01001: not a missing number, an
+ * unstated type. Nothing here was ever set, so every sender we made was a
+ * company that could not prove it was one.
+ *
+ * AND IT IS PERMANENT. «Тип клієнта неможливо змінити» — a client created with
+ * the wrong type cannot be corrected, only replaced. Which is why this is a
+ * constant with an override rather than an env var that has to be remembered:
+ * an unset variable used to produce a silently wrong, permanent record.
+ */
+function senderClientType(): string {
+  return process.env.UKRPOSHTA_SENDER_CLIENT_TYPE?.trim() || "PRIVATE_ENTREPRENEUR";
+}
+
 /* ---- The sender, made once ------------------------------------------------
    Cached in module scope. A serverless instance that is recycled simply makes
    it again, which is idempotent enough: Ukrposhta returns a fresh uuid and the
@@ -202,23 +225,23 @@ async function ensureSender(): Promise<{ clientUuid: string }> {
     "create sender address"
   );
 
-  /* ---- EDRPOU, which the sender cannot be booked without -----------------
+  /* ---- The sender's tax number ------------------------------------------
 
-     "Client's field 'EDRPOU' should be filled for sender with type 'COMPANY'".
-     The account is a company to Ukrposhta, so the registration code is
-     mandatory on the sender — but there is no endpoint that will simply tell
-     us what it is: GET /counterparties 404s.
+     IT NEVER LIVES IN THIS FILE. It is a tax registration code, it identifies
+     a person, and source control is not where those belong — hence the env var
+     and the read-back rather than a literal.
 
-     It comes back on a CREATED CLIENT though, as counterpartyRegcode, so the
-     first call here is again a lookup and the second is the real record. That
-     is better than putting the number in this file: it is a tax registration
-     code, it identifies a person, and source control is not where personal
-     identifiers belong. The env override exists for the case where the account
-     is ever restructured and the two stop agreeing.
+     WHAT THIS USED TO BE, AND WHY IT WAS WRONG. This posted a throwaway client
+     purely to read `counterpartyRegcode` back off the account, then posted the
+     real one. Two clients per cold start, one of them stranded — and the
+     stranded one was created with no `type`, which the documentation says
+     defaults to COMPANY and CANNOT BE CHANGED afterwards. So the workaround
+     was quietly littering the account with permanently mistyped clients.
 
-     Both calls are directory writes, not shipments, and the cache above means
-     they happen once per serverless instance. */
-  const regcode =
+     The lookup stays only as the fallback. UKRPOSHTA_SENDER_TIN is the way in:
+     when it is set nothing is created to find out who we are. */
+  const tin =
+    process.env.UKRPOSHTA_SENDER_TIN?.trim() ||
     process.env.UKRPOSHTA_SENDER_EDRPOU?.trim() ||
     (
       await call<{ counterpartyRegcode?: string | null }>(
@@ -230,6 +253,7 @@ async function ensureSender(): Promise<{ clientUuid: string }> {
           name: sender.name,
           contactPersonName: sender.name,
           latinName: latinName(sender.name),
+          type: senderClientType(),
         },
         "resolve counterparty registration code"
       )
@@ -241,17 +265,22 @@ async function ensureSender(): Promise<{ clientUuid: string }> {
     {
       counterpartyUuid: counterpartyUuid(),
       addressId: address.id,
-      /* ONLY WHEN IT IS ACTUALLY AN EDRPOU. The account's registration code
-         came back as ten digits, which is an РНОКПП — an individual
-         entrepreneur's tax number — and Ukrposhta rejects it here with "EDRPOU
-         should contain 8-9 digits". Sending it anyway fails the sender
-         outright, so it is sent only when it is the right shape and the
-         account question is left to be answered by a human. */
-      ...(/^\d{8,9}$/.test(regcode) ? { edrpou: regcode } : {}),
-      /* COMPANY by default, which is what the counterparty is registered as.
-         INDIVIDUAL is the other possibility for a ФОП and needs first/last/
-         middle name fields instead of `name` — see the note at the top. */
-      type: process.env.UKRPOSHTA_SENDER_CLIENT_TYPE || undefined,
+      /* THE NUMBER GOES IN THE FIELD THAT MATCHES THE TYPE. Ukrposhta keeps
+         two, and we spent weeks pushing a sole trader's number into the
+         company one:
+
+           edrpou  ЄДРПОУ of a legal entity        digits, 5-8
+           tin     ІПН of a person or a ФОП        digits, 10
+
+         A ten-digit code is an РНОКПП, which is a ФОП's, which is `tin`. That
+         is why every attempt at `edrpou` came back "should contain 8-9 digits"
+         — not a malformed number, the wrong field.
+
+         Still shape-checked before it is sent. The API validates the ІПН by
+         checksum and refuses an invalid one, and a refusal that names our
+         field is worth more than one that names theirs. */
+      ...(/^\d{10}$/.test(tin) ? { tin } : {}),
+      type: senderClientType(),
       phoneNumber: sender.phone,
       name: sender.name,
       contactPersonName: sender.name,
@@ -274,36 +303,44 @@ async function ensureSender(): Promise<{ clientUuid: string }> {
   return senderCache;
 }
 
-/* ---- WHAT STILL BLOCKS A REAL INTERNATIONAL PARCEL ------------------------
+/* ---- WHAT THE DOCUMENTATION SETTLED, AND WHAT IS LEFT ---------------------
 
-   Sandbox, 24 August 2026. Booking gets as far as creating the sender and is
-   refused there. Two answers are needed and neither is a code change:
+   Both of the questions that blocked this were answered by Ukrposhta's own
+   published documentation (dev.ukrposhta.ua/documentation), read 27 August
+   2026. Neither needed the account manager; both had been guesses.
 
-   1. THE DISPATCH STREET ADDRESS. A bare postcode is enough for a domestic
-      parcel and not for a foreign one — with only an index, the shipment call
-      refuses with "Shipment's data to Germany should include only latin
-      characters at fields: Sender address, Return address", and supplying a
-      Latin street and house number cleared it. UKRPOSHTA_SENDER_STREET and
-      UKRPOSHTA_SENDER_HOUSE feed it; both are unset, because inventing a
-      return address for real parcels is not something to guess at.
+   1. THE SENDER'S TYPE AND NUMBER. Settled — see senderClientType() above and
+      the `tin` field on the create call. The short version: there is a third
+      client type, PRIVATE_ENTREPRENEUR, and a second tax field, `tin`. We were
+      sending neither, so the API defaulted us to COMPANY and then asked for the
+      ЄДРПОУ a company must have. "EDRPOU should contain 8-9 digits" was never
+      about the number being malformed; it was the wrong field.
 
-   2. WHAT KIND OF CLIENT THE SENDER IS. The counterparty is registered as a
-      COMPANY, so Ukrposhta demands EDRPOU on the sender — but the registration
-      code on the account is ten digits (an РНОКПП, i.e. a ФОП's tax number)
-      and the same API rejects it: "EDRPOU should contain 8-9 digits". Sending
-      the sender as INDIVIDUAL instead gets a third answer, "Cannot save client
-      ONLY with latinName if country is Ukraine", which reads as an individual
-      needing first/last/middle name fields rather than the single `name` the
-      cabinet holds.
+   2. THE DISPATCH STREET ADDRESS. Settled, and the answer is that it is NOT
+      required. Табл. 2.1 of the international documentation marks only
+      `country` and `postcode` as mandatory — `region`, `district`, `city`,
+      `street` and `houseNumber` are all optional. The 61204 index is enough,
+      and UKRPOSHTA_SENDER_STREET / _HOUSE stay optional refinements rather
+      than the missing piece they were thought to be.
 
-      So the account says company, the code says sole trader, and the API will
-      not accept the pair. That is a question for the Ukrposhta account
-      manager, not something to work around here — a sender misdeclared on a
-      customs document is worse than a sender who cannot yet post.
+      What IS mandatory is the alphabet: «Всі поля адреси в міжнародному
+      відправленні необхідно заповнювати латинськими літерами». Transliteration
+      is ours to do, which is what the two-call dance above already does, and
+      `senderAddressId` exists precisely so a Latin address can be chosen for an
+      international parcel. The workaround turns out to be the intended design.
 
-   Everything upstream of this is verified against sandbox: the customs code is
-   accepted, the postcode resolves to Kharkiv, and the transliteration
-   satisfies the Latin-only check.
+   ONE NUMBER IS STILL A JUDGEMENT CALL. The two documents disagree on the
+   length of a ФОП's ІПН: the domestic one (30.06.2026), which owns the /clients
+   table, says «тільки цифри, 10 символів» for both people and sole traders; the
+   international one (23.07.2026) says 10 for a person and 12 for a sole trader.
+   Ten is taken here, because a Ukrainian РНОКПП is ten digits and no
+   twelve-digit personal tax number exists — the international doc looks like an
+   error. If the API disagrees it will say so by checksum, which is a loud,
+   specific failure rather than a wrong parcel.
+
+   NOTHING HERE IS PROVEN AGAINST A REAL BOOKING YET. It is proven against the
+   specification, which is more than the guesses it replaces, and booking stays
+   behind UKRPOSHTA_BOOKING either way.
 --------------------------------------------------------------------------- */
 
 /**

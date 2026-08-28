@@ -72,10 +72,16 @@ UKRPOSHTA_BOOKING=off
 UKRPOSHTA_HS_CODE=
 
 # THE STREET AND HOUSE ARE REQUIRED FOR INTERNATIONAL BOOKING — see the postcode
-# note below. They are the sender's and the RETURN address on a customs
-# declaration, so they must be the real dispatch address, in Latin characters.
-# UKRPOSHTA_SENDER_STREET=
-# UKRPOSHTA_SENDER_HOUSE=
+# note below. They are the sender's AND the return address on a customs
+# declaration, so they must be the real dispatch office.
+#
+# KEEP THEM IN UKRAINIAN. The code transliterates both, and that matters more
+# than it looks: the office is at 48Б, and that Б is Cyrillic. Sent raw it fails
+# the Latin-only check on a two-character suffix inside what reads as a number.
+# latinName gives "prospekt Liudviha Svobody" and "48B", which is what Ukrposhta
+# stored and shipped on 28 August 2026.
+UKRPOSHTA_SENDER_STREET=проспект Людвіга Свободи
+UKRPOSHTA_SENDER_HOUSE=48Б
 
 # NAME AND PHONE ARE OPTIONAL and normally left blank: lib/sender.ts reads them
 # from the Nova Poshta business cabinet, which is where that identity already

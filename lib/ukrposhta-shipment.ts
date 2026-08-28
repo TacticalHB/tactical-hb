@@ -226,7 +226,14 @@ export async function ensureSender(): Promise<{ clientUuid: string; addressId: n
       ...(process.env.UKRPOSHTA_SENDER_STREET
         ? { street: latinName(process.env.UKRPOSHTA_SENDER_STREET) }
         : {}),
-      ...(process.env.UKRPOSHTA_SENDER_HOUSE ? { houseNumber: process.env.UKRPOSHTA_SENDER_HOUSE } : {}),
+      /* THE HOUSE NUMBER IS TRANSLITERATED TOO, and it is not a formality: the
+         dispatch office is at 48Б, and that Б is Cyrillic. Sent raw it fails
+         the Latin-only check on the sender and return address — the same
+         refusal a Cyrillic street causes, from two characters at the end of a
+         number that looks like digits. latinName turns it into 48B. */
+      ...(process.env.UKRPOSHTA_SENDER_HOUSE
+        ? { houseNumber: latinName(process.env.UKRPOSHTA_SENDER_HOUSE) }
+        : {}),
     },
     "create sender address"
   );

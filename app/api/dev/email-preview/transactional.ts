@@ -132,6 +132,7 @@ export type TransactionalKind =
   | "order"
   | "order-legacy"
   | "shipping"
+  | "shipping-ukrposhta"
   | "wholesale"
   | "wholesale-register"
   | "wholesale-approved"
@@ -146,6 +147,7 @@ export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "order",
   "order-legacy",
   "shipping",
+  "shipping-ukrposhta",
   "wholesale",
   "wholesale-register",
   "wholesale-approved",
@@ -243,11 +245,26 @@ export function renderTransactional(
         reference: "THB-2608-0142",
         ttn: "20450912345678",
         locale,
+        carrier: "nova_poshta",
         addressLines: [
           "Preview Customer",
           locale === "uk" ? "Київ" : "Kyiv",
           "вул. Хрещатик, 22, кв. 4",
         ],
+      });
+
+    /* The same letter for the other carrier, and it is a separate preview
+       rather than a query flag because the whole point is to be able to put
+       the two side by side: different tracking link, different name in the
+       sentence, different word for the number, and a foreign address instead
+       of a branch. Every one of those is a place it can go wrong. */
+    case "shipping-ukrposhta":
+      return buildShippedEmail({
+        reference: "THB-2608-0143",
+        ttn: "CV062216404UA",
+        locale,
+        carrier: "ukrposhta",
+        addressLines: ["Preview Customer", "Musterstraße 12, 3", "10115 Berlin", "Germany"],
       });
 
     case "wholesale": {

@@ -99,7 +99,16 @@ export async function createUkrposhtaShipmentForOrder(
 
     await admin
       .from("orders")
-      .update({ ukrposhta_uuid: result.uuid, ukrposhta_barcode: result.barcode })
+      .update({
+        ukrposhta_uuid: result.uuid,
+        ukrposhta_barcode: result.barcode,
+        /* AND THE ORDER IS NOW BEING PROCESSED. lib/order-ttn.ts writes the
+           waybill and the status in one statement for Nova Poshta, and this
+           left the row on 'paid' — which is the admin's "no parcel yet, buy
+           this one by hand" queue. A successfully booked order sitting in that
+           queue is a lie about work still to do. */
+        status: "processing",
+      })
       .eq("id", orderId);
 
     console.log(`[ukrposhta] booked order ${orderId}: ${result.barcode || result.uuid}`);

@@ -59,6 +59,31 @@ export type UkrposhtaParcel = {
   cancelled: boolean;
 };
 
+/**
+ * Where to send a customer who wants to watch their own parcel.
+ *
+ * NOT the API host. This is the public tracking site, and it is a different
+ * property again — a third host after the eCom API and the StatusTracking
+ * service. The old deep link (`/tracking_UA.html?barcode=`) still works but
+ * only because the page immediately does `window.location.replace` onto the
+ * root carrying the query string; linking a customer at a redirect stub is
+ * borrowing somebody else's implementation detail, so this links the root.
+ *
+ * Checked against the live site on 29 August 2026 in both languages: the app
+ * reads `barcode` from the query and renders the parcel without a click.
+ *
+ * ALWAYS PRODUCTION, even when the API mode is sandbox. There is no customer
+ * to send anywhere in sandbox, and a dev-host tracking link in a real email
+ * would be worse than none.
+ */
+export function ukrposhtaTrackingUrl(barcode: string, locale = "uk"): string {
+  /* Ukrainian is the site default and lives at the root; everything else this
+     shop speaks gets the English page, which is the only other one that
+     exists. */
+  const path = locale === "uk" ? "" : "en/";
+  return `https://track.ukrposhta.ua/${path}?barcode=${encodeURIComponent(barcode.trim())}`;
+}
+
 function trackingBaseUrl(): string {
   const host = ukrposhtaMode() === "production" ? "https://www.ukrposhta.ua" : "https://dev.ukrposhta.ua";
   return `${host}/status-tracking/0.0.1`;

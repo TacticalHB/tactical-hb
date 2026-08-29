@@ -10,6 +10,7 @@ import {
   type AdminOrder,
 } from "@/lib/orders-display";
 import OrderTtnForm from "@/components/admin/OrderTtnForm";
+import OrderUkrposhtaForm from "@/components/admin/OrderUkrposhtaForm";
 import { carrierName, isShippingCarrier } from "@/lib/shipping-carriers";
 
 /* ---------------------------------------------------------------------------
@@ -134,17 +135,9 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
               <span style={{ color: "var(--console-muted)" }}>{order.deliveryDetail}</span>
             </>
           )}
-          {/* The Ukrposhta barcode sits here rather than in the TTN field
-              below, which is Nova Poshta's and is written by its own form. */}
-          {order.ukrposhtaBarcode && (
-            <>
-              <br />
-              <span style={{ color: "var(--console-muted)" }}>
-                {uk ? "Штрихкод Укрпошти: " : "Ukrposhta barcode: "}
-                <span className="font-mono">{order.ukrposhtaBarcode}</span>
-              </span>
-            </>
-          )}
+          {/* The barcode used to be printed here read-only. It is editable in
+              the footer now, and one number in two places on the same card is
+              two things to keep in step. */}
           {order.deliveryNotes && (
             <>
               <br />
@@ -220,8 +213,27 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         )}
       </div>
 
-      <footer className="px-5 py-4" style={{ borderTop: "1px solid var(--console-border)" }}>
-        <OrderTtnForm orderId={order.id} initial={order.ttn} locale={locale} />
+      {/* WHICH NUMBER THIS ORDER NEEDS.
+
+          Neither field is shown to every order — a domestic branch delivery
+          has no use for a customs barcode, and an Ukrposhta export has no
+          waybill — but neither can hide a number that already exists, which is
+          why each condition ends with "or it already has one". A number nobody
+          can see is a number nobody can correct.
+
+          An international order shows the Ukrposhta field even when its
+          carrier column says otherwise: those are the parcels bought at a
+          counter while booking is off, and the carrier is not always recorded
+          before the paper receipt exists. */}
+      <footer className="px-5 py-4 flex flex-wrap gap-x-8 gap-y-4" style={{ borderTop: "1px solid var(--console-border)" }}>
+        {(order.carrier !== "ukrposhta" || order.ttn) && (
+          <OrderTtnForm orderId={order.id} initial={order.ttn} locale={locale} />
+        )}
+        {(order.carrier === "ukrposhta" ||
+          order.deliveryKind === "international" ||
+          order.ukrposhtaBarcode) && (
+          <OrderUkrposhtaForm orderId={order.id} initial={order.ukrposhtaBarcode} locale={locale} />
+        )}
       </footer>
     </article>
   );

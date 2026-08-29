@@ -90,6 +90,25 @@ UKRPOSHTA_SENDER_HOUSE=48Б
 UKRPOSHTA_SENDER_NAME=
 UKRPOSHTA_SENDER_PHONE=
 
+# THE NAME AS ITS OWNER SPELLS IT, IN LATIN. Three separate fields because a
+# customs declaration has three separate boxes, and the CN23 prints Прізвище
+# from `lastName` alone — leave these blank and the surname box is empty and
+# the whole name lands on the Business/Компанія line instead.
+#
+# NOT TRANSLITERATED, EVER. The romanisation standard turns Газоханна into
+# "Hazokhanna" — Г as H, one word — and the name on the passport is
+# "Gazo Khanna". Both are defensible transliterations; only one is the person's
+# name, and it is a real customs document. A machine does not get to spell
+# somebody's name.
+#
+# LATIN_NAME is optional: unset, it is built as "<last> <first>", surname
+# first, which is the order a Ukrainian document reads in. Unset ALL of these
+# and the code falls back to transliterating the Nova Poshta cabinet name,
+# which is what it did before and is better than a blank form.
+UKRPOSHTA_SENDER_LAST_NAME=
+UKRPOSHTA_SENDER_FIRST_NAME=
+# UKRPOSHTA_SENDER_LATIN_NAME=
+
 # THE POSTCODE HAS NO FALLBACK AND MUST BE SUPPLIED before any shipment can be
 # created. Nova Poshta addresses a sender by warehouse uuid and holds no postal
 # code anywhere, so there is nothing to inherit. Quoting never needs it.

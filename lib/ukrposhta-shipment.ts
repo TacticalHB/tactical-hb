@@ -172,6 +172,33 @@ function senderClientType(): string {
   return process.env.UKRPOSHTA_SENDER_CLIENT_TYPE?.trim() || "PRIVATE_ENTREPRENEUR";
 }
 
+/* ---- The sender's name, in Latin, as its owner spells it -------------------
+
+   THESE ARE STATED, NEVER TRANSLITERATED. The romanisation standard turns
+   Газоханна into "Hazokhanna" — one word, Г as H — and the name on the passport
+   is "Gazo Khanna". Both are defensible as transliterations and only one is the
+   person's name. A customs declaration carrying the other is a document with a
+   wrong fact on it, and the wrong fact is somebody's name.
+
+   Left unset, the code falls back to transliterating whatever the Nova Poshta
+   cabinet holds, which is what it did before and is better than nothing for a
+   sender nobody has spelled out.
+--------------------------------------------------------------------------- */
+function senderFirstName(): string {
+  return process.env.UKRPOSHTA_SENDER_FIRST_NAME?.trim() ?? "";
+}
+function senderLastName(): string {
+  return process.env.UKRPOSHTA_SENDER_LAST_NAME?.trim() ?? "";
+}
+/** The full Latin name for the customs form. Built from the parts if not given. */
+function senderLatinName(): string {
+  const explicit = process.env.UKRPOSHTA_SENDER_LATIN_NAME?.trim();
+  if (explicit) return explicit;
+  /* Surname first — the order the sender asked for, and the order a Ukrainian
+     document reads in. Not the API example's Western "Elon Musk". */
+  return [senderLastName(), senderFirstName()].filter(Boolean).join(" ");
+}
+
 /* ---- The sender, made once ------------------------------------------------
    Cached in module scope. A serverless instance that is recycled simply makes
    it again, which is idempotent enough: Ukrposhta returns a fresh uuid and the
@@ -297,6 +324,18 @@ export async function ensureSender(): Promise<{ clientUuid: string; addressId: n
       phoneNumber: sender.phone,
       name: sender.name,
       contactPersonName: sender.name,
+      /* THE SURNAME GOES IN ITS OWN FIELD, and until now neither name field was
+         sent at all. Табл. 3.1 of the domestic documentation marks both
+         required — firstName «Ім'я фізичної особи», lastName «Прізвище
+         фізичної особи» — and without them the CN23 leaves Прізвище empty and
+         drops the whole name into the Business/Компанія line instead. A person
+         is not a company, and a customs form that says so is a form with a
+         wrong fact on it.
+
+         SPREAD RATHER THAN SENT BLANK: two-character minimum, so an unset
+         variable must omit the field rather than pass "". */
+      ...(senderLastName() ? { lastName: senderLastName() } : {}),
+      ...(senderFirstName() ? { firstName: senderFirstName() } : {}),
       /* Required the moment the destination is in the EU — sandbox refused a
          German parcel with "Sender's 'latinName' should not be empty". Sent
          always rather than kept behind a country list somebody maintains.
@@ -306,8 +345,17 @@ export async function ensureSender(): Promise<{ clientUuid: string; addressId: n
          which holds it in Ukrainian, and sandbox refused the first parcel
          outright: "Client's latinName should contain only latin symbols". The
          Cyrillic stays in `name` and `contactPersonName`, where it belongs —
-         it is the real name, and a Ukrainian sorting office should see it. */
-      latinName: latinName(sender.name),
+         it is the real name, and a Ukrainian sorting office should see it.
+
+         BUT A PERSON'S LATIN NAME IS A FACT, NOT A DERIVATION. Transliterating
+         it produced "Hazokhanna Beshyr Maryovych" on a real customs
+         declaration: the standard romanisation renders Г as H and keeps
+         Газоханна as one word, and the name on the документи is "Gazo Khanna".
+         A transliterator is right about places and wrong about people — nobody
+         gets to spell somebody else's name by algorithm. So when the Latin name
+         is stated it is used verbatim, and latinName() is only the fallback for
+         a sender nobody has spelled out. */
+      latinName: senderLatinName() || latinName(sender.name),
     },
     "create sender client"
   );

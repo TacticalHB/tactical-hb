@@ -41,13 +41,26 @@ export async function generateMetadata({
   const site = (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "");
 
   return {
-    title: t("meta_title"),
+    /* ABSOLUTE, because the copy already ends in the brand. The root layout's
+       template appends "· Tactical HB" to every title, so this page shipped as
+       "Mr HB — оперативна справа | Tactical HB · Tactical HB" — the brand
+       twice, in two different separators, inside the 60 characters a result
+       actually shows. Absolute tells the template to keep its hands off rather
+       than making four translations agree about a suffix. */
+    title: { absolute: t("meta_title") },
     description: t("meta_desc"),
     alternates: {
       canonical: `${site}/${locale}/mr-hb`,
       /* Every storefront, not the two this page was born with — a missing
          hreflang is how a translated page gets indexed as a duplicate. */
-      languages: Object.fromEntries(locales.map((l) => [l, `${site}/${l}/mr-hb`])),
+      languages: {
+        ...Object.fromEntries(locales.map((l) => [l, `${site}/${l}/mr-hb`])),
+        /* And the x-default every other page declares through alternatesFor().
+           This page builds its own set — it predates that helper — so it was
+           the one page in the site with no fallback for an unmatched language.
+           Ukrainian, same policy as everywhere else. */
+        "x-default": `${site}/uk/mr-hb`,
+      },
     },
     openGraph: {
       title: t("meta_title"),

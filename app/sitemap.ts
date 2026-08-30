@@ -22,8 +22,9 @@ import { SITE_URL, alternatesFor } from "@/lib/seo";
    one signed-in person. /admin is absent for the same reason plus a better
    one. A sitemap is a list of pages worth finding, not an inventory.
 
-   ROBOTS STILL SAYS DISALLOW. This file is inert until app/robots.ts opens up
-   on launch day — at which point it should also start advertising this sitemap.
+   ROBOTS IS OPEN AS OF 30 AUGUST 2026, so this file is finally doing something:
+   for its whole life until then app/robots.ts said `Disallow: /` and no crawler
+   was permitted to read a line of it.
 --------------------------------------------------------------------------- */
 
 /** Locale-less paths, in rough order of how much they matter. */
@@ -58,14 +59,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   /* Products come from the catalogue rather than a hand-kept list, so a new
      SKU appears in the sitemap the moment it appears in lib/products.ts. */
-  const productEntries = products.map((p) => ({
-    url: `${SITE_URL}/uk/products/${p.slug}`,
-    lastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-    alternates: { languages: alternatesFor(`/products/${p.slug}`) },
-    images: [`${SITE_URL}${p.gridImage || p.image}`],
-  }));
+  const productEntries = products.map((p) => {
+    /* AN UNPHOTOGRAPHED PRODUCT GETS NO IMAGE FIELD, not an empty one.
+       `${SITE_URL}${""}` is "https://tactical-hb.com" — the live sitemap
+       listed exactly that against fear-9e418 and lid-9e418, which is not an
+       image URL at all and invalidates the entry it sits in. Omitted until
+       the photographs exist. */
+    const photo = p.gridImage || p.image;
+    return {
+      url: `${SITE_URL}/uk/products/${p.slug}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+      alternates: { languages: alternatesFor(`/products/${p.slug}`) },
+      ...(photo ? { images: [`${SITE_URL}${photo}`] } : {}),
+    };
+  });
 
   return [...staticEntries, ...productEntries];
 }

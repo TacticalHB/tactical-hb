@@ -20,9 +20,11 @@ import { getTranslations } from "next-intl/server";
    of the same page, and a path that already carried one would have to be
    unpicked to get there.
 
-   ROBOTS IS STILL DISALLOW-ALL IN app/robots.ts. None of this is visible to a
-   crawler until that flips on launch day; it is written now so that flipping
-   one file is all launch day requires.
+   ALL OF THIS WAS INVISIBLE UNTIL 30 AUGUST 2026. app/robots.ts served
+   `Disallow: /` from launch, so the canonicals, the hreflang and the OG cards
+   below were generated correctly and read by nobody. That is why the file was
+   written this way — flipping one file was all launch day required — and it
+   is worth remembering that the day has to actually come.
 --------------------------------------------------------------------------- */
 
 export const SITE_NAME = "Tactical HB";
@@ -75,6 +77,56 @@ export const siteMetadata = {
       "إكسسوارات شيشة فاخرة من أوكرانيا — أجهزة إدارة الحرارة والرؤوس وأغطية الرياح، مصنوعة بدقة صناعة السلاح.",
   },
 };
+
+/* ---------------------------------------------------------------------------
+   What a product IS, in four languages, for the <title>.
+
+   A PRODUCT TITLE OF JUST THE NAME TELLS A SEARCHER NOTHING. "HMD A.Craft ·
+   Tactical HB" is the brand talking to people who already know the brand;
+   somebody searching for a heat management device has no way to recognise it.
+   The descriptor is what makes the title answer a query rather than confirm a
+   name, and it costs one short phrase per category.
+
+   NAMES ARE NEVER TRANSLATED and never touched — A.Craft, FTP, Windcover
+   Detonator and FEAR 9E418 read the same on every storefront. Only the words
+   AFTER the dash change.
+
+   THE WITHHELD LISTING IS DELIBERATELY ABSENT from this map. Its category is
+   "hookah", and naming the category would put the one word back that was
+   stripped from its page and from the flagship file on purpose. It keeps a
+   bare name, which is exactly what a page called TOP SECRET should have.
+--------------------------------------------------------------------------- */
+const PRODUCT_KIND: Record<string, Record<string, string>> = {
+  hmd: {
+    en: "heat management device",
+    uk: "пристрій для керування жаром",
+    ja: "ヒートマネジメントデバイス（HMD）",
+    ar: "جهاز إدارة الحرارة",
+  },
+  bowl: {
+    en: "clay hookah bowl",
+    uk: "глиняна чаша для кальяну",
+    ja: "シーシャ用クレイボウル",
+    ar: "رأس شيشة من الطين",
+  },
+  windcover: {
+    en: "hookah wind cover",
+    uk: "ковпак для кальяну",
+    ja: "シーシャ用ウインドカバー",
+    ar: "غطاء رياح للشيشة",
+  },
+  accessory: {
+    en: "accessory for Tactical HB heat devices",
+    uk: "аксесуар для пристроїв Tactical HB",
+    ja: "Tactical HB ヒートデバイス用アクセサリー",
+    ar: "ملحق لأجهزة Tactical HB الحرارية",
+  },
+};
+
+/** The descriptor for one product category, or "" when there is none to give. */
+export function productKind(category: string, locale: string): string {
+  return PRODUCT_KIND[category]?.[locale] ?? PRODUCT_KIND[category]?.en ?? "";
+}
 
 /** Both language versions of one page, plus the x-default a crawler needs. */
 /** Facebook's locale codes, which are not the same shape as ours. */

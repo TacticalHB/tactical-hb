@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import ConsoleShell from "@/components/admin/ConsoleShell";
@@ -16,6 +17,20 @@ import ConsoleShell from "@/components/admin/ConsoleShell";
    The known layout caveat (no re-render on sibling navigation) costs nothing
    here: a lapsed admin session keeps an empty frame at worst, never data.
 --------------------------------------------------------------------------- */
+
+/**
+ * The internal OS is never indexed.
+ *
+ * app/robots.ts disallows /{locale}/admin too, and the two do different jobs:
+ * robots stops a crawler FETCHING the page, while this stops the URL being
+ * listed from a link somewhere else — a disallowed page can still appear in
+ * results as a bare URL. Every (shop) surface that must stay out already
+ * carries this pair; the console did not, which only went unnoticed because
+ * robots.txt said `Disallow: /` to the whole site until today.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,

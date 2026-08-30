@@ -1,48 +1,65 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL, LOCALES } from "@/lib/seo";
 
 /**
- * Keep the site out of search results while it's still being finished.
+ * What a crawler may fetch.
  *
  * IMPORTANT: robots.txt is a polite request, not access control. Google and
- * Bing honour it; scrapers ignore it entirely. Never treat it as security.
+ * Bing honour it; scrapers ignore it entirely. Never treat it as security —
+ * every private path below is guarded server-side as well, and that is what
+ * actually protects it.
  *
- * ── GOING LIVE IN SEARCH IS NOW ONE LINE ──────────────────────────────────
- * Flip SEARCH_LAUNCHED to true. Everything else is already in place: per-page
- * titles and descriptions, canonicals, hreflang for both locales, OG cards,
- * Product and Organization schema, and app/sitemap.ts. The sitemap is
- * advertised either way, because pointing at it costs nothing while closed and
- * is one less thing to remember on the day.
+ * ── OPEN, AS OF 30 AUGUST 2026 ────────────────────────────────────────────
+ * This file served `Disallow: /` from launch until today, which forbade every
+ * crawler from every path. That was correct while the shop was behind a
+ * password wall and wrong the moment it went live: a sitemap, per-page titles,
+ * canonicals, hreflang across four storefronts and Product schema were all
+ * being generated and none of it could be read. The brand name itself did not
+ * return the catalogue.
  *
- * Do it when the flagship PDP behind the countdown exists — an indexed site
- * whose most-linked page is a countdown to nothing spends its first
- * impressions badly. Then submit both locales in Search Console and Bing.
- *
- * The private surfaces stay disallowed AFTER launch, which is why they are
- * listed separately rather than swept up by the site-wide rule: /admin is the
- * internal OS, and the rest are transactional or belong to one signed-in
- * person. None of them should ever appear in a result.
+ * SEARCH_LAUNCHED IS KEPT AS A SWITCH, and it is a loaded one. Setting it back
+ * to false does not "pause" indexing — it asks Google to stop crawling, and
+ * pages it can no longer fetch drop out of the index over the following weeks.
+ * Recovering from that costs months. If a single page must be pulled, give
+ * that page `noindex` (see the layouts under (shop)) rather than closing the
+ * whole site.
  */
-const SEARCH_LAUNCHED = false;
+const SEARCH_LAUNCHED = true;
 
-/** Never indexed, before or after launch. Mirrors what app/sitemap.ts omits. */
+/**
+ * Never indexed, before or after launch, on every storefront.
+ *
+ * LOCALE-PREFIXED AND GENERATED, NOT TYPED. The hand-written list this
+ * replaces named /uk and /en only — it was written when those were the only
+ * two storefronts and never grew when Japanese and Arabic shipped. Opening
+ * the site with it would have left /ja/admin, /ar/checkout and /ja/account
+ * crawlable while their Ukrainian and English twins were protected: a
+ * disallow list that is a copy of the locale list is a disallow list that
+ * silently stops covering half the site.
+ *
+ * These are PREFIXES to Google, so /uk/checkout covers /checkout/success and
+ * /checkout/confirmation without naming them.
+ */
+const PRIVATE_SEGMENTS = [
+  "/admin",
+  "/account",
+  "/checkout",
+  "/cart",
+  "/login",
+  "/register",
+  "/newsletter/preferences",
+  /* The trade catalogue and the application form. /wholesale itself is the
+     public enquiry page and stays crawlable — it is the one that should rank;
+     these two are behind a sign-in and a form respectively, and both already
+     carry noindex of their own. */
+  "/wholesale/portal",
+  "/wholesale/register",
+];
+
 const PRIVATE_PATHS = [
   "/api/",
   "/unlock",
-  "/uk/admin",
-  "/en/admin",
-  "/uk/account",
-  "/en/account",
-  "/uk/checkout",
-  "/en/checkout",
-  "/uk/cart",
-  "/en/cart",
-  "/uk/login",
-  "/en/login",
-  "/uk/register",
-  "/en/register",
-  "/uk/newsletter/preferences",
-  "/en/newsletter/preferences",
+  ...LOCALES.flatMap((locale) => PRIVATE_SEGMENTS.map((path) => `/${locale}${path}`)),
 ];
 
 export default function robots(): MetadataRoute.Robots {

@@ -140,7 +140,113 @@ export type Product = {
    * enforced on the server and merely reflected in the UI.
    */
   incoming?: true;
+  /**
+   * In the catalogue, priced, and not in the building.
+   *
+   * THE SAME GATE AS `incoming`, A DIFFERENT SENTENCE. Both mean "cannot be
+   * bought today" and both are enforced in lib/pricing, so every caller asks
+   * isPurchasable() rather than testing either flag — that is what stops the
+   * next surface from honouring one and forgetting the other. What they do NOT
+   * share is what a customer is told: a thing that has never existed says
+   * Coming soon, and a thing that sold out says Sold out. Telling a returning
+   * buyer their bowl is "coming soon" would read as a new product they have
+   * already owned.
+   *
+   * TEMPORARY BY NATURE. `incoming` describes a product; this describes a
+   * shelf, and the shelf changes. Clearing it is the whole restock procedure.
+   */
+  soldOut?: true;
+  /**
+   * Real, priced, photographed if we are lucky — and not here yet.
+   *
+   * NOT `incoming`, WHICH IS A DIFFERENT THING WEARING A SIMILAR WORD.
+   * `incoming` is the withheld listing: no price, no category, a TOP SECRET
+   * stamp where the figure goes. Reusing it here would have printed that stamp
+   * on a lid that is simply on a lorry, and hidden the price a customer needs
+   * in order to decide whether to wait.
+   */
+  comingSoon?: true;
 };
+
+/** Which catalogue product each HMD add-on actually IS. */
+export const ADDON_PRODUCT = { lid: "lid-9e418", rubber: "fear-9e418" } as const;
+export type AddonKey = keyof typeof ADDON_PRODUCT;
+
+/**
+ * Can this be sold right now?
+ *
+ * THE ONE QUESTION EVERY SURFACE ASKS. There were eleven places testing
+ * `product.incoming` directly; adding a second reason to refuse a sale by
+ * hand-editing all eleven is how one of them ends up selling a sold-out bowl.
+ */
+export function isPurchasable(p: Product): boolean {
+  return !p.incoming && !p.comingSoon && !p.soldOut;
+}
+
+/**
+ * What to SAY about it — the label, not the gate.
+ *
+ * THREE WAYS TO BE UNBUYABLE AND THEY ARE NOT THE SAME SENTENCE. Withheld has
+ * no price to show, coming soon has one and a future, sold out has one and a
+ * past. A shopper told the wrong one of these is misinformed rather than
+ * merely disappointed.
+ */
+export type Availability = "available" | "withheld" | "coming_soon" | "sold_out";
+
+export function availabilityOf(p: Product): Availability {
+  if (p.incoming) return "withheld";
+  if (p.comingSoon) return "coming_soon";
+  if (p.soldOut) return "sold_out";
+  return "available";
+}
+
+/**
+ * What a shopper is told, in the four storefronts.
+ *
+ * ONE SET OF WORDS, because there were already three. The grid said «Скоро»,
+ * the card said «Очікується» and the kit builder said «Незабаром» — three
+ * Ukrainian words for one state, on three surfaces a customer sees in the same
+ * minute. Adding a fourth state by hand would have made it six.
+ *
+ * Plain data rather than a next-intl namespace: this is read by client
+ * components that already take `locale` as a prop, and lib/products has no
+ * business importing the i18n runtime.
+ */
+export const AVAILABILITY_TEXT: Record<Exclude<Availability, "available">, Record<string, string>> = {
+  withheld: { uk: "Очікується", en: "Incoming", ja: "近日公開", ar: "قريبًا" },
+  coming_soon: { uk: "Незабаром", en: "Coming soon", ja: "近日入荷", ar: "قريبًا" },
+  sold_out: { uk: "Немає в наявності", en: "Sold out", ja: "売り切れ", ar: "نفدت الكمية" },
+};
+
+/** The label for a state, or "" when there is nothing to say. */
+export function availabilityText(a: Availability, locale: string): string {
+  if (a === "available") return "";
+  const row = AVAILABILITY_TEXT[a];
+  return row[locale] ?? row.en;
+}
+
+/**
+ * Is an HMD add-on orderable?
+ *
+ * AN ADD-ON IS A PRODUCT. The lid and the ring are sold on their own pages and
+ * ticked as options on a device, and they come off the same shelf either way —
+ * migration 0038 exists precisely because both routes decrement one bin. So
+ * their availability is read from the catalogue rather than kept as a second
+ * switch that somebody has to remember to flip twice.
+ */
+export function addonAvailable(key: AddonKey): boolean {
+  const p = products.find((x) => x.slug === ADDON_PRODUCT[key]);
+  return p ? isPurchasable(p) : false;
+}
+
+/** The availability of the product behind an add-on, for its label. */
+export function addonAvailability(key: AddonKey): Availability {
+  const p = products.find((x) => x.slug === ADDON_PRODUCT[key]);
+  /* A missing add-on product is a catalogue bug, not a sale: default to the
+     most restrictive answer rather than letting a typo in ADDON_PRODUCT open
+     the tick box back up. */
+  return p ? availabilityOf(p) : "coming_soon";
+}
 
 export const products: Product[] = [
   {
@@ -787,6 +893,9 @@ export const products: Product[] = [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
       ],
     },
+    /* Out of stock, August 2026. Clearing this line is the entire restock —
+       nothing else anywhere needs changing. */
+    soldOut: true,
     tags: ["phunnel", "handmade"],
   },
   {
@@ -1028,6 +1137,11 @@ export const products: Product[] = [
     /* Findable by what the part used to be called, without the old word
        appearing anywhere on the page. Someone who knows it as a гумка still
        lands on it — `tags` is what site search reads. */
+    /* Awaiting delivery — not in the building yet. Sets Coming soon on the
+       card, the PDP, the kit builder and the HMD add-on tick, removes it from
+       the trade catalogue, and makes lib/pricing refuse the line however the
+       request arrives. Clearing this line is the whole arrival procedure. */
+    comingSoon: true,
     tags: ["accessory", "fear", "9e418", "rubber", "ring", "seal", "гумка", "гумове кільце", "кільце"],
     pdp: {
       shortEn:
@@ -1067,6 +1181,11 @@ export const products: Product[] = [
     category: "accessory",
     featured: false,
     image: "",
+    /* Awaiting delivery — not in the building yet. Sets Coming soon on the
+       card, the PDP, the kit builder and the HMD add-on tick, removes it from
+       the trade catalogue, and makes lib/pricing refuse the line however the
+       request arrives. Clearing this line is the whole arrival procedure. */
+    comingSoon: true,
     tags: ["accessory", "lid", "9e418", "cap", "cover", "кришка"],
     pdp: {
       shortEn:

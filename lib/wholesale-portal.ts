@@ -1,7 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { products, type Product, type Variant } from "@/lib/products";
+import { products, isPurchasable, addonAvailable, type Product, type Variant } from "@/lib/products";
 import { currencyForLocale } from "@/lib/currency";
 import { isPartnerType, unitPrice, type PartnerType } from "@/lib/wholesale-prices";
 import {
@@ -90,7 +90,7 @@ export function wholesaleCatalogue(): Product[] {
      against "quote on request" — inviting a partner to order a thing that does
      not exist yet. Retail refuses it in lib/pricing; this is the same refusal
      on the trade side. */
-  return products.filter((p) => !p.incoming);
+  return products.filter(isPurchasable);
 }
 
 /* ---- Add-ons ---------------------------------------------------------------
@@ -118,7 +118,13 @@ export function addonLabel(a: LineAddons): string | null {
 }
 
 export function addonsFor(p: Product): AddonKey[] {
-  if (p.category === "hmd") return ["lid", "rubber"];
+  /* THE SAME SHELF ANSWERS THE TRADE PORTAL. A lid that has not arrived has
+     not arrived for a partner ordering forty of them either — arguably less,
+     since forty is the order that finds out. The retail configurator drops the
+     option for the same reason and reads the same catalogue row. */
+  if (p.category === "hmd") {
+    return (["lid", "rubber"] as const).filter((k) => addonAvailable(k));
+  }
   if (p.category === "windcover") return ["timer"];
   return [];
 }

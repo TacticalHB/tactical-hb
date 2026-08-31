@@ -100,13 +100,19 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
     let l = ALL.filter((p) => (cat === "all" ? p.category !== "accessory" : p.category === cat));
     /* A withheld listing has no price, so it matches no band — the same call
        the Incoming tile already makes. Filtering by price is asking about
-       money, and it has none to answer with. */
+       money, and it has none to answer with.
+
+       A SOLD-OUT BOWL STILL HAS ONE, and still belongs in its band: somebody
+       filtering €10–15 is deciding what they can spend, not what is on the
+       shelf this week. So the band test keeps only the priceless out, which is
+       why this asks about the price rather than about purchasability. */
     if (bands.length)
-      l = l.filter((p) => !p.incoming && bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
-    /* And it sorts to the end either way rather than leading "low to high" on
-       a zero it does not really have. */
+      l = l.filter((p) => p.price > 0 && bands.some((k) => inBand(p, PRICE_BANDS.find((b) => b.key === k)!, currency)));
+    /* And a priceless one sorts to the end either way rather than leading
+       "low to high" on a zero it does not really have. */
+    const priceless = (p: Product) => Number(!(p.price > 0));
     const byPrice = (dir: 1 | -1) => (a: Product, b: Product) =>
-      a.incoming || b.incoming ? Number(!!a.incoming) - Number(!!b.incoming) : (a.price - b.price) * dir;
+      priceless(a) || priceless(b) ? priceless(a) - priceless(b) : (a.price - b.price) * dir;
     if (sort === "price-asc") l = [...l].sort(byPrice(1));
     else if (sort === "price-desc") l = [...l].sort(byPrice(-1));
     return l;

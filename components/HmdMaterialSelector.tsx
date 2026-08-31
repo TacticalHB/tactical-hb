@@ -4,6 +4,7 @@ import { useState } from "react";
 import { t } from "@/lib/i18n-text";
 import { currencyForLocale, formatMoney, type Money } from "@/lib/currency";
 import { MATERIAL_PRICE, type HmdMaterial } from "@/lib/hmd-options";
+import { addonAvailability, availabilityText, type Availability } from "@/lib/products";
 import { TIMER_PRICE } from "@/lib/windcover-options";
 
 /* ---------------------------------------------------------------------------
@@ -39,15 +40,24 @@ export type OptionSpec = {
   ar?: string;
   glyph: "disc" | "ring" | "clock";
   price: Money;
+  /**
+   * Whether the thing behind this tick box can actually be sent.
+   *
+   * READ FROM THE CATALOGUE, NOT SET BY HAND. An add-on IS a product — the lid
+   * ticked here and the lid bought on its own page come off one shelf, which
+   * is the whole reason migration 0038 exists — so a second switch here would
+   * be a second thing to remember, and the one that gets forgotten.
+   */
+  status?: Availability;
 };
 
 export const HMD_OPTIONS: OptionSpec[] = [
-  { key: "lid", en: "With Lid 9E418", uk: "З Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418", glyph: "disc", price: MATERIAL_PRICE.lid },
+  { key: "lid", en: "With Lid 9E418", uk: "З Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418", glyph: "disc", price: MATERIAL_PRICE.lid, status: addonAvailability("lid") },
   /* The KEY stays `rubber` — it is written into cart lines, order rows
      (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
      would orphan every order already placed. Only the two labels are the
      product's name. */
-  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber },
+  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber, status: addonAvailability("rubber") },
 ];
 
 export const WINDCOVER_OPTIONS: OptionSpec[] = [
@@ -97,7 +107,10 @@ export function ConfigSelector({
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成", ar: "التكوين" });
   const OPTIONS = options;
-  const names = OPTIONS.filter((o) => value[o.key]).map((o) => t(locale, o));
+  const offerable = (o: OptionSpec) => (o.status ?? "available") === "available";
+  /* A disabled option cannot be part of the configuration, even if a stale
+     state object still says it is ticked. */
+  const names = OPTIONS.filter((o) => value[o.key] && offerable(o)).map((o) => t(locale, o));
   const summary = names.length ? names.join(" + ") : t(locale, { uk: "Базова", en: "Base", ja: "ベース", ar: "أساسي" });
 
   /* ---- PDP: Rimowa-style option list ----
@@ -118,7 +131,8 @@ export function ConfigSelector({
           aria-label={label}
         >
           {OPTIONS.map((o, i) => {
-            const active = value[o.key];
+            const can = offerable(o);
+            const active = can && value[o.key];
             const name = t(locale, o);
             const price = formatMoney(o.price, currencyForLocale(locale));
             const hovered = hoverKey === o.key;
@@ -128,23 +142,36 @@ export function ConfigSelector({
                 type="button"
                 role="checkbox"
                 aria-checked={active}
-                onClick={() => onToggle(o.key)}
+                /* DISABLED, NOT HIDDEN. Removing the row would leave a device
+                   that silently stopped offering a lid it has always offered;
+                   the customer would assume it never existed rather than that
+                   it is on its way. It stays, greyed, saying which. */
+                disabled={!can}
+                aria-disabled={!can}
+                onClick={() => can && onToggle(o.key)}
                 onMouseEnter={() => setHoverKey(o.key)}
                 onMouseLeave={() => setHoverKey(null)}
                 className="w-full flex items-center justify-between px-5 py-4 text-[15px] text-left transition-colors"
                 style={{
-                  background: active ? "#f0f0f0" : hovered ? "#f7f7f7" : "#ffffff",
+                  background: !can ? "#fafafa" : active ? "#f0f0f0" : hovered ? "#f7f7f7" : "#ffffff",
                   borderTop: i > 0 ? "1px solid #e4e4e6" : "none",
-                  color: "#111111",
+                  color: can ? "#111111" : "#9a9a9e",
                   fontWeight: active ? 500 : 400,
+                  cursor: can ? "pointer" : "not-allowed",
                 }}
               >
                 <span>{name}</span>
                 <span
                   className="flex items-center gap-2 text-[14px]"
-                  style={{ color: active ? "#111111" : "#707072" }}
+                  style={{ color: !can ? "#9a9a9e" : active ? "#111111" : "#707072" }}
                 >
-                  +{price}
+                  {/* The state takes the price's place: what it costs is not
+                      the question when it cannot be had. */}
+                  {can ? `+${price}` : (
+                    <span className="text-[12px] tracking-[0.14em] uppercase">
+                      {availabilityText(o.status ?? "available", locale)}
+                    </span>
+                  )}
                   {active && (
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                       <path
@@ -172,22 +199,31 @@ export function ConfigSelector({
       </div>
       <div className="flex gap-1.5" role="group" aria-label={label}>
         {OPTIONS.map((o) => {
-          const active = value[o.key];
+          const can = offerable(o);
+          const active = can && value[o.key];
           const name = t(locale, o);
           const price = formatMoney(o.price, currencyForLocale(locale));
+          const note = can ? `+${price}` : availabilityText(o.status ?? "available", locale);
           return (
             <button
               key={o.key}
               type="button"
               aria-pressed={active}
-              aria-label={`${name} (+${price})`}
-              title={`${name} · +${price}`}
-              onClick={() => onToggle(o.key)}
+              disabled={!can}
+              aria-disabled={!can}
+              aria-label={`${name} (${note})`}
+              title={`${name} · ${note}`}
+              onClick={() => can && onToggle(o.key)}
               onMouseEnter={() => setHoverKey(o.key)}
               onMouseLeave={() => setHoverKey(null)}
               className="grid place-items-center w-[30px] h-[30px] rounded-[5px] transition-colors"
               style={{
                 background: "#ffffff",
+                /* A disabled swatch reads as unavailable rather than merely
+                   unselected — same 30px square, faded, and not clickable. Its
+                   label carries the reason. */
+                opacity: can ? 1 : 0.4,
+                cursor: can ? "pointer" : "not-allowed",
                 color: active ? "#111111" : "#9a9a9e",
                 // Hover activates the ink frame on unselected swatches;
                 // the selected state (below) is unchanged. transition-colors

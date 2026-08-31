@@ -1,4 +1,4 @@
-import type { Product } from "./products";
+import { isPurchasable, type Product } from "./products";
 import { t, type Text } from "@/lib/i18n-text";
 import { LID_WEIGHT_G, type HmdMaterial } from "./hmd-options";
 import { TIMER_WEIGHT_G, type WindcoverOptions } from "./windcover-options";
@@ -92,7 +92,7 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
      "0 x 0 x 0 mm" — two invented facts, stated with the authority of a spec
      sheet, on the one page whose whole job is to say the file is closed.
      Nothing is the honest row count here. */
-  if (product.incoming) return [];
+  if (!isPurchasable(product)) return [];
 
   const rows: FieldRow[] = [];
   const g = t(locale, { uk: "г", en: "g", ja: "g", ar: "غ" });

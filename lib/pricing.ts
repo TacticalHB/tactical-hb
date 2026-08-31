@@ -1,4 +1,4 @@
-import { products } from "@/lib/products";
+import { products, isPurchasable, addonAvailable } from "@/lib/products";
 import { materialUpcharge, materialWeightG } from "@/lib/hmd-options";
 import { timerUpcharge, timerWeightG } from "@/lib/windcover-options";
 import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
@@ -79,13 +79,14 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
     // Unknown slug: drop the line rather than price it at zero.
     if (!product) continue;
 
-    /* A WITHHELD LISTING IS NOT BUYABLE, AND THIS IS WHERE THAT IS TRUE. The
+    /* A LISTING THAT CANNOT BE SOLD IS NOT BUYABLE, AND THIS IS WHERE THAT IS
+       TRUE — withheld, awaiting delivery, or sold out alike. The
        PDP renders no button for it, but the button was never the gate: every
        amount this shop charges comes through here, so dropping the line here
        is what makes a hand-made request for it come to nothing. Its price is
        zero because it has no price yet, and a zero that reached a basket would
        be a free order rather than a refused one. */
-    if (product.incoming) continue;
+    if (!isPurchasable(product)) continue;
 
     const qty = Math.floor(Number(l.qty));
     if (!Number.isFinite(qty) || qty < 1) continue;
@@ -100,8 +101,16 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
     // Add-ons are per-family; ignore stray flags on anything else. A `timer` on
     // an HMD or a `lid` on a wind cover is priced at nothing and recorded as
     // absent, so a crafted request cannot conjure an upcharge or a discount.
+    /* AND AN ADD-ON THAT CANNOT BE SENT IS NOT AN ADD-ON. The tick box is
+       disabled and the defaults are off, but neither is the gate: a request
+       can arrive with any flags at all, and charging for a lid that is still
+       on a lorry would sell it. Cleared here, so the line is priced and
+       recorded as the device alone — which is exactly what would ship. */
     const material = product.category === "hmd"
-      ? { lid: !!l.options?.lid, rubber: !!l.options?.rubber }
+      ? {
+          lid: !!l.options?.lid && addonAvailable("lid"),
+          rubber: !!l.options?.rubber && addonAvailable("rubber"),
+        }
       : { lid: false, rubber: false };
     if (product.category === "hmd") {
       unit = addMoney(unit, materialUpcharge(material));

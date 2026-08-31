@@ -5,12 +5,13 @@ import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Product } from "@/lib/products";
+import { Product, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
 import HeartButton from "./HeartButton";
 import Price from "./Price";
 import { money } from "@/lib/currency";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
+  const status = availabilityOf(product);
   const router = useRouter();
   const name = product.tileTitle ?? (locale === "uk" ? product.nameUk : product.nameEn);
   const subtitle = t(locale, { uk: product.taglineUk, en: product.taglineEn, ja: product.taglineJa, ar: product.taglineAr });
@@ -40,7 +41,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
           that renders every row's price — printing "€0.00" against a product
           that has no price rather than no product at all. Saving a thing that
           cannot be bought is a promise the shop cannot keep either way. */}
-      {!product.incoming && (
+      {isPurchasable(product) && (
       <HeartButton
         productId={product.slug}
         /* 44px, up from 36. It sits over the photograph in the corner of the
@@ -118,17 +119,31 @@ export default function NikeProductCard({ product, locale }: { product: Product;
               {subtitle}
             </div>
           )}
-          {/* A WITHHELD LISTING HAS NO PRICE, and printing its zero would read
-              as free. The status line takes the slot instead, so the card still
-              has something in the place every other card has a figure — an
-              empty row is what makes a grid look broken. */}
+          {/* THE PRICE AND THE REASON IT CANNOT BE BOUGHT ARE TWO DIFFERENT
+              FACTS. A withheld listing has no price at all, and printing its
+              zero would read as free — so the status takes the slot. But a lid
+              awaiting delivery and a sold-out bowl both have real prices, and
+              hiding them tells a shopper less than they had before: they can
+              still decide whether to come back for it. So the figure stays and
+              the status sits beside it, and only a priceless listing gets the
+              status alone.
+
+              An empty row is what makes a grid look broken, which is why one
+              of the three always renders. */}
           <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
-            {product.incoming ? (
-              <span className="text-[13px] tracking-[0.18em] uppercase" style={{ color: "#8a8a8d" }}>
-                {t(locale, { uk: "Очікується", en: "Incoming", ja: "近日公開", ar: "قريبًا" })}
+            {status === "available" ? (
+              <Price money={price} locale={locale} />
+            ) : product.price > 0 ? (
+              <span className="flex items-baseline gap-2 flex-wrap">
+                <Price money={price} locale={locale} />
+                <span className="text-[11px] tracking-[0.16em] uppercase" style={{ color: "#8a8a8d" }}>
+                  {availabilityText(status, locale)}
+                </span>
               </span>
             ) : (
-              <Price money={price} locale={locale} />
+              <span className="text-[13px] tracking-[0.18em] uppercase" style={{ color: "#8a8a8d" }}>
+                {availabilityText(status, locale)}
+              </span>
             )}
           </div>
         </Link>

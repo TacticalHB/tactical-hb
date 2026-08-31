@@ -5,7 +5,7 @@ import { t, pickList } from "@/lib/i18n-text";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Product } from "@/lib/products";
+import { Product, addonAvailable, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
@@ -212,6 +212,7 @@ function FeatureIcon({ name }: { name: string }) {
 /* ---------- Page ---------- */
 export default function ProductPDP({ product, locale }: { product: Product; locale: string }) {
   const uk = locale === "uk";
+  const status = availabilityOf(product);
   const { addToCart } = useCart();
   const mainImgRef = useRef<HTMLDivElement>(null);
   const a11y = useTranslations("a11y");
@@ -260,7 +261,15 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      Classic: the card quotes €23 and the page opens at €29.50 with both
      add-ons ticked, exactly as the A.Craft and the OP do. */
   const isHmd = product.category === "hmd";
-  const [material, setMaterial] = useState<HmdMaterial>({ lid: true, rubber: true });
+  /* THE PAGE OPENS WITH WHATEVER CAN ACTUALLY BE SENT. Both add-ons used to be
+     ticked by default, which is the configuration most people want — but a
+     default that includes an item awaiting delivery would price the device
+     with it, show a total nobody can pay, and then have the server quietly
+     drop the line at checkout. Unavailable options open unticked. */
+  const [material, setMaterial] = useState<HmdMaterial>({
+    lid: addonAvailable("lid"),
+    rubber: addonAvailable("rubber"),
+  });
 
   /* The wind cover's timer follows the same rule as the HMD add-ons above:
      PRE-SELECTED here, base price on the card. Opening the page offers the
@@ -450,7 +459,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 page exists not to do — the stamp under it says everything the
                 file is willing to say. Kept for every other product, where it
                 is orientation rather than a disclosure. */}
-            {!product.incoming && (
+            {status !== "withheld" && (
               <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
             )}
             {/* Single currency here — the headline price reads cleaner on the
@@ -463,7 +472,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 filled with the one true thing there is to say. The stamp is the
                 same string in every locale — it is a stamp, not a sentence —
                 and only the line under it translates. */}
-            {product.incoming ? (
+            {status === "withheld" ? (
               <div className="mt-5">
                 <span
                   dir="ltr"
@@ -536,11 +545,41 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               </div>
             )}
 
-            {/* Buttons. A withheld listing has none: no bag, and no favourite
-                either — a saved item that can never be bought is a promise the
-                shop cannot keep. lib/pricing refuses the line regardless; this
-                is only what the reader sees. */}
-            {!product.incoming && (
+            {/* Buttons. Nothing that cannot be sold has them: no bag, and no
+                favourite either — a saved item that cannot be bought is a
+                promise the shop cannot keep. lib/pricing refuses the line
+                regardless; this is only what the reader sees.
+
+                AND SOMETHING HAS TO TAKE THEIR PLACE. A page that simply ends
+                after the description reads as broken rather than as closed, so
+                the state and what to do about it go in the slot the buttons
+                would have filled. */}
+            {!isPurchasable(product) && status !== "withheld" && (
+              <div
+                className="mt-8 rounded-2xl px-5 py-4"
+                style={{ background: "#f5f5f5", border: "1px solid #e6e6e8" }}
+              >
+                <div className="text-[13px] tracking-[0.16em] uppercase" style={{ color: "#111" }}>
+                  {availabilityText(status, locale)}
+                </div>
+                <p className="text-[14px] mt-1.5 leading-relaxed" style={{ color: "#707072" }}>
+                  {status === "coming_soon"
+                    ? t(locale, {
+                        en: "This one has not reached us yet. It cannot be ordered today — and it is not available as an option on a heat device either.",
+                        uk: "Цей товар ще не приїхав до нас. Замовити його сьогодні не можна — і як опцію до пристрою теж.",
+                        ja: "こちらはまだ入荷していません。本日はご注文いただけず、ヒートデバイスのオプションとしてもお選びいただけません。",
+                        ar: "لم يصلنا هذا المنتج بعد. لا يمكن طلبه اليوم، ولا اختياره كإضافة على جهاز حرارة.",
+                      })
+                    : t(locale, {
+                        en: "Out of stock for now. It will return — nothing about it has changed.",
+                        uk: "Наразі немає в наявності. Товар повернеться — у ньому нічого не змінилося.",
+                        ja: "現在在庫切れです。商品自体に変更はなく、再入荷いたします。",
+                        ar: "نفدت الكمية حاليًا. سيعود المنتج كما هو دون أي تغيير.",
+                      })}
+                </p>
+              </div>
+            )}
+            {isPurchasable(product) && (
             <div className="flex flex-col gap-3 mt-8">
               {/* The slide-over replaces the fly-to-cart animation here (passing
                   null as the source). */}

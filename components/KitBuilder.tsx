@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { t } from "@/lib/i18n-text";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { products } from "@/lib/products";
+import { products, addonAvailable, addonAvailability, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
 import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";
@@ -53,8 +53,9 @@ const EMPTY: Record<SlotKey, Selection> = {
   bowl: { slug: null },
   /* The add-ons start on, matching the product pages: a device is shown with
      its lid and a cover with its timer, and a customer who wants neither turns
-     them off in the same place they would there. */
-  hmd: { slug: null, lid: true, rubber: true },
+     them off in the same place they would there. An add-on that cannot be sent
+     starts off — otherwise the kit opens with a total nobody can pay. */
+  hmd: { slug: null, lid: addonAvailable("lid"), rubber: addonAvailable("rubber") },
   windcover: { slug: null, timer: true },
 };
 
@@ -236,14 +237,22 @@ export default function KitBuilder({ locale }: { locale: string }) {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {list.map((p) => {
-                    const active = current.slug === p.slug;
+                    /* A KIT IS THREE THINGS IN ONE BOX. Letting an unavailable
+                       piece be picked would build a setup the server refuses
+                       whole, so the tile stays visible — the shelf has not
+                       changed shape — and stops being selectable. */
+                    const can = isPurchasable(p);
+                    const active = can && current.slug === p.slug;
                     return (
                       <button
                         key={p.slug}
                         type="button"
-                        onClick={() => choose(slot, active ? null : p.slug)}
+                        onClick={() => can && choose(slot, active ? null : p.slug)}
                         aria-pressed={active}
+                        disabled={!can}
+                        aria-disabled={!can}
                         className="kit-tile text-left"
+                        style={{ opacity: can ? 1 : 0.45, cursor: can ? "pointer" : "not-allowed" }}
                         data-active={active ? "true" : undefined}
                       >
                         {/* #f5f5f5, the catalogue's studio plate — the same
@@ -273,7 +282,13 @@ export default function KitBuilder({ locale }: { locale: string }) {
                             {uk ? p.nameUk : p.nameEn}
                           </div>
                           <div className="text-[12px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                            <Price money={money(p.price, p.priceUah)} locale={locale} />
+                            {can ? (
+                              <Price money={money(p.price, p.priceUah)} locale={locale} />
+                            ) : (
+                              <span className="tracking-[0.1em] uppercase text-[10.5px]">
+                                {availabilityText(availabilityOf(p), locale)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </button>
@@ -300,18 +315,29 @@ export default function KitBuilder({ locale }: { locale: string }) {
                     {(slot === "hmd"
                       ? ([["lid", L.lid], ["rubber", L.rubber]] as const)
                       : ([["timer", L.timer]] as const)
-                    ).map(([key, label]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggle(slot, key)}
-                        aria-pressed={!!current[key]}
-                        className="kit-chip text-[12px]"
-                        data-active={current[key] ? "true" : undefined}
-                      >
-                        {label}
-                      </button>
-                    ))}
+                    ).map(([key, label]) => {
+                      /* The timer has no product of its own, so it is always
+                         offerable; the lid and the ring answer to their own
+                         catalogue rows. */
+                      const st =
+                        key === "lid" || key === "rubber" ? addonAvailability(key) : "available";
+                      const can = st === "available";
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => can && toggle(slot, key)}
+                          aria-pressed={can && !!current[key]}
+                          disabled={!can}
+                          aria-disabled={!can}
+                          className="kit-chip text-[12px]"
+                          style={{ opacity: can ? 1 : 0.45, cursor: can ? "pointer" : "not-allowed" }}
+                          data-active={can && current[key] ? "true" : undefined}
+                        >
+                          {can ? label : `${label} · ${availabilityText(st, locale)}`}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </section>

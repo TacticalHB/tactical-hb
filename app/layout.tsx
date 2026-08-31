@@ -29,6 +29,39 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description: siteMetadata.en.description,
+  /* ---- The favicon --------------------------------------------------------
+
+     THE SITE SHIPPED THE DEFAULT NEXT.JS TRIANGLE for its whole life. app/
+     favicon.ico was never replaced, so the circle beside tactical-hb.com in
+     Google's results was a stock framework icon — which is what you get when
+     a search listing finally appears and nobody had reason to look at that
+     file before.
+
+     PNG, AND AT A STABLE URL. Google fetches the favicon for Search
+     separately from the browser and wants a square PNG that is a multiple of
+     48px; /favicon.png is 96 and its filename carries no content hash, so the
+     URL Google records today is the URL that answers a year from now. The
+     larger sizes are declared for browsers and installed-app surfaces, which
+     pick the closest fit themselves.
+
+     .ico STAYS AS WELL. app/favicon.ico is now the same mark rather than the
+     triangle: browsers still request /favicon.ico by convention with no HTML
+     to tell them otherwise, and a 404 there is a blank tab in the ones that
+     do.
+
+     The artwork is public/tct-logo.svg — the brand mark, unchanged geometry —
+     rendered white on the brand near-black, cropped to its own bounding box
+     and centred. The vector sits off-centre in its own canvas, which at 16px
+     would have read as a lopsided smudge. */
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "96x96" },
+      { url: "/favicon-48.png", type: "image/png", sizes: "48x48" },
+      { url: "/favicon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   ...siteMetadata.shared,
 };
 

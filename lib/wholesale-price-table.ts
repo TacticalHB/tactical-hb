@@ -1,6 +1,7 @@
 import { products, availabilityOf, availabilityText, type Availability, type Product } from "@/lib/products";
 import { PARTNER_TYPES, bookPrice, addonPrice, type PartnerType } from "@/lib/wholesale-prices";
-import type { Money } from "@/lib/currency";
+import { money, type Money } from "@/lib/currency";
+import { TIMER_PRICE } from "@/lib/windcover-options";
 
 /* ---------------------------------------------------------------------------
    The trade price books, laid out as one table anyone can read.
@@ -51,6 +52,17 @@ export type PriceRow = {
    */
   availability: Availability;
   availabilityLabel: string;
+  /**
+   * What a CUSTOMER pays on the website, for comparison.
+   *
+   * A FOURTH COLUMN, NOT A FOURTH BOOK. Retail is deliberately kept out of
+   * PARTNER_TYPES: that union is the set of values partner_type may hold, it
+   * is mirrored by a check constraint in 0040, and it fills the price-book
+   * selector on the partner card. Adding "retail" to it would offer staff a
+   * book that sells a partner the shop price, and let the database store it.
+   * It is a comparison, so it travels as its own field.
+   */
+  retail: Money | null;
 };
 
 const GROUP_LABEL: Record<PriceRow["group"], { en: string; uk: string }> = {
@@ -69,7 +81,11 @@ export function groupLabel(g: PriceRow["group"], locale: string): string {
 
 export function bookLabel(t: PartnerType, locale: string): string {
   const uk = locale === "uk";
-  if (t === "shop") return uk ? "Магазин / Рітейл" : "Shop / Retail";
+  /* NOT "Shop / Retail". Once the table grew a genuine retail column, two
+     headings carried the word and the trade book was the one that did not mean
+     it. This matches the partner card's own label exactly, so the column a
+     reader sees here is the option they pick there. */
+  if (t === "shop") return uk ? "Магазин / Онлайн-рітейл" : "Shop / Online retailer";
   if (t === "distribution") return uk ? "Дистрибуція" : "Distribution";
   return uk ? "Кальянна / Бар" : "Lounge / Bar";
 }
@@ -85,7 +101,8 @@ function row(
   group: PriceRow["group"],
   prices: (Money | null)[],
   availability: Availability,
-  locale: string
+  locale: string,
+  retail: Money | null
 ): PriceRow {
   const shopIdx = PARTNER_TYPES.indexOf("shop");
   const distIdx = PARTNER_TYPES.indexOf("distribution");
@@ -97,6 +114,7 @@ function row(
     distributionDiffers: !eq(prices[shopIdx] ?? null, prices[distIdx] ?? null),
     availability,
     availabilityLabel: availabilityText(availability, locale),
+    retail,
   };
 }
 
@@ -131,12 +149,19 @@ export function priceTable(locale: string): PriceRow[] {
       );
       if (differs) {
         for (const c of perColour) {
-          out.push(row(`${p.slug}__${c.name}`, `${name} — ${c.name}`, group, c.prices, availability, locale));
+          const v = p.variants!.find((x) => x.name === c.name);
+          /* The colour's own retail price where it has one, the product's
+             otherwise — the same fallback the PDP applies, so the comparison
+             column shows what the page actually charges. */
+          const rp = money(v?.price ?? p.price, v?.priceUah ?? p.priceUah);
+          out.push(row(`${p.slug}__${c.name}`, `${name} — ${c.name}`, group, c.prices, availability, locale, rp));
         }
         continue;
       }
     }
-    out.push(row(p.slug, name, group, books.map((b) => bookPrice(b, p.slug)), availability, locale));
+    out.push(
+      row(p.slug, name, group, books.map((b) => bookPrice(b, p.slug)), availability, locale, money(p.price, p.priceUah))
+    );
   }
 
   /* ONLY THE TIMER. The lid and the ring are add-ons too, but they are also
@@ -150,7 +175,12 @@ export function priceTable(locale: string): PriceRow[] {
     { key: "timer", en: "Timer (on a wind cover)", uk: "Таймер (на ковпаку)" },
   ];
   for (const a of addonLabels) {
-    out.push(row(a.key, uk ? a.uk : a.en, "addon", books.map((b) => addonPrice(b, a.key)), "available", locale));
+    /* The timer's retail figure is its SURCHARGE on a wind cover, which is
+       what the trade column beside it is too — comparing a surcharge against
+       a full product price would make the margin look absurd. */
+    out.push(
+      row(a.key, uk ? a.uk : a.en, "addon", books.map((b) => addonPrice(b, a.key)), "available", locale, TIMER_PRICE)
+    );
   }
 
   return out;

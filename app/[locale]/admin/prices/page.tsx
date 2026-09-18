@@ -15,6 +15,12 @@ import { formatMoney } from "@/lib/currency";
    identical figures until distributors are repriced; the table says so in as
    many words rather than leaving a reader to compare twelve pairs by eye, and
    marks the rows that genuinely differ.
+
+   THE FOURTH COLUMN IS RETAIL, AND IT IS NOT A BOOK. It is what a customer
+   pays on the website, sitting beside the trade figures so the gap is visible
+   without opening a second page. It is ruled off from the three books and
+   labelled, because a column that looks like a book is one somebody will
+   eventually quote from.
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
@@ -43,6 +49,10 @@ export default async function AdminPricesPage({
       ? "Дистрибуція має ті самі цифри, що й магазин, доки її не переоцінять окремо."
       : "Distribution carries the same figures as shop until it is repriced separately.",
     varies: uk ? "дистрибуція окремо" : "distribution repriced",
+    retail: uk ? "Роздріб (сайт)" : "Retail (site)",
+    retailNote: uk
+      ? "Останній стовпець — роздрібна ціна на сайті, а не прайс. Для порівняння, не для котирування партнерам."
+      : "The last column is the website's retail price, not a book. For comparison — never quote it to a partner.",
     unavailableNote: uk
       ? "Позиції, яких зараз немає, лишаються в таблиці — ціна не перестає бути чинною, поки полиця порожня."
       : "Items that cannot be sold today stay in the table — the price does not stop being true because the shelf is empty.",
@@ -100,6 +110,19 @@ export default async function AdminPricesPage({
                       {bookLabel(b, locale)}
                     </th>
                   ))}
+                  {/* Ruled off from the books with a left border — three trade
+                      columns, then a different kind of number. */}
+                  <th
+                    className="text-right px-4 py-3 text-[11px] tracking-[0.12em] uppercase font-normal whitespace-nowrap"
+                    style={{
+                      color: "var(--console-muted)",
+                      background: "var(--console-panel-2)",
+                      borderBottom: "1px solid var(--console-border)",
+                      borderLeft: "2px solid var(--console-border)",
+                    }}
+                  >
+                    {L.retail}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -111,7 +134,7 @@ export default async function AdminPricesPage({
                       key={g}
                       label={groupLabel(g, locale)}
                       rows={inGroup}
-                      cols={books.length}
+                      cols={books.length + 1}
                       variesLabel={L.varies}
                       none={L.none}
                     />
@@ -127,6 +150,9 @@ export default async function AdminPricesPage({
         </p>
         <p className="text-[12.5px] mt-1" style={{ color: "var(--console-faint)" }}>
           {L.unavailableNote}
+        </p>
+        <p className="text-[12.5px] mt-1" style={{ color: "var(--console-faint)" }}>
+          {L.retailNote}
         </p>
         <p className="text-[12.5px] mt-1" style={{ color: "var(--console-faint)" }}>
           {L.source}
@@ -180,11 +206,17 @@ function GroupBlock({
               </span>
             )}
           </td>
-          {r.prices.map((m, i) => (
+          {[...r.prices, r.retail].map((m, i) => (
             <td
               key={i}
               className="px-4 py-2.5 text-right tabular-nums whitespace-nowrap"
-              style={{ color: m ? "var(--console-text)" : "var(--console-faint)", borderBottom: "1px solid var(--console-border)" }}
+              style={{
+                color: m ? "var(--console-text)" : "var(--console-faint)",
+                borderBottom: "1px solid var(--console-border)",
+                /* The rule that separates trade from retail, repeated on every
+                   row so the eye can follow it down the table. */
+                ...(i === r.prices.length ? { borderLeft: "2px solid var(--console-border)" } : {}),
+              }}
             >
               {m ? (
                 <>

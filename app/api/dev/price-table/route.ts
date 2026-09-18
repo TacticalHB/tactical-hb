@@ -15,6 +15,7 @@ export async function GET(req: Request) {
   const books = tableBooks();
   return NextResponse.json({
     books: books.map((b) => ({ key: b, label: bookLabel(b, locale) })),
+    retailColumn: locale === "uk" ? "Роздріб (сайт)" : "Retail (site)",
     rows: priceTable(locale).map((r) => ({
       ...r,
       groupLabel: groupLabel(r.group, locale),

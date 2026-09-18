@@ -69,6 +69,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { href: "/partners", en: "Partners", uk: "Партнери" },
       { href: "/wholesale", en: "Requests", uk: "Оптові запити" },
+      { href: "/prices", en: "Price books", uk: "Оптові прайси" },
       { href: "/followups", en: "Follow-ups", uk: "Листи партнерам" },
     ],
   },

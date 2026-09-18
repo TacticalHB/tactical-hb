@@ -15,9 +15,25 @@ import type { LineAddons } from "@/lib/wholesale-display";
    writing to somebody who will hold you to it, which is why partner_type has
    no default and no fallback (0034).
 
-   SHOPS AND DISTRIBUTORS SHARE THE SHOP BOOK, as the printed list says:
-   "SHOP / DISTRIBUTION — wholesale book for specialty shops, online retailers
-   and distributors".
+   DISTRIBUTION IS ITS OWN BOOK AS OF 18 SEPTEMBER 2026, AND CARRIES THE SHOP
+   FIGURES. The printed list puts shops, online retailers and distributors on
+   one page — "SHOP / DISTRIBUTION — wholesale book for specialty shops, online
+   retailers and distributors" — and until distributors are quoted differently
+   that is still what they pay.
+
+   So why split it at all? Because the split is coming, and the order matters.
+   Separating the BOOK first means a partner can be recorded as a distributor
+   today and quoted exactly what they are quoted now; the day the numbers
+   change, one object changes and shops are untouched. Doing it the other way
+   round — new prices with nowhere to record who gets them — means quoting from
+   a spreadsheet in between.
+
+   THE TWO COPIES ARE NOT DERIVED FROM EACH OTHER. `distribution` restates the
+   shop figures rather than referencing them, because a reference would make
+   repricing one of them look like a change to both, and the whole point of the
+   split is that they can move apart. Until they do, a change to the shop book
+   has to be made twice — which is the cost of the split, stated here so it is
+   not a surprise.
 
    ---- Two places the list and the catalogue do not line up 1:1 -------------
 
@@ -52,7 +68,7 @@ import type { LineAddons } from "@/lib/wholesale-display";
    should carry.
 --------------------------------------------------------------------------- */
 
-export const PARTNER_TYPES = ["shop", "lounge"] as const;
+export const PARTNER_TYPES = ["shop", "distribution", "lounge"] as const;
 export type PartnerType = (typeof PARTNER_TYPES)[number];
 
 export function isPartnerType(v: unknown): v is PartnerType {
@@ -93,6 +109,31 @@ const BOOKS: Record<PartnerType, Book> = {
       lid: m(2.5, 150),
       rubber: m(2.3, 120), // FEAR 9E418 — the key stayed `rubber`, see 0029.
       timer: m(10.0, 450), // 24.30 − 14.30 / 1100 − 650
+    },
+  },
+
+  /* DISTRIBUTION — distributors buying to resell on.
+
+     IDENTICAL TO `shop` TODAY, ON PURPOSE. Every figure below is the one a
+     shop pays, because that is what the printed list says a distributor pays.
+     This book exists so that stops being true without shops moving. */
+  distribution: {
+    products: {
+      "hmd-tct-classic": m(12.0, 550),
+      "hmd-a-craft": m(13.0, 590),
+      "hmd-tct-op": m(19.5, 860),
+      "hmd-tct-op__black": m(19.0, 820),
+      "hmd-tct-op__purple": m(20.0, 890),
+      "bowl-killer": m(6.9, 320),
+      "bowl-livanka": m(6.0, 280),
+      "bowl-phunnel": m(8.0, 375),
+      "windcover-detonator": m(14.3, 650),
+      "windcover-kh": m(14.3, 650),
+    },
+    addons: {
+      lid: m(2.5, 150),
+      rubber: m(2.3, 120),
+      timer: m(10.0, 450),
     },
   },
 

@@ -192,6 +192,7 @@ export default async function AdminHomePage({
       chips: [
         { label: uk ? "Партнери" : "Partners", href: p("/partners") },
         { label: uk ? "Запити" : "Requests", href: p("/wholesale") },
+        { label: uk ? "Прайси" : "Price books", href: p("/prices") },
         { label: uk ? "Листи" : "Follow-ups", href: p("/followups") },
       ],
     },

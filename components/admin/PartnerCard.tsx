@@ -95,7 +95,11 @@ export default function PartnerCard({
     application: uk ? "Заявка партнера" : "Partner's application",
     priceBook: uk ? "Прайс" : "Price book",
     bookNone: uk ? "Не задано" : "Not set",
-    bookShop: uk ? "Магазин / Дистрибуція" : "Shop / Distribution",
+    /* Distribution left this label on 18 September 2026 and became its own
+       book. A selector still offering "Shop / Distribution" beside a separate
+       "Distribution" is how somebody files a distributor twice. */
+    bookShop: uk ? "Магазин / Онлайн-рітейл" : "Shop / Online retailer",
+    bookDistribution: uk ? "Дистрибуція" : "Distribution",
     bookLounge: uk ? "Кальянна / Бар" : "Lounge / Bar",
     needBook: uk
       ? "Спершу оберіть прайс — без нього партнер не побачить цін."
@@ -347,6 +351,9 @@ export default function PartnerCard({
                 }}
               >
                 <option value="">{L.bookNone}</option>
+                {/* Same order as both customer-facing forms: distribution,
+                    shop, lounge. */}
+                <option value="distribution">{L.bookDistribution}</option>
                 <option value="shop">{L.bookShop}</option>
                 <option value="lounge">{L.bookLounge}</option>
               </select>

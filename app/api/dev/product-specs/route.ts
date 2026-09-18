@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { products } from "@/lib/products";
-import { bookPrice } from "@/lib/wholesale-prices";
+import { bookPrice, PARTNER_TYPES } from "@/lib/wholesale-prices";
 import { LID_WEIGHT_G } from "@/lib/hmd-options";
 
 export const runtime = "nodejs";
@@ -43,8 +43,12 @@ export async function GET() {
     priceUah: p.priceUah,
     /* Trade prices come from the price book, never from the product — the two
        books differ by ~60% and neither is derived from retail. */
-    tradeShop: bookPrice("shop", p.slug) ?? null,
-    tradeLounge: bookPrice("lounge", p.slug) ?? null,
+    /* EVERY BOOK, DERIVED FROM THE LIST OF BOOKS. This used to name shop and
+       lounge by hand, and the day a third book existed the sheet silently
+       under-reported by one — the numbers it printed were right and the
+       document was still wrong. Iterating PARTNER_TYPES means a fourth book
+       appears here and in the PDF without either file being touched. */
+    trade: PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug) ?? null })),
 
     weightG: p.weightG,
     dims: p.dims,
@@ -62,8 +66,7 @@ export async function GET() {
       name: v.name,
       priceEur: v.price ?? p.price,
       priceUah: v.priceUah ?? p.priceUah,
-      tradeShop: bookPrice("shop", p.slug, v.name) ?? null,
-      tradeLounge: bookPrice("lounge", p.slug, v.name) ?? null,
+      trade: PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug, v.name) ?? null })),
     })),
     colourShown: p.pdp?.colourShownEn ?? null,
 

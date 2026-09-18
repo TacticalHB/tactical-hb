@@ -365,14 +365,22 @@ def product(d, p):
         else:
             d.row("Retail", money(p["priceEur"], p["priceUah"]))
 
-        for book, label in (("tradeShop", "shop"), ("tradeLounge", "lounge")):
-            per = [v for v in p["colours"] if v[book]]
-            distinct = {(v[book]["eur"], v[book]["uah"]) for v in per}
+        # WHATEVER BOOKS THE ROUTE SENDS, IN THE ORDER IT SENDS THEM. This
+        # named tradeShop and tradeLounge by hand until distribution became its
+        # own book, at which point the sheet quietly printed two trade lines
+        # where the business had three — every figure on it correct, and the
+        # document still wrong. The route derives the list from PARTNER_TYPES,
+        # so a fourth book reaches this page without either file changing.
+        for i, entry in enumerate(p["trade"]):
+            label = entry["book"]
+            per = [v for v in p["colours"] if v["trade"][i]["price"]]
+            distinct = {(v["trade"][i]["price"]["eur"], v["trade"][i]["price"]["uah"]) for v in per}
             if len(distinct) > 1:
                 for v in per:
-                    d.row(f"Trade {label} — {v['name']}", money(v[book]["eur"], v[book]["uah"]))
-            elif p[book]:
-                d.row(f"Trade — {label}", money(p[book]["eur"], p[book]["uah"]))
+                    m = v["trade"][i]["price"]
+                    d.row(f"Trade {label} — {v['name']}", money(m["eur"], m["uah"]))
+            elif entry["price"]:
+                d.row(f"Trade — {label}", money(entry["price"]["eur"], entry["price"]["uah"]))
     d.gap(12)
 
     # ---- How it works ------------------------------------------------------

@@ -419,6 +419,7 @@ export async function submitRequest(
 
   if (items.length === 0) return { ok: false, error: "empty" };
 
+
   /* Every line is priced or the whole request was refused above, so the
      "priced half" problem this used to guard against cannot arise. */
   const subtotalEur = round2(items.reduce((s, i) => s + (i.lineTotalEur ?? 0), 0));
@@ -887,7 +888,7 @@ export async function replaceRequestLines(
      every unit, edit it, and mark it paid again to decrement the new lines.
      Two clicks around the edit, and the stock arithmetic stays the one path
      that has been tested. */
-  if (req.status === "paid") return { ok: false, error: "paid" };
+  const paid = req.status === "paid";
 
   const book = moveToBook ?? req.partner_type;
   if (!isPartnerType(book)) return { ok: false, error: "no_book" };
@@ -899,7 +900,7 @@ export async function replaceRequestLines(
      anything is deleted — these rows are about to be replaced. */
   const { data: existing } = await db
     .from("wholesale_request_items")
-    .select("sku, addon_lid, addon_rubber, addon_timer, unit_price_eur, unit_price_uah")
+    .select("sku, qty, addon_lid, addon_rubber, addon_timer, unit_price_eur, unit_price_uah")
     .eq("request_id", requestId);
 
   const quoted = new Map<string, { eur: number; uah: number }>();
@@ -955,6 +956,45 @@ export async function replaceRequestLines(
   }
 
   if (items.length === 0) return { ok: false, error: "empty" };
+
+  /* PAID REFUSES A CHANGE OF LINES, NOT A CHANGE OF PRICE.
+     apply_wholesale_stock decremented the shelf by sku and quantity; money is
+     not in that ledger at all. So repricing a paid request — the same skus, the
+     same quantities, different figures — leaves stock exactly as correct as it
+     was, and refusing it would send somebody round the off-paid/on-paid loop to
+     restore 64 units and take the same 64 straight back off.
+
+     Any change to the LINES is a different matter and stays refused: the
+     decrement was made against the old ones, and its guard is a timestamp on
+     the request, so re-applying would either double-count or be turned away as
+     a replay. The machinery to do that correctly already exists — move it off
+     paid, which restores every unit, edit, mark it paid again. */
+  if (paid) {
+    const before = new Map<string, number>();
+    for (const row of existing ?? []) {
+      if (!row.sku) continue;
+      before.set(`${row.sku}|${addonKey({ lid: !!row.addon_lid, rubber: !!row.addon_rubber, timer: !!row.addon_timer })}`, 0);
+    }
+    const after = new Map<string, number>();
+    for (const i of items) {
+      if (!i.sku) continue;
+      after.set(`${i.sku}|${addonKey(i.addons)}`, 0);
+    }
+    const sameShape =
+      before.size === after.size && [...after.keys()].every((k) => before.has(k));
+    const sameQty =
+      sameShape &&
+      items.every((i) => {
+        const was = (existing ?? []).find(
+          (r) =>
+            r.sku === i.sku &&
+            addonKey({ lid: !!r.addon_lid, rubber: !!r.addon_rubber, timer: !!r.addon_timer }) ===
+              addonKey(i.addons)
+        );
+        return was?.qty === i.qty;
+      });
+    if (!sameQty) return { ok: false, error: "paid" };
+  }
 
   /* REPLACED, NOT PATCHED. Working out which rows moved would mean matching on
      a configuration key that can itself change; deleting and re-inserting is

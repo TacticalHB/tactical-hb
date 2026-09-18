@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminActor } from "@/lib/admin-guard";
-import { setAccountStatus, setPartnerType, setRequestStatus } from "@/lib/wholesale-portal";
+import {
+  setAccountStatus,
+  setPartnerType,
+  setRequestStatus,
+  replaceRequestLines,
+} from "@/lib/wholesale-portal";
+import type { LineAddons } from "@/lib/wholesale-display";
 import { isPartnerType } from "@/lib/wholesale-prices";
 import { isAccountStatus, isRequestStatus } from "@/lib/wholesale-display";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
@@ -138,4 +144,39 @@ export async function updateRequestStatus(
      rather than a cached one. */
   revalidatePath("/[locale]/admin/stock", "page");
   return { ok: true, applied: res.applied, restored: res.restored, unmatched: res.unmatched };
+}
+
+/* ---------------------------------------------------------------------------
+   Editing the lines of a request that has already been sent.
+
+   The conversation, not the form, decides what an order finally is: a partner
+   asks for one thing, the two sides agree another by email, and staff record
+   the agreement here rather than asking the customer to submit it all again.
+
+   AUTHORISATION IS RE-ESTABLISHED, like everything else in this file. And the
+   numbers are not: lib/wholesale-portal reprices every line from the request's
+   own book, so this action carries quantities and options and no money at all.
+--------------------------------------------------------------------------- */
+
+export type EditLinesResult =
+  | { ok: true; itemCount: number; lines: number }
+  | { ok: false; error: string };
+
+export async function saveRequestLines(
+  requestId: string,
+  lines: { slug: string; variant?: string | null; addons?: Partial<LineAddons> | null; qty: number }[]
+): Promise<EditLinesResult> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "not_authorised" };
+
+  const id = requestId?.trim();
+  if (!id) return { ok: false, error: "no_request" };
+  if (!Array.isArray(lines)) return { ok: false, error: "empty" };
+
+  const res = await replaceRequestLines(id, lines);
+  if (!res.ok) return { ok: false, error: res.error };
+
+  console.info(`[wholesale] lines edited on ${id} by ${actor}`);
+  revalidatePath("/[locale]/admin/wholesale", "page");
+  return { ok: true, itemCount: res.itemCount, lines: res.lines };
 }

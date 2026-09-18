@@ -222,13 +222,23 @@ export default function PortalClient({
   locale,
   partner,
   products,
+  initialQty,
+  initialOpts,
 }: {
   locale: string;
   partner: PortalPartner;
   products: PortalProduct[];
+  /** Quantities keyed by line sku, from a repeated request. */
+  initialQty?: Record<string, number>;
+  /** Add-ons keyed by line sku, so a repeat brings its timer with it. */
+  initialOpts?: Record<string, LineAddons>;
 }) {
-  const [qty, setQty] = useState<Qty>({});
-  const [opts, setOpts] = useState<Opts>({});
+  /* PREFILLED FROM A PAST REQUEST, when the partner pressed "order this
+     again". Seeded as initial state rather than pushed in by an effect: the
+     form is theirs from the first paint, and anything they change survives —
+     an effect would fight the typing on every re-render. */
+  const [qty, setQty] = useState<Qty>(initialQty ?? {});
+  const [opts, setOpts] = useState<Opts>(initialOpts ?? {});
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

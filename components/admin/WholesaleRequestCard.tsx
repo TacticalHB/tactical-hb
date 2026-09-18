@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import RequestLineEditor from "@/components/admin/RequestLineEditor";
 import { useState } from "react";
 import { updateRequestStatus } from "@/app/actions/wholesale-admin";
 import {
@@ -230,6 +231,19 @@ export default function WholesaleRequestCard({
               </p>
             </div>
           )}
+
+          {/* THE AGREED ORDER, not the submitted one. Sits under the lines it
+              edits and above the contact row, because the sequence on this
+              card is read the order it is worked: see what came in, adjust it
+              to what was agreed, write to the partner. */}
+          <RequestLineEditor
+            requestId={r.id}
+            status={r.status}
+            book={r.partnerType}
+            currency={r.currency}
+            items={r.items}
+            uk={uk}
+          />
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-[12.5px]">
             {r.email && (

@@ -13,6 +13,19 @@ import { REQUEST_STATUS_TEXT, type WholesaleRequest } from "@/lib/wholesale-disp
    own language — so "payment details sent" appears here at the moment it
    becomes true, and a partner chasing an email can see where things stand
    without asking.
+
+   EVERY LINE IS LISTED, not just the totals. "64 units, 4 lines" tells a
+   partner nothing they can act on three weeks later; what they came back for
+   is WHICH products and how many, so they can order the same again or say how
+   it should differ. And the lines they are shown are the lines as they now
+   stand — an order adjusted by staff after the conversation reads here as
+   what was agreed, which is the whole point of letting staff adjust it.
+
+   REPEATING IS A LINK, NOT A FORM. It carries the reference in the query
+   string; the page resolves it against THIS partner\'s own history and
+   prefills the quantities. Nothing about the basket travels in the URL, so
+   there is nothing in it to tamper with — a reference belonging to somebody
+   else simply is not in the list the page searches.
 --------------------------------------------------------------------------- */
 
 export default function RequestHistory({
@@ -29,6 +42,18 @@ export default function RequestHistory({
     ref: t(locale, { en: "Reference", uk: "Номер", ja: "番号", ar: "الرقم" }),
     units: t(locale, { en: "units", uk: "одиниць", ja: "点", ar: "وحدة" }),
     quote: t(locale, { en: "To be quoted", uk: "Буде прораховано", ja: "お見積り予定", ar: "بانتظار التسعير" }),
+    again: t(locale, {
+      en: "Order this again",
+      uk: "Замовити знову",
+      ja: "同じ内容で注文する",
+      ar: "اطلب هذا مرة أخرى",
+    }),
+    againNote: t(locale, {
+      en: "Fills the form above with these quantities — change anything before sending.",
+      uk: "Підставить ці кількості у форму вище — перед надсиланням усе можна змінити.",
+      ja: "上のフォームにこの数量を入力します。送信前に変更いただけます。",
+      ar: "يملأ النموذج أعلاه بهذه الكميات — يمكنك تعديل أي شيء قبل الإرسال.",
+    }),
   };
 
   // Arabic month names, Latin digits — the storefront's rule for every date.
@@ -73,6 +98,44 @@ export default function RequestHistory({
               >
                 {t(locale, REQUEST_STATUS_TEXT[r.status])}
               </span>
+
+              {/* The lines themselves. Full width under the summary row, so
+                  the row above stays scannable and the detail is there when
+                  the question is "what was in it". */}
+              {r.items.length > 0 && (
+                <ul className="w-full mt-2 flex flex-col gap-1">
+                  {r.items.map((it, j) => (
+                    <li
+                      key={`${r.id}-${j}`}
+                      className="flex flex-wrap items-baseline gap-x-3 text-[13px]"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <span className="tabular-nums" style={{ color: "var(--text)" }}>{it.qty} ×</span>
+                      <span style={{ color: "var(--text)" }}>{it.name}</span>
+                      {it.variant && <span>{it.variant}</span>}
+                      {it.optionsLabel && <span>· {it.optionsLabel}</span>}
+                      <span className="ms-auto tabular-nums">
+                        {it.lineTotalEur !== null && it.lineTotalUah !== null
+                          ? formatMoney(money(it.lineTotalEur, it.lineTotalUah), currency)
+                          : L.quote}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="w-full mt-3 flex flex-wrap items-center gap-3">
+                <a
+                  href={`?repeat=${encodeURIComponent(r.reference)}`}
+                  className="inline-flex h-9 px-4 items-center rounded-full text-[13px] font-medium transition-opacity hover:opacity-85"
+                  style={{ background: "var(--accent)", color: "#111114" }}
+                >
+                  {L.again}
+                </a>
+                <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+                  {L.againNote}
+                </span>
+              </div>
             </li>
           );
         })}

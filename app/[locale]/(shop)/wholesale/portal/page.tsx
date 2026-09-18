@@ -43,10 +43,13 @@ export const metadata: Metadata = {
 
 export default async function WholesalePortalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ repeat?: string }>;
 }) {
   const { locale } = await params;
+  const { repeat } = await searchParams;
   const back = `/${locale}/wholesale/portal`;
 
   const supabase = await createClient();
@@ -131,10 +134,33 @@ export default async function WholesalePortalPage({
 
   const history = await requestsForUser(user.id);
 
+  /* "ORDER THIS AGAIN" IS RESOLVED HERE, AGAINST THIS PARTNER'S OWN HISTORY.
+     The link carries a reference and nothing else — no slugs, no quantities,
+     no prices — and it is matched inside the list that was already fetched for
+     this user. A reference belonging to another partner is simply not in that
+     list, so there is no lookup to abuse and nothing in the URL that could
+     conjure a line or a figure.
+
+     Keyed by sku, which is lineSku(slug, variant) — the same key the portal
+     builds its own line keys from, so a colour repeats as that colour. */
+  const source = repeat ? history.find((r) => r.reference === repeat) : undefined;
+  const initialQty = source
+    ? Object.fromEntries(source.items.filter((i) => i.sku).map((i) => [i.sku as string, i.qty]))
+    : undefined;
+  const initialOpts = source
+    ? Object.fromEntries(source.items.filter((i) => i.sku).map((i) => [i.sku as string, i.addons]))
+    : undefined;
+
   return (
     <div className="min-h-screen pt-32 pb-20" style={{ background: "var(--bg)" }}>
       <div className="page-container">
-        <PortalClient locale={locale} partner={partner} products={items} />
+        <PortalClient
+          locale={locale}
+          partner={partner}
+          products={items}
+          initialQty={initialQty}
+          initialOpts={initialOpts}
+        />
         {history.length > 0 && <RequestHistory locale={locale} requests={history} />}
       </div>
     </div>

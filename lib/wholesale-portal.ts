@@ -798,3 +798,196 @@ export async function partnerContactsById(): Promise<Record<string, { accountSta
   }
   return out;
 }
+
+/* ---------------------------------------------------------------------------
+   Editing a request after it has been sent.
+
+   WHY THIS EXISTS. A partner sends what they think they want, the two sides
+   discuss it by email, and the agreed order is rarely the submitted one. Until
+   now the only way to record that was to ask the partner to submit again —
+   which asks the customer to redo work the conversation already settled, and
+   leaves two requests where there was one order.
+
+   PRICES ARE RE-DERIVED, NEVER ACCEPTED. The editor sends slugs, options and
+   quantities; every figure is recomputed here from the book. An admin screen
+   is still a browser, and a price that arrives over the wire is a price
+   somebody can choose.
+
+   FROM THE REQUEST'S OWN BOOK, NOT THE PARTNER'S CURRENT ONE. partner_type is
+   snapshotted onto the request at submit precisely so a repricing or a move
+   between books cannot restate an order that has already been quoted. Editing
+   the lines must not quietly do what those two are prevented from doing.
+
+   AND A LINE THAT WAS ALREADY ON THE REQUEST KEEPS ITS QUOTED PRICE. The book
+   is a live file: WH-DL53TJ quotes A.Craft at €20.40 and the lounge book now
+   says €21.00, because it was repriced after that request was sent. Pricing
+   every line from the book on save would raise a figure the partner has
+   already been given — and the next thing that happens to an edited request
+   is a payment link, so they would be invoiced above their quote for agreeing
+   to change something else entirely.
+
+   So an existing configuration is matched by sku and add-ons and keeps the
+   unit price it was quoted; only a line that was not there before is priced
+   from today's book. Quantity is free to move either way — more units at the
+   agreed price is what "we discussed it and they want thirty" means.
+--------------------------------------------------------------------------- */
+
+/** A configuration, as one comparable string. */
+function addonKey(a: LineAddons): string {
+  return `${a.lid ? 1 : 0}${a.rubber ? 1 : 0}${a.timer ? 1 : 0}`;
+}
+
+export type EditableLine = {
+  slug: string;
+  variant?: string | null;
+  addons?: Partial<LineAddons> | null;
+  qty: number;
+};
+
+export type EditResult =
+  | { ok: true; itemCount: number; lines: number }
+  | { ok: false; error: "not_found" | "paid" | "empty" | "no_book" | "failed" };
+
+export async function replaceRequestLines(
+  requestId: string,
+  wanted: EditableLine[]
+): Promise<EditResult> {
+  const db = createAdminClient();
+
+  const { data: req } = await db
+    .from("wholesale_requests")
+    .select("id, status, partner_type, currency")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (!req) return { ok: false, error: "not_found" };
+
+  /* PAID MEANS THE SHELF HAS ALREADY MOVED. apply_wholesale_stock decremented
+     against the lines as they were, and its guard is a timestamp on the
+     request — so editing in place would leave the ledger describing an order
+     that no longer exists, and re-applying would either double-count or be
+     refused as a replay.
+
+     Refused rather than handled, because the machinery to do this correctly
+     already exists and is proven: move the request off paid, which restores
+     every unit, edit it, and mark it paid again to decrement the new lines.
+     Two clicks around the edit, and the stock arithmetic stays the one path
+     that has been tested. */
+  if (req.status === "paid") return { ok: false, error: "paid" };
+
+  const book = req.partner_type;
+  if (!isPartnerType(book)) return { ok: false, error: "no_book" };
+
+  /* What this request was already quoted, keyed by configuration. Read before
+     anything is deleted — these rows are about to be replaced. */
+  const { data: existing } = await db
+    .from("wholesale_request_items")
+    .select("sku, addon_lid, addon_rubber, addon_timer, unit_price_eur, unit_price_uah")
+    .eq("request_id", requestId);
+
+  const quoted = new Map<string, { eur: number; uah: number }>();
+  for (const row of existing ?? []) {
+    if (row.unit_price_eur === null || row.unit_price_uah === null || !row.sku) continue;
+    const key = `${row.sku}|${addonKey({
+      lid: !!row.addon_lid,
+      rubber: !!row.addon_rubber,
+      timer: !!row.addon_timer,
+    })}`;
+    quoted.set(key, { eur: Number(row.unit_price_eur), uah: Number(row.unit_price_uah) });
+  }
+
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
+  const items: RequestItem[] = [];
+
+  for (const line of wanted.slice(0, MAX_LINES)) {
+    const product = bySlug.get(String(line.slug));
+    const qty = Math.floor(Number(line.qty));
+    if (!product) continue;
+    if (!Number.isFinite(qty) || qty <= 0 || qty > MAX_QTY) continue;
+
+    /* The colour is resolved against the catalogue rather than taken as given,
+       the same rule submitRequest follows: an unrecognised name must not reach
+       a sku that stock has no row for. */
+    const variant = line.variant
+      ? product.variants?.find((v) => v.name === line.variant)
+      : undefined;
+    const addons = sanitiseAddons(product, line.addons ?? null);
+    const optionsLabel = addonLabel(addons);
+    const sku = lineSku(product.slug, variant?.name);
+
+    /* Matched on the configuration, not on the product: a wind cover with a
+       timer and one without are two different quoted things, and only the one
+       that was actually on the request should inherit a price. */
+    const wasQuoted = quoted.get(`${sku}|${addonKey(addons)}`);
+    const price =
+      wasQuoted ?? unitPrice(book, product.slug, addons, variant?.name);
+
+    items.push({
+      productSlug: product.slug,
+      sku: lineSku(product.slug, variant?.name),
+      variant: variant?.name ?? null,
+      addons,
+      optionsLabel,
+      name: product.nameEn,
+      qty,
+      unitPriceEur: price?.eur ?? null,
+      unitPriceUah: price?.uah ?? null,
+      lineTotalEur: price ? round2(price.eur * qty) : null,
+      lineTotalUah: price ? Math.round(price.uah * qty) : null,
+    });
+  }
+
+  if (items.length === 0) return { ok: false, error: "empty" };
+
+  /* REPLACED, NOT PATCHED. Working out which rows moved would mean matching on
+     a configuration key that can itself change; deleting and re-inserting is
+     one statement each and cannot leave an orphan line behind. The cascade on
+     request_id is not involved — these are deleted explicitly. */
+  const { error: delErr } = await db
+    .from("wholesale_request_items")
+    .delete()
+    .eq("request_id", requestId);
+  if (delErr) {
+    console.error("[wholesale] could not clear lines:", delErr.message);
+    return { ok: false, error: "failed" };
+  }
+
+  const { error: insErr } = await db.from("wholesale_request_items").insert(
+    items.map((i) => ({
+      request_id: requestId,
+      product_slug: i.productSlug,
+      sku: i.sku,
+      variant: i.variant,
+      addon_lid: i.addons.lid,
+      addon_rubber: i.addons.rubber,
+      addon_timer: i.addons.timer,
+      options_label: i.optionsLabel,
+      name: i.name,
+      qty: i.qty,
+      unit_price_eur: i.unitPriceEur,
+      unit_price_uah: i.unitPriceUah,
+      line_total_eur: i.lineTotalEur,
+      line_total_uah: i.lineTotalUah,
+    }))
+  );
+  if (insErr) {
+    console.error("[wholesale] could not write lines:", insErr.message);
+    return { ok: false, error: "failed" };
+  }
+
+  const itemCount = items.reduce((s, i) => s + i.qty, 0);
+  const { error: sumErr } = await db
+    .from("wholesale_requests")
+    .update({
+      subtotal_eur: round2(items.reduce((s, i) => s + (i.lineTotalEur ?? 0), 0)),
+      subtotal_uah: Math.round(items.reduce((s, i) => s + (i.lineTotalUah ?? 0), 0)),
+      item_count: itemCount,
+    })
+    .eq("id", requestId);
+  if (sumErr) {
+    console.error("[wholesale] could not restate totals:", sumErr.message);
+    return { ok: false, error: "failed" };
+  }
+
+  console.info(`[wholesale] ${requestId} edited — ${items.length} line(s), ${itemCount} unit(s)`);
+  return { ok: true, itemCount, lines: items.length };
+}

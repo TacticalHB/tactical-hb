@@ -92,7 +92,7 @@ const BOOKS: Record<PartnerType, Book> = {
   shop: {
     products: {
       "hmd-tct-classic": m(12.0, 550),
-      "hmd-a-craft": m(14.5, 590),
+      "hmd-a-craft": m(14.5, 640),
       /* OP is priced per colour on this book — Black and Purple are not the
          same money to a shop, the way they are not at retail. The bare slug
          stays as the fallback for any colour not listed. */
@@ -120,7 +120,7 @@ const BOOKS: Record<PartnerType, Book> = {
   distribution: {
     products: {
       "hmd-tct-classic": m(12.0, 550),
-      "hmd-a-craft": m(14.5, 590),
+      "hmd-a-craft": m(14.5, 640),
       "hmd-tct-op": m(19.5, 860),
       "hmd-tct-op__black": m(19.0, 820),
       "hmd-tct-op__purple": m(20.0, 890),
@@ -141,7 +141,7 @@ const BOOKS: Record<PartnerType, Book> = {
   lounge: {
     products: {
       "hmd-tct-classic": m(19.5, 765),
-      "hmd-a-craft": m(21.0, 810),
+      "hmd-a-craft": m(21.0, 855),
       /* Priced per colour here too. Black is listed explicitly even though it
          equals the fallback: writing it out means the pair is visible as a
          pair, and changing the fallback later cannot move Black by accident. */

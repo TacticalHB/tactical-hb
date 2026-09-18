@@ -7,6 +7,7 @@ import { createTtnForOrder } from "@/lib/order-ttn";
 import { createUkrposhtaShipmentForOrder } from "@/lib/order-ukrposhta";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
+import { UAH_PER_EUR_FIXED } from "@/lib/currency";
 import { cancelCartFlowOnPayment } from "@/lib/email/flows";
 import { methodAllowedOn } from "@/lib/shipping-locale";
 
@@ -116,11 +117,32 @@ export async function fiscaliseOrderRow(orderId: string, payment: PaymentRow): P
       return;
     }
 
+    /* WHICH LIST THE LINE PRICES COME FROM, AND IT IS NOT ALWAYS THE HRYVNIA
+       ONE. The two catalogues are set independently and are not conversions of
+       each other, so on a euro order the hryvnia column is a different price
+       list from the one the customer read and was charged from — A.Craft is
+       €25 and ₴950, an implied 38 against the fixed 51 the card was billed at.
+
+       Using unit_uah regardless meant the receipt's lines started from a list
+       nobody had bought from, and buildGoods then had to close a gap the size
+       of the difference between two price lists. The total came out right —
+       the balance guard saw to that — while the individual lines did not: a
+       two-line euro order printed one product at half again its price and the
+       other at its catalogue figure.
+
+       So the line follows the SAME rule create-invoice used to decide what to
+       charge: Ukrainian storefront pays the hryvnia list, everywhere else pays
+       the euro list at the fixed rate. Computed in kopiyky directly rather than
+       through eurToUahFixed, which rounds to whole hryvnia and would reintroduce
+       a few kopiyky of the very gap this is closing. */
+    const uk = payment.locale === "uk";
     const lines: FiscalLine[] = payment.lines.map((l) => ({
       code: checkboxCode(l.slug, l.variant)!,
       name: l.name,
       qty: l.qty,
-      unitKop: Math.round(l.unit_uah * 100),
+      unitKop: uk
+        ? Math.round(l.unit_uah * 100)
+        : Math.round(l.unit_eur * UAH_PER_EUR_FIXED * 100),
     }));
 
     const result = await fiscaliseOrder({

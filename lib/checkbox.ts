@@ -1,5 +1,19 @@
 import "server-only";
 import { createHash } from "node:crypto";
+/* The sums live in their own module so they can be tested without this file's
+   `server-only` import and credentials coming with them. Re-exported here so
+   every existing caller keeps its import. */
+import {
+  buildGoods,
+  assertBalanced,
+  CheckboxBalanceError,
+  type Json,
+  type FiscalLine,
+  type FiscalOrder,
+} from "@/lib/checkbox-goods";
+
+export { buildGoods, assertBalanced, CheckboxBalanceError };
+export type { FiscalLine, FiscalOrder };
 
 /* ---------------------------------------------------------------------------
    Checkbox PRRO — the fiscal receipt for a paid order.
@@ -57,7 +71,7 @@ function env(name: string): string {
   return v;
 }
 
-type Json = Record<string, unknown>;
+
 
 async function call<T>(
   method: "GET" | "POST",
@@ -138,24 +152,6 @@ async function ensureShift(tok: string): Promise<void> {
 
 /* ---- Receipt ------------------------------------------------------------- */
 
-export type FiscalLine = {
-  /** Checkbox product code. Absent means this order cannot be fiscalised. */
-  code: string;
-  name: string;
-  qty: number;
-  /** Natural per-unit price in kopiyky, before anything is absorbed. */
-  unitKop: number;
-};
-
-export type FiscalOrder = {
-  /** Our order reference — appears on the receipt as the order id. */
-  reference: string;
-  /** EXACTLY what the card was charged, in kopiyky. The receipt must equal it. */
-  amountKop: number;
-  lines: FiscalLine[];
-  email: string | null;
-};
-
 /**
  * A receipt UUID that is a pure function of the order reference.
  *
@@ -174,73 +170,6 @@ export function receiptIdFor(reference: string): string {
     ((parseInt(h[16], 16) & 0x3) | 0x8).toString(16) + h.slice(17, 20),
     h.slice(20, 32),
   ].join("-");
-}
-
-/**
- * Turn priced cart lines into receipt lines whose totals sum to EXACTLY the
- * amount charged.
- *
- * Mario's choice of the two the brief allowed: keep real product codes and let
- * the prices absorb what has no product of its own — shipping, and the HMD lid
- * and rubber add-ons, which exist on the site but not in Checkbox. So a line's
- * price here is deliberately not the catalogue price.
- *
- * Exactness is not negotiable, so the arithmetic is integer throughout and the
- * remainder is handled by SPLITTING one line rather than by rounding: the
- * absorbing product appears twice, (qty−1) units at the base price and one unit
- * carrying the whole difference. Adjusting a unit price instead would leave a
- * few kopiyky unaccounted whenever the difference did not divide by the
- * quantity, and a fiscal receipt that is three kopiyky off the card is worse
- * than one that lists a product twice.
- */
-export function buildGoods(order: FiscalOrder): Json[] {
-  const natural = order.lines.reduce((s, l) => s + l.unitKop * l.qty, 0);
-  const shortfall = order.amountKop - natural;
-
-  const goods: Json[] = order.lines.map((l) => ({
-    good: { code: l.code, name: l.name, price: l.unitKop },
-    quantity: l.qty * 1000,
-  }));
-
-  if (shortfall === 0) return goods;
-
-  // Absorb into the most valuable line — the least distorting place to put it.
-  let idx = 0;
-  for (let i = 1; i < order.lines.length; i++) {
-    if (order.lines[i].unitKop * order.lines[i].qty > order.lines[idx].unitKop * order.lines[idx].qty) idx = i;
-  }
-  const l = order.lines[idx];
-
-  if (l.qty === 1) {
-    goods[idx] = {
-      good: { code: l.code, name: l.name, price: l.unitKop + shortfall },
-      quantity: 1000,
-    };
-  } else {
-    goods[idx] = {
-      good: { code: l.code, name: l.name, price: l.unitKop },
-      quantity: (l.qty - 1) * 1000,
-    };
-    goods.push({
-      good: { code: l.code, name: l.name, price: l.unitKop + shortfall },
-      quantity: 1000,
-    });
-  }
-  return goods;
-}
-
-/** The guard that makes a wrong quantity convention impossible to send. */
-function assertBalanced(goods: Json[], amountKop: number): void {
-  const total = goods.reduce((s, g) => {
-    const price = (g.good as { price: number }).price;
-    const qty = g.quantity as number;
-    return s + (price * qty) / 1000;
-  }, 0);
-  if (!Number.isInteger(total) || total !== amountKop) {
-    throw new CheckboxError(
-      `receipt would not balance: goods ${total} ≠ charged ${amountKop} kop — refusing to fiscalise`
-    );
-  }
 }
 
 export type FiscalResult =

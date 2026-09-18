@@ -6,6 +6,13 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    /* Node runs the tests directly and requires the real file extension on a
+       relative import; TypeScript rejects a ".ts" specifier unless told to
+       allow it. Safe here because nothing is emitted — the compiler only ever
+       typechecks this project. Without it the test is either untypechecked or
+       unrunnable, and an untypechecked test of a fiscal document is worth
+       little. */
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",

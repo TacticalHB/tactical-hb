@@ -93,6 +93,25 @@ const CATEGORY_ORDER = ["bowl", "hmd", "windcover", "accessory"] as const;
 --------------------------------------------------------------------------- */
 
 /**
+ * What a line starts with ticked.
+ *
+ * THE TIMER ARRIVES ON. A wind cover is sold with its timer more often than
+ * without, and a partner who saw the bare price had to notice a chip, press
+ * it, and re-read the figure before the quote meant anything — three steps to
+ * reach the common case. Starting it on shows the price of the thing most
+ * people order and leaves one press to decline it, which is the retail PDP's
+ * behaviour too.
+ *
+ * ONLY WHERE THE PRODUCT ACTUALLY OFFERS IT. The flag is keyed off the
+ * product's own add-on list rather than its category, so a bowl cannot be
+ * quoted with a timer it does not take, and the lid and ring stay off — they
+ * are a fitting choice, not the default configuration.
+ */
+function defaultAddons(product: PortalProduct): LineAddons {
+  return { ...NO_ADDONS, timer: product.addons.includes("timer") };
+}
+
+/**
  * What one unit of a configured line costs, or null when it has no price.
  *
  * The same arithmetic the server does in lib/wholesale-prices — base plus each
@@ -222,6 +241,25 @@ export default function PortalClient({
 
   const L = {
     title: t(locale, { en: "Wholesale ordering", uk: "Оптове замовлення", ja: "卸売のご注文", ar: "الطلب بالجملة" }),
+    termsMinimum: t(locale, {
+      en: "Minimum order value: €1,500.",
+      uk: "Мінімальна сума замовлення: €1 500.",
+      ja: "最低ご注文金額：€1,500。",
+      ar: "الحد الأدنى لقيمة الطلب: €1,500.",
+    }),
+    /* WHY IT IS WORDED THIS WAY. The business does not sell a delivery
+       service — it sells goods delivered to a destination, which is the same
+       ФОП-2 one-total model the retail checkout follows and the reason no
+       priced "Доставка" line appears anywhere a customer can see one. So this
+       says carriage is absorbed into the unit prices, not that it is "free"
+       and not that it is "added later": both would describe a service being
+       sold. */
+    termsShipping: t(locale, {
+      en: "Delivery is not sold as a separate service. Once your order is confirmed, carriage is apportioned evenly across the unit prices — a single total, with nothing added afterwards.",
+      uk: "Доставка не продається як окрема послуга. Після підтвердження замовлення вартість перевезення рівномірно розподіляється у цінах за одиницю — один підсумок, без доплат згодом.",
+      ja: "配送は別個のサービスとしては販売しておりません。ご注文確定後、輸送費は各単価へ均等に配分されます — 合計はひとつで、後から加算されるものはありません。",
+      ar: "لا يُباع الشحن كخدمة منفصلة. بعد تأكيد طلبك، تُوزَّع تكلفة النقل بالتساوي على أسعار الوحدات — إجمالي واحد، دون أي إضافات لاحقة.",
+    }),
     intro: t(locale, {
       en: "Set the quantities you need and send the list. We'll confirm availability and email you the payment details — nothing is charged here.",
       uk: "Вкажіть потрібні кількості та надішліть список. Ми підтвердимо наявність і надішлемо реквізити для оплати — тут нічого не списується.",
@@ -328,7 +366,7 @@ export default function PortalClient({
       for (const line of product.lines) {
         const n = qty[line.key] ?? 0;
         if (n > 0) {
-          const addons = opts[line.key] ?? NO_ADDONS;
+          const addons = opts[line.key] ?? defaultAddons(product);
           out.push({ product, line, qty: n, addons, unit: effectiveUnit(product, line, addons) });
         }
       }
@@ -353,9 +391,16 @@ export default function PortalClient({
     );
   }, [chosen]);
 
-  const toggleAddon = (key: string, addon: AddonKey) =>
+  /* THE FALLBACK HAS TO BE THE SAME DEFAULT THE ROW WAS DRAWN FROM. Until a
+     line is touched there is no entry in `opts`, so the first press reads the
+     fallback and inverts it — and reading all-off here while the row rendered
+     from defaultAddons() would turn the timer ON at the exact moment the
+     partner pressed the chip to turn it OFF, then quote the higher price. The
+     product's default is passed in rather than looked up, because the caller
+     already has the product in hand. */
+  const toggleAddon = (key: string, addon: AddonKey, fallback: LineAddons) =>
     setOpts((o) => {
-      const current = o[key] ?? NO_ADDONS;
+      const current = o[key] ?? fallback;
       return { ...o, [key]: { ...current, [addon]: !current[addon] } };
     });
 
@@ -425,7 +470,7 @@ export default function PortalClient({
   /** The configured unit price as a string, or null when it has none. */
   const unitLabel = (product: PortalProduct, line?: PortalLine) => {
     if (!line) return null;
-    const u = effectiveUnit(product, line, opts[line.key] ?? NO_ADDONS);
+    const u = effectiveUnit(product, line, opts[line.key] ?? defaultAddons(product));
     return u ? formatMoney(u, currency) : null;
   };
 
@@ -447,6 +492,26 @@ export default function PortalClient({
         <p className="text-base leading-relaxed max-w-2xl" style={{ color: "var(--text-muted)" }}>
           {L.intro}
         </p>
+
+        {/* THE SHOP BOOK ONLY, AND THAT IS THE POINT OF THE TEST. These are
+            the terms that apply to shops and online retailers; distributors
+            and lounges buy on different ones, and a partner reading a minimum
+            that is not theirs would either over-order or write in to ask.
+            Tested against the BOOK rather than what the applicant called
+            themselves — partner_type is what we sell them at. */}
+        {partner.partnerType === "shop" && (
+          <ul
+            className="mt-6 max-w-2xl rounded-[6px] px-5 py-4 flex flex-col gap-2.5"
+            style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
+          >
+            {[L.termsMinimum, L.termsShipping].map((line) => (
+              <li key={line} className="flex gap-3 text-[14.5px] leading-relaxed">
+                <span aria-hidden="true" style={{ color: "var(--accent-ink)" }}>—</span>
+                <span style={{ color: "var(--text)" }}>{line}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </header>
 
       {/* NO BOOK, NO NUMBERS. Said once at the top rather than repeated as a
@@ -553,9 +618,9 @@ export default function PortalClient({
                         <div className="ms-20">
                           <AddonChips
                             addons={p.addons}
-                            chosen={opts[p.lines[0].key] ?? NO_ADDONS}
+                            chosen={opts[p.lines[0].key] ?? defaultAddons(p)}
                             locale={locale}
-                            onToggle={(a) => toggleAddon(p.lines[0].key, a)}
+                            onToggle={(a) => toggleAddon(p.lines[0].key, a, defaultAddons(p))}
                           />
                         </div>
                       )}
@@ -617,9 +682,9 @@ export default function PortalClient({
                               <div className="ms-8">
                                 <AddonChips
                                   addons={p.addons}
-                                  chosen={opts[line.key] ?? NO_ADDONS}
+                                  chosen={opts[line.key] ?? defaultAddons(p)}
                                   locale={locale}
-                                  onToggle={(a) => toggleAddon(line.key, a)}
+                                  onToggle={(a) => toggleAddon(line.key, a, defaultAddons(p))}
                                 />
                               </div>
                             </li>

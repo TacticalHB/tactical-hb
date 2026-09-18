@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { products, availabilityOf, availabilityText } from "@/lib/products";
-import { unitPrice, type PartnerType } from "@/lib/wholesale-prices";
+import { unitPrice, PARTNER_TYPES, type PartnerType } from "@/lib/wholesale-prices";
 import { NO_ADDONS, type LineAddons, type RequestItem } from "@/lib/wholesale-display";
 import { formatMoney, money } from "@/lib/currency";
 import { saveRequestLines } from "@/app/actions/wholesale-admin";
@@ -91,6 +91,10 @@ export default function RequestLineEditor({
   uk: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  /* Which book this request is priced from. Defaults to its own snapshot;
+     changing it reprices every line and is the correction for a partner who
+     was on the wrong book when they ordered. */
+  const [useBook, setUseBook] = useState<PartnerType | null>(book);
   const [draft, setDraft] = useState<Draft[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +118,10 @@ export default function RequestLineEditor({
       uk ? `Збережено: ${n} позицій, ${u} одиниць` : `Saved — ${n} line${n === 1 ? "" : "s"}, ${u} unit${u === 1 ? "" : "s"}`,
     failed: uk ? "Не вдалося зберегти." : "Could not save.",
     quotedAt: uk ? "за старою ціною" : "at quoted price",
+    bookLabel: uk ? "Прайс запиту" : "Priced from",
+    repriceWarn: uk
+      ? "Зміна прайсу перерахує ВСІ позиції за новим списком — узгоджені ціни не зберігаються. Прайс самого партнера змінюється на його картці."
+      : "Changing the book reprices EVERY line from the new list — agreed prices are not kept. The partner's own book is changed on their partner card, not here.",
     quotedNote: uk
       ? "Позиції, що вже були в запиті, зберігають ціну, за якою їх прорахували. Нові рядки рахуються за чинним прайсом."
       : "Lines already on the request keep the price they were quoted. New lines are priced from the current book.",
@@ -123,7 +131,9 @@ export default function RequestLineEditor({
     return <p className="text-[12.5px]" style={{ color: "var(--console-faint)" }}>{L.noBook}</p>;
   }
 
-  const options = pickable(book);
+  const priceBook = useBook ?? book;
+  const options = pickable(priceBook);
+  const repricing = priceBook !== book;
   const cur = currency ?? "EUR";
 
   const begin = () => {
@@ -148,13 +158,16 @@ export default function RequestLineEditor({
     setOpen(true);
   };
 
-  const lineMoney = (d: Draft) => d.quoted ?? unitPrice(book, d.slug, d.addons, d.variant);
+  /* When the book is being changed, nothing is inherited — that is the point
+     of changing it, and the server applies the same rule. */
+  const lineMoney = (d: Draft) =>
+    repricing ? unitPrice(priceBook, d.slug, d.addons, d.variant) : d.quoted ?? unitPrice(priceBook, d.slug, d.addons, d.variant);
 
   /* A quoted price that today's book no longer matches. Worth marking: it is
      the difference between honouring a quote and noticing you are about to. */
   const movedSince = (d: Draft) => {
-    if (!d.quoted) return false;
-    const now = unitPrice(book, d.slug, d.addons, d.variant);
+    if (!d.quoted || repricing) return false;
+    const now = unitPrice(priceBook, d.slug, d.addons, d.variant);
     return !!now && (now.eur !== d.quoted.eur || now.uah !== d.quoted.uah);
   };
 
@@ -171,7 +184,8 @@ export default function RequestLineEditor({
     setError(null);
     const res = await saveRequestLines(
       requestId,
-      draft.map((d) => ({ slug: d.slug, variant: d.variant, addons: d.addons, qty: d.qty }))
+      draft.map((d) => ({ slug: d.slug, variant: d.variant, addons: d.addons, qty: d.qty })),
+      repricing ? priceBook : undefined
     );
     setBusy(false);
     if (res.ok) {
@@ -269,6 +283,24 @@ export default function RequestLineEditor({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-[12.5px]" style={{ color: "var(--console-muted)" }}>
+          {L.bookLabel}
+          <select
+            value={priceBook}
+            onChange={(e) => setUseBook(e.target.value as PartnerType)}
+            className="h-8 px-2 text-[13px] rounded outline-none"
+            style={{
+              border: `1px solid ${repricing ? "var(--console-warn)" : "var(--console-border)"}`,
+              background: "transparent",
+              color: "var(--console-text)",
+            }}
+          >
+            {PARTNER_TYPES.map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+        </label>
+
         <select
           value=""
           onChange={(e) => {
@@ -284,7 +316,7 @@ export default function RequestLineEditor({
         >
           <option value="">{L.add}</option>
           {options.map((o) => {
-            const m = unitPrice(book, o.slug, NO_ADDONS, o.variant)!;
+            const m = unitPrice(priceBook, o.slug, NO_ADDONS, o.variant)!;
             return (
               <option key={o.value} value={o.value}>
                 {o.label} — {formatMoney(m, cur)}
@@ -299,8 +331,11 @@ export default function RequestLineEditor({
         </span>
       </div>
 
-      <p className="mt-2 text-[11.5px] leading-relaxed" style={{ color: "var(--console-faint)" }}>
-        {L.quotedNote}
+      <p
+        className="mt-2 text-[11.5px] leading-relaxed"
+        style={{ color: repricing ? "var(--console-warn)" : "var(--console-faint)" }}
+      >
+        {repricing ? L.repriceWarn : L.quotedNote}
       </p>
 
       {error && (

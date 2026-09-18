@@ -850,7 +850,22 @@ export type EditResult =
 
 export async function replaceRequestLines(
   requestId: string,
-  wanted: EditableLine[]
+  wanted: EditableLine[],
+  /**
+   * Move the request onto a different book, repricing every line from it.
+   *
+   * A SEPARATE ACT FROM EDITING, and it turns the quoted-price rule off on
+   * purpose. Keeping an agreed price is right when the conversation changed
+   * WHAT was ordered; it is exactly wrong when the conversation established
+   * that the partner was on the wrong book all along, because then the quoted
+   * price is the thing being corrected. Passing a book says which of the two
+   * this is.
+   *
+   * The partner's own book is NOT touched here. That decision lives on the
+   * partner card, where it is recorded with who made it and when — this only
+   * restates one request.
+   */
+  moveToBook?: PartnerType
 ): Promise<EditResult> {
   const db = createAdminClient();
 
@@ -874,8 +889,11 @@ export async function replaceRequestLines(
      that has been tested. */
   if (req.status === "paid") return { ok: false, error: "paid" };
 
-  const book = req.partner_type;
+  const book = moveToBook ?? req.partner_type;
   if (!isPartnerType(book)) return { ok: false, error: "no_book" };
+  /* Repricing onto another book replaces every figure, so nothing is
+     inherited — see moveToBook. */
+  const repricing = isPartnerType(moveToBook) && moveToBook !== req.partner_type;
 
   /* What this request was already quoted, keyed by configuration. Read before
      anything is deleted — these rows are about to be replaced. */
@@ -917,7 +935,7 @@ export async function replaceRequestLines(
     /* Matched on the configuration, not on the product: a wind cover with a
        timer and one without are two different quoted things, and only the one
        that was actually on the request should inherit a price. */
-    const wasQuoted = quoted.get(`${sku}|${addonKey(addons)}`);
+    const wasQuoted = repricing ? undefined : quoted.get(`${sku}|${addonKey(addons)}`);
     const price =
       wasQuoted ?? unitPrice(book, product.slug, addons, variant?.name);
 
@@ -981,6 +999,10 @@ export async function replaceRequestLines(
       subtotal_eur: round2(items.reduce((s, i) => s + (i.lineTotalEur ?? 0), 0)),
       subtotal_uah: Math.round(items.reduce((s, i) => s + (i.lineTotalUah ?? 0), 0)),
       item_count: itemCount,
+      /* The snapshot follows the prices. Leaving it on the old book would
+         leave the request claiming to be quoted from a list none of its lines
+         came from — and a later edit would then inherit from the wrong one. */
+      ...(repricing ? { partner_type: book } : {}),
     })
     .eq("id", requestId);
   if (sumErr) {

@@ -164,7 +164,9 @@ export type EditLinesResult =
 
 export async function saveRequestLines(
   requestId: string,
-  lines: { slug: string; variant?: string | null; addons?: Partial<LineAddons> | null; qty: number }[]
+  lines: { slug: string; variant?: string | null; addons?: Partial<LineAddons> | null; qty: number }[],
+  /** Set to reprice the whole request onto another book. See replaceRequestLines. */
+  moveToBook?: string
 ): Promise<EditLinesResult> {
   const actor = await requireAdminActor();
   if (!actor) return { ok: false, error: "not_authorised" };
@@ -173,7 +175,11 @@ export async function saveRequestLines(
   if (!id) return { ok: false, error: "no_request" };
   if (!Array.isArray(lines)) return { ok: false, error: "empty" };
 
-  const res = await replaceRequestLines(id, lines);
+  const res = await replaceRequestLines(
+    id,
+    lines,
+    isPartnerType(moveToBook) ? moveToBook : undefined
+  );
   if (!res.ok) return { ok: false, error: res.error };
 
   console.info(`[wholesale] lines edited on ${id} by ${actor}`);

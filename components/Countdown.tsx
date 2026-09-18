@@ -2,22 +2,27 @@
 
 import { useSyncExternalStore } from "react";
 
-/* 20 September 2026, set on 11 August 2026 (previously the 10th). UTC on
-   purpose: the date is a fixed instant worldwide, not midnight in whichever
-   zone the reader is in.
+/* 15 October 2026, set on 18 September 2026 (previously the 20th of
+   September, and the 10th and 11th of August before that). UTC on purpose: the
+   date is a fixed instant worldwide, not midnight in whichever zone the reader
+   is in.
 
-   THIS CONSTANT IS THE LAUNCH DATE FOR THE WHOLE SITE. Two other things must
-   agree with it and neither is imported from here, so they have to be checked
-   by hand:
+   THIS CONSTANT IS THE LAUNCH DATE FOR THE WHOLE SITE, and it is NOT the only
+   copy of it. The previous note here said the date lived in three places; by
+   the time it next moved it lived in seventeen, across four storefronts:
 
-     · flagship.eyebrow in messages/{en,uk}.json names the launch MONTH and
-       sits directly above this timer — move this into October and the page
-       contradicts itself in the same eyeful.
-     · the 12-month strategy document's revenue phasing and teaser calendar.
+     · flagship.eyebrow           — names the launch MONTH, and sits directly
+                                    above this timer, so a stale one
+                                    contradicts the clock in a single eyeful
+     · flagship.spec_note         — the full date, in the file's own format
+     · flagship.spec_release_v    — the release row of the specification table
+     · seo.flagship_desc          — the search result's description
+     · the 12-month strategy document's revenue phasing and teaser calendar
 
-   A date that lives in three places drifts. If it moves again, grep for
-   "2026-09" and fix every hit in the same commit. */
-const LAUNCH = new Date("2026-09-20T00:00:00Z").getTime();
+   That is four keys in each of messages/{en,uk,ja,ar}.json plus this line.
+   If it moves again, grep for "2026-10" AND for the month name in each
+   language, and fix every hit in the same commit. */
+const LAUNCH = new Date("2026-10-15T00:00:00Z").getTime();
 
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
 

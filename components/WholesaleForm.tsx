@@ -24,11 +24,22 @@ export default function WholesaleForm() {
     mountedAt.current = Date.now();
   }, []);
 
-  // Single-select, so labels double as stable values. Order and wording are
-  // deliberate — no "Hotel / Restaurant".
+  /* Single-select, so labels double as stable values. Order and wording are
+     deliberate — no "Hotel / Restaurant".
+
+     THE ORDER IS THE SALES ORDER, NOT THE ALPHABET: distribution first, then
+     shops and online retailers, lounges and bars last. It matches the register
+     form's list exactly — the same question asked twice in the same funnel,
+     answered from two differently ordered menus, is how the same business gets
+     filed two ways.
+
+     REORDERING IS SAFE BECAUSE THE VALUES ARE NAMED. `value` is what reaches
+     staff and lib/wholesale-decision-email; it travels with the option rather
+     than being its position, so shuffling the rows cannot re-file anybody who
+     already applied. */
   const businessOptions = [
-    { value: "shop", label: t("biz_shop") },
     { value: "distribution", label: t("biz_distribution") },
+    { value: "shop", label: t("biz_shop") },
     { value: "lounge", label: t("biz_lounge") },
   ];
 

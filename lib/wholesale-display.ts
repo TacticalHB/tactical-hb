@@ -1,5 +1,6 @@
 import type { Text } from "@/lib/i18n-text";
 import type { PartnerType } from "@/lib/wholesale-prices";
+import { addonAvailable, type Product } from "@/lib/products";
 
 /* ---------------------------------------------------------------------------
    Wholesale accounts and requests — the shapes and the words for them.
@@ -54,6 +55,8 @@ export function isRequestStatus(v: unknown): v is RequestStatus {
    renamed in 0029 and the key deliberately was not, because it is written into
    orders that already exist. */
 export type LineAddons = { lid: boolean; rubber: boolean; timer: boolean };
+
+export type AddonKey = keyof LineAddons;
 
 export const NO_ADDONS: LineAddons = { lid: false, rubber: false, timer: false };
 
@@ -208,4 +211,30 @@ export const ADMIN_REQUEST_STATUS: Record<RequestStatus, { en: string; uk: strin
 /** Requests still needing someone to do something. Drives the admin badge. */
 export function isOpenRequest(status: RequestStatus): boolean {
   return status === "submitted" || status === "contacted";
+}
+
+/* ---------------------------------------------------------------------------
+   Which product takes which add-on.
+
+   MOVED HERE FROM lib/wholesale-portal SO THERE IS ONE COPY. That module is
+   `server-only`, and the admin's line editor is a client component that needs
+   the same answer — so the choice was to move the rule or to write it twice.
+   Twice is how the launch date ended up in seventeen places and how the trade
+   books ended up disagreeing with the printed list: the second copy is always
+   the one nobody updates.
+
+   Nothing here touches the database, so it belongs on this side of that line
+   anyway. wholesale-portal re-exports it, and every existing caller is
+   unchanged.
+--------------------------------------------------------------------------- */
+export function addonsFor(p: Product): AddonKey[] {
+  /* THE SAME SHELF ANSWERS THE TRADE PORTAL. A lid that has not arrived has
+     not arrived for a partner ordering forty of them either — arguably less,
+     since forty is the order that finds out. The retail configurator drops the
+     option for the same reason and reads the same catalogue row. */
+  if (p.category === "hmd") {
+    return (["lid", "rubber"] as const).filter((k) => addonAvailable(k));
+  }
+  if (p.category === "windcover") return ["timer"];
+  return [];
 }

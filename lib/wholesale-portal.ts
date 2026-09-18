@@ -1,9 +1,11 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { products, isPurchasable, addonAvailable, type Product, type Variant } from "@/lib/products";
+import { products, isPurchasable, type Product, type Variant } from "@/lib/products";
 import { currencyForLocale } from "@/lib/currency";
 import { isPartnerType, unitPrice, type PartnerType } from "@/lib/wholesale-prices";
+import { addonsFor } from "@/lib/wholesale-display";
+export { addonsFor };
 import {
   canAccessPortal,
   isAccountStatus,
@@ -117,17 +119,7 @@ export function addonLabel(a: LineAddons): string | null {
   return on.length ? on.map((k) => ADDON_LABEL[k]).join(" + ") : null;
 }
 
-export function addonsFor(p: Product): AddonKey[] {
-  /* THE SAME SHELF ANSWERS THE TRADE PORTAL. A lid that has not arrived has
-     not arrived for a partner ordering forty of them either — arguably less,
-     since forty is the order that finds out. The retail configurator drops the
-     option for the same reason and reads the same catalogue row. */
-  if (p.category === "hmd") {
-    return (["lid", "rubber"] as const).filter((k) => addonAvailable(k));
-  }
-  if (p.category === "windcover") return ["timer"];
-  return [];
-}
+
 
 /**
  * Narrow a requested set to what this product can actually carry.

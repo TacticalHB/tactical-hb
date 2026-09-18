@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { products, availabilityOf, availabilityText } from "@/lib/products";
 import { unitPrice, PARTNER_TYPES, type PartnerType } from "@/lib/wholesale-prices";
-import { NO_ADDONS, type LineAddons, type RequestItem } from "@/lib/wholesale-display";
+import { NO_ADDONS, addonsFor, type AddonKey, type LineAddons, type RequestItem } from "@/lib/wholesale-display";
 import { formatMoney, money } from "@/lib/currency";
 import { saveRequestLines } from "@/app/actions/wholesale-admin";
 
@@ -118,6 +118,11 @@ export default function RequestLineEditor({
       uk ? `Збережено: ${n} позицій, ${u} одиниць` : `Saved — ${n} line${n === 1 ? "" : "s"}, ${u} unit${u === 1 ? "" : "s"}`,
     failed: uk ? "Не вдалося зберегти." : "Could not save.",
     quotedAt: uk ? "за старою ціною" : "at quoted price",
+    addonLabels: {
+      lid: "Lid 9E418",
+      rubber: "FEAR 9E418",
+      timer: uk ? "Таймер" : "Timer",
+    } as Record<AddonKey, string>,
     bookLabel: uk ? "Прайс запиту" : "Priced from",
     repriceWarn: uk
       ? "Зміна прайсу перерахує ВСІ позиції за новим списком — узгоджені ціни не зберігаються. Прайс самого партнера змінюється на його картці."
@@ -240,9 +245,48 @@ export default function RequestLineEditor({
             <div key={d.key} className="flex flex-wrap items-center gap-3 text-[13px]">
               <span className="flex-1 min-w-[180px]" style={{ color: "var(--console-text)" }}>
                 {label}
-                {d.addons.timer && <span style={{ color: "var(--console-muted)" }}> · timer</span>}
-                {d.addons.lid && <span style={{ color: "var(--console-muted)" }}> · lid</span>}
-                {d.addons.rubber && <span style={{ color: "var(--console-muted)" }}> · FEAR</span>}
+                {/* The add-ons this product actually takes, read from the same
+                    rule the partner portal reads — a bowl can never be offered
+                    a timer. Toggling one changes the CONFIGURATION, so the
+                    quoted price stops applying and the line reprices from the
+                    book: the server matches a quote on sku AND add-ons, and a
+                    cover with a timer was never the thing that was quoted. */}
+                {(() => {
+                  const product = products.find((x) => x.slug === d.slug);
+                  const keys = product ? addonsFor(product) : [];
+                  if (keys.length === 0) return null;
+                  return (
+                    <span className="ms-3 inline-flex gap-1.5">
+                      {keys.map((k) => {
+                        const on = d.addons[k];
+                        return (
+                          <button
+                            key={k}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() =>
+                              setDraft((rows) =>
+                                rows.map((r, j) =>
+                                  j === i
+                                    ? { ...r, addons: { ...r.addons, [k]: !on }, quoted: null }
+                                    : r
+                                )
+                              )
+                            }
+                            className="px-2 py-0.5 text-[11px] rounded transition-colors"
+                            style={{
+                              border: `1px solid ${on ? "var(--console-accent)" : "var(--console-border)"}`,
+                              color: on ? "var(--console-accent)" : "var(--console-muted)",
+                              background: "transparent",
+                            }}
+                          >
+                            {L.addonLabels[k]}
+                          </button>
+                        );
+                      })}
+                    </span>
+                  );
+                })()}
                 {movedSince(d) && (
                   <span className="ms-2 text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--console-warn)" }}>
                     {L.quotedAt}

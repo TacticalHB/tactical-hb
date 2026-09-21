@@ -1,11 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { t, pickList } from "@/lib/i18n-text";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Product, addonAvailable, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
+import {
+  ADDON_PRODUCT,
+  type AddonKey,
+  Product,
+  addonAvailable,
+  addonProduct,
+  availabilityOf,
+  availabilityText,
+  isPurchasable,
+} from "@/lib/products";
 import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
@@ -271,6 +281,15 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     rubber: addonAvailable("rubber"),
   });
 
+  /* THE ADD-ONS AS THE PRODUCTS THEY ARE. Derived from ADDON_PRODUCT, the same
+     map the selector above reads, so the links cannot come to name a slug the
+     tick boxes have stopped using. */
+  const accessories = isHmd
+    ? (Object.keys(ADDON_PRODUCT) as AddonKey[])
+        .map((k) => addonProduct(k))
+        .filter((a): a is Product => a !== undefined)
+    : [];
+
   /* The wind cover's timer follows the same rule as the HMD add-ons above:
      PRE-SELECTED here, base price on the card. Opening the page offers the
      complete thing and lets them opt out — ₴1700 / €45 with the timer, ₴850 /
@@ -354,6 +373,12 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
     favourite: t(locale, { uk: "В обране", en: "Favourite", ja: "お気に入り", ar: "المفضّلة" }),
     colour: t(locale, { uk: "Колір", en: "Colour Shown", ja: "カラー", ar: "اللون المعروض" }),
     style: t(locale, { uk: "Модель", en: "Style", ja: "品番", ar: "الطراز" }),
+    accessories: t(locale, {
+      uk: "Аксесуари для цього пристрою",
+      en: "Accessories for this device",
+      ja: "このデバイス用アクセサリー",
+      ar: "ملحقات هذا الجهاز",
+    }),
     specs: t(locale, { uk: "Характеристики", en: "Tech Specs", ja: "仕様", ar: "المواصفات" }),
     tips: t(locale, { uk: "Поради з використання", en: "Tips for Use", ja: "ご使用のヒント", ar: "نصائح الاستخدام" }),
     delivery: t(locale, { uk: "Доставка та повернення", en: "Delivery & Returns", ja: "配送と返品", ar: "الشحن والإرجاع" }),
@@ -621,6 +646,64 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               {colourShown && <li className="list-disc ml-5">{L.colour}: {colourShown}</li>}
               {pdp?.styleCode && <li className="list-disc ml-5">{L.style}: {pdp.styleCode}</li>}
             </ul>
+
+            {/* ---- Accessories for this device ----------------------------
+                THE LID AND THE RING ARE PRODUCTS AND NOTHING LINKED TO THEM.
+                Both carry the `accessory` category, which the catalogue keeps
+                out of "All products" on purpose, and the Accessories tab is
+                React state rather than a URL — so their pages were reachable
+                from the sitemap and from nowhere else. Google discovered both
+                and fetched neither, and a customer had no path to them at all.
+
+                HERE RATHER THAN IN THE GRID, because the catalogue's exclusion
+                is deliberate and this is the honest place for the link anyway:
+                these are the two options in the selector above, and when one
+                of them cannot be sold the selector simply drops it. A page
+                that quietly loses a tick box explains nothing; this says what
+                the part is called, where its page is, and why it is missing.
+
+                NOT A BUY CONTROL. It sits under the description with the other
+                facts, carries no price and no basket — availabilityText is the
+                same sentence the card and the kit builder use. */}
+            {accessories.length > 0 && (
+              <div className="mt-6 pt-5" style={{ borderTop: "1px solid #e5e5e5" }}>
+                <div
+                  className="text-[13px] tracking-[0.12em] uppercase mb-3"
+                  style={{ color: "#707072" }}
+                >
+                  {L.accessories}
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {accessories.map((a) => {
+                    const state = availabilityOf(a);
+                    return (
+                      <li key={a.slug} className="text-[15px]">
+                        <Link
+                          href={`/${locale}/products/${a.slug}`}
+                          className="underline underline-offset-4"
+                          style={{ color: "#111" }}
+                        >
+                          {uk ? a.nameUk : a.nameEn}
+                        </Link>
+                        {state !== "available" && (
+                          /* ms-, not ml-: a physical left margin puts the gap
+                             on the wrong side of the label in Arabic, where
+                             the state reads to the LEFT of the name it
+                             qualifies. The logical property flips with the
+                             page and needs no ar- branch. Written as a plain
+                             block comment because this is expression position
+                             rather than JSX children, where the braced form
+                             parses as an object literal. */
+                          <span className="ms-2 text-[13px]" style={{ color: "#8a8a8e" }}>
+                            {availabilityText(state, locale)}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
             {/* ---- Field card ----
                 What the thing is, in rows, sitting where the old weight and

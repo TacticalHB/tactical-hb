@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { products } from "@/lib/products";
+import { availabilityOf, products } from "@/lib/products";
 import ProductPDP from "@/components/ProductPDP";
-import { SITE_NAME, SITE_URL, jsonLdScript, pageMetadata, productKind } from "@/lib/seo";
+import { SITE_NAME, SITE_URL, jsonLdScript, pageMetadata, productKind, schemaAvailability } from "@/lib/seo";
 
 /* ---------------------------------------------------------------------------
    A product page describes itself twice: once for a human sharing the link,
@@ -111,7 +111,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                euro — the same rule lib/currency applies, not a guess. */
             priceCurrency: uk ? "UAH" : "EUR",
             price: uk ? product.priceUah : product.price,
-            availability: "https://schema.org/InStock",
+            availability: schemaAvailability(availabilityOf(product)),
             seller: { "@type": "Organization", name: SITE_NAME },
           },
         }),

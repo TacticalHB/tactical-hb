@@ -235,13 +235,25 @@ export function availabilityText(a: Availability, locale: string): string {
  * switch that somebody has to remember to flip twice.
  */
 export function addonAvailable(key: AddonKey): boolean {
-  const p = products.find((x) => x.slug === ADDON_PRODUCT[key]);
+  const p = addonProduct(key);
   return p ? isPurchasable(p) : false;
+}
+
+/**
+ * The catalogue entry an add-on IS, or undefined when ADDON_PRODUCT lies.
+ *
+ * THE LOOKUP HAD TWO COPIES AND NOW HAS THREE CALLERS. Both questions below
+ * resolved the slug themselves, and the product page needs the whole row to
+ * link to it — a third hand-written `find` is how one of them ends up reading
+ * a slug the other two have moved on from.
+ */
+export function addonProduct(key: AddonKey): Product | undefined {
+  return products.find((x) => x.slug === ADDON_PRODUCT[key]);
 }
 
 /** The availability of the product behind an add-on, for its label. */
 export function addonAvailability(key: AddonKey): Availability {
-  const p = products.find((x) => x.slug === ADDON_PRODUCT[key]);
+  const p = addonProduct(key);
   /* A missing add-on product is a catalogue bug, not a sale: default to the
      most restrictive answer rather than letting a typo in ADDON_PRODUCT open
      the tick box back up. */

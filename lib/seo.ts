@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Availability } from "@/lib/products";
 import { getTranslations } from "next-intl/server";
 
 /* ---------------------------------------------------------------------------
@@ -126,6 +127,40 @@ const PRODUCT_KIND: Record<string, Record<string, string>> = {
 /** The descriptor for one product category, or "" when there is none to give. */
 export function productKind(category: string, locale: string): string {
   return PRODUCT_KIND[category]?.[locale] ?? PRODUCT_KIND[category]?.en ?? "";
+}
+
+/* ---------------------------------------------------------------------------
+   What the shelf says, in schema.org's vocabulary.
+
+   THE OFFER USED TO SAY InStock UNCONDITIONALLY. That was true of every
+   product on the day it was written and stopped being true the moment the
+   catalogue grew a way to say otherwise: the FTP bowl reads "Sold out" and
+   both 9E418 parts read "Coming soon" to a customer, while the markup under
+   them told Google all three were in stock. A rich result promising a bowl
+   nobody can buy is worse than no rich result, and an availability that
+   disagrees with the visible page is the one structured-data error Google
+   treats as a policy matter rather than a warning.
+
+   NOTHING ORDERABLE MAPS TO PreOrder OR BackOrder. Both of those mean "you
+   may place the order now and we will ship it later", and lib/pricing refuses
+   the line however the request arrives — so claiming either would advertise a
+   checkout that does not exist. Coming soon is simply out of stock with a
+   different sentence for the human, which is exactly the distinction
+   Availability already draws.
+
+   `withheld` is here for completeness and never reaches this function: the
+   product page omits the Offer node entirely for the withheld listing,
+   because it has no price to put in one.
+--------------------------------------------------------------------------- */
+const SCHEMA_AVAILABILITY: Record<Availability, string> = {
+  available: "https://schema.org/InStock",
+  coming_soon: "https://schema.org/OutOfStock",
+  sold_out: "https://schema.org/SoldOut",
+  withheld: "https://schema.org/OutOfStock",
+};
+
+export function schemaAvailability(a: Availability): string {
+  return SCHEMA_AVAILABILITY[a];
 }
 
 /** Both language versions of one page, plus the x-default a crawler needs. */

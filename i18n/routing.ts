@@ -38,6 +38,23 @@ export function localeDir(locale: string): "rtl" | "ltr" {
 export const routing = defineRouting({
   locales,
   defaultLocale: "uk",
+  /* HREFLANG IS DECLARED ONCE, IN THE HTML, AND THIS TURNS OFF THE SECOND COPY.
+
+     next-intl sets a `Link:` response header carrying the same alternates by
+     default, and on 22 September 2026 Bing's URL inspection showed the two
+     disagreeing: the header gave x-default as https://tactical-hb.com/ while
+     the <link> tag from lib/seo gave https://tactical-hb.com/uk. The four
+     locale entries matched, which made the single disagreement read as a bug
+     rather than a choice, and a crawler handed two answers picks one.
+
+     THE HTML IS THE ONE THAT STAYS, because it is the one that was decided:
+     alternatesFor() points x-default at Ukrainian on purpose — a Ukrainian
+     brand selling domestically first — and the same helper builds the sitemap,
+     so the file and the pages cannot drift apart. The header was a library
+     default nobody chose, generated from the route rather than from that rule.
+
+     This changes no redirect and no locale detection. It removes a header. */
+  alternateLinks: false,
 });
 
 /** Narrow an unknown string to a locale we actually serve. */

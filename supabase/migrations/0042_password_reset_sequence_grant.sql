@@ -1,0 +1,23 @@
+-- 0042 — let the service role actually insert into the throttle
+--
+-- 0041 declared the key as `bigserial`, which creates a sequence alongside the
+-- table. Rights on a table do not carry to its sequence: service_role could
+-- select, delete and — as far as PostgREST was concerned — insert, but the
+-- nextval() behind the default failed with
+--
+--   42501: permission denied for sequence password_reset_requests_id_seq
+--
+-- WHY THAT WAS WORSE THAN A BROKEN INSERT. The action did not read the insert's
+-- error, so every request logged nothing and then counted the nothing it had
+-- logged. The throttle ran, read zero, and allowed everything — a limit that
+-- reports success while enforcing nothing. Caught by submitting the form once
+-- against the real database and finding the table still empty afterwards.
+--
+-- The action now refuses to send when the row cannot be written, so this grant
+-- is what turns the feature back on rather than what makes it safe.
+--
+-- `select` alongside `usage` because currval/lastval are read through it, and
+-- a grant that works for inserts but not for the representation PostgREST
+-- returns is the same class of half-permission this file exists to remove.
+
+grant usage, select on sequence public.password_reset_requests_id_seq to service_role;

@@ -124,8 +124,21 @@ export async function requestPasswordReset(input: {
 
     /* Logged BEFORE the send, so a send that hangs or throws still counts
        against the limit. A counter incremented on success is a counter an
-       attacker can avoid by making the send fail. */
-    await admin.from("password_reset_requests").insert({ email, ip });
+       attacker can avoid by making the send fail.
+
+       AND THE WRITE IS CHECKED, because an unrecorded attempt is an unlimited
+       one. 0041 declared the key as bigserial and service_role had no rights
+       on the sequence it created, so every insert failed 42501 while this line
+       discarded the error — the throttle then counted the nothing it had
+       managed to log and let everything through. A limit that reports success
+       while enforcing nothing is worse than no limit, because it is the one
+       nobody goes back to check. 0042 grants the sequence; this refuses to
+       send if the row still does not land. */
+    const logged = await admin.from("password_reset_requests").insert({ email, ip });
+    if (logged.error) {
+      console.error("[password-reset] could not record the attempt — refusing to send");
+      return { ok: true };
+    }
 
     /* Opportunistic prune, on a request that is already doing IO. One more
        cron job is one more thing to forget. */

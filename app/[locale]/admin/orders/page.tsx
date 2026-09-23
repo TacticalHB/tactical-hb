@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/supabase/require-user";
 import { isAdminEmail } from "@/lib/admin";
@@ -7,6 +8,7 @@ import {
   deliveryLabel,
   statusLabel,
   formatWhen,
+  awaitingParcel,
   type AdminOrder,
 } from "@/lib/orders-display";
 import OrderTtnForm from "@/components/admin/OrderTtnForm";
@@ -49,6 +51,46 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function Tab({
+  href,
+  active,
+  label,
+  count,
+  warn,
+}: {
+  href: string;
+  active: boolean;
+  label: string;
+  count: number;
+  warn?: boolean;
+}) {
+  /* An empty queue is not a warning. The tone follows the count, so a zero
+     reads as calm rather than as a job somebody has not done. */
+  const fg = active ? "var(--console-text)" : warn ? "var(--console-warn)" : "var(--console-muted)";
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 h-9 px-3.5 rounded-md text-[13px] transition-colors"
+      style={{
+        border: `1px solid ${active ? "var(--console-border)" : "transparent"}`,
+        background: active ? "var(--console-panel)" : "transparent",
+        color: fg,
+      }}
+    >
+      {label}
+      <span
+        className="tabular-nums text-[12px] px-1.5 rounded"
+        style={{
+          background: warn ? "var(--console-warn-soft)" : "var(--console-panel-2)",
+          color: warn ? "var(--console-warn)" : "var(--console-muted)",
+        }}
+      >
+        {count}
+      </span>
+    </Link>
+  );
+}
+
 function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; uk: boolean }) {
   const total = orderTotal(order);
   const tone = STATUS_TONE[order.status] ?? STATUS_TONE.delivered;
@@ -69,6 +111,15 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
         >
           {statusLabel(order.status, locale)}
         </span>
+        {/* Warn, not accent: the brand orange is not a status colour. */}
+        {awaitingParcel(order) && (
+          <span
+            className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
+            style={{ background: "var(--console-warn-soft)", color: "var(--console-warn)" }}
+          >
+            {uk ? "Купити посилку" : "Buy parcel"}
+          </span>
+        )}
         {order.source !== "monobank" && (
           <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: "var(--console-panel-2)", color: "var(--console-muted)" }}>
             {order.source}
@@ -241,15 +292,25 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
 
 export default async function AdminOrdersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ view?: string }>;
 }) {
   const { locale } = await params;
+  const { view } = await searchParams;
   const { user } = await requireUser(locale);
   if (!isAdminEmail(user.email)) notFound();
 
   const uk = locale === "uk";
-  const orders = await fetchAdminOrders();
+  const all = await fetchAdminOrders();
+
+  /* The count is off the WHOLE list, never off the filtered one — a tab that
+     reported its own length would read "0" the moment you were standing on it
+     and had cleared the queue, which is the one number you want to trust. */
+  const awaiting = all?.filter(awaitingParcel) ?? [];
+  const onlyAwaiting = view === "awaiting";
+  const orders = all === null ? null : onlyAwaiting ? awaiting : all;
 
   return (
     <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
@@ -267,6 +328,29 @@ export default async function AdminOrdersPage({
                 ? `${orders.length} ${orders.length === 1 ? "замовлення" : "замовлень"} · найновіші зверху`
                 : `${orders.length} ${orders.length === 1 ? "order" : "orders"} · newest first`}
           </p>
+
+          {/* Two tabs, and the second one is a dispatch queue. Links rather
+              than client state: this page is force-dynamic and server-rendered
+              already, so the filter costs no JavaScript and the queue is a URL
+              somebody can bookmark or send to whoever is going to the post
+              office. */}
+          {all !== null && (
+            <nav className="flex flex-wrap gap-2 mt-4">
+              <Tab
+                href={`/${locale}/admin/orders`}
+                active={!onlyAwaiting}
+                label={uk ? "Усі" : "All"}
+                count={all.length}
+              />
+              <Tab
+                href={`/${locale}/admin/orders?view=awaiting`}
+                active={onlyAwaiting}
+                label={uk ? "Чекають посилки" : "Awaiting parcel"}
+                count={awaiting.length}
+                warn={awaiting.length > 0}
+              />
+            </nav>
+          )}
         </header>
 
         {orders === null && (
@@ -282,7 +366,13 @@ export default async function AdminOrdersPage({
 
         {orders !== null && orders.length === 0 && (
           <p className="text-[14.5px]" style={{ color: "var(--console-muted)" }}>
-            {uk ? "Замовлень поки немає." : "No orders yet."}
+            {onlyAwaiting
+              ? uk
+                ? "Усі посилки куплено — черга порожня."
+                : "Every parcel is bought — the queue is empty."
+              : uk
+                ? "Замовлень поки немає."
+                : "No orders yet."}
           </p>
         )}
 

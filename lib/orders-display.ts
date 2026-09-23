@@ -208,6 +208,38 @@ export function totalFromAmounts(
   return { text: amountEur !== null ? `€${amountEur.toFixed(2)}` : "—", sub: null };
 }
 
+/* ---------------------------------------------------------------------------
+   Which orders are waiting for somebody to buy postage.
+
+   UKRPOSHTA_BOOKING IS OFF, DELIBERATELY. lib/order-ukrposhta stands aside when
+   it is, logs "needs a parcel bought by hand" at info and leaves the order
+   paid — so the parcel is bought at a counter and the barcode pasted back in
+   through OrderUkrposhtaForm. That works at one order a day and stops working
+   the week the flagship lands, because nothing on the orders page said which
+   orders were waiting. Now it does.
+
+   THE BARCODE IS THE SIGNAL, NOT THE STATUS. Saving one calls markProcessing,
+   so an order that has been posted reads `processing` — but so does one moved
+   there by hand before anybody went to the post office. The barcode is the
+   thing that only exists once the parcel does.
+
+   TERMINAL STATES ARE EXCLUDED, AND NOTHING ELSE IS. A cancelled order needs
+   no parcel and a delivered one already had one. Every other status stays in,
+   including one this code has never heard of — for a work queue an extra row
+   costs a glance, and a missing row costs a customer their parcel. This is the
+   one list where showing too much is the safe way to be wrong.
+
+   HERE RATHER THAN IN THE PAGE because it is a rule about an order, like
+   orderTotal and statusLabel above it, and because a rule in a page component
+   cannot be tested without rendering the page — which this one needs an admin
+   session to do.
+--------------------------------------------------------------------------- */
+const POSTED_OR_DONE = new Set(["shipped", "delivered", "cancelled"]);
+
+export function awaitingParcel(o: AdminOrder): boolean {
+  return o.carrier === "ukrposhta" && !o.ukrposhtaBarcode && !POSTED_OR_DONE.has(o.status);
+}
+
 export function orderTotal(o: AdminOrder): { text: string; sub: string | null } {
   return totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah);
 }

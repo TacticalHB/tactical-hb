@@ -427,10 +427,13 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                        /uk was the one control in the gallery speaking the
                        wrong language. alt="" on the thumbnail is correct and
                        stays: the button already carries the name, and a second
-                       one inside it would be announced twice. */
+                       one inside it would be announced twice. aria-hidden says
+                       that in the one way an auditor can read without tracing
+                       the label up to the parent — the button's name wins
+                       either way, so this changes nothing but the record. */
                     aria-label={a11y("view_image", { n: i + 1, total: photos.length })}
                   >
-                    <Image src={p} alt="" fill sizes="56px" className="object-cover" />
+                    <Image src={p} alt="" aria-hidden="true" fill sizes="56px" className="object-cover" />
                   </button>
                 ))}
               </div>

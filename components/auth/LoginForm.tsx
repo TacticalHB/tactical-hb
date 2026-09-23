@@ -24,6 +24,7 @@ export default function LoginForm({ locale }: { locale: string }) {
     password: t(locale, { uk: "Пароль", en: "Password", ja: "パスワード", ar: "كلمة المرور" }),
     signIn: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン", ar: "تسجيل الدخول" }),
     noAcc: t(locale, { uk: "Ще не з нами?", en: "Not a member yet?", ja: "アカウントをお持ちでない方", ar: "لست عضوًا بعد؟" }),
+    forgot: t(locale, { uk: "Забули пароль?", en: "Forgot your password?", ja: "パスワードをお忘れですか？", ar: "نسيت كلمة المرور؟" }),
     join: t(locale, { uk: "Приєднатися", en: "Join us", ja: "登録する", ar: "انضم إلينا" }),
     badEmail: t(locale, { uk: "Введіть дійсну електронну пошту.", en: "Enter a valid email address.", ja: "有効なメールアドレスをご入力ください。", ar: "أدخل بريدًا إلكترونيًا صالحًا." }),
     badCreds: t(locale, { uk: "Невірна пошта або пароль.", en: "Incorrect email or password.", ja: "メールアドレスまたはパスワードが正しくありません。", ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة." }),
@@ -61,6 +62,19 @@ export default function LoginForm({ locale }: { locale: string }) {
             <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-11 h-11 text-xs uppercase tracking-wide" style={{ color: "#707072" }}>
               {showPw ? (t(locale, { uk: "Сховати", en: "Hide", ja: "隠す", ar: "إخفاء" })) : (t(locale, { uk: "Показати", en: "Show", ja: "表示", ar: "إظهار" }))}
             </button>
+          </div>
+          {/* ABOVE THE BUTTON, NOT BELOW IT. Somebody who cannot remember the
+              password finds out at the password field, not after pressing a
+              button they already know will fail. It carries the typed address
+              so the next screen does not ask for it twice. */}
+          <div className="flex justify-end -mt-1">
+            <Link
+              href={`/${locale}/forgot-password`}
+              className="text-[13px] underline underline-offset-4"
+              style={{ color: "#707072" }}
+            >
+              {L.forgot}
+            </Link>
           </div>
           <button type="submit" disabled={loading}
             className="h-12 rounded-full text-[15px] font-medium disabled:opacity-60 mt-2"

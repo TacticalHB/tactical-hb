@@ -47,6 +47,10 @@ const PRIVATE_SEGMENTS = [
   "/cart",
   "/login",
   "/register",
+  /* Both carry noindex of their own as well. A password form is the last URL
+     that should be reachable from a search result. */
+  "/forgot-password",
+  "/reset-password",
   "/newsletter/preferences",
   /* The trade catalogue and the application form. /wholesale itself is the
      public enquiry page and stays crawlable — it is the one that should rank;

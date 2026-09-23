@@ -165,9 +165,23 @@ export const footerRow = footerRows();
  * The outer shell — background, centring, and the 600px column.
  * `inner` is the table rows between the wordmark and the footer.
  */
-export function emailShell(opts: { lang: string; title: string; inner: string }): string {
+/**
+ * The shell every transactional letter is poured into.
+ *
+ * `dir` DEFAULTS TO LTR AND IS NOT DERIVED FROM `lang`. Deriving it would mean
+ * this module keeping its own list of right-to-left languages, which is the
+ * second copy of a fact i18n/routing already owns — and the copy that stops
+ * being updated. The caller knows which storefront it is writing for; it says
+ * so. Every existing caller passes nothing and is unchanged.
+ */
+export function emailShell(opts: {
+  lang: string;
+  title: string;
+  inner: string;
+  dir?: "ltr" | "rtl";
+}): string {
   return `<!doctype html>
-<html lang="${opts.lang}">
+<html lang="${opts.lang}" dir="${opts.dir ?? "ltr"}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${opts.title}</title>
 ${FONT_LINK}</head>

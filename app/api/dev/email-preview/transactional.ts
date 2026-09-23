@@ -1,6 +1,7 @@
 import "server-only";
 import { buildOrderEmail } from "@/lib/order-email";
 import { buildShippedEmail } from "@/lib/shipping-email";
+import { buildResetEmail } from "@/lib/password-reset";
 import { buildWholesaleReply, buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
 import {
@@ -133,6 +134,7 @@ export type TransactionalKind =
   | "order-legacy"
   | "shipping"
   | "shipping-ukrposhta"
+  | "password-reset"
   | "wholesale"
   | "wholesale-register"
   | "wholesale-approved"
@@ -148,6 +150,7 @@ export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "order-legacy",
   "shipping",
   "shipping-ukrposhta",
+  "password-reset",
   "wholesale",
   "wholesale-register",
   "wholesale-approved",
@@ -265,6 +268,19 @@ export function renderTransactional(
         locale,
         carrier: "ukrposhta",
         addressLines: ["Preview Customer", "Musterstraße 12, 3", "10115 Berlin", "Germany"],
+      });
+
+    /* The only letter here that exists in all four storefronts, which is the
+       thing worth checking in the preview: a person locked out is the last one
+       to hand a language they do not read. ?locale=ar also proves the shell's
+       dir="rtl", which no other transactional letter exercises.
+
+       The URL is obviously fake. A real recovery link is single-use and would
+       be spent by whoever opened the preview. */
+    case "password-reset":
+      return buildResetEmail({
+        locale,
+        url: "https://tactical-hb.com/auth/v1/verify?token=PREVIEW-NOT-A-REAL-LINK&type=recovery",
       });
 
     case "wholesale": {

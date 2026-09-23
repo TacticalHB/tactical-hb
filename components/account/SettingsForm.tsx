@@ -4,8 +4,7 @@ import { useState } from "react";
 import { t } from "@/lib/i18n-text";
 import { useAuth } from "@/components/AuthContext";
 import { openCookieSettings } from "@/lib/cookie-consent";
-
-const pwOk = (pw: string) => pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw);
+import { pwOk } from "@/lib/password-rules";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

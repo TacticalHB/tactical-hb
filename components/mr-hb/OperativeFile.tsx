@@ -273,7 +273,17 @@ export default function OperativeFile({ locale }: { locale: string }) {
 
             <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-7 sm:p-9">
               <div>
-                <div className="text-[26px] sm:text-[30px] font-semibold tracking-[0.22em]">{t("env_name")}</div>
+                {/* THE PAGE'S ONE HEADING AT FIRST PAINT. Both storefronts of
+                    /mr-hb served HTML with no h1 — no heading of any level —
+                    because the two <h1>s further down sit inside `beat === 1`
+                    and the chapter block, neither of which is rendered until
+                    somebody opens the envelope. A crawler does not open the
+                    envelope, so it read a page with no structure at all.
+
+                    The beats are mutually exclusive, so this is one h1 per
+                    beat, never two. Same classes, same rendering: this changes
+                    the tag and nothing a visitor can see. */}
+                <h1 className="text-[26px] sm:text-[30px] font-semibold tracking-[0.22em]">{t("env_name")}</h1>
                 <div className="text-[11px] tracking-[0.2em] uppercase mt-1" style={{ color: "rgba(255,255,255,0.35)", fontFamily: mono }}>
                   {t("env_ref")}
                 </div>

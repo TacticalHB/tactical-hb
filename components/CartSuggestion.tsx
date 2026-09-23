@@ -225,6 +225,7 @@ export default function CartSuggestion({
         <Image
           src={suggestion.poster}
           alt=""
+          aria-hidden="true"
           width={800}
           height={800}
           sizes="384px"

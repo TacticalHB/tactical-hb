@@ -72,6 +72,7 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
                 <Image
                   src={step.src}
                   alt=""
+                  aria-hidden="true"
                   width={484}
                   height={484}
                   sizes="88px"

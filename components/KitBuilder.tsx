@@ -269,9 +269,19 @@ export default function KitBuilder({ locale }: { locale: string }) {
                             studio. The plate has to match what the photos were
                             cut against, and that is 245. */}
                         <div className="relative aspect-square overflow-hidden" style={{ background: "#f5f5f5" }}>
+                          {/* DECORATIVE ON PURPOSE, AND NOW IT SAYS SO. The
+                              button around this card already carries the
+                              product's name as text, so alt text here would
+                              have a screen reader announce it twice. An empty
+                              alt alone does not state that intent, though —
+                              it reads identically to an alt somebody forgot,
+                              which is exactly how Bing's site scan reported
+                              it. aria-hidden is the marker that makes the
+                              decision auditable. */}
                           <Image
                             src={p.gridImage ?? p.image}
                             alt=""
+                            aria-hidden="true"
                             fill
                             sizes="(max-width: 640px) 45vw, 220px"
                             className="object-contain p-2"
@@ -376,6 +386,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
                       key={product.slug}
                       src={product.gridImage ?? product.image}
                       alt=""
+                      aria-hidden="true"
                       fill
                       sizes="120px"
                       className="kit-stack-img object-contain p-1.5"
@@ -384,6 +395,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
                     <Image
                       src={GHOST[slot]}
                       alt=""
+                      aria-hidden="true"
                       fill
                       sizes="120px"
                       className="object-contain p-1.5"

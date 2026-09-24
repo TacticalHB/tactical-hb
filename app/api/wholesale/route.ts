@@ -6,7 +6,7 @@ import { screen } from "@/lib/anti-spam";
 import { buildWholesaleReply } from "@/lib/wholesale-email";
 
 /* ---------------------------------------------------------------------------
-   Wholesale enquiry → Sales.tactical-hb@outlook.com.
+   Wholesale enquiry → SALES_EMAIL (lib/contact-info).
 
    This endpoint is public and unauthenticated, like any contact form, so
    everything is validated and length-capped server-side. The client's

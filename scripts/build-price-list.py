@@ -118,7 +118,7 @@ COPY = {
     },
 }
 
-SALES = "Sales.tactical-hb@outlook.com"
+SALES = "sales@tactical-hb.com"   # mirrors SALES_EMAIL in lib/contact-info.ts
 
 
 def eur(v):

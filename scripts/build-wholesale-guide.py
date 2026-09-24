@@ -63,7 +63,7 @@ FOOTER_Y = 38
 FLOOR = FOOTER_Y + 22
 COL = RIGHT - LEFT
 
-SALES_EMAIL = "Sales.tactical-hb@outlook.com"
+SALES_EMAIL = "sales@tactical-hb.com"   # mirrors SALES_EMAIL in lib/contact-info.ts
 SITE = "tactical-hb.com"
 
 # strftime("%B") answers in the C locale, so the Ukrainian edition was dated

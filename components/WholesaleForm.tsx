@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
+import { SALES_EMAIL } from "@/lib/contact-info";
 import { useEffect, useRef, useState } from "react";
 import HoneypotField from "./HoneypotField";
 
@@ -205,7 +206,7 @@ export default function WholesaleForm() {
 
       {failed && (
         <p role="alert" className="text-sm leading-relaxed" style={{ color: "#b42318" }}>
-          {t("form_error")}
+          {t("form_error", { email: SALES_EMAIL })}
         </p>
       )}
 

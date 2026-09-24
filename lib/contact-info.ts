@@ -9,8 +9,15 @@
 /** General enquiries, customer support, returns. */
 export const ADMIN_EMAIL = "admin@tactical-hb.com";
 
-/** Wholesale enquiries and orders. */
-export const SALES_EMAIL = "Sales.tactical-hb@outlook.com";
+/**
+ * Wholesale enquiries and orders.
+ *
+ * On the company's own domain from 24 September 2026; it was an Outlook.com
+ * mailbox before that, and partner PDFs sent earlier still print the old one.
+ * This constant is the address every page shows, every wholesale notification
+ * is sent TO, and every partner email says to reply to.
+ */
+export const SALES_EMAIL = "sales@tactical-hb.com";
 
 export const PHONE = "+380 66 707 33 07";
 

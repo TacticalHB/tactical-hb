@@ -30,7 +30,7 @@ function AboutContent() {
     { title: t("value_4_title"), text: t("value_4_text") },
   ];
 
-  const payMethods = [t("pay_method_1"), t("pay_method_2"), t("pay_method_3")];
+  const payMethods = [t("pay_method_1"), t("pay_method_2"), t("pay_method_3"), t("pay_method_4"), t("pay_method_5")];
 
   const returnTerms = [
     { title: t("return_1_title"), text: t("return_1_text") },

@@ -106,10 +106,10 @@ function Body({ blocks, locale }: { blocks: Block[]; locale: string }) {
 const PAYMENT: Block[] = [
   {
     p: {
-      uk: "Ми приймаємо оплату карткою — Visa та Mastercard — через Plata by Mono (Monobank). Іноземні картки приймаються там, де це доступно.",
-      en: "We accept card payments — Visa and Mastercard — through Plata by Mono (Monobank). International cards are accepted where available.",
-      ja: "お支払いは Plata by Mono (Monobank) を通じたカード決済 — Visa と Mastercard — に対応しています。海外発行のカードもご利用いただける場合があります。",
-      ar: "نقبل الدفع بالبطاقة — Visa وMastercard — عبر Plata by Mono (Monobank). وتُقبل البطاقات الأجنبية حيثما كان ذلك متاحًا.",
+      uk: "Ми приймаємо оплату карткою — Visa та Mastercard — і Apple Pay або Google Pay на підтримуваних пристроях через Plata by Mono (Monobank). Іноземні картки приймаються там, де це доступно.",
+      en: "We accept card payments — Visa and Mastercard — and Apple Pay or Google Pay on supported devices, through Plata by Mono (Monobank). International cards are accepted where available.",
+      ja: "お支払いは Plata by Mono (Monobank) を通じたカード決済 — Visa と Mastercard — と、対応デバイスでの Apple Pay・Google Pay に対応しています。海外発行のカードもご利用いただける場合があります。",
+      ar: "نقبل الدفع بالبطاقة — Visa وMastercard — وApple Pay أو Google Pay على الأجهزة المدعومة، عبر Plata by Mono (Monobank). وتُقبل البطاقات الأجنبية حيثما كان ذلك متاحًا.",
     },
   },
   {
@@ -254,11 +254,13 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       id: "payment",
       icon: <CardIcon />,
       title: t(locale, { uk: "Захищена оплата", en: "Secured Payment", ja: "安全なお支払い", ar: "دفع آمن" }),
-      /* APPLE PAY AND GOOGLE PAY ARE NOT CLAIMED HERE, and must not be until
-         they are confirmed live on the Monobank invoice flow. This row is read
-         at the highest-intent moment on the site; a payment method that turns
-         out not to be there is the most expensive kind of wrong copy. */
-      sub: "Plata by Mono (Monobank)",
+      /* APPLE PAY was seen on the live Monobank page on 1 October 2026, and
+         Mario asked for Google Pay to be named beside it the same day. Both
+         are wallets on Monobank's own page, shown only on a device that
+         supports them. This row is read at the highest-intent moment on the
+         site; a method that turns out not to be there is the most expensive
+         kind of wrong copy. */
+      sub: "Plata by Mono · Apple Pay · Google Pay",
     },
     {
       id: "delivery",

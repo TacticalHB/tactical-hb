@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { awaitingParcel } from "@/lib/orders-display";
+import { awaitingParcel, needsDispatch } from "@/lib/orders-display";
 import type { AdminOrder } from "@/lib/orders-display";
 
 /* ---------------------------------------------------------------------------
@@ -56,4 +56,19 @@ test("an unknown status stays IN the queue rather than vanishing from it", () =>
      that decides whether a parcel gets bought. */
   assert.equal(awaitingParcel(order({ status: "awaiting_refund_review" })), true);
   assert.equal(awaitingParcel(order({ status: "" })), true);
+});
+
+test("dispatch counts both carriers, each by its own tracking number", () => {
+  assert.equal(needsDispatch(order()), true, "Ukrposhta, no barcode");
+  assert.equal(needsDispatch(order({ ukrposhtaBarcode: "CV123456789UA" })), false);
+  assert.equal(needsDispatch(order({ carrier: "nova_poshta" })), true, "Nova Poshta, no waybill");
+  assert.equal(needsDispatch(order({ carrier: "nova_poshta", ttn: "20450712345678" } as Partial<AdminOrder>)), false);
+  /* Orders predating the carrier column are Nova Poshta, and are read by waybill. */
+  assert.equal(needsDispatch(order({ carrier: null })), true);
+});
+
+test("a shipped, delivered or cancelled order is never waiting to be dispatched", () => {
+  for (const status of ["shipped", "delivered", "cancelled"]) {
+    assert.equal(needsDispatch(order({ status, carrier: "nova_poshta" })), false, status);
+  }
 });

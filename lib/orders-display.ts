@@ -240,6 +240,20 @@ export function awaitingParcel(o: AdminOrder): boolean {
   return o.carrier === "ukrposhta" && !o.ukrposhtaBarcode && !POSTED_OR_DONE.has(o.status);
 }
 
+/**
+ * Any order still waiting to leave the building, whichever carrier.
+ *
+ * The overview's headline number. It is awaitingParcel's rule extended to
+ * Nova Poshta: the tracking number is the signal for both carriers (a waybill
+ * for Nova Poshta, a barcode for Ukrposhta), terminal states are excluded, and
+ * an unknown status stays IN for the same reason it does there — a spare row
+ * costs a glance, a missing one costs a customer their parcel.
+ */
+export function needsDispatch(o: AdminOrder): boolean {
+  if (POSTED_OR_DONE.has(o.status)) return false;
+  return o.carrier === "ukrposhta" ? !o.ukrposhtaBarcode : !o.ttn;
+}
+
 export function orderTotal(o: AdminOrder): { text: string; sub: string | null } {
   return totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah);
 }

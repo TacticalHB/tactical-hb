@@ -51,22 +51,26 @@ const room = (c: number, r: number) => ({
   desk: [COL[c] + 62, ROW[r] + 112] as [number, number],
 });
 
+/* Cells are named for what sits in them. On 1 October 2026 three were
+   renamed when their departments left the menu: marketing → strategy (the
+   strategist stayed), finance → margin (the guard stayed), projects →
+   overview (the doorway back to the console's home). */
 const ROOMS = {
   orders: room(0, 0),
   command: room(1, 0),
-  marketing: room(2, 0),
+  strategy: room(2, 0),
   stock: room(0, 1),
   wholesale: room(2, 1),
   costs: room(0, 2),
-  finance: room(1, 2),
-  projects: room(2, 2),
+  margin: room(1, 2),
+  overview: room(2, 2),
 } as const;
 
 const CORE = { x: 600, y: 380, r: 78 };
 
 const TONE_COLOR: Record<RoomTone, string> = {
   ok: "var(--console-ok)",
-  warn: "var(--console-accent)",
+  warn: "var(--console-accent-ink)",   // words on white take the deep orange
   alert: "var(--console-alert)",
   idle: "var(--console-faint)",
 };
@@ -98,7 +102,7 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 function AgentFigure({ color }: { color: string }) {
   return (
     <g>
-      <ellipse cx="0" cy="13" rx="8" ry="2.6" fill="rgba(0,0,0,0.45)" />
+      <ellipse cx="0" cy="13" rx="8" ry="2.6" fill="rgba(0,0,0,0.16)" />
       <rect x="-6" y="-3" width="12" height="15" rx="5" fill={color} />
       <circle cx="0" cy="-9" r="6" fill={color} />
       <rect x="-4.5" y="-11" width="9" height="4.6" rx="2.2" fill="#0b0e13" opacity="0.85" />

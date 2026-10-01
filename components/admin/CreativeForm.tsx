@@ -179,7 +179,7 @@ export default function CreativeForm({
               className="h-7 px-2.5 text-[12px] rounded-full transition-colors"
               style={
                 on
-                  ? { background: "var(--console-accent)", color: "#14151a", border: "1px solid var(--console-accent)" }
+                  ? { background: "var(--console-accent)", color: "var(--console-on-accent)", border: "1px solid var(--console-accent)" }
                   : { background: "transparent", color: "var(--console-muted)", border: "1px solid var(--console-border)" }
               }
             >
@@ -192,7 +192,7 @@ export default function CreativeForm({
           type="submit"
           disabled={busy || !title.trim()}
           className="ml-auto h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-          style={{ background: "var(--console-accent)", color: "#14151a" }}
+          style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
         >
           {busy ? "…" : L.add}
         </button>

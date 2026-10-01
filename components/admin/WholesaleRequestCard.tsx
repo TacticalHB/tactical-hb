@@ -125,7 +125,7 @@ export default function WholesaleRequestCard({
         {/* Which book priced it — the one fact that explains why these numbers
             and not the other set. */}
         {r.partnerType && (
-          <span className="text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--console-accent)" }}>
+          <span className="text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--console-accent-ink)" }}>
             {r.partnerType}
           </span>
         )}
@@ -163,7 +163,7 @@ export default function WholesaleRequestCard({
       )}
 
       {note && (
-        <p className="px-5 pb-2 text-[12.5px]" style={{ color: "var(--console-accent)" }}>
+        <p className="px-5 pb-2 text-[12.5px]" style={{ color: "var(--console-accent-ink)" }}>
           {note}
         </p>
       )}
@@ -193,7 +193,7 @@ export default function WholesaleRequestCard({
                         packing list, and "with a lid" is the difference
                         between two otherwise identical rows. */}
                     {i.optionsLabel && (
-                      <span className="block text-[12px]" style={{ color: "var(--console-accent)" }}>
+                      <span className="block text-[12px]" style={{ color: "var(--console-accent-ink)" }}>
                         {i.optionsLabel}
                       </span>
                     )}
@@ -250,7 +250,7 @@ export default function WholesaleRequestCard({
               <a
                 href={`mailto:${r.email}?subject=${encodeURIComponent(`Tactical HB — ${r.reference}`)}`}
                 className="h-9 px-4 inline-flex items-center rounded font-medium transition-opacity hover:opacity-85"
-                style={{ background: "var(--console-accent)", color: "#111114" }}
+                style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
               >
                 {L.email}
               </a>

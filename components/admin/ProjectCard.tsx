@@ -325,7 +325,7 @@ export default function ProjectCard({
               onClick={onSave}
               disabled={busy !== null}
               className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-              style={{ background: "var(--console-accent)", color: "#14151a" }}
+              style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
             >
               {busy === "save" ? "…" : L.save}
             </button>
@@ -379,7 +379,7 @@ export default function ProjectCard({
                 onClick={onDelete}
                 disabled={busy !== null}
                 className="ml-auto h-9 px-3 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-                style={{ border: "1px solid rgba(196,92,92,0.4)", color: "var(--console-alert)", background: "transparent" }}
+                style={{ border: "1px solid rgba(178,59,55,0.35)", color: "var(--console-alert)", background: "transparent" }}
               >
                 {busy === "delete" ? "…" : L.remove}
               </button>

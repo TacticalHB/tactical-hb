@@ -554,40 +554,59 @@ body {
    panel stops being readable at a glance — which is the only thing it is for.
 ============================================================================ */
 .thb-console {
-  /* Surfaces */
-  --console-bg: #0c0d10;        /* deepest — page behind everything */
-  --console-bg-2: #14151a;      /* content area */
-  --console-panel: #1a1b21;     /* cards, panels, sidebar */
-  --console-panel-2: #21222a;   /* nested rows, hover, inputs */
-  --console-border: #2a2b33;
-  --console-border-soft: #23242b;
+  /* WHITE SINCE 1 OCTOBER 2026. Mario found the dark command deck too dark and
+     dull, and asked for the whole console in white with the brand's orange
+     buttons — the storefront's own look. The colour RULE did not change (orange
+     is brand and system, green/amber/red are health, everything else quiet);
+     only the ground did, and that moved two things that a value swap alone
+     would have got wrong. See the accent and status notes below. */
 
-  /* Brand / system — the same packaging orange the shop uses. The console is
-     dark throughout, so it takes the bright weight everywhere. */
-  --console-accent: #FA8246;
+  /* Surfaces */
+  --console-bg: #FFFFFF;        /* sidebar, top bar */
+  --console-bg-2: #FAFAF9;      /* content area — white, a breath warmer so cards lift */
+  --console-panel: #FFFFFF;     /* cards, panels */
+  --console-panel-2: #F4F4F2;   /* nested rows, hover, inputs */
+  --console-border: #E4E3E0;
+  --console-border-soft: #EEEDEA;
+  /* Inputs sit on white cards, so they are white too and carry the firmer
+     edge — a grey fill read as "disabled". */
+  --console-field-border: #D3D2CE;
+
+  /* Brand / system — the packaging orange, now in BOTH weights, because one
+     orange cannot do both jobs on white. The bright fill carries dark text at
+     7.5:1 (the shop's .btn-accent exactly); as TEXT on white it manages
+     2.5:1 and is unreadable, so anything that is words takes the deep ink —
+     the same split the storefront has always used (--accent / --accent-ink). */
+  --console-accent: #FA8246;         /* fills: buttons, markers, the active bar */
+  --console-accent-hover: #E56B2E;
+  --console-accent-ink: #C45A1A;     /* orange as text on white */
+  --console-on-accent: #111114;      /* text sitting ON the orange fill */
   --console-accent-soft: rgba(250, 130, 70, 0.12);
-  --console-accent-line: rgba(250, 130, 70, 0.45);
+  --console-accent-line: rgba(250, 130, 70, 0.55);
 
   /* Text */
-  --console-text: #E8E8EA;
-  --console-muted: #8B8D97;
-  --console-faint: #61636d;
+  --console-text: #16171B;
+  --console-muted: #66676D;
+  --console-faint: #7E7F85;
 
-  /* Status — indicator lights only */
-  --console-ok: #3D9A6A;
-  --console-warn: #D4A017;
-  --console-alert: #C45C5C;
-  --console-info: #5B7C9A;
-  --console-marketing: #7A6B9A;
-  --console-ok-soft: rgba(61, 154, 106, 0.13);
-  --console-warn-soft: rgba(212, 160, 23, 0.13);
-  --console-alert-soft: rgba(196, 92, 92, 0.13);
-  --console-info-soft: rgba(91, 124, 154, 0.13);
+  /* Status — indicator lights only. Re-tuned for white: the dark deck's amber
+     (#D4A017) is 2.3:1 as text on white. These are each 4.5:1 or better on
+     white and on their own tint, so health still reads at a glance. */
+  --console-ok: #2B7A4F;
+  --console-warn: #8F5E00;
+  --console-alert: #B23B37;
+  --console-info: #3D5F7E;
+  --console-marketing: #5E4F8A;
+  --console-ok-soft: rgba(43, 122, 79, 0.10);
+  --console-warn-soft: rgba(143, 94, 0, 0.10);
+  --console-alert-soft: rgba(178, 59, 55, 0.09);
+  --console-info-soft: rgba(61, 95, 126, 0.10);
 
   --console-radius: 10px;
 
   background: var(--console-bg-2);
   color: var(--console-text);
+  color-scheme: light;
 }
 
 /* ---- Sidebar navigation ------------------------------------------------ */
@@ -604,7 +623,7 @@ body {
 
 /* Active = an accent marker and accent text, not a filled slab. The sidebar should
    read as an index with one line lit, not as a stack of buttons. */
-.console-nav-link.active { color: var(--console-accent); background: transparent; }
+.console-nav-link.active { color: var(--console-accent-ink); background: var(--console-accent-soft); font-weight: 500; }
 .console-nav-link.active::before {
   content: "";
   position: absolute;
@@ -627,6 +646,7 @@ body {
   background: var(--console-panel);
   border: 1px solid var(--console-border);
   border-radius: var(--console-radius);
+  box-shadow: 0 1px 2px rgba(22, 23, 27, 0.04);
 }
 .console-card-link {
   transition: transform var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out);
@@ -655,10 +675,10 @@ body {
   border: 1px solid transparent;
   transition: opacity var(--motion-fast) var(--ease-out);
 }
-.console-chip-ok      { color: var(--console-ok);      background: var(--console-ok-soft);      border-color: rgba(61,154,106,0.35); }
-.console-chip-warn    { color: var(--console-warn);    background: var(--console-warn-soft);    border-color: rgba(212,160,23,0.35); }
-.console-chip-alert   { color: var(--console-alert);   background: var(--console-alert-soft);   border-color: rgba(196,92,92,0.35); }
-.console-chip-info    { color: var(--console-info);    background: var(--console-info-soft);    border-color: rgba(91,124,154,0.35); }
+.console-chip-ok      { color: var(--console-ok);      background: var(--console-ok-soft);      border-color: rgba(43,122,79,0.28); }
+.console-chip-warn    { color: var(--console-warn);    background: var(--console-warn-soft);    border-color: rgba(143,94,0,0.28); }
+.console-chip-alert   { color: var(--console-alert);   background: var(--console-alert-soft);   border-color: rgba(178,59,55,0.28); }
+.console-chip-info    { color: var(--console-info);    background: var(--console-info-soft);    border-color: rgba(61,95,126,0.28); }
 .console-chip-neutral { color: var(--console-muted);   background: var(--console-panel-2);      border-color: var(--console-border); }
 
 /* ---- Buttons ----------------------------------------------------------- */
@@ -680,10 +700,12 @@ body {
 .console-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .console-btn-primary {
   background: var(--console-accent);
-  color: #14151a;
+  color: var(--console-on-accent);
   border-color: var(--console-accent);
 }
-.console-btn-primary:hover:not(:disabled) { background: #d0b070; border-color: #d0b070; }
+/* Was #d0b070 — the old brass, left behind when gold became orange in July, so
+   every primary button turned gold under the cursor. */
+.console-btn-primary:hover:not(:disabled) { background: var(--console-accent-hover); border-color: var(--console-accent-hover); }
 .console-btn-secondary {
   background: transparent;
   color: var(--console-text);
@@ -696,23 +718,23 @@ body {
 .console-btn-danger {
   background: transparent;
   color: var(--console-alert);
-  border-color: rgba(196, 92, 92, 0.4);
+  border-color: rgba(178, 59, 55, 0.35);
 }
 .console-btn-danger:hover:not(:disabled) { background: var(--console-alert-soft); }
 
 /* ---- Fields ------------------------------------------------------------ */
 .console-field {
   width: 100%;
-  background: var(--console-panel-2);
+  background: var(--console-panel);
   color: var(--console-text);
-  border: 1px solid var(--console-border);
+  border: 1px solid var(--console-field-border);
   border-radius: 7px;
   padding: 0.55rem 0.7rem;
   font-size: 0.85rem;
   outline: none;
   transition: border-color var(--motion-fast) var(--ease-out);
 }
-.console-field:focus { border-color: var(--console-accent-line); }
+.console-field:focus { border-color: var(--console-accent); box-shadow: 0 0 0 3px var(--console-accent-soft); }
 .console-field::placeholder { color: var(--console-faint); }
 .console-label {
   display: block;
@@ -796,42 +818,39 @@ body {
   content: "";
   width: 8px;
   height: 4px;
-  border-left: 2px solid #14151a;
-  border-bottom: 2px solid #14151a;
+  border-left: 2px solid var(--console-on-accent);
+  border-bottom: 2px solid var(--console-on-accent);
   transform: rotate(-45deg) translateY(-1px);
 }
 .thb-console input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.7);
-  cursor: pointer;
+  cursor: pointer;   /* the invert() that made it visible on dark is gone */
 }
 
 /* ---------------------------------------------------------------------------
-   The ops map keeps its own skin.
+   The ops map, in white.
 
-   Mario preferred the Phase E map to the command-deck restyle of it, and he is
-   right: the deck's calm is correct for tables and forms, but it drained the
-   one screen whose job is to look alive. Muting the core glow and the data
-   lines cost the map its centre of gravity — the hexagon stopped reading as
-   the thing every department feeds into.
-
-   So the map carries Phase E's palette, scoped here and nowhere else. It is
-   the deliberate exception to the deck's colour rule: the cyan data lines and
-   the brighter agent greens live inside .thb-map and cannot leak into a
-   module page, a chip, or a button.
+   It kept a darker Phase E skin of its own while the rest of the console was a
+   dark deck, because Mario preferred it to the deck's muted version. On 1
+   October 2026 he asked for the whole console in white and for the map — "the
+   interactive thing" — to stay, so it follows the console onto white, keeping
+   what made it look alive: the orange core halo, the animated data lines and
+   the agents' identity colours. It still scopes its own values here, so its
+   brighter data-line cyan cannot leak into a module page, a chip or a button.
 --------------------------------------------------------------------------- */
 .thb-map {
-  --console-bg: #0b0e13;
-  --console-panel: #10141b;
-  --console-panel-2: #161b24;
-  --console-border: #222a36;
-  --console-text: #e8e6df;
-  --console-muted: #8b93a1;
-  --console-faint: #5d6572;
+  --console-bg: #FBFBFA;
+  --console-panel: #FFFFFF;
+  --console-panel-2: #F3F3F1;
+  --console-border: #DEDDD9;
+  --console-text: #16171B;
+  --console-muted: #5F6066;
+  --console-faint: #8A8B91;
   --console-accent: #FA8246;
+  --console-accent-ink: #C45A1A;
   --console-accent-dim: rgba(250, 130, 70, 0.14);
-  --console-alert: #e2574f;
-  --console-ok: #4cd48b;
-  --console-data: #58c4dd;
+  --console-alert: #B23B37;
+  --console-ok: #2B7A4F;
+  --console-data: #2C9CBF;
 }
 
 /* ---- Mr HB dossier ----

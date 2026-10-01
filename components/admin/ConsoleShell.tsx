@@ -9,7 +9,7 @@ import { useAuth } from "@/components/AuthContext";
    THB-OS console frame: department sidebar, shop exit, its own sign-out.
 
    Reachability rule, Phase E edition: EVERY /admin page must appear both here
-   and on the ops map (components/admin/OfficeMap via the home page). The old
+   and on the ops map (components/admin/OfficeMap via /admin/ops). The old
    AccountNav scaffolding is gone — this sidebar is now the doorway Mario uses,
    so a page missing from this list ships invisible.
 --------------------------------------------------------------------------- */
@@ -17,14 +17,30 @@ import { useAuth } from "@/components/AuthContext";
 type NavItem = { href: string; en: string; uk: string };
 type NavSection = { en: string; uk: string; items: NavItem[] };
 
+/* ---------------------------------------------------------------------------
+   THE MAIN SECTIONS ONLY, SINCE 1 OCTOBER 2026.
+
+   Mario asked to work with the core of the console first and grow from there.
+   What stays is what carries real data or he named: orders, wholesale, stock,
+   costs, suppliers, vouchers, margin and the advisors. Hidden for now, and
+   ONLY from this menu and the ops map — every page, action and table is
+   untouched and still answers its URL, so bringing one back is one line here
+   and one room chip:
+
+     /workshop   Machines            (0 machines recorded)
+     /finance    Finance overview
+     /marketing  Campaigns & ad spend (0 spend, 0 creatives)
+     /projects   Projects & exhibitions (0 projects)
+     /followups  Partner follow-ups  (0 messages)
+
+   The reachability rule still holds for every page in this list: each must
+   also be a room or chip on the ops map (app/[locale]/admin/ops/page.tsx).
+--------------------------------------------------------------------------- */
 const SECTIONS: NavSection[] = [
   {
-    en: "Command",
-    uk: "Командування",
-    items: [
-      { href: "", en: "Ops map", uk: "Мапа" },
-      { href: "/brief", en: "Weekly Brief", uk: "Тижневий бриф" },
-    ],
+    en: "Today",
+    uk: "Сьогодні",
+    items: [{ href: "", en: "Overview", uk: "Огляд" }],
   },
   {
     en: "Commerce",
@@ -35,56 +51,33 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    en: "Stock & Production",
-    uk: "Склад і виробництво",
-    items: [
-      { href: "/stock", en: "Stock", uk: "Склад" },
-      { href: "/advisor", en: "Stock Advisor", uk: "Радник складу" },
-    ],
-  },
-  {
-    en: "Suppliers & Costs",
-    uk: "Постачання і витрати",
-    items: [
-      { href: "/costs", en: "Costs", uk: "Витрати" },
-      { href: "/suppliers", en: "Suppliers", uk: "Постачальники" },
-    ],
-  },
-  {
-    en: "Workshop",
-    uk: "Майстерня",
-    items: [{ href: "/workshop", en: "Machines", uk: "Машини" }],
-  },
-  {
-    en: "Finance",
-    uk: "Фінанси",
-    items: [
-      { href: "/finance", en: "Finance", uk: "Фінанси" },
-      { href: "/margin", en: "Cost & Margin Guard", uk: "Вартість і маржа" },
-    ],
-  },
-  {
-    en: "Wholesale CRM",
+    en: "Wholesale",
     uk: "Опт",
     items: [
       { href: "/partners", en: "Partners", uk: "Партнери" },
       { href: "/wholesale", en: "Requests", uk: "Оптові запити" },
       { href: "/prices", en: "Price books", uk: "Оптові прайси" },
-      { href: "/followups", en: "Follow-ups", uk: "Листи партнерам" },
     ],
   },
   {
-    en: "Marketing",
-    uk: "Маркетинг",
+    en: "Stock & costs",
+    uk: "Склад і витрати",
     items: [
-      { href: "/marketing", en: "Marketing", uk: "Маркетинг" },
-      { href: "/strategist", en: "Strategist", uk: "Стратег" },
+      { href: "/stock", en: "Stock", uk: "Склад" },
+      { href: "/costs", en: "Costs", uk: "Витрати" },
+      { href: "/suppliers", en: "Suppliers", uk: "Постачальники" },
     ],
   },
   {
-    en: "Projects",
-    uk: "Проєкти",
-    items: [{ href: "/projects", en: "Projects & Exhibitions", uk: "Проєкти та виставки" }],
+    en: "Advisors",
+    uk: "Радники",
+    items: [
+      { href: "/ops", en: "Ops map", uk: "Мапа операцій" },
+      { href: "/brief", en: "Weekly Brief", uk: "Тижневий бриф" },
+      { href: "/advisor", en: "Stock Advisor", uk: "Радник складу" },
+      { href: "/strategist", en: "Strategist", uk: "Стратег" },
+      { href: "/margin", en: "Cost & Margin Guard", uk: "Вартість і маржа" },
+    ],
   },
 ];
 
@@ -118,7 +111,7 @@ export default function ConsoleShell({
       {/* On mobile the top bar already carries the wordmark. */}
       <Link href={base} className="hidden lg:block px-5 pt-5 pb-4">
         <span className="font-display text-2xl tracking-widest" style={{ color: "var(--console-text)" }}>
-          THB<span style={{ color: "var(--console-accent)" }}>-OS</span>
+          THB<span style={{ color: "var(--console-accent-ink)" }}>-OS</span>
         </span>
         <span className="block text-[10px] tracking-[0.22em] uppercase mt-0.5" style={{ color: "var(--console-faint)" }}>
           {uk ? "Операційний центр" : "Operations Centre"}
@@ -171,7 +164,7 @@ export default function ConsoleShell({
         style={{ background: "var(--console-panel)", borderBottom: "1px solid var(--console-border)" }}
       >
         <Link href={base} className="font-display text-xl tracking-widest" style={{ color: "var(--console-text)" }}>
-          THB<span style={{ color: "var(--console-accent)" }}>-OS</span>
+          THB<span style={{ color: "var(--console-accent-ink)" }}>-OS</span>
         </Link>
         <button
           onClick={() => setOpen((o) => !o)}

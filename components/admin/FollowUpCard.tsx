@@ -177,7 +177,7 @@ export default function FollowUpCard({
             className="rounded px-2.5 py-1 text-[12px] font-medium uppercase tracking-[0.08em]"
             style={
               lang === l
-                ? { background: "var(--console-accent)", color: "#14151a" }
+                ? { background: "var(--console-accent)", color: "var(--console-on-accent)" }
                 : { background: "var(--console-panel-2)", color: "var(--console-muted)" }
             }
           >
@@ -250,7 +250,7 @@ export default function FollowUpCard({
             onClick={() => setConfirming(true)}
             disabled={busy || !subject.trim() || !body.trim()}
             className="rounded px-4 py-2 text-[13.5px] font-medium disabled:opacity-40"
-            style={{ background: "var(--console-accent)", color: "#14151a" }}
+            style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
           >
             {uk ? "Надіслати з системи" : "Send from the system"}
           </button>
@@ -262,7 +262,7 @@ export default function FollowUpCard({
         <div
           className="mt-3 rounded px-4 py-3"
           style={{
-            border: "1px solid rgba(212,160,23,0.35)",
+            border: "1px solid rgba(143,94,0,0.3)",
             background: "var(--console-warn-soft)",
           }}
         >
@@ -278,7 +278,7 @@ export default function FollowUpCard({
               onClick={send}
               disabled={busy}
               className="rounded px-4 py-2 text-[13.5px] font-medium disabled:opacity-40"
-              style={{ background: "var(--console-accent)", color: "#14151a" }}
+              style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
             >
               {busy ? (uk ? "Надсилаю…" : "Sending…") : uk ? "Так, надіслати" : "Yes, send it"}
             </button>

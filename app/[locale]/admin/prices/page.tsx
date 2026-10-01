@@ -181,7 +181,7 @@ function GroupBlock({
         <td
           colSpan={cols + 1}
           className="px-4 pt-5 pb-2 text-[11px] tracking-[0.14em] uppercase"
-          style={{ color: "var(--console-accent)" }}
+          style={{ color: "var(--console-accent-ink)" }}
         >
           {label}
         </td>

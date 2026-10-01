@@ -63,7 +63,7 @@ export default async function AdminSuppliersPage({
           <div
             className="rounded-lg px-5 py-4 text-[14px] mb-6"
             style={{
-              border: "1px solid rgba(196,92,92,0.35)",
+              border: "1px solid rgba(178,59,55,0.3)",
               background: "var(--console-alert-soft)",
               color: "var(--console-alert)",
             }}

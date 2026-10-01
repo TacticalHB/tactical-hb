@@ -265,7 +265,7 @@ function Plan({ data, uk, locale }: { data: CampaignPlan; uk: boolean; locale: s
         <div className="lg:col-span-2">
           <div
             className="rounded-lg px-5 py-4 text-[13.5px]"
-            style={{ border: "1px solid rgba(212,160,23,0.35)", background: "var(--console-warn-soft)", color: "var(--console-warn)" }}
+            style={{ border: "1px solid rgba(143,94,0,0.3)", background: "var(--console-warn-soft)", color: "var(--console-warn)" }}
           >
             {data.notes.map((n) => (
               <p key={n} className="py-0.5">
@@ -319,7 +319,7 @@ export default async function AdminStrategistPage({
         {runs === null && (
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
-            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
+            style={{ border: "1px solid rgba(178,59,55,0.3)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграції 0019 та 0020 у Supabase, та чи задано SUPABASE_SERVICE_ROLE_KEY."

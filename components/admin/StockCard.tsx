@@ -200,7 +200,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                 type="submit"
                 disabled={busy !== null || !qty.trim()}
                 className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "var(--console-accent)", color: "#14151a" }}
+                style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
               >
                 {busy === "receive" ? L.saving : L.add}
               </button>
@@ -233,7 +233,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                 type="submit"
                 disabled={busy !== null || !counted.trim() || !correctNote.trim()}
                 className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "var(--console-accent)", color: "#14151a" }}
+                style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
               >
                 {busy === "correct" ? L.saving : L.apply}
               </button>
@@ -278,7 +278,7 @@ export default function StockCard({ item, uk }: { item: StockItem; uk: boolean }
                 type="submit"
                 disabled={busy !== null}
                 className="h-9 px-4 text-[13px] rounded self-start transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
-                style={{ background: "var(--console-accent)", color: "#14151a" }}
+                style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
               >
                 {busy === "thresholds" ? L.saving : L.save}
               </button>

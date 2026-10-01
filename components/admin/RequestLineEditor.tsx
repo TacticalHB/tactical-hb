@@ -394,7 +394,7 @@ export default function RequestLineEditor({
           onClick={save}
           disabled={busy || draft.length === 0 || draft.some((d) => d.qty <= 0)}
           className="h-8 px-4 text-[12.5px] rounded transition-opacity hover:opacity-85 disabled:opacity-40"
-          style={{ background: "var(--console-accent)", color: "#14151a" }}
+          style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
         >
           {busy ? L.saving : L.save}
         </button>

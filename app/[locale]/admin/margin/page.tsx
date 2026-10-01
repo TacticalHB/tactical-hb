@@ -272,7 +272,7 @@ function Report({ data, uk, locale }: { data: MarginReport; uk: boolean; locale:
         <div
           className="rounded-lg px-5 py-4 text-[13.5px]"
           style={{
-            border: "1px solid rgba(212,160,23,0.35)",
+            border: "1px solid rgba(143,94,0,0.3)",
             background: "var(--console-warn-soft)",
             color: "var(--console-warn)",
           }}
@@ -331,7 +331,7 @@ export default async function AdminMarginPage({
           <div
             className="rounded-lg px-5 py-4 text-[14px]"
             style={{
-              border: "1px solid rgba(196,92,92,0.35)",
+              border: "1px solid rgba(178,59,55,0.3)",
               background: "var(--console-alert-soft)",
               color: "var(--console-alert)",
             }}

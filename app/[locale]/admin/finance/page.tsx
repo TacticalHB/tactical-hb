@@ -186,7 +186,7 @@ export default async function AdminFinancePage({
         {failed && (
           <div
             className="rounded-lg px-5 py-4 mb-6 text-[14px]"
-            style={{ border: "1px solid rgba(196,92,92,0.35)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
+            style={{ border: "1px solid rgba(178,59,55,0.3)", background: "var(--console-alert-soft)", color: "var(--console-alert)" }}
           >
             {uk
               ? "Перевірте, чи виконано міграцію 0018_finance_views.sql у Supabase."

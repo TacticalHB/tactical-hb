@@ -139,7 +139,7 @@ export default function AdvisorCard({ row, uk }: { row: AdvisorRow; uk: boolean 
             onClick={save}
             disabled={busy}
             className="rounded px-4 py-2 text-[13.5px] font-medium disabled:opacity-50"
-            style={{ background: "var(--console-accent)", color: "#14151a" }}
+            style={{ background: "var(--console-accent)", color: "var(--console-on-accent)" }}
           >
             {busy ? "…" : uk ? "Зберегти" : "Save"}
           </button>

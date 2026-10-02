@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { t } from "@/lib/i18n-text";
 import Link from "next/link";
 import { products as ALL, Product } from "@/lib/products";
@@ -9,6 +10,29 @@ import { ADDONS } from "@/lib/addons";
 import NikeProductCard from "./NikeProductCard";
 
 type CatKey = "all" | "hmd" | "bowl" | "windcover" | "accessory";
+const CAT_KEYS: CatKey[] = ["all", "hmd", "bowl", "windcover", "accessory"];
+
+/* ---------------------------------------------------------------------------
+   ?category=hmd opens the catalogue on that filter.
+
+   ADDED 2 OCTOBER 2026 FOR THE NEW HMD BOX, whose printed QR code lands here
+   (tactical-hb.com/en/products?category=hmd). The filter is otherwise plain
+   client state with no address, so a link could only ever open on "All".
+
+   ONLY THIS READER WAITS FOR THE URL. useSearchParams on a prerendered page
+   hands everything up to the nearest Suspense boundary to the client; wrapped
+   alone, with a null fallback, it costs nothing — the grid is still in the
+   first HTML for crawlers and arrives on "All", then this switches it once
+   hydrated. An unknown value is ignored rather than trusted.
+--------------------------------------------------------------------------- */
+function CategoryFromUrl({ onCategory }: { onCategory: (c: CatKey) => void }) {
+  const params = useSearchParams();
+  const wanted = params.get("category");
+  useEffect(() => {
+    if (wanted && (CAT_KEYS as string[]).includes(wanted)) onCategory(wanted as CatKey);
+  }, [wanted, onCategory]);
+  return null;
+}
 
 /**
  * Price bands, held in BOTH currencies so the filter matches the prices the
@@ -133,10 +157,13 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const toggleBand = (k: string) =>
     setBands((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
 
-  const catKeys: CatKey[] = ["all", "hmd", "bowl", "windcover", "accessory"];
+  const catKeys = CAT_KEYS;
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
+      <Suspense fallback={null}>
+        <CategoryFromUrl onCategory={setCat} />
+      </Suspense>
       <div className="page-container pt-8 pb-24">
         {/* Top bar.
 

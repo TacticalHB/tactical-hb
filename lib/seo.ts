@@ -154,6 +154,7 @@ export function productKind(category: string, locale: string): string {
 --------------------------------------------------------------------------- */
 const SCHEMA_AVAILABILITY: Record<Availability, string> = {
   available: "https://schema.org/InStock",
+  preorder: "https://schema.org/PreOrder",
   coming_soon: "https://schema.org/OutOfStock",
   sold_out: "https://schema.org/SoldOut",
   withheld: "https://schema.org/OutOfStock",

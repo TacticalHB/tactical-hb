@@ -498,8 +498,14 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 page exists not to do — the stamp under it says everything the
                 file is willing to say. Kept for every other product, where it
                 is orientation rather than a disclosure. */}
-            {status !== "withheld" && (
+            {status !== "withheld" && !product.preorder ? (
               <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
+            ) : (
+              /* Project KI 06 names no category; under its name it carries only
+                 its maker, quietly (Mario, 4 Oct 2026). */
+              <p className="text-[15px] mt-1" style={{ color: "#707072" }}>
+                {t(locale, { uk: product.taglineUk, en: product.taglineEn, ja: product.taglineJa, ar: product.taglineAr })}
+              </p>
             )}
             {/* Single currency here — the headline price reads cleaner on the
                 detail page. Currency follows the language (УКР → ₴, ENG → €).
@@ -530,9 +536,30 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 </p>
               </div>
             ) : (
-              <p className="text-lg font-medium mt-4">
-                <Price money={price} locale={locale} />
-              </p>
+              <>
+                <p className="text-lg font-medium mt-4">
+                  <Price money={price} locale={locale} />
+                </p>
+                {/* The ship date of a pre-order, under its price (Mario, 4 Oct
+                    2026). UTC so server and browser print the same day; Arabic
+                    pinned to Latin digits like every number on the site. */}
+                {product.preorder && product.shipsOn && (
+                  <p className="text-[15px] mt-1" style={{ color: "#707072" }}>
+                    {(() => {
+                      const d = new Intl.DateTimeFormat(
+                        locale === "uk" ? "uk-UA" : locale === "ja" ? "ja-JP" : locale === "ar" ? "ar-u-nu-latn" : "en-GB",
+                        { day: "numeric", month: "long", timeZone: "UTC" },
+                      ).format(new Date(`${product.shipsOn}T00:00:00Z`));
+                      return t(locale, {
+                        en: `Pre-order · ships ${d}`,
+                        uk: `Передзамовлення · відправка ${d}`,
+                        ja: `予約注文 · ${d}発送`,
+                        ar: `طلب مسبق · الشحن في ${d}`,
+                      });
+                    })()}
+                  </p>
+                )}
+              </>
             )}
 
             {/* Colour variants — swatch selector (Black / Purple …) */}
@@ -602,7 +629,14 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   {availabilityText(status, locale)}
                 </div>
                 <p className="text-[14px] mt-1.5 leading-relaxed" style={{ color: "#707072" }}>
-                  {status === "coming_soon"
+                  {status === "preorder"
+                    ? t(locale, {
+                        en: "Pre-orders open shortly.",
+                        uk: "Передзамовлення відкриється найближчим часом.",
+                        ja: "予約受付はまもなく開始します。",
+                        ar: "يُفتح الطلب المسبق قريبًا.",
+                      })
+                    : status === "coming_soon"
                     ? t(locale, {
                         en: "This one has not reached us yet. It cannot be ordered today — and it is not available as an option on a heat device either.",
                         uk: "Цей товар ще не приїхав до нас. Замовити його сьогодні не можна — і як опцію до пристрою теж.",
@@ -636,10 +670,14 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     true
                   )
                 }
-                className="w-full h-14 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85"
-                style={{ background: "#111111", color: "#ffffff" }}
+                className="w-full h-14 rounded-full text-[15px] font-medium transition-opacity hover:opacity-85 cursor-pointer"
+                /* Pre-Order is the brand orange (Mario, 4 Oct 2026); dark text,
+                   the pairing the site uses on every orange fill. */
+                style={product.preorder ? { background: "var(--accent)", color: "#111114" } : { background: "#111111", color: "#ffffff" }}
               >
-                {L.addToBag}
+                {product.preorder
+                  ? t(locale, { en: "Pre-Order", uk: "Передзамовити", ja: "予約注文", ar: "اطلب مسبقًا" })
+                  : L.addToBag}
               </button>
               <button
                 onClick={toggleFav}

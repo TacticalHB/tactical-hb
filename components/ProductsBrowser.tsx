@@ -139,6 +139,9 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       priceless(a) || priceless(b) ? priceless(a) - priceless(b) : (a.price - b.price) * dir;
     if (sort === "price-asc") l = [...l].sort(byPrice(1));
     else if (sort === "price-desc") l = [...l].sort(byPrice(-1));
+    /* PROJECT KI 06 LEADS the default ("featured") order (Mario, 4 Oct 2026):
+       the flagship opens the catalogue. A price sort still places it by price. */
+    else l = [...l].sort((a, b) => Number(b.slug === "incoming-hookah") - Number(a.slug === "incoming-hookah"));
     return l;
   }, [cat, bands, sort, currency]);
 

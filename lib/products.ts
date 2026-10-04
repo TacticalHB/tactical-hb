@@ -166,6 +166,21 @@ export type Product = {
    * in order to decide whether to wait.
    */
   comingSoon?: true;
+  /**
+   * Priced, sold and paid for today; shipped when the run is ready.
+   *
+   * ADDED 4 OCT 2026 FOR PROJECT KI 06 (Mario: "Pay in full now"). Unlike the
+   * three flags above this one does NOT refuse the sale — it changes what the
+   * button says (Pre-Order) and what the page tells Google (PreOrder).
+   *
+   * IT CANNOT SELL WITHOUT A PARCEL. A zero weight is silently dropped from
+   * the delivery quote (lib/parcel), so a pre-order with no boxed weight and
+   * box size would ship its heaviest item for free. isPurchasable refuses it
+   * until both are real — a guard in the one place every surface asks.
+   */
+  preorder?: true;
+  /** When a pre-order ships, as an ISO date (YYYY-MM-DD). Printed under the price. */
+  shipsOn?: string;
 };
 
 /** Which catalogue product each HMD add-on actually IS. */
@@ -180,6 +195,7 @@ export type AddonKey = keyof typeof ADDON_PRODUCT;
  * hand-editing all eleven is how one of them ends up selling a sold-out bowl.
  */
 export function isPurchasable(p: Product): boolean {
+  if (p.preorder && !(p.weightG > 0 && p.dims.l > 0 && p.dims.w > 0 && p.dims.h > 0)) return false;
   return !p.incoming && !p.comingSoon && !p.soldOut;
 }
 
@@ -191,12 +207,13 @@ export function isPurchasable(p: Product): boolean {
  * past. A shopper told the wrong one of these is misinformed rather than
  * merely disappointed.
  */
-export type Availability = "available" | "withheld" | "coming_soon" | "sold_out";
+export type Availability = "available" | "preorder" | "withheld" | "coming_soon" | "sold_out";
 
 export function availabilityOf(p: Product): Availability {
   if (p.incoming) return "withheld";
   if (p.comingSoon) return "coming_soon";
   if (p.soldOut) return "sold_out";
+  if (p.preorder) return "preorder";
   return "available";
 }
 
@@ -213,6 +230,7 @@ export function availabilityOf(p: Product): Availability {
  * business importing the i18n runtime.
  */
 export const AVAILABILITY_TEXT: Record<Exclude<Availability, "available">, Record<string, string>> = {
+  preorder: { uk: "Передзамовлення", en: "Pre-order", ja: "予約受付中", ar: "طلب مسبق" },
   withheld: { uk: "Очікується", en: "Incoming", ja: "近日公開", ar: "قريبًا" },
   coming_soon: { uk: "Незабаром", en: "Coming soon", ja: "近日入荷", ar: "قريبًا" },
   sold_out: { uk: "Немає в наявності", en: "Sold out", ja: "売り切れ", ar: "نفدت الكمية" },
@@ -1220,6 +1238,7 @@ export const products: Product[] = [
      that the file is closed rather than 404ing or, worse, bouncing to a device
      that is not the thing on the pouch.
 
+     (SUPERSEDED 4 Oct 2026: the piece is now named Project KI 06.)
      NO NAME IS PUBLISHED. `TOP SECRET` is a stamp, not a product name: it is
      the same string in every locale for the same reason the wordmark is, and
      only the line under it translates. Naming it "Mr HB Hookah" here would
@@ -1243,24 +1262,36 @@ export const products: Product[] = [
   {
     id: "incoming-hookah",
     slug: "incoming-hookah",
-    nameUk: "TOP SECRET",
-    nameEn: "TOP SECRET",
-    taglineUk: "Досьє закрито.",
-    taglineEn: "File withheld.",
-    taglineJa: "資料は非公開。",
-    taglineAr: "الملف محجوب.",
+    /* Named on 4 Oct 2026 (Mario): Project KI 06, "by Mr HB" as the quiet
+       line under it — the tagline the catalogue card and the PDP both print.
+       Still `incoming`: stamped, unpriced, not for sale. */
+    nameUk: "Project KI 06",
+    nameEn: "Project KI 06",
+    taglineUk: "від Mr HB",
+    taglineEn: "by Mr HB",
+    taglineJa: "Mr HB 作",
+    taglineAr: "من Mr HB",
     descriptionUk: "Матеріали цього виробу закриті до оголошення.",
     descriptionEn: "The file on this piece is closed until release.",
     descriptionJa: "この製品の資料は公開時まで非公開です。",
     descriptionAr: "ملف هذه القطعة مغلق حتى الإعلان.",
-    price: 0,
-    priceUah: 0,
+    /* On sale as a pre-order from 4 Oct 2026 (Mario): 11 180 ₴ / €268, paid
+       in full now.
+
+       PROVISIONAL PARCEL — REPLACE WITH MARIO'S BOXED FIGURES. He asked for
+       the button live before he had them. A zero weight is dropped from the
+       delivery quote (lib/parcel), which would ship the hookah free, so these
+       are deliberately generous placeholders (3 kg, 450×350×150 mm): delivery
+       may be slightly over-quoted until the real figures land, never under. */
+    price: 268,
+    priceUah: 11180,
     currency: "EUR",
-    weightG: 0,
-    dims: { l: 0, w: 0, h: 0 },
+    weightG: 3000,
+    dims: { l: 450, w: 350, h: 150 },
     category: "hookah",
     featured: false,
-    incoming: true,
+    preorder: true,
+    shipsOn: "2026-10-20", // Mario, 4 Oct 2026
     image: "/images/hookah/hookah-1.jpg",
     gridImage: "/images/hookah/hookah-1.jpg",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],

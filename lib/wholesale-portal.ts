@@ -92,7 +92,8 @@ export function wholesaleCatalogue(): Product[] {
      against "quote on request" — inviting a partner to order a thing that does
      not exist yet. Retail refuses it in lib/pricing; this is the same refusal
      on the trade side. */
-  return products.filter(isPurchasable);
+  // Pre-orders have no trade price — retail only (Mario, 4 Oct 2026).
+  return products.filter((p) => isPurchasable(p) && !p.preorder);
 }
 
 /* ---- Add-ons ---------------------------------------------------------------

@@ -44,7 +44,6 @@ export default function CaseContents({ locale }: { locale: string }) {
   const [open, setOpen] = useState(false);
   const listId = useId();
   const title = t(locale, { en: "In the case", uk: "У кейсі", ja: "ケースの中身", ar: "داخل الحقيبة" });
-  const count = t(locale, { en: `${ITEMS.length} items`, uk: `${ITEMS.length} позицій`, ja: `${ITEMS.length} 点`, ar: `${ITEMS.length} عناصر` });
   return (
     <section aria-label={title} className="mt-8 mb-6">
       <button
@@ -56,7 +55,6 @@ export default function CaseContents({ locale }: { locale: string }) {
         style={{ background: open ? "var(--accent-hover)" : "var(--accent)", color: "#111114" }}
       >
         <span className="uppercase tracking-[0.2em] text-[13px]">{title}</span>
-        <span className="text-[13px] opacity-70">· {count}</span>
         <svg
           aria-hidden="true"
           width="18"

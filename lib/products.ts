@@ -181,6 +181,8 @@ export type Product = {
   preorder?: true;
   /** When a pre-order ships, as an ISO date (YYYY-MM-DD). Printed under the price. */
   shipsOn?: string;
+  /** Smallest quantity a wholesale partner may request (portal + server). */
+  wholesaleMinQty?: number;
 };
 
 /** Which catalogue product each HMD add-on actually IS. */
@@ -1290,6 +1292,7 @@ export const products: Product[] = [
     featured: false,
     preorder: true,
     shipsOn: "2026-10-20", // Mario, 4 Oct 2026
+    wholesaleMinQty: 5, // Mario, 4 Oct 2026 — partner minimum order
     image: "/images/hookah/hookah-1.jpg",
     gridImage: "/images/hookah/hookah-1.jpg",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],

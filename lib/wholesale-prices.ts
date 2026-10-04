@@ -104,6 +104,10 @@ const BOOKS: Record<PartnerType, Book> = {
       "bowl-phunnel": m(8.0, 375),
       "windcover-detonator": m(14.3, 650),
       "windcover-kh": m(14.3, 650),
+      /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
+         will reprice per book later). Minimum order 5, enforced in
+         lib/wholesale-portal. */
+      "incoming-hookah": m(175, 8060),
     },
     addons: {
       lid: m(2.5, 150),
@@ -129,6 +133,10 @@ const BOOKS: Record<PartnerType, Book> = {
       "bowl-phunnel": m(8.0, 375),
       "windcover-detonator": m(14.3, 650),
       "windcover-kh": m(14.3, 650),
+      /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
+         will reprice per book later). Minimum order 5, enforced in
+         lib/wholesale-portal. */
+      "incoming-hookah": m(175, 8060),
     },
     addons: {
       lid: m(2.5, 150),
@@ -153,6 +161,10 @@ const BOOKS: Record<PartnerType, Book> = {
       "bowl-phunnel": m(11.0, 460),
       "windcover-detonator": m(19.5, 765),
       "windcover-kh": m(19.5, 765),
+      /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
+         will reprice per book later). Minimum order 5, enforced in
+         lib/wholesale-portal. */
+      "incoming-hookah": m(175, 8060),
     },
     addons: {
       lid: m(3.5, 190),

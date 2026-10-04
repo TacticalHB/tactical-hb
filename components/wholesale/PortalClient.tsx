@@ -55,6 +55,10 @@ export type PortalProduct = {
      priced live. Null throughout when the partner has no book. Advisory only:
      the server recomputes every figure from the database on submit. */
   addonPrices: Partial<Record<AddonKey, Money | null>>;
+  /** Partner minimum order, when the product has one (KI 06: 5). */
+  minQty?: number | null;
+  /** Pre-order ship date, ISO (YYYY-MM-DD), when the product is a pre-order. */
+  shipsOn?: string | null;
 };
 
 type Qty = Record<string, number>;
@@ -79,7 +83,8 @@ const ADDON_SPEC: Record<AddonKey, OptionSpec> = {
   timer: WINDCOVER_OPTIONS.find((o) => o.key === "timer")!,
 };
 
-const CATEGORY_ORDER = ["bowl", "hmd", "windcover", "accessory"] as const;
+/* The flagship leads the portal, as it leads the catalogue (4 Oct 2026). */
+const CATEGORY_ORDER = ["hookah", "bowl", "hmd", "windcover", "accessory"] as const;
 
 /* ---------------------------------------------------------------------------
    Both of these live at module scope, NOT inside PortalClient.
@@ -299,6 +304,16 @@ export default function PortalClient({
       ar: "أحد المنتجات التي اخترتها لا يحمل سعرًا بعد. أزِله أو راسلنا وسنعالج الأمر.",
     }),
     qtyLabel: t(locale, { en: "Quantity", uk: "Кількість", ja: "数量", ar: "الكمية" }),
+    sheetTitle: t(locale, { en: "Project KI 06 — product sheet (PDF)", uk: "Project KI 06 — опис продукту (PDF)", ja: "Project KI 06 — 製品資料（PDF・英語）", ar: "Project KI 06 — ملف المنتج (PDF، بالإنجليزية)" }),
+    sheetSub: t(locale, { en: "Materials, case contents, photos and partner terms", uk: "Матеріали, комплектація, фото та умови для партнерів", ja: "素材、同梱物、写真、パートナー条件", ar: "المواد ومحتويات الحقيبة والصور وشروط الشركاء" }),
+    minOrder: (n: number) => t(locale, { en: `Minimum order ${n}`, uk: `Мінімальне замовлення — ${n}`, ja: `最小注文数 ${n}`, ar: `الحد الأدنى للطلب ${n}` }),
+    preorder: (d: string) => t(locale, { en: `Pre-order · ships ${d}`, uk: `Передзамовлення · відправка ${d}`, ja: `予約注文 · ${d}発送`, ar: `طلب مسبق · الشحن في ${d}` }),
+    belowMinimum: t(locale, {
+      en: "Project KI 06 has a minimum order of 5. Raise the quantity or remove the line.",
+      uk: "Мінімальне замовлення Project KI 06 — 5 одиниць. Збільште кількість або приберіть позицію.",
+      ja: "Project KI 06 の最小注文数は 5 です。数量を増やすか、その行を削除してください。",
+      ar: "الحد الأدنى لطلب Project KI 06 هو 5. ارفع الكمية أو أزِل السطر.",
+    }),
     note: t(locale, {
       en: "Notes — PO number, delivery preference, anything we should know (optional)",
       uk: "Примітки — номер замовлення, побажання щодо доставки, будь-що важливе (необов'язково)",
@@ -363,6 +378,7 @@ export default function PortalClient({
       ar: "لا يمكن لهذا الحساب إرسال طلبات. يرجى التواصل معنا.",
     }),
     categories: {
+      hookah: t(locale, { en: "Hookahs", uk: "Кальяни", ja: "シーシャ", ar: "الشيشة" }),
       bowl: t(locale, { en: "Bowls", uk: "Чаші", ja: "ボウル", ar: "الرؤوس" }),
       hmd: t(locale, { en: "Heat devices", uk: "Пристрої нагріву", ja: "ヒートデバイス", ar: "أجهزة الحرارة" }),
       windcover: t(locale, { en: "Wind covers", uk: "Ковпаки", ja: "ウインドカバー", ar: "أغطية الرياح" }),
@@ -423,6 +439,7 @@ export default function PortalClient({
   const send = async () => {
     setError(null);
     if (chosen.length === 0) return setError(L.empty);
+    if (chosen.some((c) => c.product.minQty && c.qty < c.product.minQty)) return setError(L.belowMinimum);
     setBusy(true);
     const result = await submitWholesaleRequest(
       chosen.map((c) => ({
@@ -439,6 +456,7 @@ export default function PortalClient({
       if (result.error === "not_approved") return setError(L.notApproved);
       if (result.error === "no_price_book") return setError(L.noBookBody);
       if (result.error === "unpriced_line") return setError(L.unpricedLine);
+      if (result.error === "below_minimum") return setError(L.belowMinimum);
       return setError(L.failed);
     }
     setDone(result.reference ?? "");
@@ -502,6 +520,23 @@ export default function PortalClient({
         <p className="text-base leading-relaxed max-w-2xl" style={{ color: "var(--text-muted)" }}>
           {L.intro}
         </p>
+
+        {/* The Project KI 06 product sheet — Ukrainian on /uk, English on every
+            other storefront (Mario: those two languages only). Served by a
+            route that re-checks approval; the file is not in public/. */}
+        <a
+          href={`/api/wholesale/sheet/${locale === "uk" ? "uk" : "en"}`}
+          className="mt-6 max-w-2xl flex items-center gap-4 rounded-[6px] px-5 py-4 transition-colors hover:bg-[var(--bg-card)]"
+          style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" strokeWidth="1.6" aria-hidden="true">
+            <path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14" />
+          </svg>
+          <span className="flex-1">
+            <span className="block text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.sheetTitle}</span>
+            <span className="block text-[13px]" style={{ color: "var(--text-muted)" }}>{L.sheetSub}</span>
+          </span>
+        </a>
 
         {/* THE SHOP BOOK ONLY, AND THAT IS THE POINT OF THE TEST. These are
             the terms that apply to shops and online retailers; distributors
@@ -609,6 +644,16 @@ export default function PortalClient({
                           {hasColours && (
                             <p className="text-[12.5px] mt-0.5" style={{ color: "var(--text-faint)" }}>
                               {L.perColour}
+                            </p>
+                          )}
+                          {(p.minQty || p.shipsOn) && (
+                            <p className="text-[12.5px] mt-0.5" style={{ color: "var(--accent-ink)" }}>
+                              {[
+                                p.shipsOn
+                                  ? L.preorder(new Intl.DateTimeFormat(locale === "uk" ? "uk-UA" : locale === "ja" ? "ja-JP" : locale === "ar" ? "ar-u-nu-latn" : "en-GB", { day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${p.shipsOn}T00:00:00Z`)))
+                                  : null,
+                                p.minQty ? L.minOrder(p.minQty) : null,
+                              ].filter(Boolean).join(" · ")}
                             </p>
                           )}
                         </div>

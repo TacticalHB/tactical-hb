@@ -53,7 +53,6 @@ function pickable(book: PartnerType) {
   const out: { value: string; label: string; slug: string; variant: string | null; note: string }[] = [];
   for (const p of products) {
     if (p.incoming) continue; // the withheld listing has no trade price at all
-    if (p.preorder) continue; // pre-orders are retail only
     const status = availabilityOf(p);
     /* UNAVAILABLE PRODUCTS ARE OFFERED, AND MARKED. A negotiated order can
        legitimately include something still in transit — that is exactly what

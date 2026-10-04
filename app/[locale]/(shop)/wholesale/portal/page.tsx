@@ -104,6 +104,8 @@ export default async function WholesalePortalPage({
          itself, so a bowl can never be shown a timer toggle. */
       addons,
       addonPrices,
+      minQty: p.wholesaleMinQty ?? null,
+      shipsOn: p.preorder ? p.shipsOn ?? null : null,
     };
 
     /* PRICED PER LINE, NOT PER PRODUCT. A colour can carry its own trade

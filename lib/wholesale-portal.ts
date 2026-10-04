@@ -92,8 +92,8 @@ export function wholesaleCatalogue(): Product[] {
      against "quote on request" — inviting a partner to order a thing that does
      not exist yet. Retail refuses it in lib/pricing; this is the same refusal
      on the trade side. */
-  // Pre-orders have no trade price — retail only (Mario, 4 Oct 2026).
-  return products.filter((p) => isPurchasable(p) && !p.preorder);
+  // Pre-orders are orderable by partners too once priced (KI 06, 4 Oct 2026).
+  return products.filter(isPurchasable);
 }
 
 /* ---- Add-ons ---------------------------------------------------------------
@@ -304,7 +304,7 @@ export type SubmitLine = {
 
 export type SubmitResult =
   | { ok: true; request: WholesaleRequest }
-  | { ok: false; error: "not_approved" | "empty" | "failed" | "no_price_book" | "unpriced_line" };
+  | { ok: false; error: "not_approved" | "empty" | "failed" | "no_price_book" | "unpriced_line" | "below_minimum" };
 
 const MAX_LINES = 60;
 const MAX_QTY = 100_000;
@@ -354,6 +354,11 @@ export async function submitRequest(
     const qty = Math.floor(Number(line.qty));
     if (!product) continue;
     if (!Number.isFinite(qty) || qty <= 0 || qty > MAX_QTY) continue;
+    /* A partner minimum is a refusal, not a silent drop: the partner must see
+       why the line did not go through (KI 06: 5+, Mario 4 Oct 2026). */
+    if (product.wholesaleMinQty && qty < product.wholesaleMinQty) {
+      return { ok: false, error: "below_minimum" };
+    }
 
     /* THE COLOUR IS RESOLVED AGAINST THE CATALOGUE, not taken as given. The
        client sends a name; if it does not match one this product actually has,

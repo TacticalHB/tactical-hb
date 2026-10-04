@@ -923,9 +923,7 @@ export const products: Product[] = [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
       ],
     },
-    /* Out of stock, August 2026. Clearing this line is the entire restock —
-       nothing else anywhere needs changing. */
-    soldOut: true,
+    /* Back in stock 4 Oct 2026 (Mario). To mark it out again: soldOut: true. */
     tags: ["phunnel", "handmade"],
   },
   {
@@ -1170,11 +1168,7 @@ export const products: Product[] = [
     /* Findable by what the part used to be called, without the old word
        appearing anywhere on the page. Someone who knows it as a гумка still
        lands on it — `tags` is what site search reads. */
-    /* Awaiting delivery — not in the building yet. Sets Coming soon on the
-       card, the PDP, the kit builder and the HMD add-on tick, removes it from
-       the trade catalogue, and makes lib/pricing refuse the line however the
-       request arrives. Clearing this line is the whole arrival procedure. */
-    comingSoon: true,
+    /* In stock 4 Oct 2026 (Mario) — on sale on its own and as the HMD add-on. */
     tags: ["accessory", "fear", "9e418", "rubber", "ring", "seal", "гумка", "гумове кільце", "кільце"],
     pdp: {
       photos: ["/images/accessories/fear-9e418-1.jpg", "/images/accessories/fear-9e418-2.jpg", "/images/accessories/fear-9e418-3.jpg"],
@@ -1218,11 +1212,7 @@ export const products: Product[] = [
        -1 the part alone (main), -2 fitted, -3 separated. */
     image: "/images/accessories/lid-9e418-1.jpg",
     gridImage: "/images/accessories/lid-9e418-1.jpg",
-    /* Awaiting delivery — not in the building yet. Sets Coming soon on the
-       card, the PDP, the kit builder and the HMD add-on tick, removes it from
-       the trade catalogue, and makes lib/pricing refuse the line however the
-       request arrives. Clearing this line is the whole arrival procedure. */
-    comingSoon: true,
+    /* In stock 4 Oct 2026 (Mario) — on sale on its own and as the HMD add-on. */
     tags: ["accessory", "lid", "9e418", "cap", "cover", "кришка"],
     pdp: {
       photos: ["/images/accessories/lid-9e418-1.jpg", "/images/accessories/lid-9e418-2.jpg", "/images/accessories/lid-9e418-3.jpg"],

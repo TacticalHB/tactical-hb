@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { jsonLdScript, metadataFor, organizationJsonLd } from "@/lib/seo";
+import { jsonLdScript, metadataFor, organizationJsonLd, websiteJsonLd, SITE_NAME } from "@/lib/seo";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
@@ -16,7 +16,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return metadataFor({ locale, path: "/", key: "home" });
+  const meta = await metadataFor({ locale, path: "/", key: "home" });
+  /* BRAND FIRST ON THE HOMEPAGE (4 Oct 2026). Every page ended its title with
+     "· Tactical HB", so for a search for the name the homepage had no stronger
+     claim than the Mr HB file — which outranked it. The homepage alone leads
+     with the name: "Tactical HB — Premium Hookah Accessories from Ukraine". */
+  const tagline = typeof meta.title === "string" ? meta.title : "";
+  return { ...meta, title: { absolute: `${SITE_NAME} — ${tagline}` } };
 }
 
 export default async function HomePage() {
@@ -30,6 +36,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript(organizationJsonLd(locale))}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteJsonLd())} />
       <HomeContent locale={locale} />
     </>
   );

@@ -308,5 +308,29 @@ export function organizationJsonLd(locale: string) {
       addressLocality: "Kharkiv",
       addressCountry: "UA",
     },
+    /* The brand's own profiles (the footer's three). Google ties a search for
+       the name to the entity these agree on — added 4 Oct 2026 when "tactical
+       hb" ranked the Mr HB file above the homepage. */
+    sameAs: [
+      "https://www.instagram.com/tactical_hb/",
+      "https://www.tiktok.com/@tactical_hb",
+      "https://www.linkedin.com/company/tactical-hb",
+    ],
+  };
+}
+
+/**
+ * WebSite schema — the site's NAME, which Google shows as the site name in
+ * results and uses to decide which page answers a search for the brand.
+ * Homepage only, like the Organization node. The url is the bare domain:
+ * Google reads site-name markup on the root, and `/` negotiates the language.
+ */
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    alternateName: ["TCT", "Tactical HB Ukraine", "tactical-hb.com"],
+    url: `${SITE_URL}/`,
   };
 }

@@ -1265,7 +1265,7 @@ export const products: Product[] = [
     gridImage: "/images/hookah/hookah-1.jpg",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],
     pdp: {
-      photos: ["/images/hookah/hookah-1.jpg", "/images/hookah/hookah-2.jpg", "/images/hookah/hookah-3.jpg", "/images/hookah/hookah-4-collar-v3.jpg"],
+      photos: ["/images/hookah/hookah-1.jpg", "/images/hookah/hookah-2.jpg", "/images/hookah/hookah-3.jpg", "/images/hookah/hookah-4-collar-v3.jpg", "/images/hookah/hookah-5.jpg", "/images/hookah/hookah-6.jpg", "/images/hookah/hookah-7.jpg"],
       /* NOT the stamp's line repeated — the PDP prints "Release pending" under
          the stamp already, and the same sentence twice on one short page reads
          as a template that nobody finished. */

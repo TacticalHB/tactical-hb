@@ -26,6 +26,7 @@ import { addMoney, money } from "@/lib/currency";
 import { buildFieldCard } from "@/lib/field-card";
 import MaterialsTable from "@/components/hookah/MaterialsTable";
 import CaseContents from "@/components/hookah/CaseContents";
+import View3DButton from "@/components/hmd/View3DButton";
 import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /* Brand slogan — shown as the statement band on every product page */
@@ -690,6 +691,12 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 </svg>
               </button>
             </div>
+            )}
+
+            {/* The 3D viewer (Classic HMD + LID + FEAR) — under every HMD and on
+                the LID and FEAR listings (Mario, 4 Oct 2026). */}
+            {(isHmd || product.slug === "lid-9e418" || product.slug === "fear-9e418") && (
+              <View3DButton slug={product.slug} locale={locale} />
             )}
 
             {/* Short description + meta */}

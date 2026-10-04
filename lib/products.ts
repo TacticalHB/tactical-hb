@@ -1163,7 +1163,10 @@ export const products: Product[] = [
     dims: { l: 130, w: 130, h: 15 },
     category: "accessory",
     featured: false,
-    image: "",
+    /* The catalogue renders from the CAD (Classic HMD; Mario, 4 Oct 2026):
+       -1 the part alone (main), -2 fitted, -3 separated. */
+    image: "/images/accessories/fear-9e418-1.jpg",
+    gridImage: "/images/accessories/fear-9e418-1.jpg",
     /* Findable by what the part used to be called, without the old word
        appearing anywhere on the page. Someone who knows it as a гумка still
        lands on it — `tags` is what site search reads. */
@@ -1174,6 +1177,7 @@ export const products: Product[] = [
     comingSoon: true,
     tags: ["accessory", "fear", "9e418", "rubber", "ring", "seal", "гумка", "гумове кільце", "кільце"],
     pdp: {
+      photos: ["/images/accessories/fear-9e418-1.jpg", "/images/accessories/fear-9e418-2.jpg", "/images/accessories/fear-9e418-3.jpg"],
       shortEn:
         "The sealing ring for Tactical HB heat devices, sold on its own. It seats between the device and the bowl so the two meet evenly, and it is the same ring offered as an option when you configure a heat device.",
       shortUk:
@@ -1210,7 +1214,10 @@ export const products: Product[] = [
     dims: { l: 130, w: 130, h: 25 },
     category: "accessory",
     featured: false,
-    image: "",
+    /* The catalogue renders from the CAD (Classic HMD; Mario, 4 Oct 2026):
+       -1 the part alone (main), -2 fitted, -3 separated. */
+    image: "/images/accessories/lid-9e418-1.jpg",
+    gridImage: "/images/accessories/lid-9e418-1.jpg",
     /* Awaiting delivery — not in the building yet. Sets Coming soon on the
        card, the PDP, the kit builder and the HMD add-on tick, removes it from
        the trade catalogue, and makes lib/pricing refuse the line however the
@@ -1218,6 +1225,7 @@ export const products: Product[] = [
     comingSoon: true,
     tags: ["accessory", "lid", "9e418", "cap", "cover", "кришка"],
     pdp: {
+      photos: ["/images/accessories/lid-9e418-1.jpg", "/images/accessories/lid-9e418-2.jpg", "/images/accessories/lid-9e418-3.jpg"],
       shortEn:
         "The lid for Tactical HB heat devices, sold on its own. HMD TCT Classic ships without one unless it is added at checkout, and this is the same lid offered there.",
       shortUk:

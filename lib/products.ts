@@ -1261,18 +1261,83 @@ export const products: Product[] = [
     category: "hookah",
     featured: false,
     incoming: true,
-    image: "/images/incoming-hookah.png",
-    gridImage: "/images/incoming-hookah.png",
+    image: "/images/hookah/hookah-1.jpg",
+    gridImage: "/images/hookah/hookah-1.jpg",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],
     pdp: {
-      photos: ["/images/incoming-hookah.png"],
+      photos: ["/images/hookah/hookah-1.jpg", "/images/hookah/hookah-2.jpg", "/images/hookah/hookah-3.jpg", "/images/hookah/hookah-4-collar-v3.jpg"],
       /* NOT the stamp's line repeated — the PDP prints "Release pending" under
          the stamp already, and the same sentence twice on one short page reads
          as a template that nobody finished. */
-      shortEn: "The file on this piece is closed until release.",
-      shortUk: "Матеріали цього виробу закриті до оголошення.",
-      shortJa: "この製品の資料は公開時まで非公開です。",
-      shortAr: "ملف هذه القطعة مغلق حتى الإعلان.",
+      /* Mario's Key Benefits (4 Oct 2026), Safety Lock explained the same day. */
+      benefitsEn: [
+        "Seamless stainless steel pipes — resist rust and oxidation",
+        "Safety Lock — a universal security system that holds the base in place. No drops. No casualties.",
+        "PVD treatment — protection against hard water and limescale",
+        "Durable hard-anodised parts",
+      ],
+      benefitsUk: [
+        "Безшовні трубки з нержавіючої сталі — стійкі до іржі та окиснення",
+        "Safety Lock — універсальна система безпеки, що утримує колбу на місці. Без падінь. Без втрат.",
+        "PVD-покриття — захист від жорсткої води та накипу",
+        "Міцні деталі з твердим анодуванням",
+      ],
+      benefitsJa: [
+        "シームレス ステンレスパイプ — 錆や酸化に強い",
+        "Safety Lock — ベースを定位置に固定するユニバーサル セキュリティシステム。落下ゼロ。損失ゼロ。",
+        "PVD 処理 — 硬水や水垢から保護",
+        "耐久性の高い硬質アルマイト部品",
+      ],
+      benefitsAr: [
+        "أنابيب فولاذية غير قابلة للصدأ بلا لحام — مقاومة للصدأ والأكسدة",
+        "Safety Lock — نظام أمان شامل يثبّت القاعدة في مكانها. لا سقوط. لا خسائر.",
+        "معالجة PVD — حماية من الماء العسر والترسبات الكلسية",
+        "قطع متينة بأنودة صلبة",
+      ],
+      /* The grey features band under the slogan — the four Key Benefits, in
+         the order Mario set (pipes, Safety Lock, PVD, anodised). */
+      features: [
+        { icon: "layers", titleEn: "Pipes", titleUk: "Трубки", titleJa: "パイプ", titleAr: "الأنابيب", textEn: "Seamless stainless", textUk: "Безшовна нержавійка", textJa: "シームレス ステンレス", textAr: "فولاذ بلا لحام" },
+        { icon: "shield", titleEn: "Safety Lock", titleUk: "Safety Lock", titleJa: "Safety Lock", titleAr: "Safety Lock", textEn: "No drops", textUk: "Без падінь", textJa: "落下ゼロ", textAr: "لا سقوط" },
+        { icon: "droplet", titleEn: "PVD treatment", titleUk: "PVD-покриття", titleJa: "PVD 処理", titleAr: "معالجة PVD", textEn: "Limescale-proof", textUk: "Захист від накипу", textJa: "水垢に強い", textAr: "مقاوم للترسبات" },
+        { icon: "sparkle", titleEn: "Parts", titleUk: "Деталі", titleJa: "パーツ", titleAr: "القطع", textEn: "Hard-anodised", textUk: "Тверде анодування", textJa: "硬質アルマイト", textAr: "أنودة صلبة" },
+      ],
+      /* Mario's Tips for Use (4 Oct 2026). "Be tct" is the brand mark used
+         as a word — lowercase, as on the logo, in every locale. */
+      tipsEn: [
+        "Wash the device before first use.",
+        "Do not use a dishwasher or harsh abrasive scrubs when cleaning the device.",
+        "Silicone parts are heat-resistant, not fire-resistant!",
+        "Be tct when using this device.",
+      ],
+      tipsUk: [
+        "Промийте пристрій перед першим використанням.",
+        "Не мийте пристрій у посудомийній машині та не використовуйте жорсткі абразивні губки.",
+        "Силіконові деталі термостійкі, але не вогнестійкі!",
+        "Будьте tct, користуючись цим пристроєм.",
+      ],
+      tipsJa: [
+        "初回使用前にデバイスを洗浄してください。",
+        "洗浄の際は食洗機や硬い研磨スポンジを使用しないでください。",
+        "シリコン部品は耐熱性ですが、耐火性ではありません！",
+        "このデバイスを使うときは tct であれ。",
+      ],
+      tipsAr: [
+        "اغسل الجهاز قبل الاستخدام الأول.",
+        "لا تستخدم غسالة الأطباق أو الإسفنج الكاشط الخشن عند تنظيف الجهاز.",
+        "قطع السيليكون مقاومة للحرارة، لكنها غير مقاومة للنار!",
+        "كن tct عند استخدام هذا الجهاز.",
+      ],
+      /* Mario's description (3 Oct 2026); it ends on the case, and the case
+         contents follow it as their own block (components/hookah/CaseContents). */
+      shortEn:
+        "Project KI 06 is the device the workshop was built toward. Mr HB designed it to his own standard — the one every piece under the TCT mark is measured against. Project KI 06 has one mission: to deliver a unique experience through a tactical build. Each part is manufactured in-house under his supervision. Every surface, tolerance and finish had to earn its place. The personal standard travels in one case, and so does this:",
+      shortUk:
+        "Project KI 06 — пристрій, до якого йшла вся майстерня. Mr HB створив його за власним стандартом — тим, за яким звіряють кожен виріб під знаком TCT. У Project KI 06 одна місія: дати неповторний досвід завдяки тактичній конструкції. Кожну деталь виготовлено на власному виробництві під його наглядом. Кожна поверхня, допуск і обробка мусили заслужити своє місце. Особистий стандарт подорожує в одному кейсі — і цей теж:",
+      shortJa:
+        "Project KI 06 は、工房がずっと目指してきたデバイスです。Mr HB が自らの基準で設計しました。TCT マークを冠するすべての製品が測られる、その基準です。Project KI 06 の使命はただ一つ。タクティカルな構造で、唯一無二の体験を届けること。すべてのパーツは彼の監督のもと、自社で製造されています。あらゆる面、公差、仕上げが、その場所にふさわしいことを証明しなければなりませんでした。個人の基準はひとつのケースで持ち運ばれる。これも同じです：",
+      shortAr:
+        "Project KI 06 هو الجهاز الذي بُنيت الورشة من أجله. صمّمه Mr HB وفق معياره الخاص — المعيار الذي تُقاس به كل قطعة تحمل علامة TCT. لـ Project KI 06 مهمة واحدة: تقديم تجربة فريدة عبر بنية تكتيكية. تُصنع كل قطعة داخلياً تحت إشرافه. كان على كل سطح وكل تفاوت وكل تشطيب أن يستحق مكانه. المعيار الشخصي يُحمل في حقيبة واحدة، وكذلك هذا:",
     },
   },
 

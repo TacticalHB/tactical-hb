@@ -24,6 +24,8 @@ import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 import { buildFieldCard } from "@/lib/field-card";
+import MaterialsTable from "@/components/hookah/MaterialsTable";
+import CaseContents from "@/components/hookah/CaseContents";
 import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /* Brand slogan — shown as the statement band on every product page */
@@ -337,7 +339,16 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   /* The card follows the live selection, so choosing a lid or a timer moves
      the weight and adds the configuration row rather than leaving the page
      describing a product the customer is no longer buying. */
-  const fieldRows = buildFieldCard({ product, locale, material, windcover });
+  /* The hookah's own spec rows (Mario, 4 Oct 2026) — no material or
+     compatibility rows; the materials table further down covers those. */
+  const fieldRows = product.slug === "incoming-hookah"
+    ? [
+        { key: "height", label: t(locale, { en: "Height (assembled, without base)", uk: "Висота (у зборі, без колби)", ja: "高さ（組立時・ベース除く）", ar: "الارتفاع (مُجمّعة، دون القاعدة)" }), value: "390 mm" },
+        { key: "downstem", label: t(locale, { en: "Down stem inner diameter", uk: "Внутрішній діаметр шахти", ja: "ダウンステム内径", ar: "القطر الداخلي للأنبوب السفلي" }), value: "12 mm" },
+        { key: "immersion", label: t(locale, { en: "Immersion pipe inner diameter", uk: "Внутрішній діаметр занурювальної трубки", ja: "浸水パイプ内径", ar: "القطر الداخلي لأنبوب الغمر" }), value: "14 mm" },
+        { key: "tray", label: t(locale, { en: "Tray diameter", uk: "Діаметр тарілки", ja: "トレイ直径", ar: "قطر الصينية" }), value: "192 mm" },
+      ]
+    : buildFieldCard({ product, locale, material, windcover });
   const shortDesc = pdp
     ? t(locale, { uk: pdp.shortUk, en: pdp.shortEn, ja: pdp.shortJa, ar: pdp.shortAr })
     : t(locale, { uk: product.descriptionUk, en: product.descriptionEn, ja: product.descriptionJa, ar: product.descriptionAr });
@@ -649,6 +660,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               {colourShown && <li className="list-disc ml-5">{L.colour}: {colourShown}</li>}
               {pdp?.styleCode && <li className="list-disc ml-5">{L.style}: {pdp.styleCode}</li>}
             </ul>
+            {product.slug === "incoming-hookah" && <CaseContents locale={locale} />}
 
             {/* ---- Accessories for this device ----------------------------
                 THE LID AND THE RING ARE PRODUCTS AND NOTHING LINKED TO THEM.
@@ -723,7 +735,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 own spacing, so zero rows would leave a stray hairline with a
                 gap under it — which reads as a section that failed to load. */}
             <dl
-              className="mt-6 pt-5 flex-col gap-2 text-[15px]"
+              className={`mt-6 pt-5 flex-col gap-2 text-[15px]${product.slug === "incoming-hookah" ? " mb-10" : ""}`}
               style={{ borderTop: "1px solid #efefef", display: fieldRows.length ? "flex" : "none" }}
             >
               {fieldRows.map((row) => (
@@ -798,6 +810,11 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           </div>
         )}
       </div>
+
+      {/* The hookah's materials table follows the slogan and features band,
+          which sit straight after Delivery & Returns as on every product
+          (Mario, 4 Oct 2026). */}
+      {product.slug === "incoming-hookah" && <MaterialsTable locale={locale} />}
     </div>
   );
 }

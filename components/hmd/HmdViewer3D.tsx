@@ -89,7 +89,9 @@ export default function HmdViewer3D({
         const key = new THREE.DirectionalLight(0xffffff, 0.9); key.position.set(90, 170, 125); scene.add(key);
         const rim = new THREE.DirectionalLight(0xffffff, 0.35); rim.position.set(-125, 65, -60); scene.add(rim);
 
-        const TAU = Math.PI * 2;
+        const TAU = Math.PI * 2, DEG = Math.PI / 180;
+        /* Where the CAD engraves the tct mark, measured from the mesh (0° = +Z). */
+        const MARK_AZ = -119.7 * DEG;
         const bytes = (b64: string) => { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; };
         const unpack = (part: { pos: string; nrm: string; idx: string }, uvMode: "planar" | null) => {
           const qp = new Int16Array(bytes(part.pos)), qn = new Int16Array(bytes(part.nrm)), ix = new Uint16Array(bytes(part.idx));
@@ -121,31 +123,44 @@ export default function HmdViewer3D({
         const hmdMat = new THREE.MeshPhysicalMaterial({ color: "#c7cacd", metalness: 1, roughness: 1, roughnessMap: brushed(6) });
         const steelMat = new THREE.MeshPhysicalMaterial({ color: "#c3c5c7", metalness: 1, roughness: 1, roughnessMap: brushed(10) });
         const siliconeMat = new THREE.MeshPhysicalMaterial({ color: "#141517", metalness: 0, roughness: 0.78, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color("#3a3c40") });
+        /* THE FEAR GRIPS THE HMD SURFACE-TO-SURFACE, and the lid's silicone sits
+           on its steel the same way: coincident faces fought triangle by
+           triangle — stepped flecks in the slots and along the rim (Mario,
+           5 Oct 2026: "looks a bit laggy"). The silicone is pulled a hair toward
+           the camera in depth so it wins every tie, cleanly. (Not logarithmic
+           depth: writing gl_FragDepth switches polygon offset off.) */
+        const fearMat = siliconeMat.clone();
+        for (const m of [siliconeMat, fearMat]) { m.polygonOffset = true; m.polygonOffsetFactor = -1; m.polygonOffsetUnits = -2; }
 
         const model = new THREE.Group(); scene.add(model);
         const holder: Record<string, InstanceType<typeof THREE.Group>> = {};
-        for (const [k, uvMode, mat] of [["hmd", null, hmdMat], ["lidSteel", "planar", steelMat], ["lidSilicone", null, siliconeMat], ["fear", null, siliconeMat]] as const) {
+        for (const [k, uvMode, mat] of [["hmd", null, hmdMat], ["lidSteel", "planar", steelMat], ["lidSilicone", null, siliconeMat], ["fear", null, fearMat]] as const) {
           const h = new THREE.Group();
           h.add(new THREE.Mesh(unpack(ASM[k], uvMode), mat));
           model.add(h); holder[k] = h;
         }
 
-        /* The tct mark — not in the CAD, placed from the product photos. */
+        /* THE tct MARK IS THE CAD'S OWN ENGRAVING, DARKENED (Mario, 5 Oct 2026).
+           The model carries it cut ~0.1 mm into the cone at −119.7°, between two
+           side slots: the outline box and the letters. Every vertex sunk below
+           the cone's surface in that window is coloured dark, so the mark is
+           exactly the shape and place the part is engraved — a drawn overlay
+           sat a third of a turn away, then misaligned with the cut. */
         {
           const CONE = [[16.55, 32.692], [17.3, 32.418], [18.05, 32.256], [25.55, 30.933], [26.0, 30.85]];
           const rAt = (y: number) => { for (let i = 0; i < CONE.length - 1; i++) { const [y0, r0] = CONE[i], [y1, r1] = CONE[i + 1]; if (y >= y0 && y <= y1) return r0 + (r1 - r0) * (y - y0) / (y1 - y0); } return CONE[CONE.length - 1][1]; };
-          const Y0 = 17.2, Y1 = 24.9, HALF = 5.25 / 31.75;
-          const lc = document.createElement("canvas"); lc.width = 700; lc.height = 514;
-          const x = lc.getContext("2d")!, lw = 30, p = lw / 2 + 6;
-          x.strokeStyle = x.fillStyle = "#34373a"; x.lineWidth = lw;
-          x.beginPath(); x.roundRect(p, p, 700 - 2 * p, 514 - 2 * p, 70); x.stroke();
-          x.font = "700 296px Arial, Helvetica, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("tct", 350, 265);
-          const tex = new THREE.CanvasTexture(lc); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
-          const pts = []; for (let k = 0; k <= 16; k++) { const y = Y0 + (Y1 - Y0) * k / 16; pts.push(new THREE.Vector2(rAt(y) + 0.04, y)); }
-          const g = new THREE.LatheGeometry(pts, 28, -HALF, 2 * HALF), pp = g.attributes.position, uv = g.attributes.uv;
-          for (let i = 0; i < pp.count; i++) uv.setXY(i, (Math.atan2(pp.getX(i), pp.getZ(i)) + HALF) / (2 * HALF), (pp.getY(i) - Y0) / (Y1 - Y0));
-          uv.needsUpdate = true;
-          holder.hmd.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 0.75, metalness: 0.1, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 })));
+          const g = (holder.hmd.children[0] as InstanceType<typeof THREE.Mesh>).geometry;
+          const pp = g.attributes.position, n = pp.count, col = new Float32Array(n * 3).fill(1);
+          const a0 = MARK_AZ - 14 * DEG, a1 = MARK_AZ + 14 * DEG;
+          for (let i = 0; i < n; i++) {
+            const x = pp.getX(i), y = pp.getY(i), z = pp.getZ(i);
+            if (y < 16.7 || y > 24.1) continue;
+            const ang = Math.atan2(x, z);
+            if (ang < a0 || ang > a1) continue;
+            if (rAt(y) - Math.hypot(x, z) > 0.05) col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = 0.14;
+          }
+          g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+          hmdMat.vertexColors = true;
         }
 
         /* Soft contact shadow under the lowest part. */
@@ -156,8 +171,12 @@ export default function HmdViewer3D({
         const shadow = new THREE.Mesh(new THREE.PlaneGeometry(95, 95), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
         shadow.rotation.x = -Math.PI / 2; scene.add(shadow);
 
-        const camera = new THREE.PerspectiveCamera(30, mount.clientWidth / mount.clientHeight, 1, 5000);
-        camera.position.set(95, 120, 185);
+        const camera = new THREE.PerspectiveCamera(30, mount.clientWidth / mount.clientHeight, 10, 2000);
+        /* Open facing the mark, a little to its right, as the renders do. */
+        {
+          const az = MARK_AZ + 25 * DEG, horiz = 208;
+          camera.position.set(Math.sin(az) * horiz, 120, Math.cos(az) * horiz);
+        }
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.enablePan = false;

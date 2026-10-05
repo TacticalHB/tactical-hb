@@ -18,7 +18,7 @@ type L4 = Record<"uk" | "en" | "ja" | "ar", string>;
 const ITEMS: L4[] = [
   { en: "Project KI 06 stem", uk: "Шахта Project KI 06", ja: "Project KI 06 ステム", ar: "جسم Project KI 06" },
   { en: "Tactical mouthpiece", uk: "Тактичний мундштук", ja: "タクティカル マウスピース", ar: "مبسم تكتيكي" },
-  { en: "Head sphere", uk: "Головна сфера", ja: "ヘッドスフィア", ar: "الكرة العلوية" },
+  { en: "Head sphere", uk: "Верхня сфера", ja: "ヘッドスフィア", ar: "الكرة العلوية" },
   { en: "Mr HB tray", uk: "Тарілка Mr HB", ja: "Mr HB トレイ", ar: "صينية Mr HB" },
   {
     en: "Soft Touch silicone hose TCT branded, plastic spring",

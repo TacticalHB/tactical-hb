@@ -86,17 +86,17 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const uk = locale === "uk";
   const currency = currencyForLocale(locale);
   const L = {
-    title: t(locale, { uk: "Продукти", en: "Products", ja: "製品", ar: "المنتجات" }),
+    title: t(locale, { uk: "Товари", en: "Products", ja: "製品", ar: "المنتجات" }),
     hide: t(locale, { uk: "Сховати фільтри", en: "Hide Filters", ja: "絞り込みを隠す", ar: "إخفاء عوامل التصفية" }),
     show: t(locale, { uk: "Показати фільтри", en: "Show Filters", ja: "絞り込む", ar: "عوامل التصفية" }),
     sortBy: t(locale, { uk: "Сортувати", en: "Sort By", ja: "並び替え", ar: "ترتيب حسب" }),
     featured: t(locale, { uk: "Рекомендовані", en: "Featured", ja: "おすすめ", ar: "المميّزة" }),
-    lowHigh: t(locale, { uk: "Ціна: зростання", en: "Price: Low–High", ja: "価格：安い順", ar: "السعر: من الأقل" }),
-    highLow: t(locale, { uk: "Ціна: спадання", en: "Price: High–Low", ja: "価格：高い順", ar: "السعر: من الأعلى" }),
+    lowHigh: t(locale, { uk: "Ціна: за зростанням", en: "Price: Low–High", ja: "価格：安い順", ar: "السعر: من الأقل" }),
+    highLow: t(locale, { uk: "Ціна: за спаданням", en: "Price: High–Low", ja: "価格：高い順", ar: "السعر: من الأعلى" }),
     category: t(locale, { uk: "Категорія", en: "Category", ja: "カテゴリー", ar: "الفئة" }),
     price: t(locale, { uk: "Ціна", en: "Shop by Price", ja: "価格から探す", ar: "التسوق حسب السعر" }),
     cats: {
-      all: t(locale, { uk: "Усі продукти", en: "All Products", ja: "すべての製品", ar: "كل المنتجات" }),
+      all: t(locale, { uk: "Усі товари", en: "All Products", ja: "すべての製品", ar: "كل المنتجات" }),
       hmd: t(locale, { uk: "Пристрої для нагріву", en: "Heat Devices", ja: "ヒートデバイス", ar: "أجهزة الحرارة" }),
       bowl: t(locale, { uk: "Чаші", en: "Bowls", ja: "ボウル", ar: "الرؤوس" }),
       windcover: t(locale, { uk: "Ковпаки", en: "Windcovers", ja: "ウインドカバー", ar: "أغطية الرياح" }),

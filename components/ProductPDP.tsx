@@ -640,7 +640,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     : status === "coming_soon"
                     ? t(locale, {
                         en: "This one has not reached us yet. It cannot be ordered today — and it is not available as an option on a heat device either.",
-                        uk: "Цей товар ще не приїхав до нас. Замовити його сьогодні не можна — і як опцію до пристрою теж.",
+                        uk: "Цей товар до нас ще не надійшов. Замовити його сьогодні не можна — і як опцію до пристрою теж.",
                         ja: "こちらはまだ入荷していません。本日はご注文いただけず、ヒートデバイスのオプションとしてもお選びいただけません。",
                         ar: "لم يصلنا هذا المنتج بعد. لا يمكن طلبه اليوم، ولا اختياره كإضافة على جهاز حرارة.",
                       })

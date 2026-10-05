@@ -328,22 +328,22 @@ export const products: Product[] = [
       colourShownJa: "素地アルミニウム",
       colourShownAr: "ألمنيوم خام",
       shortEn:
-        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The Classic is the bare aluminium expression of the HMD — machined metal with no coating and no surface treatment, so there is nothing on it to wear through or discolour with use. Set it and forget it — no constant coal manipulation required.",
+        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers a mild, consistent draw with extended session duration. The Classic is the bare aluminium expression of the HMD — machined metal with no coating and no surface treatment, so there is nothing on it to wear through or discolour with use. Set it and forget it — no constant coal manipulation required.",
       shortUk:
-        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Classic — це версія HMD з алюмінію без покриття: оброблений метал без жодного шару зверху, тож на ньому нічому стиратися чи темніти з часом. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яку, стабільну тягу та довші сесії. Classic — це версія HMD з алюмінію без покриття: оброблений метал без жодного шару зверху, тож на ньому нічому стиратися чи темніти з часом. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
       shortJa:
         "極端な温度変化を伴わない均一な熱分布のために設計されています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。Classic は HMD の素地アルミニウム版です。コーティングも表面処理もない削り出しの金属なので、使ううちにすり減ったり変色したりする層がありません。セットしたら、あとは任せるだけ — 炭を絶えず動かす必要はありません。",
       shortAr:
-        "مهندس لتوزيع حرارة منتظم بلا تقلّبات حادة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي تدخينًا لطيفًا وثابتًا وجلسات أطول. وClassic هو صورة الألمنيوم الخام من هذا الجهاز — معدن مخرَّط بلا طلاء وبلا معالجة سطحية، فلا شيء عليه يزول أو يتغيّر لونه بالاستعمال. اضبطه وانسَه — بلا تحريك متواصل للفحم.",
+        "مهندس لتوزيع حرارة منتظم بلا تقلّبات حادة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي سحبًا لطيفًا وثابتًا وجلسات أطول. وClassic هو صورة الألمنيوم الخام من هذا الجهاز — معدن مخرَّط بلا طلاء وبلا معالجة سطحية، فلا شيء عليه يزول أو يتغيّر لونه بالاستعمال. اضبطه وانسَه — بلا تحريك متواصل للفحم.",
       benefitsEn: [
-        "Mildness of smoking with rich, consistent flavour",
+        "A mild draw with rich, consistent flavour",
         "Extended session duration (90+ minutes with proper use)",
         "Bare aluminium — no coating to wear through or discolour",
         "Effortless experience — no constant coal rotation or adjustments",
         "Heating time of approximately 6 minutes under wind cover",
       ],
       benefitsUk: [
-        "М'якість куріння з насиченим, стабільним смаком",
+        "М'яка тяга з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
         "Алюміній без покриття — немає шару, який стирається чи темніє",
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
@@ -357,7 +357,7 @@ export const products: Product[] = [
         "ウインドカバー使用時の加熱時間は約6分",
       ],
       benefitsAr: [
-        "تدخين لطيف بنكهة غنية وثابتة",
+        "سحب لطيف بنكهة غنية وثابتة",
         "جلسات أطول (أكثر من 90 دقيقة عند الاستخدام السليم)",
         "ألمنيوم خام — لا طلاء يزول أو يتغيّر لونه",
         "بلا عناء — لا حاجة إلى تدوير الفحم أو تعديله باستمرار",
@@ -401,7 +401,7 @@ export const products: Product[] = [
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Mild & consistent", textUk: "М'який і стабільний", textJa: "まろやかで安定", textAr: "لطيف وثابت" },
         { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "90+ minutes", textUk: "90+ хвилин", textJa: "90分以上", textAr: "أكثر من 90 دقيقة" },
-        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", titleAr: "الجهد", textEn: "Zero coal fuss", textUk: "Жодної метушні", textJa: "炭いらずの手間なし", textAr: "بلا عناء الفحم" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", titleAr: "الجهد", textEn: "Zero coal fuss", textUk: "Без метушні з вугіллям", textJa: "炭いらずの手間なし", textAr: "بلا عناء الفحم" },
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分", textAr: "نحو 6 دقائق" },
       ],
     },
@@ -412,11 +412,11 @@ export const products: Product[] = [
     slug: "hmd-a-craft",
     nameUk: "HMD A.Craft",
     nameEn: "HMD A.Craft",
-    taglineUk: "Крафтове видання з твердим анодуванням.",
+    taglineUk: "Крафтова версія з твердим анодуванням.",
     taglineEn: "Hard anodised craft edition.",
     taglineJa: "ハードアノダイズド仕上げのクラフトエディション。",
     taglineAr: "إصدار حرفي بأكسدة صلبة.",
-    descriptionUk: "Видання A.Craft з твердим анодованим покриттям алюмінію. Без кришки. Унікальна тактична естетика.",
+    descriptionUk: "Версія A.Craft із твердим анодуванням. Без кришки. Унікальна тактична естетика.",
     descriptionEn: "A.Craft edition with a hard anodised aluminium surface. Without lid. Unique tactical aesthetic.",
     descriptionJa: "アルミニウムをハードアノダイズド処理した A.Craft エディション。リッドなし。独自のタクティカルな佇まい。",
     descriptionAr: "إصدار A.Craft بسطح ألمنيوم مؤكسد أكسدة صلبة. بلا غطاء. حضور تكتيكي مميّز.",
@@ -442,22 +442,22 @@ export const products: Product[] = [
       colourShownJa: "タクティカルグレー",
       colourShownAr: "رمادي تكتيكي",
       shortEn:
-        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. The A.Craft body is hard anodised — the finish is grown into the surface of the metal rather than laid on top of it, which is what lets it take heat and handling without marking. Set it and forget it — no constant coal manipulation required.",
+        "Engineered for uniform heat distribution without extreme temperature swings. Inspired by the precision of weaponry, this dedicated aluminium device delivers a mild, consistent draw with extended session duration. The A.Craft body is hard anodised — the finish is grown into the surface of the metal rather than laid on top of it, which is what lets it take heat and handling without marking. Set it and forget it — no constant coal manipulation required.",
       shortUk:
-        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Корпус A.Craft має тверде анодоване покриття — воно утворюється в самому металі, а не лежить зверху, тому витримує жар і щоденне користування без слідів. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
+        "Розроблений для рівномірного розподілу тепла без екстремальних перепадів температури. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яку, стабільну тягу та довші сесії. Корпус A.Craft має тверде анодоване покриття — воно утворюється в самому металі, а не лежить зверху, тому витримує жар і щоденне користування без слідів. Встановив — і забув: жодних постійних маніпуляцій з вугіллям.",
       shortJa:
         "極端な温度変化を伴わない均一な熱分布のために設計されています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。A.Craft のボディはハードアノダイズド処理 — 被膜を上から載せるのではなく、金属の表面そのものを変化させて育てた仕上げです。だからこそ、熱にも日々の扱いにも跡を残さず耐えます。セットしたら、あとは任せるだけ — 炭を絶えず動かす必要はありません。",
       shortAr:
-        "مهندس لتوزيع حرارة منتظم بلا تقلّبات حادة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي تدخينًا لطيفًا وثابتًا وجلسات أطول. وجسم A.Craft مؤكسد أكسدة صلبة — إذ ينشأ التشطيب داخل سطح المعدن نفسه لا فوقه، وهو ما يجعله يحتمل الحرارة والاستعمال دون أن يترك أثرًا. اضبطه وانسَه — بلا تحريك متواصل للفحم.",
+        "مهندس لتوزيع حرارة منتظم بلا تقلّبات حادة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي سحبًا لطيفًا وثابتًا وجلسات أطول. وجسم A.Craft مؤكسد أكسدة صلبة — إذ ينشأ التشطيب داخل سطح المعدن نفسه لا فوقه، وهو ما يجعله يحتمل الحرارة والاستعمال دون أن يترك أثرًا. اضبطه وانسَه — بلا تحريك متواصل للفحم.",
       benefitsEn: [
-        "Mildness of smoking with rich, consistent flavour",
+        "A mild draw with rich, consistent flavour",
         "Extended session duration (90+ minutes with proper use)",
         "Hard anodised surface — resists wear, heat and marking",
         "Effortless experience — no constant coal rotation or adjustments",
         "Heating time of approximately 6 minutes under wind cover",
       ],
       benefitsUk: [
-        "М'якість куріння з насиченим, стабільним смаком",
+        "М'яка тяга з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (90+ хвилин за правильного використання)",
         "Тверде анодоване покриття — стійке до зношування, жару та подряпин",
         "Без зусиль — не потрібно постійно обертати чи поправляти вугілля",
@@ -471,7 +471,7 @@ export const products: Product[] = [
         "ウインドカバー使用時の加熱時間は約6分",
       ],
       benefitsAr: [
-        "تدخين لطيف بنكهة غنية وثابتة",
+        "سحب لطيف بنكهة غنية وثابتة",
         "جلسات أطول (أكثر من 90 دقيقة عند الاستخدام السليم)",
         "سطح مؤكسد أكسدة صلبة — يقاوم التآكل والحرارة والخدوش",
         "بلا عناء — لا حاجة إلى تدوير الفحم أو تعديله باستمرار",
@@ -506,7 +506,7 @@ export const products: Product[] = [
       features: [
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Mild & consistent", textUk: "М'який і стабільний", textJa: "まろやかで安定", textAr: "لطيف وثابت" },
         { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "90+ minutes", textUk: "90+ хвилин", textJa: "90分以上", textAr: "أكثر من 90 دقيقة" },
-        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", titleAr: "الجهد", textEn: "Zero coal fuss", textUk: "Жодної метушні", textJa: "炭いらずの手間なし", textAr: "بلا عناء الفحم" },
+        { icon: "hands", titleEn: "Effort", titleUk: "Зусилля", titleJa: "手間", titleAr: "الجهد", textEn: "Zero coal fuss", textUk: "Без метушні з вугіллям", textJa: "炭いらずの手間なし", textAr: "بلا عناء الفحم" },
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分", textAr: "نحو 6 دقائق" },
       ],
     },
@@ -521,10 +521,10 @@ export const products: Product[] = [
     taglineEn: "Non-stick surface, PFOA-free.",
     taglineJa: "非粘着表面、PFOA フリー。",
     taglineAr: "سطح غير لاصق، خالٍ من PFOA.",
-    descriptionUk: "Повністю антипригарна поверхня, 100% без PFOA. Запобігає прилипанню тютюну, легке очищення. Доступний у фіолетовому та чорному кольорах.",
-    descriptionEn: "Fully non-stick surface, 100% PFOA-free. Prevents tobacco adhesion, easy cleaning. Available in purple and black.",
-    descriptionJa: "完全な非粘着表面、100% PFOA フリー。タバコの付着を防ぎ、お手入れも簡単です。パープルとブラックをご用意しています。",
-    descriptionAr: "سطح غير لاصق تمامًا، خالٍ من PFOA بنسبة 100٪. يمنع التصاق المعسّل ويسهّل التنظيف. متوفر بالبنفسجي والأسود.",
+    descriptionUk: "Повністю антипригарна поверхня, 100% без PFOA. Суміш не прилипає, а чистити легко. Доступний у фіолетовому та чорному кольорах.",
+    descriptionEn: "Fully non-stick surface, 100% PFOA-free. The mix doesn't stick, and it cleans easily. Available in purple and black.",
+    descriptionJa: "完全な非粘着表面、100% PFOA フリー。フレーバーがこびりつかず、お手入れも簡単です。パープルとブラックをご用意しています。",
+    descriptionAr: "سطح غير لاصق تمامًا، خالٍ من PFOA بنسبة 100٪. يمنع التصاق الخلطة ويسهّل التنظيف. متوفر بالبنفسجي والأسود.",
     price: 30,
     priceUah: 1220,
     currency: "EUR",
@@ -565,13 +565,13 @@ export const products: Product[] = [
          array is not the way to say "none" either: it used to blank the gallery
          and the page read "Photos coming soon". */
       shortEn:
-        "The HMD OP is built for overpack smoking. Inspired by the precision of weaponry, this dedicated aluminium device delivers mild, consistent smoking with extended session duration. Its fully non-stick, 100% PFOA-free surface repels tobacco residue, which keeps heat distribution even and cleaning effortless — even through intensive sessions. Offered in black and purple.",
+        "The HMD OP is built for overpack sessions. Inspired by the precision of weaponry, this dedicated aluminium device delivers a mild, consistent draw with extended session duration. Its fully non-stick, 100% PFOA-free surface repels residue from the mix, which keeps heat distribution even and cleaning effortless — even through intensive sessions. Offered in black and purple.",
       shortUk:
-        "HMD OP створений для куріння в стилі overpack. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яке, стабільне куріння та довші сесії. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки тютюну, завдяки чому тепло розподіляється рівномірно, а очищення не потребує зусиль навіть після інтенсивних сесій. Доступний у чорному та фіолетовому кольорах.",
+        "HMD OP створений для сесій у стилі overpack. Натхненний точністю зброї, цей спеціалізований алюмінієвий пристрій забезпечує м'яку, стабільну тягу та довші сесії. Повністю антипригарна поверхня (100% без PFOA) відштовхує залишки суміші, завдяки чому тепло розподіляється рівномірно, а очищення не потребує зусиль навіть після інтенсивних сесій. Доступний у чорному та фіолетовому кольорах.",
       shortJa:
-        "HMD OP はオーバーパック向けに作られています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。完全な非粘着かつ 100% PFOA フリーの表面がタバコの残りを寄せつけないため、熱が均一に伝わり、激しいセッションのあとでも手入れに手間がかかりません。ブラックとパープルの2色。",
+        "HMD OP はオーバーパック向けに作られています。武器づくりの精度から着想を得たこの専用アルミニウムデバイスは、まろやかで安定した吸い心地と長いセッションをもたらします。完全な非粘着かつ 100% PFOA フリーの表面がフレーバーの残りを寄せつけないため、熱が均一に伝わり、激しいセッションのあとでも手入れに手間がかかりません。ブラックとパープルの2色。",
       shortAr:
-        "صُنع HMD OP للتعبئة الغزيرة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي تدخينًا لطيفًا وثابتًا وجلسات أطول. وسطحه غير اللاصق تمامًا والخالي من PFOA بنسبة 100٪ يدفع بقايا المعسّل عنه، فيبقى توزيع الحرارة منتظمًا والتنظيف بلا عناء — حتى بعد الجلسات المكثّفة. متوفر بالأسود والبنفسجي.",
+        "صُنع HMD OP للتعبئة الغزيرة. ومستوحًى من دقّة صناعة السلاح، يمنحك هذا الجهاز الألمنيومي سحبًا لطيفًا وثابتًا وجلسات أطول. وسطحه غير اللاصق تمامًا والخالي من PFOA بنسبة 100٪ يدفع بقايا الخلطة عنه، فيبقى توزيع الحرارة منتظمًا والتنظيف بلا عناء — حتى بعد الجلسات المكثّفة. متوفر بالأسود والبنفسجي.",
       benefitsEn: [
         "Non-stick surface repels residue — bold overpacks without sticking or bitterness",
         "Optimised for overpacking — even heat for massive clouds and rich flavour",
@@ -588,7 +588,7 @@ export const products: Product[] = [
       ],
       benefitsJa: [
         "非粘着表面が残りを寄せつけません — 大胆なオーバーパックでも、貼りつきや苦みが出ません",
-        "オーバーパックに最適化 — 均一な熱で、豊かな煙と香味を引き出します",
+        "オーバーパックに最適化 — 均一な熱で、豊かなクラウドと香味を引き出します",
         "なめらかで扱いやすいセッションと、澄んだ軽い吸い込み",
         "丈夫でお手入れも簡単 — 残りはさっと拭き取れます",
         "通常の TCT HMD としても使えますが、本領はオーバーパックにあります",
@@ -637,7 +637,7 @@ export const products: Product[] = [
         { icon: "shield", titleEn: "Surface", titleUk: "Поверхня", titleJa: "表面", titleAr: "السطح", textEn: "100% PFOA-free", textUk: "100% без PFOA", textJa: "100% PFOA フリー", textAr: "خالٍ من PFOA بنسبة 100٪" },
         { icon: "flame", titleEn: "Overpack", titleUk: "Overpack", titleJa: "オーバーパック", titleAr: "تعبئة غزيرة", textEn: "Even heat", textUk: "Рівномірне тепло", textJa: "均一な熱", textAr: "حرارة منتظمة" },
         { icon: "wave", titleEn: "Draw", titleUk: "Тяга", titleJa: "吸い込み", titleAr: "السحب", textEn: "Smooth & clean", textUk: "М'яка і чиста", textJa: "なめらかで澄んだ", textAr: "سلس ونظيف" },
-        { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", titleJa: "お手入れ", titleAr: "التنظيف", textEn: "Wipes clean", textUk: "Легко витерти", textJa: "拭くだけ", textAr: "يُمسح بسهولة" },
+        { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", titleJa: "お手入れ", titleAr: "التنظيف", textEn: "Wipes clean", textUk: "Легко витирається", textJa: "拭くだけ", textAr: "يُمسح بسهولة" },
       ],
     },
     tags: ["non-stick", "PFOA free", "premium"],
@@ -647,14 +647,14 @@ export const products: Product[] = [
     slug: "bowl-killer",
     nameUk: "Tactical Killer",
     nameEn: "Tactical Killer",
-    taglineUk: "Ручна натуральна глина.",
+    taglineUk: "Натуральна глина, ручна робота.",
     taglineEn: "Handmade natural clay.",
     taglineJa: "手づくりの天然クレイ。",
     taglineAr: "طين طبيعي مصنوع يدويًا.",
-    descriptionUk: "Класична форма ручної роботи з натуральної глини. Сильний та насичений дим. Оптимальна товщина стінок для стабільного утримання тепла.",
-    descriptionEn: "Classic handmade bowl from natural clay. Strong and rich smoke. Optimal wall thickness for steady heat retention.",
-    descriptionJa: "天然クレイの手づくりクラシックボウル。力強く濃厚な煙。安定した保熱のための最適な肉厚。",
-    descriptionAr: "رأس كلاسيكي مصنوع يدويًا من طين طبيعي. دخان قوي وغني. سماكة جدران مثالية لاحتفاظ ثابت بالحرارة.",
+    descriptionUk: "Класична форма ручної роботи з натуральної глини. Щільні, насичені хмари. Оптимальна товщина стінок для стабільного утримання тепла.",
+    descriptionEn: "Classic handmade bowl from natural clay. Dense, rich clouds. Optimal wall thickness for steady heat retention.",
+    descriptionJa: "天然クレイの手づくりクラシックボウル。力強く濃厚なクラウド。安定した保熱のための最適な肉厚。",
+    descriptionAr: "رأس كلاسيكي مصنوع يدويًا من طين طبيعي. سحاب كثيف وغني. سماكة جدران مثالية لاحتفاظ ثابت بالحرارة.",
     price: 11,
     priceUah: 430,
     currency: "EUR",
@@ -679,20 +679,20 @@ export const products: Product[] = [
       colourShownJa: "マットブラック",
       colourShownAr: "أسود مطفأ",
       shortEn:
-        "The classic shape of a hand-made Killer bowl in natural clay. A well-deserved name — your smoke is strong and rich, while the optimal wall thickness holds heat steadily without overheating your flavour, guaranteeing long sessions free of bitterness.",
+        "The classic shape of a hand-made Killer bowl in natural clay. A well-deserved name — the clouds are dense and rich, while the optimal wall thickness holds heat steadily without overheating your flavour, guaranteeing long sessions free of bitterness.",
       shortUk:
-        "Класична форма killer-чаші ручної роботи з натуральної глини. Заслужена назва — дим міцний і насичений, а оптимальна товщина стінок стабільно утримує тепло, не перепалюючи смак, гарантуючи довгі сесії без гіркоти.",
+        "Класична форма killer-чаші ручної роботи з натуральної глини. Назву вона заслужила: хмари щільні й насичені, а оптимальна товщина стінок стабільно тримає тепло й не перепалює смак — тож сесії довгі й без гіркоти.",
       shortJa:
-        "天然クレイで手づくりした Killer ボウルの、そのままの定番シェイプ。名前のとおり、煙は力強く濃厚です。最適な肉厚が熱を安定して保ち、香味を焼きすぎないため、苦みの出ない長いセッションをお約束します。",
+        "天然クレイで手づくりした Killer ボウルの、そのままの定番シェイプ。名前のとおり、クラウドは力強く濃厚です。最適な肉厚が熱を安定して保ち、香味を焼きすぎないため、苦みの出ない長いセッションをお約束します。",
       shortAr:
-        "الشكل الكلاسيكي لرأس Killer المصنوع يدويًا من طين طبيعي. اسم عن جدارة — فالدخان قوي وغني، بينما تحفظ سماكة الجدران المثالية الحرارة بثبات دون أن تحرق النكهة، ما يضمن جلسات طويلة بلا مرارة.",
+        "الشكل الكلاسيكي لرأس Killer المصنوع يدويًا من طين طبيعي. اسم عن جدارة — فالسحاب كثيف وغني، بينما تحفظ سماكة الجدران المثالية الحرارة بثبات دون أن تحرق النكهة، ما يضمن جلسات طويلة بلا مرارة.",
       benefitsEn: [
-        "Mildness of smoking with rich, consistent flavour",
+        "A mild draw with rich, consistent flavour",
         "Extended session duration (70+ minutes with proper use)",
         "Heating time of approximately 6 minutes under wind cover",
       ],
       benefitsUk: [
-        "М'якість куріння з насиченим, стабільним смаком",
+        "М'яка тяга з насиченим, стабільним смаком",
         "Подовжена тривалість сесії (70+ хвилин за правильного використання)",
         "Час нагріву — близько 6 хвилин під ковпаком",
       ],
@@ -702,7 +702,7 @@ export const products: Product[] = [
         "ウインドカバー使用時の加熱時間は約6分",
       ],
       benefitsAr: [
-        "تدخين لطيف بنكهة غنية وثابتة",
+        "سحب لطيف بنكهة غنية وثابتة",
         "جلسات أطول (أكثر من 70 دقيقة عند الاستخدام السليم)",
         "زمن التسخين نحو 6 دقائق تحت غطاء الرياح",
       ],
@@ -744,10 +744,10 @@ export const products: Product[] = [
     taglineEn: "Bright, soft solo sessions.",
     taglineJa: "明るくやわらかな、ひとりの時間に。",
     taglineAr: "جلسات فردية مشرقة وناعمة.",
-    descriptionUk: "Ручна робота з натуральної глини. Яскравий та м'який дим 35–40 хвилин. Для індивідуального використання. Ємність 10–12 г.",
-    descriptionEn: "Handmade from natural clay. Bright and soft smoke for 35–40 minutes. For solo use. Capacity 10–12g.",
-    descriptionJa: "天然クレイの手づくり。35〜40分の明るくやわらかな煙。おひとり用。容量 10〜12g。",
-    descriptionAr: "مصنوع يدويًا من طين طبيعي. دخان مشرق وناعم لمدة 35–40 دقيقة. للاستخدام الفردي. السعة 10–12 غ.",
+    descriptionUk: "Ручна робота з натуральної глини. Яскравий і м'який смак 35–40 хвилин. Для індивідуального використання. Ємність 10–12 г.",
+    descriptionEn: "Handmade from natural clay. Bright, soft sessions for 35–40 minutes. For solo use. Capacity 10–12g.",
+    descriptionJa: "天然クレイの手づくり。35〜40分の明るくやわらかな味わい。おひとり用。容量 10〜12g。",
+    descriptionAr: "مصنوع يدويًا من طين طبيعي. جلسة مشرقة وناعمة لمدة 35–40 دقيقة. للاستخدام الفردي. السعة 10–12 غ.",
     price: 10,
     priceUah: 380,
     currency: "EUR",
@@ -764,37 +764,37 @@ export const products: Product[] = [
       colourShownJa: "マットブラック",
       colourShownAr: "أسود مطفأ",
       shortEn:
-        "A hand-made bowl in natural clay, shaped for a bright, soft smoke that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
+        "A hand-made bowl in natural clay, shaped for a bright, soft session that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
       shortUk:
-        "Чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який дим протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
+        "Чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який смак протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
       shortJa:
-        "天然クレイを手づくりしたボウル。35〜40分続く、明るくやわらかな煙のために形づくられています。内側の小さなリムが糖蜜を受け止め、最適な肉厚がミックスの焼けすぎを防ぎます。ひとりでじっくり向き合うセッションのために。",
+        "天然クレイを手づくりしたボウル。35〜40分続く、明るくやわらかな味わいのために形づくられています。内側の小さなリムが糖蜜を受け止め、最適な肉厚がミックスの焼けすぎを防ぎます。ひとりでじっくり向き合うセッションのために。",
       shortAr:
-        "رأس مصنوع يدويًا من طين طبيعي، مصمَّم لدخان مشرق وناعم يمتد من 35 إلى 40 دقيقة. تمسك حافة داخلية صغيرة المعسّل في موضعه، بينما تمنع سماكة الجدران المثالية احتراق الخلطة — مصنوع للجلسة الفردية المركّزة.",
+        "رأس مصنوع يدويًا من طين طبيعي، مصمَّم لجلسة مشرقة وناعمة تمتد من 35 إلى 40 دقيقة. تمسك حافة داخلية صغيرة الدبس في موضعه، بينما تمنع سماكة الجدران المثالية احتراق الخلطة — مصنوع للجلسة الفردية المركّزة.",
       benefitsEn: [
-        "Bright and soft smoke for 35–40 minutes",
+        "Bright, soft sessions for 35–40 minutes",
         "Small internal rim that delays molasses",
         "Optimal wall thickness prevents overheating",
         "Designed for solo use",
         "Heating time of approximately 5 minutes under wind cover (2–3 cubes)",
       ],
       benefitsUk: [
-        "Яскравий і м'який дим протягом 35–40 хвилин",
+        "Яскравий і м'який смак протягом 35–40 хвилин",
         "Невеликий внутрішній бортик, що затримує патоку",
         "Оптимальна товщина стінок запобігає перегріву",
         "Створена для індивідуального використання",
         "Час нагріву — близько 5 хвилин під ковпаком (2–3 кубики)",
       ],
       benefitsJa: [
-        "35〜40分続く、明るくやわらかな煙",
+        "35〜40分続く、明るくやわらかな味わい",
         "糖蜜の落ちを抑える内側の小さなリム",
         "最適な肉厚が焼けすぎを防ぎます",
         "おひとり用に設計",
         "ウインドカバー使用時の加熱時間は約5分（炭2〜3個）",
       ],
       benefitsAr: [
-        "دخان مشرق وناعم لمدة 35–40 دقيقة",
-        "حافة داخلية صغيرة تؤخّر نزول المعسّل",
+        "جلسة مشرقة وناعمة لمدة 35–40 دقيقة",
+        "حافة داخلية صغيرة تؤخّر نزول الدبس",
         "سماكة جدران مثالية تمنع الاحتراق",
         "مصمَّم للاستخدام الفردي",
         "زمن التسخين نحو 5 دقائق تحت غطاء الرياح (2–3 قطع فحم)",
@@ -817,10 +817,10 @@ export const products: Product[] = [
       ],
       specs: [
         { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", labelAr: "المادة", valueEn: "Natural clay", valueUk: "Натуральна глина", valueJa: "天然クレイ", valueAr: "طين طبيعي" },
-        { labelEn: "Tobacco capacity", labelUk: "Ємність тютюну", labelJa: "タバコ容量", labelAr: "سعة المعسّل", valueEn: "10–12 g", valueUk: "10–12 г", valueJa: "10〜12 g", valueAr: "10–12 غ" },
+        { labelEn: "Bowl capacity", labelUk: "Місткість чаші", labelJa: "ボウル容量", labelAr: "سعة الرأس", valueEn: "10–12 g", valueUk: "10–12 г", valueJa: "10〜12 g", valueAr: "10–12 غ" },
       ],
       features: [
-        { icon: "cloud", titleEn: "Smoke", titleUk: "Дим", textEn: "Bright & soft", textUk: "Яскравий і м'який" },
+        { icon: "cloud", titleEn: "Session", titleUk: "Сесія", textEn: "Bright & soft", textUk: "Яскрава й м'яка" },
         { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "35–40 minutes", textUk: "35–40 хвилин" },
         { icon: "user", titleEn: "Made for", titleUk: "Формат", textEn: "Solo use", textUk: "Соло-сесії" },
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин" },
@@ -833,14 +833,14 @@ export const products: Product[] = [
     slug: "bowl-phunnel",
     nameUk: "Tactical 0.66 F.CK THE PHUNNEL",
     nameEn: "Tactical 0.66 F.CK THE PHUNNEL",
-    taglineUk: "Ручна натуральна глина.",
+    taglineUk: "Натуральна глина, ручна робота.",
     taglineEn: "Handmade natural clay.",
     taglineJa: "手づくりの天然クレイ。",
     taglineAr: "طين طبيعي مصنوع يدويًا.",
-    descriptionUk: "Класичний фанель з унікальною вставкою. Неймовірна насиченість та м'якість диму. Для тих, хто цінує процес.",
-    descriptionEn: "Classic phunnel with unique insert. Incredible richness and mildness of smoke. For those who value the process.",
-    descriptionJa: "独自のインサートを備えたクラシックなファンネル。驚くほど濃厚でまろやかな煙。過程を大切にする方へ。",
-    descriptionAr: "فانل كلاسيكي بقطعة داخلية مميّزة. دخان غني ولطيف إلى حد مذهل. لمن يقدّر التجربة.",
+    descriptionUk: "Класичний фанел з унікальною вставкою. Неймовірна насиченість і м'якість смаку. Для тих, хто цінує процес.",
+    descriptionEn: "Classic phunnel with unique insert. Incredible richness and mildness of flavour. For those who value the process.",
+    descriptionJa: "独自のインサートを備えたクラシックなファンネル。驚くほど濃厚でまろやかな香味。過程を大切にする方へ。",
+    descriptionAr: "فانل كلاسيكي بقطعة داخلية مميّزة. نكهة غنية ولطيفة إلى حد مذهل. لمن يقدّر التجربة.",
     price: 13,
     priceUah: 510,
     currency: "EUR",
@@ -863,11 +863,11 @@ export const products: Product[] = [
       shortEn:
         "The FTP is a hand-made clay phunnel with a clever 2-in-1 design and two interchangeable inserts. Drop in the aluminium sleeve for a true phunnel — no molasses down the stem, just clean, even airflow — or the stainless-steel mesh screen for the open, powerful draw of a killer bowl. Deep, rich flavour with an effortless, mild pull, whether you're chasing clouds or settling in for a long session.",
       shortUk:
-        "FTP — це фанель ручної роботи з глини з розумним дизайном 2-в-1 та двома змінними вставками. Встановіть алюмінієву гільзу для справжнього фанеля — жодної патоки в шахті, лише чистий рівномірний потік повітря — або вставку зі сталевою сіткою для відкритої, потужної тяги killer-чаші. Глибокий насичений смак і легка м'яка тяга — чи то ви ганяєтеся за хмарами, чи налаштувалися на довгу сесію.",
+        "FTP — це фанел ручної роботи з глини з розумним дизайном 2-в-1 та двома змінними вставками. Встановіть алюмінієву гільзу для справжнього фанела — жодної патоки в шахті, лише чистий рівномірний потік повітря — або вставку зі сталевою сіткою для відкритої, потужної тяги killer-чаші. Глибокий насичений смак і легка м'яка тяга — чи то ви ганяєтеся за хмарами, чи налаштувалися на довгу сесію.",
       shortJa:
-        "FTP は、2-in-1 の巧みな設計と2種類の交換式インサートを備えた、クレイ製の手づくりファンネルです。アルミニウムスリーブを入れれば本格的なファンネル — 糖蜜がステムに落ちず、澄んだ均一な気流だけが残ります。ステンレスメッシュのスクリーンに替えれば、killer ボウルのような開いた力強い吸い込みに。深く豊かな香味と、力のいらないまろやかな吸い込みを、大きな煙を求めるときにも、長くくつろぐときにも。",
+        "FTP は、2-in-1 の巧みな設計と2種類の交換式インサートを備えた、クレイ製の手づくりファンネルです。アルミニウムスリーブを入れれば本格的なファンネル — 糖蜜がステムに落ちず、澄んだ均一な気流だけが残ります。ステンレスメッシュのスクリーンに替えれば、killer ボウルのような開いた力強い吸い込みに。深く豊かな香味と、力のいらないまろやかな吸い込みを、大きなクラウドを求めるときにも、長くくつろぐときにも。",
       shortAr:
-        "FTP فانل من الطين مصنوع يدويًا بتصميم ذكي 2 في 1 وقطعتين داخليتين قابلتين للتبديل. ضع الكم الألمنيومي لتحصل على فانل حقيقي — بلا نزول للمعسّل في الشيشة، وبتدفق هواء نظيف ومنتظم — أو ضع الشبكة من الفولاذ المقاوم للصدأ لتحصل على السحب المفتوح والقوي لرأس killer. نكهة عميقة وغنية وسحب لطيف بلا مجهود، سواء كنت تلاحق الدخان الكثيف أو تستقر لجلسة طويلة.",
+        "FTP فانل من الطين مصنوع يدويًا بتصميم ذكي 2 في 1 وقطعتين داخليتين قابلتين للتبديل. ضع الكم الألمنيومي لتحصل على فانل حقيقي — بلا نزول للدبس في الشيشة، وبتدفق هواء نظيف ومنتظم — أو ضع الشبكة من الفولاذ المقاوم للصدأ لتحصل على السحب المفتوح والقوي لرأس killer. نكهة عميقة وغنية وسحب لطيف بلا مجهود، سواء كنت تلاحق السحاب الكثيف أو تستقر لجلسة طويلة.",
       benefitsEn: [
         "2-in-1 design with interchangeable inserts",
         "Classic Phunnel Mode — no molasses dripping down the stem",
@@ -877,7 +877,7 @@ export const products: Product[] = [
       ],
       benefitsUk: [
         "Дизайн 2-в-1 зі змінними вставками",
-        "Класичний режим фанеля — патока не стікає в шахту",
+        "Класичний режим фанела — патока не стікає в шахту",
         "Тактичний режим із сіткою — відкрита тяга та потужний потік",
         "Глибокий насичений смак і легка м'яка тяга",
         "Підходить і для хмар, і для довгих спокійних сесій",
@@ -887,14 +887,14 @@ export const products: Product[] = [
         "クラシックなファンネルモード — 糖蜜がステムに落ちません",
         "メッシュスクリーンのタクティカルモード — 開いた気流と力強い吸い込み",
         "深く豊かな香味と、力のいらないまろやかな吸い込み",
-        "大きな煙にも、長くゆったりしたセッションにも",
+        "大きなクラウドにも、長くゆったりしたセッションにも",
       ],
       benefitsAr: [
         "تصميم 2 في 1 بقطع داخلية قابلة للتبديل",
-        "وضع الفانل الكلاسيكي — بلا نزول للمعسّل في الشيشة",
+        "وضع الفانل الكلاسيكي — بلا نزول للدبس في الشيشة",
         "الوضع التكتيكي بالشبكة — تدفق مفتوح وسحب قوي",
         "نكهة عميقة وغنية بسحب لطيف بلا مجهود",
-        "مناسب للدخان الكثيف وللجلسات الطويلة الهادئة على السواء",
+        "مناسب للسحاب الكثيف وللجلسات الطويلة الهادئة على السواء",
       ],
       tipsEn: [
         "Never cool the device with water",
@@ -919,8 +919,8 @@ export const products: Product[] = [
         { labelEn: "Insert 2", labelUk: "Вставка 2", labelJa: "インサート 2", labelAr: "القطعة الداخلية 2", valueEn: "Stainless steel mesh screen", valueUk: "Сітка з нержавіючої сталі", valueJa: "ステンレスメッシュスクリーン", valueAr: "شبكة من الفولاذ المقاوم للصدأ" },
       ],
       features: [
-        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", titleJa: "設計", titleAr: "التصميم", textEn: "2-in-1 inserts", textUk: "2-в-1 вставки" },
-        { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанель", textEn: "No molasses drip", textUk: "Без патоки в шахті" },
+        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", titleJa: "設計", titleAr: "التصميم", textEn: "2-in-1 inserts", textUk: "Вставки 2-в-1" },
+        { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанел", textEn: "No molasses drip", textUk: "Без патоки в шахті" },
         { icon: "mesh", titleEn: "Tactical", titleUk: "Тактичний", textEn: "Mesh screen", textUk: "Сталева сітка" },
         { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
       ],
@@ -1344,7 +1344,7 @@ export const products: Product[] = [
       ],
       tipsUk: [
         "Промийте пристрій перед першим використанням.",
-        "Не мийте пристрій у посудомийній машині та не використовуйте жорсткі абразивні губки.",
+        "Не мийте пристрій у посудомийній машині й не чистіть його жорсткими абразивними губками.",
         "Силіконові деталі термостійкі, але не вогнестійкі!",
         "Будьте tct, користуючись цим пристроєм.",
       ],
@@ -1365,7 +1365,7 @@ export const products: Product[] = [
       shortEn:
         "Project KI 06 is the device the workshop was built toward. Mr HB designed it to his own standard — the one every piece under the TCT mark is measured against. Project KI 06 has one mission: to deliver a unique experience through a tactical build. Each part is manufactured in-house under his supervision. Every surface, tolerance and finish had to earn its place. The personal standard travels in one case, and so does this:",
       shortUk:
-        "Project KI 06 — пристрій, до якого йшла вся майстерня. Mr HB створив його за власним стандартом — тим, за яким звіряють кожен виріб під знаком TCT. У Project KI 06 одна місія: дати неповторний досвід завдяки тактичній конструкції. Кожну деталь виготовлено на власному виробництві під його наглядом. Кожна поверхня, допуск і обробка мусили заслужити своє місце. Особистий стандарт подорожує в одному кейсі — і цей теж:",
+        "Project KI 06 — пристрій, до якого йшла вся майстерня. Mr HB створив його за власним стандартом — тим, за яким звіряють кожен виріб під знаком TCT. У Project KI 06 одна місія: дати неповторний досвід завдяки тактичній конструкції. Кожну деталь виготовлено на власному виробництві під його наглядом. Кожна поверхня, кожен допуск і кожна обробка мали заслужити своє місце. Особистий стандарт вміщується в один кейс — як і цей пристрій:",
       shortJa:
         "Project KI 06 は、工房がずっと目指してきたデバイスです。Mr HB が自らの基準で設計しました。TCT マークを冠するすべての製品が測られる、その基準です。Project KI 06 の使命はただ一つ。タクティカルな構造で、唯一無二の体験を届けること。すべてのパーツは彼の監督のもと、自社で製造されています。あらゆる面、公差、仕上げが、その場所にふさわしいことを証明しなければなりませんでした。個人の基準はひとつのケースで持ち運ばれる。これも同じです：",
       shortAr:

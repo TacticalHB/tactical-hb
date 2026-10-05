@@ -92,7 +92,7 @@ export const WELCOME: Record<WelcomeStep, Record<Locale, EmailCopy>> = {
       headline: "Bowl. Heat. Cover.",
       paragraphs: ["A complete session is a system:"],
       bullets: [
-        "Bowl — holds the tobacco and sets the flavour path",
+        "Bowl — holds the mix and sets the flavour path",
         "HMD — manages heat so you stop babysitting coals",
         "Wind cover — locks the session when air moves against you",
       ],
@@ -105,7 +105,7 @@ export const WELCOME: Record<WelcomeStep, Record<Locale, EmailCopy>> = {
       headline: "Чаша. Жар. Ковпак.",
       paragraphs: ["Повноцінна сесія — це система:"],
       bullets: [
-        "Чаша — тримає тютюн і задає смаковий профіль",
+        "Чаша — тримає суміш і задає смаковий профіль",
         "Пристрій нагріву — керує жаром, і вугілля більше не потребує няньки",
         "Ковпак — тримає сесію, коли повітря працює проти вас",
       ],

@@ -47,12 +47,12 @@ const ROWS: Row[] = [
   },
   {
     material: { en: "POM-C", uk: "POM-C", ja: "POM-C", ar: "POM-C" },
-    finish: { en: "Black matte", uk: "Чорний матовий", ja: "ブラックマット", ar: "أسود مطفأ" },
+    finish: { en: "Black matte", uk: "Чорна матова поверхня", ja: "ブラックマット", ar: "أسود مطفأ" },
     swatch: POM,
   },
   {
-    material: { en: "Custom silicone rubber", uk: "Силікон, виготовлений на замовлення", ja: "特注シリコーンゴム", ar: "مطاط سيليكون مخصص" },
-    finish: { en: "Matte finish", uk: "Матове покриття", ja: "マット仕上げ", ar: "تشطيب مطفأ" },
+    material: { en: "Custom silicone rubber", uk: "Силікон власної розробки", ja: "特注シリコーンゴム", ar: "مطاط سيليكون مخصص" },
+    finish: { en: "Matte finish", uk: "Матова поверхня", ja: "マット仕上げ", ar: "تشطيب مطفأ" },
     swatch: SILICONE,
   },
 ];
@@ -62,7 +62,7 @@ export default function MaterialsTable({ locale }: { locale: string }) {
     kicker: t(locale, { uk: "Матеріали та обробка", en: "Materials & finishes", ja: "素材と仕上げ", ar: "المواد والتشطيبات" }),
     title: t(locale, { uk: "З чого він зроблений", en: "What it's made of", ja: "その素材", ar: "مما صُنع" }),
     lede: t(locale, {
-      uk: "П'ять матеріалів, кожен зі своєю обробкою. Нічого зайвого — лише те, що витримує жар, вагу та щоденне користування.",
+      uk: "П'ять матеріалів, кожен зі своєю обробкою. Нічого зайвого — лише те, що витримує жар, вагу та щоденне використання.",
       en: "Five materials, each with its own finish. Nothing for show — only what stands up to heat, weight and daily use.",
       ja: "5つの素材と、それぞれの仕上げ。見せるためのものはなく、熱と重さ、毎日の使用に耐えるものだけ。",
       ar: "خمس مواد، لكل منها تشطيبها الخاص. لا شيء للزينة — فقط ما يتحمّل الحرارة والوزن والاستخدام اليومي.",

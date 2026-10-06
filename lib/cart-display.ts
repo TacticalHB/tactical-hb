@@ -19,7 +19,31 @@ export type LineDisplay = {
   material: string | null;
   /** "With Lid 9E418 + With FEAR 9E418", or null when the line is the base config. */
   addons: string | null;
+  /** "Pre-order · ships 20 October" for a pre-order line, otherwise null. */
+  preorder: string | null;
 };
+
+/** A ship date as the shopper reads it — "20 October", "20 жовтня". UTC so the
+    server and the browser print the same day; Arabic keeps Latin digits like
+    every number on the site. Same formatting as the product page. */
+export function formatShipDate(isoDate: string, locale: string): string {
+  return new Intl.DateTimeFormat(
+    locale === "uk" ? "uk-UA" : locale === "ja" ? "ja-JP" : locale === "ar" ? "ar-u-nu-latn" : "en-GB",
+    { day: "numeric", month: "long", timeZone: "UTC" },
+  ).format(new Date(`${isoDate}T00:00:00Z`));
+}
+
+/** "Pre-order · ships 20 October" — the product page's own wording. */
+export function preorderLabel(product: Product, locale: string): string | null {
+  if (!product.preorder || !product.shipsOn) return null;
+  const d = formatShipDate(product.shipsOn, locale);
+  return t(locale, {
+    en: `Pre-order · ships ${d}`,
+    uk: `Передзамовлення · відправка ${d}`,
+    ja: `予約注文 · ${d}発送`,
+    ar: `طلب مسبق · الشحن في ${d}`,
+  });
+}
 
 const VARIANT_UK: Record<string, string> = { Black: "Чорний", Purple: "Фіолетовий" };
 
@@ -95,5 +119,6 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
     colour,
     material,
     addons,
+    preorder: preorderLabel(product, locale),
   };
 }

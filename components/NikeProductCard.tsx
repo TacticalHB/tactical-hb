@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { t } from "@/lib/i18n-text";
+import { colourName } from "@/lib/colour-names";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -49,7 +50,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
            inset drops to top-1.5/right-1.5 so the visible disc stays roughly
            where it was rather than marching into the middle of the image. */
         className="absolute top-1.5 right-1.5 z-10 w-11 h-11 rounded-full backdrop-blur-sm"
-        label={`Favourite ${name}`}
+        label={t(locale, { uk: `Додати ${name} в обране`, en: `Add ${name} to favourites`, ja: `${name} をお気に入りに追加`, ar: `أضف ${name} إلى المفضّلة` })}
       />
       )}
       {/* Image */}
@@ -97,7 +98,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
                   key={v.name}
                   onMouseEnter={() => setIdx(i)}
                   onClick={() => router.push(`${href}?variant=${encodeURIComponent(v.name)}`)}
-                  aria-label={v.name}
+                  aria-label={`${name} — ${colourName(v.name, locale)}`}
                   className="w-10 h-10 flex items-center justify-center shrink-0"
                 >
                   <span

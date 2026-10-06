@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { SALES_EMAIL } from "@/lib/contact-info";
 import { useEffect, useRef, useState } from "react";
 import HoneypotField from "./HoneypotField";
+import { WHOLESALE_LIMITS as LIM, cleanBlock, cleanLine, isEmail, isPhone, isWord } from "@/lib/form-checks";
 
 export default function WholesaleForm() {
   const t = useTranslations("wholesale");
@@ -15,6 +16,7 @@ export default function WholesaleForm() {
   const [bizError, setBizError] = useState(false);
   const [hoverBiz, setHoverBiz] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [invalid, setInvalid] = useState(false);
   /* When the form appeared, so the server can tell a person from a script.
      Stamped at commit, not in the initialiser: Date.now() is impure, and a
      render can be discarded or replayed, so a timestamp taken during one is
@@ -55,6 +57,29 @@ export default function WholesaleForm() {
       return;
     }
     const data = new FormData(e.currentTarget);
+    const v = {
+      name: cleanLine(data.get("name")),
+      company: cleanLine(data.get("company")),
+      email: cleanLine(data.get("email")),
+      phone: cleanLine(data.get("phone")),
+      country: cleanLine(data.get("country")),
+      city: cleanLine(data.get("city")),
+      message: cleanBlock(data.get("message")),
+    };
+    /* The same rules the server applies (lib/form-checks). */
+    if (
+      !isWord(v.name, LIM.name) ||
+      !isWord(v.company, LIM.company) ||
+      !isEmail(v.email) ||
+      !isPhone(v.phone) ||
+      !isWord(v.country, LIM.country) ||
+      !isWord(v.city, LIM.city) ||
+      v.message.length < 2
+    ) {
+      setInvalid(true);
+      return;
+    }
+    setInvalid(false);
     setLoading(true);
     setFailed(false);
 
@@ -67,14 +92,8 @@ export default function WholesaleForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: String(data.get("name") ?? ""),
-          company: String(data.get("company") ?? ""),
-          email: String(data.get("email") ?? ""),
-          phone: String(data.get("phone") ?? ""),
-          country: String(data.get("country") ?? ""),
-          city: String(data.get("city") ?? ""),
+          ...v,
           businessType: typeLabel,
-          message: String(data.get("message") ?? ""),
           // Decides which language the auto-reply and attached form are in.
           locale,
           // Spam screening — see lib/anti-spam.
@@ -107,13 +126,21 @@ export default function WholesaleForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <HoneypotField />
       {[
-        { name: "name", label: t("form_name"), type: "text" },
-        { name: "company", label: t("form_company"), type: "text" },
-        { name: "email", label: t("form_email"), type: "email" },
+        { name: "name", label: t("form_name"), type: "text", max: LIM.name, auto: "name" },
+        { name: "company", label: t("form_company"), type: "text", max: LIM.company, auto: "organization" },
+        { name: "email", label: t("form_email"), type: "email", max: LIM.email, auto: "email" },
       ].map((field) => (
         <div key={field.name}>
-          <label className={label} style={labelStyle}>{field.label}</label>
-          <input type={field.type} name={field.name} required className="field" />
+          <label htmlFor={`ws-${field.name}`} className={label} style={labelStyle}>{field.label}</label>
+          <input
+            id={`ws-${field.name}`}
+            type={field.type}
+            name={field.name}
+            required
+            maxLength={field.max}
+            autoComplete={field.auto}
+            className="field"
+          />
         </div>
       ))}
 
@@ -121,11 +148,13 @@ export default function WholesaleForm() {
           Ukrainian visitors get the country code pre-filled; English-language
           visitors may be anywhere, so they only get the "+". */}
       <div>
-        <label className={label} style={labelStyle}>{t("form_phone")}</label>
+        <label htmlFor="ws-phone" className={label} style={labelStyle}>{t("form_phone")}</label>
         <input
+          id="ws-phone"
           type="tel"
           name="phone"
           required
+          maxLength={LIM.phone}
           /* LTR regardless of the storefront — see the checkout's phone field. */
           dir="ltr"
           defaultValue={uk ? "+380" : locale === "ja" ? "+81" : "+"}
@@ -138,12 +167,12 @@ export default function WholesaleForm() {
 
       {/* Country then City, kept adjacent. */}
       <div>
-        <label className={label} style={labelStyle}>{t("form_country")}</label>
-        <input type="text" name="country" required className="field" />
+        <label htmlFor="ws-country" className={label} style={labelStyle}>{t("form_country")}</label>
+        <input id="ws-country" type="text" name="country" required maxLength={LIM.country} autoComplete="country-name" className="field" />
       </div>
       <div>
-        <label className={label} style={labelStyle}>{t("form_city")}</label>
-        <input type="text" name="city" required className="field" />
+        <label htmlFor="ws-city" className={label} style={labelStyle}>{t("form_city")}</label>
+        <input id="ws-city" type="text" name="city" required maxLength={LIM.city} autoComplete="address-level2" className="field" />
       </div>
 
       {/* Business type — a bordered panel of full-width rows, following the
@@ -200,10 +229,15 @@ export default function WholesaleForm() {
       </div>
 
       <div>
-        <label className={label} style={labelStyle}>{t("form_message")}</label>
-        <textarea name="message" rows={5} required className="field resize-none" />
+        <label htmlFor="ws-message" className={label} style={labelStyle}>{t("form_message")}</label>
+        <textarea id="ws-message" name="message" rows={5} required maxLength={LIM.message} className="field resize-none" />
       </div>
 
+      {invalid && (
+        <p role="alert" className="text-sm leading-relaxed" style={{ color: "#b42318" }}>
+          {t("form_invalid")}
+        </p>
+      )}
       {failed && (
         <p role="alert" className="text-sm leading-relaxed" style={{ color: "#b42318" }}>
           {t("form_error", { email: SALES_EMAIL })}

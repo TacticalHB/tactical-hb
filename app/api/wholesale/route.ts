@@ -3,6 +3,8 @@ import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { sendMail } from "@/lib/email";
 import { buildWholesaleEnquiryStaffMail } from "@/lib/wholesale-staff-email";
 import { screen } from "@/lib/anti-spam";
+import { allowSubmission } from "@/lib/rate-limit";
+import { WHOLESALE_LIMITS as LIMITS, cleanBlock, cleanLine, isEmail, isPhone, isWord } from "@/lib/form-checks";
 import { buildWholesaleReply } from "@/lib/wholesale-email";
 
 /* ---------------------------------------------------------------------------
@@ -12,15 +14,12 @@ import { buildWholesaleReply } from "@/lib/wholesale-email";
    everything is validated and length-capped server-side. The client's
    `required` attributes are a convenience, not a guarantee.
 
-   No rate limiting yet — serverless has no shared counter to hang it on. Worth
-   adding (Upstash or similar) before this address is published widely.
+   Rate-limited per visitor (lib/rate-limit), and every field checked with the
+   same rules the form uses (lib/form-checks).
 --------------------------------------------------------------------------- */
 
 export const runtime = "nodejs";
 
-const LIMITS = { name: 100, company: 150, email: 200, phone: 40, country: 80, city: 80, businessType: 60, message: 5000 };
-
-const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 /** Absolute origin, so Resend can fetch the attached form. */
 function siteUrl(): string {
@@ -45,18 +44,30 @@ export async function POST(request: NextRequest) {
   // page, narrowed to the two languages the site actually has.
   const locale = String(b.locale ?? "uk") === "uk" ? "uk" : "en";
 
+  if (!allowSubmission(request, "wholesale")) {
+    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+  }
+
   const f = {
-    name: String(b.name ?? "").trim(),
-    company: String(b.company ?? "").trim(),
-    email: String(b.email ?? "").trim(),
-    phone: String(b.phone ?? "").trim(),
-    country: String(b.country ?? "").trim(),
-    city: String(b.city ?? "").trim(),
-    businessType: String(b.businessType ?? "").trim(),
-    message: String(b.message ?? "").trim(),
+    name: cleanLine(b.name),
+    company: cleanLine(b.company),
+    email: cleanLine(b.email),
+    phone: cleanLine(b.phone),
+    country: cleanLine(b.country),
+    city: cleanLine(b.city),
+    businessType: cleanLine(b.businessType),
+    message: cleanBlock(b.message),
   };
 
-  if (!f.name || !f.company || !f.email || !f.message || !isEmail(f.email)) {
+  if (
+    !isWord(f.name, Infinity) ||
+    !isWord(f.company, Infinity) ||
+    !isEmail(f.email) ||
+    !isPhone(f.phone) ||
+    !isWord(f.country, Infinity) ||
+    !isWord(f.city, Infinity) ||
+    f.message.length < 2
+  ) {
     return NextResponse.json({ ok: false, error: "invalid_input" }, { status: 400 });
   }
   if ((Object.keys(LIMITS) as (keyof typeof LIMITS)[]).some((k) => f[k].length > LIMITS[k])) {

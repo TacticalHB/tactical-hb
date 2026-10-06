@@ -1,6 +1,12 @@
 import CartPageClient from "@/components/cart/CartPageClient";
 import { createClient } from "@/lib/supabase/server";
 import { rankForUser, GUEST_RANK } from "@/lib/loyalty/rank-server";
+import { privatePageMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Кошик", en: "Your bag", ja: "ショッピングバッグ", ar: "حقيبة التسوق" });
+}
 
 export default async function CartPage({
   params,

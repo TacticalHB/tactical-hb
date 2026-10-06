@@ -4,6 +4,12 @@ import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouc
 import { rankProgress } from "@/lib/loyalty/ranks";
 import { sumSpend, SPEND_COLUMNS } from "@/lib/loyalty/rank-server";
 import LoyaltyDashboard from "@/components/account/LoyaltyDashboard";
+import { privatePageMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Бонусна програма", en: "Loyalty", ja: "ロイヤルティ", ar: "برنامج الولاء" });
+}
 
 export default async function LoyaltyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

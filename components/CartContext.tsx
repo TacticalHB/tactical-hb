@@ -258,10 +258,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     (key: string, delta: number) =>
       setLines((prev) =>
         prev.flatMap((l) =>
+          /* FLOORED AT 1 (pre-launch audit, BUG-14): "−" used to delete the
+             line at quantity 1, with no undo. Removing is the line's own
+             "Remove" link — one deliberate action, never a side effect. */
           lineKey(l.slug, l.options) === key
-            ? l.qty + delta <= 0
-              ? []
-              : [{ ...l, qty: l.qty + delta }]
+            ? [{ ...l, qty: Math.max(1, l.qty + delta) }]
             : [l]
         )
       ),

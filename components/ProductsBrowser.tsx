@@ -106,22 +106,16 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
     buildSetup: t(locale, { uk: "Зібрати сет", en: "Build a setup", ja: "セットを組む", ar: "كوّن طقمك" }),
   };
 
-  /* ACCESSORIES ARE REAL PRODUCTS AND STILL NOT IN ALL PRODUCTS.
-
-     FEAR 9E418 and LID 9E418 carry the accessory category and have their own
-     routes, so this filter renders ordinary product cards for them. The wind
-     cover's timer is still an option with no page, so its card is appended
-     below and still points at the cover.
-
-     THE EXCLUSION FROM "ALL" IS NOW EXPLICIT, and it has to be. It used to be
-     free — nothing in `products` was an accessory, so nothing could leak in.
-     Now that two things are, "all" would sweep them into the main grid unless
-     it says otherwise, which is the rule this shop has always had: accessories
-     are found through this filter, through search, and by their own URL. */
+  /* ACCESSORIES ARE REAL PRODUCTS, AND "ALL" NOW MEANS ALL (Mario, 6 Oct
+     2026, after the pre-launch audit's BUG-04). FEAR 9E418 and LID 9E418 have
+     their own pages, sit in the sitemap and are sold on their own, so hiding
+     them from the main grid made "All products (9)" a count that was not all
+     of them. The wind cover's timer is still an option with no page; its card
+     stays on the Accessories filter only, pointing at the cover. */
   const showingAddons = cat === "accessory";
 
   const list = useMemo(() => {
-    let l = ALL.filter((p) => (cat === "all" ? p.category !== "accessory" : p.category === cat));
+    let l = ALL.filter((p) => cat === "all" || p.category === cat);
     /* A withheld listing has no price, so it matches no band — the same call
        the Incoming tile already makes. Filtering by price is asking about
        money, and it has none to answer with.
@@ -206,6 +200,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
                  time they want the sidebar gone. */
               onClick={() => setShowFilters((v) => (v === null ? true : !v))}
               className="flex items-center gap-2 h-11 text-[15px]"
+              aria-label={showFilters ? L.hide : L.show}
               aria-expanded={showFilters === true}
             >
               <span className="hidden sm:inline">{showFilters ? L.hide : L.show}</span>
@@ -291,6 +286,8 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
                     <label key={b.key} className="flex items-center gap-3 min-h-11 text-[15px] cursor-pointer" style={{ color: "#707072" }}>
                       <input
                         type="checkbox"
+                        value={b.key}
+                        aria-label={bandLabel(b, currency, locale)}
                         checked={bands.includes(b.key)}
                         onChange={() => toggleBand(b.key)}
                         className="w-5 h-5 accent-black shrink-0"

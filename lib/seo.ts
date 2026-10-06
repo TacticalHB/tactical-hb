@@ -274,6 +274,27 @@ export async function metadataFor({
   });
 }
 
+/**
+ * The bag, checkout, sign-in and account pages: a title in the page's own
+ * language and never indexed. They used to inherit the root layout's English
+ * "Tactical HB — Premium Hookah Accessories" in every storefront (pre-launch
+ * audit, BUG-13). The description is the storefront's own home description,
+ * in its language — these pages are not search landing pages, but a shared
+ * link still shows one.
+ */
+export async function privatePageMetadata(
+  locale: string,
+  title: { uk: string; en: string; ja: string; ar: string },
+): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "seo" });
+  const pick = locale === "uk" || locale === "ja" || locale === "ar" ? locale : "en";
+  return {
+    title: title[pick],
+    description: t("home_desc"),
+    robots: { index: false, follow: false },
+  };
+}
+
 /* ---------------------------------------------------------------------------
    JSON-LD.
 

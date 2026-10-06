@@ -1,12 +1,14 @@
 "use client";
 
 import ProductThumb from "@/components/ProductThumb";
+import PreorderNotice from "@/components/cart/PreorderNotice";
 import { pick } from "@/lib/i18n-text";
 import Link from "next/link";
 import { useCart, lineKey, linePrice } from "./CartContext";
 import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
+import LineTotal from "@/components/LineTotal";
 import { WasPrice, SetupNote } from "./SetupSaving";
 import CartSuggestion from "./CartSuggestion";
 
@@ -102,19 +104,21 @@ export default function CartDrawer({ locale }: { locale: string }) {
                         {d.name}
                       </span>
                       <span className="text-[14px] shrink-0" style={{ color: "var(--text)" }}>
-                        <Price money={linePrice(l)} locale={locale} />
+                        <LineTotal unit={linePrice(l)} qty={l.qty} locale={locale} />
                       </span>
                     </div>
                     <div className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
                       {d.colour && <div>{L.colour}: {d.colour}</div>}
                       {d.material && <div>{L.material}: {d.material}</div>}
                       {d.addons && <div>{d.addons}</div>}
+                    {d.preorder && <div style={{ color: "var(--accent-ink)", fontWeight: 500 }}>{d.preorder}</div>}
                     </div>
                     <div className="flex items-center justify-between mt-3">
                       <div className="flex items-center" style={{ border: "1px solid var(--border-strong)" }}>
                         <button
                           onClick={() => changeQty(key, -1)}
-                          className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60"
+                          disabled={l.qty <= 1}
+                          className="w-11 h-11 flex items-center justify-center transition-opacity hover:opacity-60 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:opacity-30"
                           style={{ color: "var(--text)" }}
                           aria-label={L.dec}
                         >
@@ -146,6 +150,8 @@ export default function CartDrawer({ locale }: { locale: string }) {
             })}
           </ul>
         )}
+
+        <PreorderNotice lines={lines} locale={locale} className="mt-4" />
 
         {/* The pairing card, inside the scroller and below the lines — it
             scrolls away with the bag rather than sitting between the customer

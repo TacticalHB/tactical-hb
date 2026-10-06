@@ -119,7 +119,8 @@
     "account_title": "Already a partner?",
     "account_body": "Approved partners order through the trade portal — set your quantities, send the list, and we'll email you the payment details. Trade accounts are approved by hand after we've reviewed your application.",
     "account_signin": "Partner sign in",
-    "account_register": "Register as a wholesale partner"
+    "account_register": "Register as a wholesale partner",
+    "form_invalid": "Please check your details: name, company, a valid email address, a phone number in digits, country, city and a message."
   },
   "about": {
     "title": "About Us",
@@ -145,7 +146,7 @@
     "payment_note": "Prices are shown in hryvnia (₴) for orders within Ukraine and in euro (€) elsewhere.",
     "delivery_tag": "Delivery",
     "delivery_title": "Across Ukraine and worldwide",
-    "delivery_text_1": "Within Ukraine we ship with Nova Poshta and Ukrposhta — to a branch, a parcel locker, or by courier to your door. Delivery is calculated at checkout and included in your order total, so there is nothing to pay on collection.",
+    "delivery_text_1": "Within Ukraine we ship with Nova Poshta — to a branch, a parcel locker, or by courier to your door. Delivery is calculated at checkout and included in your order total, so there is nothing to pay on collection.",
     "delivery_text_2": "International orders work the same way: delivery to your country is calculated at checkout and included in the order total, so you pay once, on the site. If a destination can't be quoted automatically, we confirm the full total by email first — still one payment, still one total.",
     "returns_tag": "Returns",
     "returns_title": "Fourteen days to change your mind",
@@ -192,7 +193,8 @@
     "form_error": "Something went wrong. Please try again or email us directly.",
     "method_sales": "Sales & Wholesale",
     "method_tiktok": "TikTok",
-    "method_linkedin": "LinkedIn"
+    "method_linkedin": "LinkedIn",
+    "form_invalid": "Please enter your name, a valid email address and a message."
   },
   "footer": {
     "follow": "Follow us",
@@ -258,7 +260,7 @@
     "payment_1": "We accept secure online card payments (including international cards where available).",
     "payment_2": "You pay the full order total at checkout. That total is the price of your goods for the selected delivery destination.",
     "delivery_tag": "Delivery",
-    "delivery_1": "Orders are shipped with established postal and courier partners — such as Nova Poshta in Ukraine, and international postal services where available.",
+    "delivery_1": "Orders are shipped with established postal and courier partners — Nova Poshta within Ukraine, and Ukrposhta for international orders.",
     "delivery_2": "Delivery cost depends on destination, weight and service type. At checkout we calculate the applicable amount and include it in your order total.",
     "delivery_3": "You are not charged a separate “delivery service” fee on a second invoice — you pay one total for your order.",
     "ua_tag": "Ukraine",
@@ -355,7 +357,7 @@
     "setup_title": "Build a Setup",
     "setup_desc": "Put a full Tactical HB setup together piece by piece — bowl, heat management device and wind cover, matched and priced as you go.",
     "delivery_title": "Payment & Delivery",
-    "delivery_desc": "How paying and shipping work: one order, one total. Nova Poshta and Ukrposhta within Ukraine, worldwide delivery beyond it.",
+    "delivery_desc": "How paying and shipping work: one order, one total. Nova Poshta within Ukraine, Ukrposhta worldwide.",
     "offer_title": "Terms of Sale",
     "offer_desc": "The terms governing sales through tactical-hb.com — orders, payment, delivery, returns and refunds.",
     "privacy_title": "Privacy Policy",
@@ -427,6 +429,8 @@
     "search": "Search",
     "search_close": "Close search",
     "menu": "Menu",
-    "view_image": "View image {n} of {total}"
+    "view_image": "View image {n} of {total}",
+    "prev_image": "Previous image",
+    "next_image": "Next image"
   }
 }

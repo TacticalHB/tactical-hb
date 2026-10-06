@@ -142,10 +142,10 @@ const PAYMENT: Block[] = [
 const DELIVERY: Block[] = [
   {
     p: {
-      uk: "У межах України ми відправляємо Новою Поштою та Укрпоштою — у відділення, поштомат або кур’єром за вашою адресою.",
-      en: "Within Ukraine we ship with Nova Poshta and Ukrposhta — to a branch, a parcel locker, or by courier to your door.",
-      ja: "ウクライナ国内は Nova Poshta と Ukrposhta で発送します — 営業所受け取り、宅配ロッカー、ご自宅への配達からお選びいただけます。",
-      ar: "داخل أوكرانيا نشحن عبر Nova Poshta وUkrposhta — إلى الفرع أو صندوق الطرود أو إلى بابك مع المندوب.",
+      uk: "У межах України ми відправляємо Новою Поштою — у відділення, поштомат або кур’єром за вашою адресою. За кордон — Укрпоштою.",
+      en: "Within Ukraine we ship with Nova Poshta — to a branch, a parcel locker, or by courier to your door. Internationally, we ship with Ukrposhta.",
+      ja: "ウクライナ国内は Nova Poshta で発送します — 営業所受け取り、宅配ロッカー、ご自宅への配達からお選びいただけます。国外へは Ukrposhta で発送します。",
+      ar: "داخل أوكرانيا نشحن عبر Nova Poshta — إلى الفرع أو صندوق الطرود أو إلى بابك مع المندوب. وخارجها عبر Ukrposhta.",
     },
   },
   /* NO SEPARATE DELIVERY INVOICE. This used to promise «окремий лист із
@@ -266,13 +266,13 @@ export default function CartInfoSections({ locale }: { locale: string }) {
       id: "delivery",
       icon: <TruckIcon />,
       title: t(locale, { uk: "Доставка", en: "Delivery", ja: "配送", ar: "الشحن" }),
-      sub: t(locale, { uk: "Нова Пошта та Укрпошта", en: "Nova Poshta and Ukrposhta", ja: "Nova Poshta / Ukrposhta", ar: "Nova Poshta وUkrposhta" }),
+      sub: t(locale, { uk: "Нова Пошта · за кордон Укрпошта", en: "Nova Poshta · abroad Ukrposhta", ja: "国内 Nova Poshta · 国外 Ukrposhta", ar: "Nova Poshta · وUkrposhta للخارج" }),
     },
     {
       id: "returns",
       icon: <BoxIcon />,
       title: t(locale, { uk: "Повернення та обмін", en: "Returns & Exchanges", ja: "返品・交換", ar: "الإرجاع والاستبدال" }),
-      sub: t(locale, { uk: "14 днів, без винятків", en: "14 days, no excluded items", ja: "14日間、対象外なし", ar: "14 يومًا، بلا أصناف مستثناة" }),
+      sub: t(locale, { uk: "14 днів, з обґрунтованої причини", en: "14 days, with a justified reason", ja: "14日間・正当な理由がある場合", ar: "14 يومًا، لسبب مبرَّر" }),
     },
   ];
 

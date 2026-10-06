@@ -1,10 +1,12 @@
 "use client";
 
 import ProductThumb from "@/components/ProductThumb";
+import PreorderNotice from "@/components/cart/PreorderNotice";
 import { pick, t } from "@/lib/i18n-text";
 import { useCart, lineKey, linePrice } from "@/components/CartContext";
 import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
+import LineTotal from "@/components/LineTotal";
 import { WasPrice, SetupNote } from "@/components/SetupSaving";
 import { addMoney, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE } from "@/lib/loyalty/ranks";
@@ -102,14 +104,19 @@ export default function OrderSummaryPanel({
                   {[d.colour, d.addons].filter(Boolean).join(" · ") || d.material}
                 </div>
                 <div className="text-[12px] mt-0.5" style={{ color: "var(--text-muted)" }}>{L.qty} {l.qty}</div>
+                {d.preorder && (
+                  <div className="text-[12px] mt-0.5" style={{ color: "var(--accent-ink)", fontWeight: 500 }}>{d.preorder}</div>
+                )}
               </div>
               <div className="text-[13px] shrink-0" style={{ color: "var(--text)" }}>
-                <Price money={linePrice(l)} locale={locale} />
+                <LineTotal unit={linePrice(l)} qty={l.qty} locale={locale} />
               </div>
             </li>
           );
         })}
       </ul>
+
+      <PreorderNotice lines={lines} locale={locale} className="mb-5" />
 
       <div className="flex flex-col gap-2.5 text-[13px] pt-5" style={{ borderTop: "1px solid var(--border-strong)" }}>
         <div className="flex items-center justify-between">
@@ -173,6 +180,14 @@ export default function OrderSummaryPanel({
    "1 منتجات" would be the same order of wrongness as "1 items".
 --------------------------------------------------------------------------- */
 function itemCount(locale: string, n: number, word: string): string {
+  /* Ukrainian has three forms: 1 / 21 товар, 2–4 / 22–24 товари, 5–20 and
+     11–14 товарів ("3 товарів" was the audit's BUG-12). English: 1 item. */
+  if (locale === "uk") {
+    const d = n % 10, h = n % 100;
+    const w = d === 1 && h !== 11 ? "товар" : d >= 2 && d <= 4 && (h < 12 || h > 14) ? "товари" : "товарів";
+    return `${n} ${w}`;
+  }
+  if (locale === "en") return `${n} ${n === 1 ? "item" : "items"}`;
   if (locale !== "ar") return `${n} ${word}`;
   if (n === 1) return "منتج واحد";
   if (n === 2) return "منتجان";

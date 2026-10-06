@@ -19,6 +19,23 @@ export const SHIPPING_CARRIERS = ["nova_poshta", "ukrposhta"] as const;
 
 export type ShippingCarrier = (typeof SHIPPING_CARRIERS)[number];
 
+/* WHO CARRIES ABROAD. Ukrposhta everywhere it goes; Nova Post for the USA
+   only (Mario, 6 Oct 2026 — Nova Post is otherwise kept for domestic parcels,
+   given the current situation in Ukraine, and the USA is the one market
+   Ukrposhta will not price). The Nova Post cross-border integration
+   (lib/novapost.ts) is intact; the checkout quote AND the pay-time re-quote
+   both read this one function, so they can never disagree. */
+const NOVA_POST_ABROAD = new Set(["US"]);
+
+export function carriersFor(countryCode: string): ShippingCarrier[] {
+  const cc = countryCode.trim().toUpperCase();
+  return NOVA_POST_ABROAD.has(cc) ? ["ukrposhta", "nova_poshta"] : ["ukrposhta"];
+}
+
+export function carriesInternational(carrier: ShippingCarrier, countryCode: string): boolean {
+  return carriersFor(countryCode).includes(carrier);
+}
+
 export function isShippingCarrier(value: unknown): value is ShippingCarrier {
   return typeof value === "string" && (SHIPPING_CARRIERS as readonly string[]).includes(value);
 }

@@ -1,6 +1,12 @@
 import CheckoutClient from "@/components/checkout/CheckoutClient";
 import { createClient } from "@/lib/supabase/server";
 import { rankForUser, GUEST_RANK } from "@/lib/loyalty/rank-server";
+import { privatePageMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Оформлення замовлення", en: "Checkout", ja: "ご注文手続き", ar: "إتمام الطلب" });
+}
 
 export default async function CheckoutPage({
   params,

@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/supabase/require-user";
 import { CUSTOMER_ORDER_COLUMNS, toCustomerOrder } from "@/lib/account-orders";
 import OrdersList from "@/components/account/OrdersList";
+import { privatePageMetadata } from "@/lib/seo";
 
 /* Page size — a single knob to turn when we add pagination/filters.
    To paginate later: swap .limit() for .range(from, to) and pass a page param. */
@@ -19,6 +20,11 @@ const PAGE_SIZE = 20;
    takeover dressed up as a convenience. They appear here only if something
    with authority has attached a user_id to them, which nothing does today.
 --------------------------------------------------------------------------- */
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Мої замовлення", en: "My orders", ja: "ご注文履歴", ar: "طلباتي" });
+}
 
 export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

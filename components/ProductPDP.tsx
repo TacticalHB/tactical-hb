@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { colourName } from "@/lib/colour-names";
 import Link from "next/link";
 import { t, pickList } from "@/lib/i18n-text";
 import { useEffect, useRef, useState } from "react";
@@ -10,7 +11,6 @@ import {
   ADDON_PRODUCT,
   type AddonKey,
   Product,
-  addonAvailable,
   addonProduct,
   availabilityOf,
   availabilityText,
@@ -279,10 +279,11 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      default that includes an item awaiting delivery would price the device
      with it, show a total nobody can pay, and then have the server quietly
      drop the line at checkout. Unavailable options open unticked. */
-  const [material, setMaterial] = useState<HmdMaterial>({
-    lid: addonAvailable("lid"),
-    rubber: addonAvailable("rubber"),
-  });
+  /* OPT-IN SINCE 6 OCT 2026 (Mario, after the pre-launch audit's BUG-09):
+     the page opens at the same price as the catalogue card, the search data
+     and any ad, and every add-on is one orange tap away with its price on it.
+     This supersedes the "opt out of the full configuration" note above. */
+  const [material, setMaterial] = useState<HmdMaterial>({ lid: false, rubber: false });
 
   /* THE ADD-ONS AS THE PRODUCTS THEY ARE. Derived from ADDON_PRODUCT, the same
      map the selector above reads, so the links cannot come to name a slug the
@@ -298,7 +299,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
      complete thing and lets them opt out — ₴1700 / €45 with the timer, ₴850 /
      €23 without. */
   const isWindcover = product.category === "windcover";
-  const [windcover, setWindcover] = useState<WindcoverOptions>({ timer: true });
+  const [windcover, setWindcover] = useState<WindcoverOptions>({ timer: false });
 
   const basePrice = variants
     ? money(variants[variantIdx].price ?? product.price, variants[variantIdx].priceUah ?? product.priceUah)
@@ -332,8 +333,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
       window.history.replaceState(null, "", url.toString());
     }
   };
-  const variantLabel = (n: string) =>
-    uk ? (({ Black: "Чорний", Purple: "Фіолетовий" } as Record<string, string>)[n] ?? n) : n;
+  const variantLabel = (n: string) => colourName(n, locale);
 
   const name = locale === "uk" ? product.nameUk : product.nameEn;
 
@@ -479,7 +479,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                       onClick={() => setIdx((idx + d + photos.length) % photos.length)}
                       className="w-11 h-11 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                       style={{ background: "#ffffff", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" }}
-                      aria-label={d === -1 ? "Previous image" : "Next image"}
+                      aria-label={a11y(d === -1 ? "prev_image" : "next_image")}
                     >
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#111" strokeWidth="1.6">
                         {d === -1 ? <path d="M10 3L5 8l5 5" /> : <path d="M6 3l5 5-5 5" />}
@@ -574,7 +574,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                     <button
                       key={v.name}
                       onClick={() => selectVariant(i)}
-                      aria-label={v.name}
+                      aria-label={variantLabel(v.name)}
+                      aria-pressed={i === variantIdx}
                       className="w-11 h-11 rounded-full transition-transform hover:scale-110"
                       style={{
                         background: v.swatch,

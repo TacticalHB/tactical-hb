@@ -186,8 +186,8 @@ export default function CheckoutClient({
 
   /* Both carriers quote shipping in hryvnia; OrderSummaryPanel converts the
      quote to the display currency and folds it into the one order total.
-     International is priced by Nova Post's cross-border API where it carries;
-     where it does not, there is no rate to show and the exact total is
+     International is priced by Ukrposhta (plus Nova Post for the USA only,
+     since 6 Oct 2026) where it carries; where it does not, there is no rate to show and the exact total is
      confirmed by email before any payment instead. */
 
   /** True when this order will be emailed a total rather than paid for now. */
@@ -778,8 +778,8 @@ export default function CheckoutClient({
               ) : (
                 <>
                   <div className="mb-6">
-                    <label className={labelCls} style={labelSt}>{L.email}</label>
-                    <input
+                    <label htmlFor="co-email" className={labelCls} style={labelSt}>{L.email}</label>
+                    <input id="co-email"
                       className={field}
                       type="email"
                       autoComplete="email"
@@ -839,16 +839,16 @@ export default function CheckoutClient({
               <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>{L.contact}</h2>
               <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 <div>
-                  <label className={labelCls} style={labelSt}>{L.firstName}</label>
-                  <input className={field} autoComplete="given-name" value={form.firstName} onChange={set("firstName")} required />
+                  <label htmlFor="co-firstName" className={labelCls} style={labelSt}>{L.firstName}</label>
+                  <input id="co-firstName" className={field} autoComplete="given-name" value={form.firstName} onChange={set("firstName")} required />
                 </div>
                 <div>
-                  <label className={labelCls} style={labelSt}>{L.surname}</label>
-                  <input className={field} autoComplete="family-name" value={form.surname} onChange={set("surname")} required />
+                  <label htmlFor="co-surname" className={labelCls} style={labelSt}>{L.surname}</label>
+                  <input id="co-surname" className={field} autoComplete="family-name" value={form.surname} onChange={set("surname")} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className={labelCls} style={labelSt}>{L.phone}</label>
-                  <input
+                  <label htmlFor="co-phone" className={labelCls} style={labelSt}>{L.phone}</label>
+                  <input id="co-phone"
                     className={field}
                     type="tel"
                     /* A PHONE NUMBER IS LTR IN EVERY LANGUAGE. Left to inherit
@@ -952,20 +952,20 @@ export default function CheckoutClient({
                     <>
                       <div className="grid sm:grid-cols-2 gap-4 mb-6">
                         <div className="sm:col-span-2">
-                          <label className={labelCls} style={labelSt}>{L.street}</label>
-                          <input className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
+                          <label htmlFor="co-street" className={labelCls} style={labelSt}>{L.street}</label>
+                          <input id="co-street" className={field} autoComplete="address-line1" value={form.address} onChange={set("address")} required />
                         </div>
                         <div className="sm:col-span-2">
-                          <label className={labelCls} style={labelSt}>{L.apartment}</label>
-                          <input className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
+                          <label htmlFor="co-apartment" className={labelCls} style={labelSt}>{L.apartment}</label>
+                          <input id="co-apartment" className={field} autoComplete="address-line2" value={form.apartment} onChange={set("apartment")} />
                         </div>
                         <div>
-                          <label className={labelCls} style={labelSt}>{L.city}</label>
-                          <input className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
+                          <label htmlFor="co-city" className={labelCls} style={labelSt}>{L.city}</label>
+                          <input id="co-city" className={field} autoComplete="address-level2" value={form.city} onChange={set("city")} required />
                         </div>
                         <div>
-                          <label className={labelCls} style={labelSt}>{L.postcode}</label>
-                          <input className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
+                          <label htmlFor="co-postcode" className={labelCls} style={labelSt}>{L.postcode}</label>
+                          <input id="co-postcode" className={field} autoComplete="postal-code" value={form.postcode} onChange={set("postcode")} required />
                         </div>
                       </div>
                       {/* ── CARRIER CHOICE ───────────────────────────────

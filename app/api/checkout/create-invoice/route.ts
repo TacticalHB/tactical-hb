@@ -10,7 +10,7 @@ import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational as quoteNovaPost } from "@/lib/novapost";
 import { quoteInternational as quoteUkrposhta } from "@/lib/ukrposhta";
-import { isShippingCarrier, type ShippingCarrier } from "@/lib/shipping-carriers";
+import { carriersFor, isShippingCarrier, type ShippingCarrier } from "@/lib/shipping-carriers";
 import { parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
@@ -293,9 +293,14 @@ export async function POST(request: NextRequest) {
          two the customer picked is a preference and is safe to accept; what
          that carrier charges is re-asked here, because a cost posted from a
          page anyone can edit would let somebody choose their own postage. */
-      const requested: ShippingCarrier = isShippingCarrier(shipReq.carrier)
-        ? shipReq.carrier
-        : "nova_poshta";
+      /* Only a carrier allowed for this country can be requested; anything
+         else (an old tab, an edited request) is quietly read as the first
+         allowed one — Ukrposhta. Nova Post is allowed for the USA only. */
+      const allowed = carriersFor(country);
+      const requested: ShippingCarrier =
+        isShippingCarrier(shipReq.carrier) && allowed.includes(shipReq.carrier)
+          ? shipReq.carrier
+          : allowed[0];
 
       const ask = async (carrier: ShippingCarrier): Promise<number | null> => {
         try {
@@ -327,12 +332,12 @@ export async function POST(request: NextRequest) {
          confirm-by-email flow they had already got past. They are charged what
          that carrier costs and the order records who is actually carrying it,
          so the row never claims a carrier that was not asked. */
-      const other: ShippingCarrier = requested === "ukrposhta" ? "nova_poshta" : "ukrposhta";
+      const other = allowed.find((c) => c !== requested) ?? null;
 
       let cost = await ask(requested);
       if (cost !== null) {
         shippingCarrier = requested;
-      } else {
+      } else if (other) {
         cost = await ask(other);
         if (cost !== null) {
           shippingCarrier = other;

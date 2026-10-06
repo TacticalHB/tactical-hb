@@ -124,9 +124,15 @@ export function ConfigSelector({
         <div className="text-[13px] mb-2" style={{ color: "#707072" }}>
           {label}: <span style={{ color: "#111111" }}>{summary}</span>
         </div>
+        {/* ORANGE, AND OFF UNTIL CHOSEN (Mario, 6 Oct 2026). The add-ons used
+            to open ticked, so the page quoted more than the catalogue card; the
+            pre-launch audit read that as a price mismatch (BUG-09). They now
+            open off, and the rows are drawn in the brand orange so an optional
+            extra is impossible to miss: an orange outline with a "+" while it
+            is on offer, a solid orange fill with a tick once it is chosen. */}
         <div
-          className="rounded-[4px] overflow-hidden"
-          style={{ border: "1px solid #cacacc" }}
+          className="rounded-[10px] overflow-hidden"
+          style={{ border: "1.5px solid var(--accent)" }}
           role="group"
           aria-label={label}
         >
@@ -142,6 +148,7 @@ export function ConfigSelector({
                 type="button"
                 role="checkbox"
                 aria-checked={active}
+                aria-label={can ? `${name}, +${price}` : `${name}, ${availabilityText(o.status ?? "available", locale)}`}
                 /* DISABLED, NOT HIDDEN. Removing the row would leave a device
                    that silently stopped offering a lid it has always offered;
                    the customer would assume it never existed rather than that
@@ -151,37 +158,50 @@ export function ConfigSelector({
                 onClick={() => can && onToggle(o.key)}
                 onMouseEnter={() => setHoverKey(o.key)}
                 onMouseLeave={() => setHoverKey(null)}
-                className="w-full flex items-center justify-between px-5 py-4 text-[15px] text-left transition-colors"
+                className="w-full flex items-center gap-3 px-5 py-4 text-[15px] text-left transition-colors"
                 style={{
-                  background: !can ? "#fafafa" : active ? "#f0f0f0" : hovered ? "#f7f7f7" : "#ffffff",
-                  borderTop: i > 0 ? "1px solid #e4e4e6" : "none",
-                  color: can ? "#111111" : "#9a9a9e",
-                  fontWeight: active ? 500 : 400,
+                  background: !can
+                    ? "#fafafa"
+                    : active
+                      ? "var(--accent)"
+                      : hovered
+                        ? "color-mix(in srgb, var(--accent) 12%, #ffffff)"
+                        : "#ffffff",
+                  borderTop: i > 0 ? "1px solid color-mix(in srgb, var(--accent) 40%, #ffffff)" : "none",
+                  color: !can ? "#9a9a9e" : "#111114",
+                  fontWeight: active ? 600 : 500,
                   cursor: can ? "pointer" : "not-allowed",
                 }}
               >
-                <span>{name}</span>
+                {/* The state mark: "+" on offer, a tick once chosen. */}
                 <span
-                  className="flex items-center gap-2 text-[14px]"
-                  style={{ color: !can ? "#9a9a9e" : active ? "#111111" : "#707072" }}
+                  aria-hidden="true"
+                  className="grid place-items-center w-[22px] h-[22px] rounded-full shrink-0"
+                  style={{
+                    background: active ? "#111114" : "transparent",
+                    border: active ? "none" : `1.5px solid ${can ? "var(--accent)" : "#c4c4c8"}`,
+                    color: active ? "var(--accent)" : can ? "var(--accent-ink)" : "#c4c4c8",
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                    {active ? (
+                      <path d="M2.5 7.5l3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    ) : (
+                      <path d="M7 2.5v9M2.5 7h9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    )}
+                  </svg>
+                </span>
+                <span className="flex-1">{name}</span>
+                <span
+                  className="text-[14px] tabular-nums"
+                  style={{ color: !can ? "#9a9a9e" : active ? "#111114" : "var(--accent-ink)", fontWeight: 600 }}
                 >
                   {/* The state takes the price's place: what it costs is not
                       the question when it cannot be had. */}
                   {can ? `+${price}` : (
-                    <span className="text-[12px] tracking-[0.14em] uppercase">
+                    <span className="text-[12px] tracking-[0.14em] uppercase font-normal">
                       {availabilityText(o.status ?? "available", locale)}
                     </span>
-                  )}
-                  {active && (
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <path
-                        d="M2.5 7.5l3 3 6-6"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
                   )}
                 </span>
               </button>

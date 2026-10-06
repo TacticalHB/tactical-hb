@@ -3,11 +3,14 @@
 import Image from "next/image";
 import { t } from "@/lib/i18n-text";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { products, addonAvailable, addonAvailability, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
+import { products, addonAvailability, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
 import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";
-import { money } from "@/lib/currency";
+import { money, formatMoney, currencyForLocale } from "@/lib/currency";
+import { MATERIAL_PRICE } from "@/lib/hmd-options";
+import { TIMER_PRICE } from "@/lib/windcover-options";
+import { colourName } from "@/lib/colour-names";
 import { WasPrice, SetupNote } from "@/components/SetupSaving";
 
 /* ---------------------------------------------------------------------------
@@ -51,15 +54,16 @@ type Selection = {
 
 const EMPTY: Record<SlotKey, Selection> = {
   bowl: { slug: null },
-  /* The add-ons start on, matching the product pages: a device is shown with
-     its lid and a cover with its timer, and a customer who wants neither turns
-     them off in the same place they would there. An add-on that cannot be sent
-     starts off — otherwise the kit opens with a total nobody can pay. */
-  hmd: { slug: null, lid: addonAvailable("lid"), rubber: addonAvailable("rubber") },
-  windcover: { slug: null, timer: true },
+  /* The add-ons start OFF, matching the product pages (opt-in since 6 Oct
+     2026): the kit opens at the catalogue prices, and each extra is an orange
+     chip carrying its own price. */
+  hmd: { slug: null, lid: false, rubber: false },
+  windcover: { slug: null, timer: false },
 };
 
 const SLOT_ORDER: SlotKey[] = ["bowl", "hmd", "windcover"];
+
+
 
 /** The ring add-on's product name. Same string in both languages. */
 const FEAR_9E418 = "FEAR 9E418";
@@ -112,6 +116,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
     /* Not translated — it is a name, not a word. */
     rubber: FEAR_9E418,
     timer: t(locale, { uk: "Таймер", en: "Timer", ja: "タイマー", ar: "مؤقّت" }),
+    colour: t(locale, { uk: "Колір", en: "Colour", ja: "カラー", ar: "اللون" }),
     incoming: t(locale, { uk: "Незабаром", en: "Incoming", ja: "近日入荷", ar: "قريبًا" }),
   };
 
@@ -175,7 +180,15 @@ export default function KitBuilder({ locale }: { locale: string }) {
      offers the same two at the same prices, so someone who has turned the lid
      off is stating a preference about lids and not about the A.Craft. */
   const choose = useCallback((slot: SlotKey, slug: string | null) => {
-    setSel((prev) => ({ ...prev, [slot]: { ...prev[slot], slug } }));
+    /* A device that comes in colours opens on its first one (the OP: Black),
+       so the line always reaches the bag WITH a colour — the audit found
+       builder HMDs arriving colourless (BUG-14). Any other device clears it. */
+    const variants = slug ? products.find((p) => p.slug === slug)?.variants : undefined;
+    setSel((prev) => ({ ...prev, [slot]: { ...prev[slot], slug, variant: variants?.[0]?.name } }));
+  }, []);
+
+  const pickVariant = useCallback((slot: SlotKey, variant: string) => {
+    setSel((prev) => ({ ...prev, [slot]: { ...prev[slot], variant } }));
   }, []);
 
   const toggle = useCallback((slot: SlotKey, key: "lid" | "rubber" | "timer") => {
@@ -248,6 +261,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
                         key={p.slug}
                         type="button"
                         onClick={() => can && choose(slot, active ? null : p.slug)}
+                        aria-label={`${locale === "uk" ? p.nameUk : p.nameEn}${can ? "" : ` — ${availabilityText(availabilityOf(p), locale)}`}`}
                         aria-pressed={active}
                         disabled={!can}
                         aria-disabled={!can}
@@ -279,7 +293,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
                               it. aria-hidden is the marker that makes the
                               decision auditable. */}
                           <Image
-                            src={p.gridImage ?? p.image}
+                            src={(current.slug === p.slug && p.variants?.find((v) => v.name === current.variant)?.image) || (p.gridImage ?? p.image)}
                             alt=""
                             aria-hidden="true"
                             fill
@@ -320,6 +334,39 @@ export default function KitBuilder({ locale }: { locale: string }) {
                 {/* Add-ons, only for the slot that takes them and only once
                     something is chosen — the same options, and the same
                     defaults, as the product page. */}
+                {/* Colour, for a device sold in more than one — the same choice
+                    its product page offers, made here before the add-ons. */}
+                {(() => {
+                  const variants = current.slug ? products.find((p) => p.slug === current.slug)?.variants : undefined;
+                  if (!variants || variants.length < 2) return null;
+                  return (
+                    <div className="flex flex-wrap items-center gap-2 mt-3.5" role="radiogroup" aria-label={L.colour}>
+                      <span className="text-[12px] me-1" style={{ color: "var(--text-muted)" }}>{L.colour}:</span>
+                      {variants.map((v) => {
+                        const on = current.variant === v.name;
+                        return (
+                          <button
+                            key={v.name}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            onClick={() => pickVariant(slot, v.name)}
+                            className="kit-chip text-[12px] inline-flex items-center gap-2"
+                            data-active={on ? "true" : undefined}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="inline-block w-3 h-3 rounded-full"
+                              style={{ background: v.swatch, boxShadow: "0 0 0 1px rgba(0,0,0,0.15)" }}
+                            />
+                            {colourName(v.name, locale)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
                 {current.slug && (slot === "hmd" || slot === "windcover") && (
                   <div className="flex flex-wrap gap-2 mt-3.5">
                     {(slot === "hmd"
@@ -332,19 +379,23 @@ export default function KitBuilder({ locale }: { locale: string }) {
                       const st =
                         key === "lid" || key === "rubber" ? addonAvailability(key) : "available";
                       const can = st === "available";
+                      /* The surcharge rides on the chip, so the total never
+                         moves by an amount the customer was not shown. */
+                      const price = formatMoney(key === "timer" ? TIMER_PRICE : MATERIAL_PRICE[key], currencyForLocale(locale));
+                      const on = can && !!current[key];
                       return (
                         <button
                           key={key}
                           type="button"
                           onClick={() => can && toggle(slot, key)}
-                          aria-pressed={can && !!current[key]}
+                          aria-pressed={on}
                           disabled={!can}
                           aria-disabled={!can}
                           className="kit-chip text-[12px]"
                           style={{ opacity: can ? 1 : 0.45, cursor: can ? "pointer" : "not-allowed" }}
-                          data-active={can && current[key] ? "true" : undefined}
+                          data-active={on ? "true" : undefined}
                         >
-                          {can ? label : `${label} · ${availabilityText(st, locale)}`}
+                          {can ? `${on ? "✓" : "+"} ${label} · +${price}` : `${label} · ${availabilityText(st, locale)}`}
                         </button>
                       );
                     })}
@@ -383,8 +434,8 @@ export default function KitBuilder({ locale }: { locale: string }) {
                 <div key={slot} className="kit-stack-slot">
                   {product ? (
                     <Image
-                      key={product.slug}
-                      src={product.gridImage ?? product.image}
+                      key={`${product.slug}-${sel[slot].variant ?? ""}`}
+                      src={product.variants?.find((v) => v.name === sel[slot].variant)?.image || (product.gridImage ?? product.image)}
                       alt=""
                       aria-hidden="true"
                       fill

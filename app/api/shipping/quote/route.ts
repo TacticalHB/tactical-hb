@@ -8,7 +8,7 @@ import {
 } from "@/lib/ukrposhta";
 import { priceCart } from "@/lib/pricing";
 import { parcelFor } from "@/lib/parcel";
-import type { ShippingCarrier } from "@/lib/shipping-carriers";
+import { carriesInternational, type ShippingCarrier } from "@/lib/shipping-carriers";
 import {
   countryAllowedOn,
   destinationForLocale,
@@ -24,9 +24,10 @@ import {
    tampered figure here cannot become the price someone pays.
 
    THREE CARRIER APIS BEHIND ONE ROUTE. Domestic goes to api.novaposhta.ua.
-   International asks BOTH Nova Post (api.novapost.com) and Ukrposhta
-   (dev/www.ukrposhta.ua/ecom) and returns whatever each of them offers, so the
-   customer picks. See lib/novapost.ts and lib/ukrposhta.ts for why none of the
+   International asks the carriers carriersFor(country) allows — Ukrposhta
+   (dev/www.ukrposhta.ua/ecom) everywhere, Nova Post (api.novapost.com) for the
+   USA only since 6 Oct 2026 — and returns whatever each offers, so the
+   customer picks when there is more than one. See lib/novapost.ts and lib/ukrposhta.ts for why none of the
    three is interchangeable with another.
 
    NEITHER INTERNATIONAL CARRIER CAN TAKE THE OTHER DOWN. They are asked with
@@ -96,25 +97,32 @@ export async function POST(request: NextRequest) {
        sum of two round trips on the one screen where a customer is already
        waiting to see a number. allSettled rather than all: one rejecting must
        not discard the other's answer, which is the entire point. */
+    /* Only the carriers allowed for THIS country are asked at all (see
+       carriersFor — Ukrposhta everywhere, Nova Post for the USA only). A
+       carrier that is switched off resolves to null and offers nothing. */
     const [np, up] = await Promise.allSettled([
-      quoteNovaPost({
-        countryCode,
-        weightKg: parcel.weightKg,
-        dims: parcel.dims,
-        declaredValueUah: subtotal.uah,
-        city,
-      }),
-      quoteUkrposhta({
-        countryCode,
-        weightKg: parcel.weightKg,
-        dims: parcel.dims,
-        declaredValueUah: subtotal.uah,
-      }),
+      carriesInternational("nova_poshta", countryCode)
+        ? quoteNovaPost({
+            countryCode,
+            weightKg: parcel.weightKg,
+            dims: parcel.dims,
+            declaredValueUah: subtotal.uah,
+            city,
+          })
+        : Promise.resolve(null),
+      carriesInternational("ukrposhta", countryCode)
+        ? quoteUkrposhta({
+            countryCode,
+            weightKg: parcel.weightKg,
+            dims: parcel.dims,
+            declaredValueUah: subtotal.uah,
+          })
+        : Promise.resolve(null),
     ]);
 
     const offers: Offer[] = [];
 
-    if (np.status === "fulfilled" && np.value.ok) {
+    if (np.status === "fulfilled" && np.value?.ok) {
       offers.push({ carrier: "nova_poshta", costUah: np.value.costUah });
     } else if (np.status === "rejected") {
       /* A missing Nova Poshta key is a deployment fault, not a routing one, and
@@ -128,7 +136,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (up.status === "fulfilled" && up.value.ok) {
+    if (up.status === "fulfilled" && up.value?.ok) {
       offers.push({ carrier: "ukrposhta", costUah: up.value.costUah });
     } else if (up.status === "rejected") {
       /* Not configured is the expected state until the bearers are in the

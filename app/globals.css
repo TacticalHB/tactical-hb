@@ -995,18 +995,22 @@ body {
   min-height: 100%;
 }
 
+/* Add-on chips: orange outline + accent-ink text while on offer, solid
+   orange with dark text once chosen — the same language as the product
+   page's option rows (opt-in since 6 Oct 2026). */
 .kit-chip {
   padding: 0.42rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  border: 1.5px solid var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
   transition: border-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out);
 }
-.kit-chip:hover { border-color: var(--border-strong); }
+.kit-chip:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .kit-chip[data-active="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #111114;
 }
 .kit-chip:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 

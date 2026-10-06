@@ -3,9 +3,11 @@
 import { useSyncExternalStore } from "react";
 
 /* 15 October 2026, set on 18 September 2026 (previously the 20th of
-   September, and the 10th and 11th of August before that). UTC on purpose: the
-   date is a fixed instant worldwide, not midnight in whichever zone the reader
-   is in.
+   September, and the 10th and 11th of August before that). MIDNIGHT IN KYIV
+   (Mario, 6 Oct 2026 — it used to be midnight UTC, which is 03:00 in Kyiv).
+   Still one fixed instant worldwide, not midnight in the reader's own zone:
+   Kyiv is on summer time (UTC+3) until 25 October, so this is 21:00 UTC on
+   the 14th.
 
    THIS CONSTANT IS THE LAUNCH DATE FOR THE WHOLE SITE, and it is NOT the only
    copy of it. The previous note here said the date lived in three places; by
@@ -22,7 +24,7 @@ import { useSyncExternalStore } from "react";
    That is four keys in each of messages/{en,uk,ja,ar}.json plus this line.
    If it moves again, grep for "2026-10" AND for the month name in each
    language, and fix every hit in the same commit. */
-const LAUNCH = new Date("2026-10-15T00:00:00Z").getTime();
+const LAUNCH = new Date("2026-10-15T00:00:00+03:00").getTime();
 
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
 
@@ -113,10 +115,16 @@ export default function Countdown({
 }) {
   const time = useSyncExternalStore(subscribeToTick, tickSnapshot, tickServerSnapshot);
 
+  /* Every storefront in its own words — Japanese and Arabic used to fall
+     through to English (pre-launch audit, BUG-05). */
   const labels =
     locale === "uk"
       ? { days: "Днів", hours: "Годин", minutes: "Хвилин", seconds: "Секунд" }
-      : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
+      : locale === "ja"
+        ? { days: "日", hours: "時間", minutes: "分", seconds: "秒" }
+        : locale === "ar"
+          ? { days: "أيام", hours: "ساعات", minutes: "دقائق", seconds: "ثوانٍ" }
+          : { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" };
 
   /* Days carry the accent — the figure that actually says something, and one
      that changes once a day rather than flickering. Seconds stay quiet,
@@ -171,7 +179,7 @@ export default function Countdown({
               {time === null ? "––" : String(unit.value).padStart(2, "0")}
             </div>
             <div
-              className="text-[0.68rem] sm:text-[0.58rem] tracking-[0.28em] uppercase mt-2.5"
+              className={`text-[0.68rem] sm:text-[0.58rem] ${locale === "ar" ? "tracking-normal sm:text-[0.7rem]" : "tracking-[0.28em]"} uppercase mt-2.5`}
               style={{ color: c.quiet }}
             >
               {unit.label}

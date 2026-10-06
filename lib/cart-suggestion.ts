@@ -99,14 +99,8 @@ export function getCartSuggestion(
   }
 
   /* A device wants a cover. Silent if any cover is already in the bag.
-
-     WITH THE TIMER ON, because that is what the wind cover's own page offers.
-     This is the one place the card follows a product's preselected option
-     rather than stripping it, and the asymmetry with the heat device above is
-     deliberate: a lid and a rubber are small parts a customer may not want,
-     while the timer IS the wind cover's story — the poster sells the timed
-     session, and quoting the bare cover under it would advertise one thing and
-     add another. Someone who wants it bare turns the timer off on the page. */
+     Offered bare, at its catalogue price; the timer follows as its own card
+     (below) once the cover is in. */
   if (last.category === "hmd") {
     if (have.has("windcover")) return null;
     const slug = firstAbsent(["windcover-detonator", "windcover-kh"], lines);
@@ -115,7 +109,10 @@ export function getCartSuggestion(
       pairingKey: "hmd-windcover",
       poster: POSTER["hmd-windcover"],
       slug,
-      options: { timer: true },
+      /* Bare, at the catalogue price (opt-in since 6 Oct 2026, audit BUG-09):
+         the card quotes what the shelf quotes, and the timer is offered next,
+         as its own card, once the cover is in the bag. */
+      options: { timer: false },
     };
   }
 

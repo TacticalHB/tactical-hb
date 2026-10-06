@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { t } from "@/lib/i18n-text";
 import { requireUser } from "@/lib/supabase/require-user";
+import { privatePageMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Мій акаунт", en: "My account", ja: "マイアカウント", ar: "حسابي" });
+}
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

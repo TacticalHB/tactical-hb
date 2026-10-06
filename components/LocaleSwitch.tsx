@@ -11,6 +11,10 @@ import {
 } from "@/lib/locale-label";
 import type { AppLocale } from "@/i18n/routing";
 
+/* "Language", in each storefront's own language — the group and button labels
+   used to say it in English everywhere (pre-launch audit, BUG-17). */
+const LANGUAGE_WORD: Record<string, string> = { uk: "Мова", en: "Language", ja: "言語", ar: "اللغة" };
+
 /* ---------------------------------------------------------------------------
    The language control.
 
@@ -118,7 +122,7 @@ export default function LocaleSwitch({
   /* ---- The mobile menu's shape: plain rows, no second layer ---------------- */
   if (variant === "list") {
     return (
-      <ul className={`flex flex-col ${className}`} aria-label="Language">
+      <ul className={`flex flex-col ${className}`} aria-label={LANGUAGE_WORD[locale as AppLocale] ?? "Language"}>
         {rows.map((r) => (
           <li key={r.code}>
             <Link
@@ -126,6 +130,7 @@ export default function LocaleSwitch({
               onClick={onNavigate}
               lang={r.code}
               hrefLang={r.code}
+              aria-label={r.endonym}
               aria-current={r.active ? "true" : undefined}
               className="flex items-center gap-3 h-11 w-full text-sm transition-opacity hover:opacity-70"
               style={{ color: r.active ? "#f4f3f0" : "#9a978f", fontWeight: r.active ? 600 : 400 }}
@@ -161,7 +166,7 @@ export default function LocaleSwitch({
         /* The accessible name says what the control DOES; the visible text
            says where you are. Both matter — "EN" alone would be announced as
            two letters with no hint that it opens anything. */
-        aria-label={`Language — ${LOCALE_ENDONYM[locale as AppLocale] ?? current}`}
+        aria-label={`${LANGUAGE_WORD[locale as AppLocale] ?? "Language"} — ${LOCALE_ENDONYM[locale as AppLocale] ?? current}`}
         className="nav-link inline-flex items-center gap-1.5 h-11 px-2 text-xs tracking-[0.2em] uppercase"
         style={{ color: open ? "#f4f3f0" : undefined }}
       >
@@ -173,7 +178,7 @@ export default function LocaleSwitch({
         <div
           id={panelId}
           role="group"
-          aria-label="Language"
+          aria-label={LANGUAGE_WORD[locale as AppLocale] ?? "Language"}
           /* Anchored to the INLINE END, so it opens leftward on the English
              header and rightward on the Arabic one — and either way it stays
              inside the viewport instead of pushing the page wide. */

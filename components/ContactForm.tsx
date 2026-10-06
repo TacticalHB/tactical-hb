@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import HoneypotField from "./HoneypotField";
+import { CONTACT_LIMITS, cleanBlock, cleanLine, isEmail, isWord } from "@/lib/form-checks";
 
 // Enquiry types. `subjectEn` is a stable English label sent to the API so the
 // admin inbox reads the same regardless of the visitor's language; `labelKey`
@@ -19,6 +20,7 @@ export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [invalid, setInvalid] = useState(false);
   // Pre-select the most common reason so the field is never empty.
   const [type, setType] = useState<(typeof ENQUIRY_TYPES)[number]["value"]>("product");
   const [hoverType, setHoverType] = useState<string | null>(null);
@@ -35,6 +37,16 @@ export default function ContactForm() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
+    const name = cleanLine(data.get("name"));
+    const email = cleanLine(data.get("email"));
+    const message = cleanBlock(data.get("message"));
+    /* The same rules the server applies (lib/form-checks) — said here, before
+       sending, so a name of spaces or a mistyped email is fixed, not lost. */
+    if (!isWord(name, CONTACT_LIMITS.name) || !isEmail(email) || message.length < 2) {
+      setInvalid(true);
+      return;
+    }
+    setInvalid(false);
     setLoading(true);
     setFailed(false);
 
@@ -45,9 +57,9 @@ export default function ContactForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: String(data.get("name") ?? ""),
-          email: String(data.get("email") ?? ""),
-          message: String(data.get("message") ?? ""),
+          name,
+          email,
+          message,
           subject: subjectEn,
           // Spam screening — see lib/anti-spam.
           company_website: String(data.get("company_website") ?? ""),
@@ -120,18 +132,31 @@ export default function ContactForm() {
       </div>
 
       {[
-        { name: "name", label: t("form_name"), type: "text" },
-        { name: "email", label: t("form_email"), type: "email" },
+        { name: "name", label: t("form_name"), type: "text", max: CONTACT_LIMITS.name, auto: "name" },
+        { name: "email", label: t("form_email"), type: "email", max: CONTACT_LIMITS.email, auto: "email" },
       ].map((field) => (
         <div key={field.name}>
-          <label className={labelClass} style={labelStyle}>{field.label}</label>
-          <input type={field.type} name={field.name} required className="field" />
+          <label htmlFor={`contact-${field.name}`} className={labelClass} style={labelStyle}>{field.label}</label>
+          <input
+            id={`contact-${field.name}`}
+            type={field.type}
+            name={field.name}
+            required
+            maxLength={field.max}
+            autoComplete={field.auto}
+            className="field"
+          />
         </div>
       ))}
       <div>
-        <label className={labelClass} style={labelStyle}>{t("form_message")}</label>
-        <textarea name="message" rows={6} required className="field resize-none" />
+        <label htmlFor="contact-message" className={labelClass} style={labelStyle}>{t("form_message")}</label>
+        <textarea id="contact-message" name="message" rows={6} required maxLength={CONTACT_LIMITS.message} className="field resize-none" />
       </div>
+      {invalid && (
+        <p role="alert" className="text-sm tracking-wide" style={{ color: "#b42318" }}>
+          {t("form_invalid")}
+        </p>
+      )}
       {failed && (
         <p role="alert" className="text-sm tracking-wide" style={{ color: "#b42318" }}>
           {t("form_error")}

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { screen } from "@/lib/anti-spam";
+import { allowSubmission } from "@/lib/rate-limit";
+import { CONTACT_LIMITS as LIMITS, cleanBlock, cleanLine, isEmail, isWord } from "@/lib/form-checks";
 
 /* ---------------------------------------------------------------------------
    Contact form → admin@tactical-hb.com, via Resend.
@@ -24,10 +26,6 @@ export const runtime = "nodejs";
 const TO = "admin@tactical-hb.com";
 const FROM = process.env.CONTACT_FROM_EMAIL || "Tactical HB <contact@tactical-hb.com>";
 
-/** Caps so a bot can't post a novel; generous for a real enquiry. */
-const LIMITS = { name: 100, email: 200, subject: 200, message: 5000 };
-
-const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -45,15 +43,20 @@ export async function POST(request: NextRequest) {
   if (verdict === "reject") return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   if (verdict === "drop") return NextResponse.json({ ok: true });
 
-  const name = String(b.name ?? "").trim();
-  const email = String(b.email ?? "").trim();
-  const message = String(b.message ?? "").trim();
-  // The form has no subject field today; accept one if it ever gains it.
-  const subject = String(b.subject ?? "").trim();
+  // Five messages per visitor per ten minutes — see lib/rate-limit.
+  if (!allowSubmission(request, "contact")) {
+    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+  }
 
-  // Validate server-side — the client's `required` attributes are a convenience,
-  // not a guarantee; this endpoint is public.
-  if (!name || !email || !message || !isEmail(email)) {
+  const name = cleanLine(b.name);
+  const email = cleanLine(b.email);
+  const message = cleanBlock(b.message);
+  // The form sends a fixed enquiry type as the subject.
+  const subject = cleanLine(b.subject);
+
+  // Validate server-side — the form checks the same things (lib/form-checks),
+  // but that is a convenience; this endpoint is public.
+  if (!isWord(name, Infinity) || !isEmail(email) || message.length < 2) {
     return NextResponse.json({ ok: false, error: "invalid_input" }, { status: 400 });
   }
   if (

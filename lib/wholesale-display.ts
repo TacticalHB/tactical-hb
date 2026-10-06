@@ -1,6 +1,8 @@
 import type { Text } from "@/lib/i18n-text";
 import type { PartnerType } from "@/lib/wholesale-prices";
-import { addonAvailable, type Product } from "@/lib/products";
+import { addonAvailable, products, type Product } from "@/lib/products";
+import { describeAddons } from "@/lib/cart-display";
+import { colourName } from "@/lib/colour-names";
 
 /* ---------------------------------------------------------------------------
    Wholesale accounts and requests — the shapes and the words for them.
@@ -237,4 +239,26 @@ export function addonsFor(p: Product): AddonKey[] {
   }
   if (p.category === "windcover") return ["timer"];
   return [];
+}
+
+
+/**
+ * A request line as its reader should see it: the product's name, and under
+ * it the colour and add-ons in the reader's language.
+ *
+ * The stored `name` ("HMD TCT OP — Purple") and `optionsLabel` ("With Lid
+ * 9E418") are English snapshots for the packing bench, and they reached the
+ * partner's own email and portal history as-is — English in the Ukrainian
+ * letter, and the colour printed twice in the history (6 Oct 2026 audit).
+ * Rebuilt here from the flags the line also carries, so it reads in any
+ * language and says each thing once.
+ */
+export function requestLineText(
+  it: Pick<RequestItem, "productSlug" | "name" | "variant" | "addons">,
+  locale: string,
+): { name: string; detail: string | null } {
+  const p = products.find((x) => x.slug === it.productSlug);
+  const name = p ? (locale === "uk" ? p.nameUk : p.nameEn) : it.name.replace(/\s+—\s+.*$/, "");
+  const parts = [it.variant ? colourName(it.variant, locale) : null, describeAddons(it.addons, locale)].filter(Boolean);
+  return { name, detail: parts.length ? parts.join(" · ") : null };
 }

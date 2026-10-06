@@ -11,7 +11,7 @@ import {
 } from "@/lib/email-theme";
 import { buildStaffLetter, staffQuote } from "@/lib/staff-email";
 import { t } from "@/lib/i18n-text";
-import type { WholesaleRequest } from "@/lib/wholesale-display";
+import { requestLineText, type WholesaleRequest } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
    The two letters a submitted request sends.
@@ -97,11 +97,14 @@ function linesTable(req: WholesaleRequest, locale: string): string {
       /* Name on one line, configuration muted under it. Two facts, two lines
          — a single run of "HMD TCT Classic With Lid 9E418 + With FEAR 9E418" is
          where a picker stops reading. */
-      const product = i.optionsLabel
+      /* Name and configuration in the reader's language — the stored
+         English snapshot is for packing, not for the partner. */
+      const line = requestLineText(i, locale);
+      const product = line.detail
         ? `<td align="${startAlign}" dir="ltr" style="padding:10px;border-bottom:1px solid ${LINE};font:14px ${FONT};color:${INK}">${esc(
-            i.name
-          )}<div style="font:13px ${FONT};color:${MUTED};padding-top:2px">${esc(i.optionsLabel)}</div></td>`
-        : cell(i.name, startAlign, true);
+            line.name
+          )}<div style="font:13px ${FONT};color:${MUTED};padding-top:2px">${esc(line.detail)}</div></td>`
+        : cell(line.name, startAlign, true);
       return `<tr>${product}${cell(String(i.qty), endAlign)}${cell(amount, endAlign)}</tr>`;
     })
     .join("");
@@ -166,7 +169,9 @@ export function buildStaffRequestMail(req: WholesaleRequest): {
     ...req.items.map(
       (i) =>
         `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""}` +
-        (i.lineTotalEur !== null ? ` — €${i.lineTotalEur.toFixed(2)}` : " — quote on request")
+        /* Same currency as the total below — the request's own. It used to
+           print every line in euros under a hryvnia total (6 Oct 2026 audit). */
+        ` — ${money(req, i.lineTotalEur, i.lineTotalUah) ?? "quote on request"}`
     ),
     ...(money(req, req.subtotalEur, req.subtotalUah)
       ? [`Total: ${money(req, req.subtotalEur, req.subtotalUah)}`]
@@ -288,7 +293,8 @@ export function buildPartnerAckMail(req: WholesaleRequest): {
        letter from the one in the HTML. */
     ...req.items.map((i) => {
       const amount = money(req, i.lineTotalEur, i.lineTotalUah) ?? quoteOnRequest(locale);
-      return `${i.qty} × ${i.name}${i.optionsLabel ? ` — ${i.optionsLabel}` : ""} — ${amount}`;
+      const line = requestLineText(i, locale);
+      return `${i.qty} × ${line.name}${line.detail ? ` — ${line.detail}` : ""} — ${amount}`;
     }),
     ...(money(req, req.subtotalEur, req.subtotalUah)
       ? ["", `${t(locale, { en: "Total", uk: "Разом", ja: "合計", ar: "الإجمالي" })}: ${money(req, req.subtotalEur, req.subtotalUah)}`]

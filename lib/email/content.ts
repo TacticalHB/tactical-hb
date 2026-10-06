@@ -310,8 +310,8 @@ export const POST_PURCHASE_LINKS: Record<PostPurchaseStep, { primary: string; se
 /** Where each step's buttons point. Paths only — `url()` adds site + locale. */
 export const WELCOME_LINKS: Record<WelcomeStep, { primary: string; secondary: string }> = {
   W1: { primary: "/products", secondary: "/setup" },
-  W2: { primary: "/setup", secondary: "/products" },
-  W3: { primary: "/products/hmd-tct-classic", secondary: "/products" },
+  W2: { primary: "/setup", secondary: "/products?category=hmd" },
+  W3: { primary: "/products/hmd-tct-classic", secondary: "/products?category=hmd" },
   W4: { primary: "/account/loyalty", secondary: "/products" },
 };
 

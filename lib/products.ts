@@ -727,10 +727,10 @@ export const products: Product[] = [
         { labelEn: "Surface", labelUk: "Поверхня", labelJa: "表面", labelAr: "السطح", valueEn: "Glazed black matte", valueUk: "Чорна матова глазур", valueJa: "ブラックマットの釉薬", valueAr: "دهان أسود مطفأ" },
       ],
       features: [
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Mild & rich", textUk: "М'який і насичений" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "70+ minutes", textUk: "70+ хвилин" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Mild & rich", textUk: "М'який і насичений", textJa: "まろやかで濃厚", textAr: "لطيف وغني" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "70+ minutes", textUk: "70+ хвилин", textJa: "70分以上", textAr: "أكثر من 70 دقيقة" },
         { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 6 minutes", textUk: "≈ 6 хвилин", textJa: "約6分", textAr: "نحو 6 دقائق" },
-        { icon: "hands", titleEn: "Craft", titleUk: "Крафт", textEn: "Handmade", textUk: "Ручна робота" },
+        { icon: "hands", titleEn: "Craft", titleUk: "Крафт", titleJa: "クラフト", titleAr: "الحِرفة", textEn: "Handmade", textUk: "Ручна робота", textJa: "手づくり", textAr: "صناعة يدوية" },
       ],
     },
     tags: ["clay", "handmade", "classic"],
@@ -820,10 +820,10 @@ export const products: Product[] = [
         { labelEn: "Bowl capacity", labelUk: "Місткість чаші", labelJa: "ボウル容量", labelAr: "سعة الرأس", valueEn: "10–12 g", valueUk: "10–12 г", valueJa: "10〜12 g", valueAr: "10–12 غ" },
       ],
       features: [
-        { icon: "cloud", titleEn: "Session", titleUk: "Сесія", textEn: "Bright & soft", textUk: "Яскрава й м'яка" },
-        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "35–40 minutes", textUk: "35–40 хвилин" },
-        { icon: "user", titleEn: "Made for", titleUk: "Формат", textEn: "Solo use", textUk: "Соло-сесії" },
-        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин" },
+        { icon: "cloud", titleEn: "Character", titleUk: "Характер", titleJa: "味わい", titleAr: "الطابع", textEn: "Bright & soft", textUk: "Яскравий і м'який", textJa: "明るくやわらか", textAr: "مشرق وناعم" },
+        { icon: "clock", titleEn: "Session", titleUk: "Сесія", titleJa: "セッション", titleAr: "الجلسة", textEn: "35–40 minutes", textUk: "35–40 хвилин", textJa: "35〜40分", textAr: "35–40 دقيقة" },
+        { icon: "user", titleEn: "Made for", titleUk: "Формат", titleJa: "スタイル", titleAr: "مصمَّم لـ", textEn: "Solo use", textUk: "Соло-сесії", textJa: "おひとり用", textAr: "الاستخدام الفردي" },
+        { icon: "flame", titleEn: "Heat-up", titleUk: "Нагрів", titleJa: "加熱", titleAr: "التسخين", textEn: "≈ 5 minutes", textUk: "≈ 5 хвилин", textJa: "約5分", textAr: "نحو 5 دقائق" },
       ],
     },
     tags: ["clay", "handmade", "solo"],
@@ -919,10 +919,10 @@ export const products: Product[] = [
         { labelEn: "Insert 2", labelUk: "Вставка 2", labelJa: "インサート 2", labelAr: "القطعة الداخلية 2", valueEn: "Stainless steel mesh screen", valueUk: "Сітка з нержавіючої сталі", valueJa: "ステンレスメッシュスクリーン", valueAr: "شبكة من الفولاذ المقاوم للصدأ" },
       ],
       features: [
-        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", titleJa: "設計", titleAr: "التصميم", textEn: "2-in-1 inserts", textUk: "Вставки 2-в-1" },
-        { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанел", textEn: "No molasses drip", textUk: "Без патоки в шахті" },
-        { icon: "mesh", titleEn: "Tactical", titleUk: "Тактичний", textEn: "Mesh screen", textUk: "Сталева сітка" },
-        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Deep & rich", textUk: "Глибокий і насичений" },
+        { icon: "layers", titleEn: "Design", titleUk: "Дизайн", titleJa: "設計", titleAr: "التصميم", textEn: "2-in-1 inserts", textUk: "Вставки 2-в-1", textJa: "2-in-1 インサート", textAr: "قطعتان 2 في 1" },
+        { icon: "droplet", titleEn: "Phunnel", titleUk: "Фанел", titleJa: "ファンネル", titleAr: "فانل", textEn: "No molasses drip", textUk: "Без патоки в шахті", textJa: "糖蜜が落ちない", textAr: "بلا نزول للدبس" },
+        { icon: "mesh", titleEn: "Tactical", titleUk: "Тактичний", titleJa: "タクティカル", titleAr: "تكتيكي", textEn: "Mesh screen", textUk: "Сталева сітка", textJa: "メッシュスクリーン", textAr: "شبكة فولاذية" },
+        { icon: "wave", titleEn: "Flavour", titleUk: "Смак", titleJa: "香味", titleAr: "النكهة", textEn: "Deep & rich", textUk: "Глибокий і насичений", textJa: "深く豊か", textAr: "عميق وغني" },
       ],
     },
     /* Back in stock 4 Oct 2026 (Mario). To mark it out again: soldOut: true. */
@@ -1271,10 +1271,10 @@ export const products: Product[] = [
     taglineEn: "by Mr HB",
     taglineJa: "Mr HB 作",
     taglineAr: "من Mr HB",
-    descriptionUk: "Матеріали цього виробу закриті до оголошення.",
-    descriptionEn: "The file on this piece is closed until release.",
-    descriptionJa: "この製品の資料は公開時まで非公開です。",
-    descriptionAr: "ملف هذه القطعة مغلق حتى الإعلان.",
+    descriptionUk: "Флагман від Mr HB: безшовні трубки з нержавіючої сталі, PVD-покриття та система Safety Lock. Передзамовлення.",
+    descriptionEn: "The flagship by Mr HB: seamless stainless steel pipes, PVD treatment and the Safety Lock system. Available to pre-order.",
+    descriptionJa: "Mr HB によるフラッグシップ。シームレスのステンレスパイプ、PVD 処理、Safety Lock システム。予約受付中。",
+    descriptionAr: "الإصدار الرائد من Mr HB: أنابيب فولاذية بلا لحام، ومعالجة PVD، ونظام Safety Lock. متاح للطلب المسبق.",
     /* On sale as a pre-order from 4 Oct 2026 (Mario): 11 180 ₴ / €268, paid
        in full now.
 

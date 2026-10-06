@@ -4,6 +4,9 @@ import { getLocale } from "next-intl/server";
 import Reveal from "@/components/Reveal";
 import { ADMIN_EMAIL } from "@/lib/contact-info";
 import { metadataFor } from "@/lib/seo";
+/* `tx`, not `t`: in this file `t` is the next-intl translator, and t(locale, {…})
+   looked up a key named after the locale — rendering "privacy.uk" (6 Oct 2026 audit). */
+import { t as tx } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    Privacy Policy.
@@ -122,7 +125,7 @@ function PrivacyContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {t(locale, { uk: "ДАНІ", en: "PRIVACY", ja: "プライバシー", ar: "الخصوصية" })}
+            {tx(locale, { uk: "ДАНІ", en: "PRIVACY", ja: "プライバシー", ar: "الخصوصية" })}
           </span>
         </div>
         <div className="page-container relative">

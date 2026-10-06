@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { colourName } from "@/lib/colour-names";
 import { useMemo, useState } from "react";
 import { t } from "@/lib/i18n-text";
 import { currencyForLocale, formatMoney, money, type Money } from "@/lib/currency";
@@ -784,7 +785,7 @@ export default function PortalClient({
                       {/* The colour is part of what was ordered, so it belongs
                           in the summary the partner checks before sending. */}
                       {c.line.variant && (
-                        <span style={{ color: "var(--text-faint)" }}> · {c.line.variant}</span>
+                        <span style={{ color: "var(--text-faint)" }}> · {colourName(c.line.variant, locale)}</span>
                       )}
                       {/* What this line is configured as — the summary is the
                           last thing they read before sending, so it has to

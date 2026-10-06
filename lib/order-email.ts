@@ -1,5 +1,7 @@
 import "server-only";
 import { esc } from "@/lib/email";
+import { products } from "@/lib/products";
+import { formatShipDate } from "@/lib/cart-display";
 import { eurToUah, moneyFromUah } from "@/lib/currency";
 import { CARD, INK, MUTED, FAINT, LINE, ACCENT, FONT, uah, emailShell } from "@/lib/email-theme";
 import { emailProductImage, emailThumbFor } from "@/lib/email/product-image";
@@ -141,7 +143,27 @@ export function buildOrderEmail(
   p: PaymentRow,
   siteUrl: string
 ): { subject: string; html: string; text: string } {
-  const t = COPY[p.locale === "uk" ? "uk" : "en"];
+  const lang = p.locale === "uk" ? "uk" : "en";
+  /* A PRE-ORDER CHANGES WHAT "BEING PREPARED" MEANS. An order holding one
+     ships whole, in one parcel, on the release date (Mario, 6 Oct 2026) — the
+     cart and checkout already say so, and the receipt must not promise an
+     immediate dispatch the customer was told would not happen. */
+  const shipsOn = p.lines
+    .map((l) => products.find((x) => x.slug === l.slug))
+    .filter((x) => x?.preorder && x.shipsOn)
+    .map((x) => x!.shipsOn!)
+    .sort()
+    .at(-1);
+  const base = COPY[lang];
+  const t = shipsOn
+    ? {
+        ...base,
+        intro:
+          lang === "uk"
+            ? `Ми отримали вашу оплату. У замовленні є передзамовлення, тож усе буде відправлено разом, однією посилкою, ${formatShipDate(shipsOn, "uk")}. Повідомимо вас, щойно воно вирушить.`
+            : `We've received your payment. Your order includes a pre-order, so everything ships together in one parcel on ${formatShipDate(shipsOn, "en")}. We'll be in touch as soon as it's on its way.`,
+      }
+    : base;
   const d = p.delivery as Record<string, string>;
   const name = [d.firstName, d.surname].filter(Boolean).join(" ");
   const np = p.shipping_method === "nova_poshta";

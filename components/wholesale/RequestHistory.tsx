@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n-text";
 import { currencyForLocale, formatMoney, money } from "@/lib/currency";
-import { REQUEST_STATUS_TEXT, type WholesaleRequest } from "@/lib/wholesale-display";
+import { REQUEST_STATUS_TEXT, requestLineText, type WholesaleRequest } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
    A partner's own past requests.
@@ -111,9 +111,9 @@ export default function RequestHistory({
                       style={{ color: "var(--text-muted)" }}
                     >
                       <span className="tabular-nums" style={{ color: "var(--text)" }}>{it.qty} ×</span>
-                      <span style={{ color: "var(--text)" }}>{it.name}</span>
-                      {it.variant && <span>{it.variant}</span>}
-                      {it.optionsLabel && <span>· {it.optionsLabel}</span>}
+                      {/* In the partner's language, each fact once — see requestLineText. */}
+                      <span style={{ color: "var(--text)" }}>{requestLineText(it, locale).name}</span>
+                      {requestLineText(it, locale).detail && <span>· {requestLineText(it, locale).detail}</span>}
                       <span className="ms-auto tabular-nums">
                         {it.lineTotalEur !== null && it.lineTotalUah !== null
                           ? formatMoney(money(it.lineTotalEur, it.lineTotalUah), currency)

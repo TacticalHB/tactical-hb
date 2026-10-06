@@ -111,12 +111,16 @@ export default function ResetPasswordForm({ locale }: { locale: string }) {
   };
 
   useEffect(() => {
-    if (!supabase) return setStage("invalid");
-
-    /* Supabase reports a dead link in the fragment rather than as a status, so
-       this is the one case that can be answered immediately. */
-    if (typeof window !== "undefined" && /error(_code|_description)?=/.test(window.location.hash)) {
-      return setStage("invalid");
+    /* No client, or Supabase reporting a dead link in the fragment rather than
+       as a status — the two cases that can be answered immediately. Deferred
+       one tick rather than set inside the effect body, which React's lint
+       (set-state-in-effect) rightly treats as a cascading render. */
+    const deadLink =
+      !supabase ||
+      (typeof window !== "undefined" && /error(_code|_description)?=/.test(window.location.hash));
+    if (deadLink || !supabase) {
+      const id = window.setTimeout(() => setStage("invalid"), 0);
+      return () => window.clearTimeout(id);
     }
 
     let settled = false;

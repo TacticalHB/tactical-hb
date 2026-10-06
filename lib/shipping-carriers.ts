@@ -42,7 +42,10 @@ export function isShippingCarrier(value: unknown): value is ShippingCarrier {
 
 /** The carrier's own name, which is a proper noun and is not translated. */
 export const CARRIER_NAME: Record<ShippingCarrier, { en: string; uk: string }> = {
-  nova_poshta: { en: "Nova Post", uk: "Nova Post" },
+  /* Ukrainian readers know it as Нова Пошта — the name every page of the
+     Ukrainian shop uses; "Nova Post" is the company's international brand,
+     which is what the English (export) storefront and its emails show. */
+  nova_poshta: { en: "Nova Post", uk: "Нова Пошта" },
   ukrposhta: { en: "Ukrposhta", uk: "Укрпошта" },
 };
 

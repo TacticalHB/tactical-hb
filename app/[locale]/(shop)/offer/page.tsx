@@ -5,6 +5,9 @@ import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import Reveal from "@/components/Reveal";
 import { ADMIN_EMAIL } from "@/lib/contact-info";
+/* `tx`, not `t`: in this file `t` is the next-intl translator, and t(locale, {…})
+   looked up a key named after the locale — rendering "privacy.uk" (6 Oct 2026 audit). */
+import { t as tx } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    Public offer / Terms of sale.
@@ -93,7 +96,7 @@ function OfferContent({ locale }: { locale: string }) {
             className="font-display text-[13vw] leading-none select-none"
             style={{ color: "rgba(23,22,15,0.035)" }}
           >
-            {t(locale, { uk: "ОФЕРТА", en: "TERMS", ja: "販売条件", ar: "الشروط" })}
+            {tx(locale, { uk: "ОФЕРТА", en: "TERMS", ja: "販売条件", ar: "الشروط" })}
           </span>
         </div>
         <div className="page-container relative">

@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/supabase/require-user";
-import { isAdminEmail } from "@/lib/admin";
+import { requireAdminPage } from "@/lib/admin-guard";
 import { fetchAdminOrders } from "@/lib/orders-admin";
 import {
   orderTotal,
@@ -299,8 +297,9 @@ export default async function AdminOrdersPage({
 }) {
   const { locale } = await params;
   const { view } = await searchParams;
-  const { user } = await requireUser(locale);
-  if (!isAdminEmail(user.email)) notFound();
+  /* requireAdminPage, like every other admin page: signing in from here
+     comes back to Orders, not to the customer's profile (6 Oct 2026 audit). */
+  await requireAdminPage(locale, "/admin/orders");
 
   const uk = locale === "uk";
   const all = await fetchAdminOrders();

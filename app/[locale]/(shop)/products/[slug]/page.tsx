@@ -55,7 +55,7 @@ export async function generateMetadata({
     locale,
     path: `/products/${slug}`,
     title: kind ? `${name} — ${kind}` : name,
-    description,
+    description: snippet(description, locale === "ja" ? 100 : 160),
     /* The product's own photograph, not the site card — this is the one place
        a bespoke share image already exists and is obviously the right one. */
     images: photo ? [{ url: photo, alt: `${name} — ${SITE_NAME}` }] : undefined,
@@ -125,4 +125,28 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </Suspense>
     </>
   );
+}
+
+/* ---------------------------------------------------------------------------
+   The search-result snippet: whole sentences, at most ~160 characters.
+
+   The page's sales copy runs to 400+ characters, and Google cuts a meta
+   description at roughly 155 — mid-word, mid-claim (6 Oct 2026 audit). The
+   JSON-LD keeps the full text; only the snippet is trimmed. Sentence ends
+   cover "." "!" "?" and the Japanese "。"; if even the first sentence is too
+   long, it is cut at a word with an ellipsis. Japanese gets ~100: its
+   characters are wider, and the snippet is measured in pixels, not letters.
+--------------------------------------------------------------------------- */
+function snippet(text: string, max = 160): string {
+  if (text.length <= max) return text;
+  const sentences = text.match(/[^.!?。]+[.!?。]+["»”]?\s*/g) ?? [text];
+  let out = "";
+  for (const sentence of sentences) {
+    if ((out + sentence).trim().length > max) break;
+    out += sentence;
+  }
+  out = out.trim();
+  if (out.length >= 60) return out;
+  const cut = text.slice(0, max - 1);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(" "), 60)).trim()}…`;
 }

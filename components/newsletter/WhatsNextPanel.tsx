@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+/* `tx`, not `t`: in this file `t` is the next-intl translator, and t(locale, {…})
+   looked up a key named after the locale — rendering "privacy.uk" (6 Oct 2026 audit). */
+import { t as tx } from "@/lib/i18n-text";
 
 /* ---------------------------------------------------------------------------
    The kit-logic panel in the newsletter rail.
@@ -41,9 +44,9 @@ export default async function WhatsNextPanel({ locale }: { locale: string }) {
   const c = await getTranslations("cart");
 
   const label: Record<string, string> = {
-    bowl: t(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" }),
-    hmd: t(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス", ar: "جهاز حرارة" }),
-    windcover: t(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー", ar: "غطاء رياح" }),
+    bowl: tx(locale, { uk: "Чаша", en: "Bowl", ja: "ボウル", ar: "رأس" }),
+    hmd: tx(locale, { uk: "Пристрій нагріву", en: "Heat device", ja: "ヒートデバイス", ar: "جهاز حرارة" }),
+    windcover: tx(locale, { uk: "Ковпак", en: "Wind cover", ja: "ウインドカバー", ar: "غطاء رياح" }),
   };
 
   return (

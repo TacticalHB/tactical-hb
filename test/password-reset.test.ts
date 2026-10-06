@@ -60,3 +60,26 @@ test("every letter tells the reader that ignoring it is safe", () => {
     assert.ok(resetCopy(locale).ignore.length > 20, `${locale} says what to do if it wasn't them`);
   }
 });
+
+test("Cyrillic in a password is named, not silently refused", async () => {
+  const { passwordRules } = await import("@/lib/password-rules");
+  /* A Ukrainian keyboard: the length and the digit pass, the Latin case rule
+     cannot, and the form must be able to say why. */
+  const r = passwordRules("Пароль2026");
+  assert.equal(r.len, true);
+  assert.equal(r.digit, true);
+  assert.equal(r.cyrillic, true);
+  assert.equal(pwOk("Пароль2026"), false);
+  assert.equal(pwOk("Tactical2026Ж"), false, "one Cyrillic letter is still refused, with a reason");
+});
+
+test("auth errors reach the visitor in their language", async () => {
+  const { authErrorText } = await import("@/lib/signup-flow");
+  const expired = { code: "otp_expired", message: "Token has expired or is invalid" };
+  assert.match(authErrorText(expired, "uk"), /Код недійсний/);
+  assert.match(authErrorText(expired, "en"), /expired/);
+  assert.match(authErrorText({ code: "weak_password", reasons: ["pwned"] }, "uk"), /витоках/);
+  assert.match(authErrorText({ code: "over_email_send_rate_limit", status: 429 }, "en"), /wait a minute/);
+  /* Nothing a person can act on still gets a sentence, never raw English. */
+  assert.match(authErrorText({ code: "unexpected_failure", message: "Database error" }, "uk"), /Спробуйте ще раз/);
+});

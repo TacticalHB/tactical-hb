@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -15,10 +14,12 @@ import { addonPrice, bookPrice } from "@/lib/wholesale-prices";
 import PortalClient, { type PortalProduct } from "@/components/wholesale/PortalClient";
 import RequestHistory from "@/components/wholesale/RequestHistory";
 import { SALES_EMAIL } from "@/lib/contact-info";
+import { privatePageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return privatePageMetadata(locale, { uk: "Оптовий портал", en: "Wholesale portal", ja: "卸売ポータル", ar: "بوابة الجملة" });
+}
 
 /* ---------------------------------------------------------------------------
    The wholesale portal — and the gate in front of it.

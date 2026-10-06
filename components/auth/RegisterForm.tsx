@@ -5,12 +5,7 @@ import { t } from "@/lib/i18n-text";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
-
-const pwRules = (pw: string) => ({
-  len: pw.length >= 8,
-  cases: /[a-z]/.test(pw) && /[A-Z]/.test(pw),
-  num: /[0-9]/.test(pw),
-});
+import { PW_TEXT, authErrorText, confirmEmailCode, passwordOk, passwordRules, setPassword as savePassword } from "@/lib/signup-flow";
 
 export default function RegisterForm({ locale }: { locale: string }) {
   const { supabase, refreshProfile } = useAuth();
@@ -18,6 +13,9 @@ export default function RegisterForm({ locale }: { locale: string }) {
 
   const [step, setStep] = useState<"email" | "details">("email");
   const [email, setEmail] = useState("");
+  /* Confirmed as soon as the code is entered — see lib/signup-flow. */
+  const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
@@ -43,8 +41,9 @@ export default function RegisterForm({ locale }: { locale: string }) {
     month: t(locale, { uk: "Місяць", en: "Month", ja: "月", ar: "شهر" }),
     year: t(locale, { uk: "Рік", en: "Year", ja: "年", ar: "سنة" }),
     password: t(locale, { uk: "Пароль", en: "Password", ja: "パスワード", ar: "كلمة المرور" }),
-    min8: t(locale, { uk: "Мінімум 8 символів", en: "Minimum of 8 characters", ja: "8文字以上", ar: "8 أحرف على الأقل" }),
-    mixed: t(locale, { uk: "Великі, малі літери та цифра", en: "Uppercase, lowercase letters and one number", ja: "大文字・小文字・数字を含む", ar: "حروف كبيرة وصغيرة ورقم واحد" }),
+    confirm: t(locale, { en: "Confirm", uk: "Підтвердити", ja: "確認", ar: "تأكيد" }),
+    codeOk: t(locale, { en: "Email confirmed", uk: "Пошту підтверджено", ja: "メールアドレスを確認しました", ar: "تم تأكيد البريد الإلكتروني" }),
+    resend: t(locale, { en: "Send a new code", uk: "Надіслати новий код", ja: "新しいコードを送信", ar: "أرسل رمزًا جديدًا" }),
     marketing: t(locale, { uk: "Отримувати новини та пропозиції Tactical HB", en: "Sign up for emails to get updates, offers and member benefits.", ja: "最新情報、ご案内、会員特典をメールで受け取る。", ar: "اشترك في الرسائل لتصلك المستجدات والعروض ومزايا الأعضاء." }),
     terms: t(locale, { uk: "Я погоджуюсь з Умовами використання та Політикою конфіденційності", en: "I agree to the Terms of Use and Privacy Policy.", ja: "利用規約とプライバシーポリシーに同意します。", ar: "أوافق على شروط الاستخدام وسياسة الخصوصية." }),
     create: t(locale, { uk: "Створити акаунт", en: "Create Account", ja: "アカウントを作成", ar: "إنشاء حساب" }),
@@ -65,47 +64,54 @@ export default function RegisterForm({ locale }: { locale: string }) {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
     setLoading(false);
-    if (error) return setError(error.message);
+    if (error) return setError(authErrorText(error, locale));
+    setVerified(false);
+    setCode("");
     setStep("details");
+  };
+
+  const confirmCode = async () => {
+    setError(null);
+    if (!supabase) return;
+    if (!code.trim()) return setError(L.needCode);
+    setVerifying(true);
+    const res = await confirmEmailCode(supabase, email, code);
+    setVerifying(false);
+    if (!res.ok) return setError(authErrorText(res.error, locale));
+    setVerified(true);
   };
 
   const submit = async () => {
     setError(null);
     if (!supabase) return setError(t(locale, { uk: "Реєстрація тимчасово недоступна.", en: "Sign-up is temporarily unavailable.", ja: "アカウント登録を一時的にご利用いただけません。", ar: "إنشاء الحساب غير متاح مؤقتًا." }));
-    const r = pwRules(password);
-    if (!code.trim()) return setError(L.needCode);
+    if (!verified && !code.trim()) return setError(L.needCode);
     if (!firstName.trim() || !surname.trim()) return setError(L.needName);
     if (!dob.d || !dob.m || !dob.y) return setError(L.needDob);
-    if (!(r.len && r.cases && r.num)) return setError(L.weakPw);
+    if (passwordRules(password).cyrillic) return setError(t(locale, PW_TEXT.cyrillic));
+    if (!passwordOk(password)) return setError(L.weakPw);
     if (!terms) return setError(L.needTerms);
 
     setLoading(true);
-    // New-signup OTPs verify as type "signup"; login/existing OTPs as "email".
-    // Try "email" first, fall back to "signup" so both cases work.
-    let verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "email" });
-    if (verify.error) {
-      verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "signup" });
-    }
-    const { data, error: vErr } = verify;
-    if (vErr || !data.user) {
+    /* Confirms the code if that has not happened yet, and never re-asks for a
+       used one on a retry — see lib/signup-flow. */
+    const verify = await confirmEmailCode(supabase, email, code);
+    if (!verify.ok) {
       setLoading(false);
-      return setError(vErr?.message || (t(locale, { uk: "Невірний код.", en: "Invalid or expired code.", ja: "コードが正しくないか、有効期限が切れています。", ar: "الرمز غير صحيح أو منتهي الصلاحية." })));
+      return setError(authErrorText(verify.error, locale));
     }
+    setVerified(true);
     const date_of_birth = `${dob.y.padStart(4, "0")}-${dob.m.padStart(2, "0")}-${dob.d.padStart(2, "0")}`;
-    const { error: uErr } = await supabase.auth.updateUser({
-      password,
-      data: { first_name: firstName, surname, date_of_birth, marketing_opt_in: marketing },
-    });
-    if (uErr) {
+    const pw = await savePassword(supabase, password, { first_name: firstName, surname, date_of_birth, marketing_opt_in: marketing });
+    if (!pw.ok) {
       setLoading(false);
-      return setError(uErr.message);
+      return setError(authErrorText(pw.error, locale));
     }
-    await supabase.from("profiles").upsert({ id: data.user.id, first_name: firstName, surname, date_of_birth, marketing_opt_in: marketing });
+    await supabase.from("profiles").upsert({ id: verify.userId, first_name: firstName, surname, date_of_birth, marketing_opt_in: marketing });
     await refreshProfile();
     router.push(`/${locale}/account`);
   };
 
-  const r = pwRules(password);
+  const r = passwordRules(password);
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6 flex justify-center" style={{ background: "#ffffff" }}>
@@ -132,8 +138,24 @@ export default function RegisterForm({ locale }: { locale: string }) {
               {L.sentTo} <span style={{ color: "#111" }}>{email}</span>{" "}
               <button type="button" className="underline" onClick={() => setStep("email")}>{L.edit}</button>
             </p>
-            <input className="field rounded-lg tracking-[0.3em]" inputMode="numeric" placeholder={L.code} value={code}
-              onChange={(e) => setCode(e.target.value)} autoFocus />
+            {verified ? (
+              <p className="text-sm font-medium" style={{ color: "#0a7d2c" }}>✓ {L.codeOk}</p>
+            ) : (
+              <div>
+                <div className="flex gap-2">
+                  <input className="field rounded-lg tracking-[0.3em] flex-1" inputMode="numeric" autoComplete="one-time-code"
+                    placeholder={L.code} aria-label={L.code} value={code} onChange={(e) => setCode(e.target.value)} autoFocus />
+                  <button type="button" onClick={confirmCode} disabled={verifying}
+                    className="h-12 px-5 rounded-full text-[14px] font-medium shrink-0 disabled:opacity-50"
+                    style={{ background: "#111", color: "#fff" }}>
+                    {verifying ? "…" : L.confirm}
+                  </button>
+                </div>
+                <button type="button" onClick={sendCode} disabled={loading} className="mt-2 text-xs underline" style={{ color: "#707072" }}>
+                  {L.resend}
+                </button>
+              </div>
+            )}
             <div className="flex gap-3">
               <input className="field rounded-lg" placeholder={L.firstName} value={firstName} onChange={(e) => setFirstName(e.target.value)} autoComplete="given-name" />
               <input className="field rounded-lg" placeholder={L.surname} value={surname} onChange={(e) => setSurname(e.target.value)} autoComplete="family-name" />
@@ -147,9 +169,11 @@ export default function RegisterForm({ locale }: { locale: string }) {
               </button>
             </div>
             <ul className="text-xs flex flex-col gap-1 -mt-1">
-              <li style={{ color: r.len ? "#0a7d2c" : "#a0a0a0" }}>{r.len ? "✓" : "○"} {L.min8}</li>
-              <li style={{ color: r.cases && r.num ? "#0a7d2c" : "#a0a0a0" }}>{r.cases && r.num ? "✓" : "○"} {L.mixed}</li>
+              <li style={{ color: r.len ? "#0a7d2c" : "#a0a0a0" }}>{r.len ? "✓" : "○"} {t(locale, PW_TEXT.len)}</li>
+              <li style={{ color: r.lower && r.upper ? "#0a7d2c" : "#a0a0a0" }}>{r.lower && r.upper ? "✓" : "○"} {t(locale, PW_TEXT.cases)}</li>
+              <li style={{ color: r.digit ? "#0a7d2c" : "#a0a0a0" }}>{r.digit ? "✓" : "○"} {t(locale, PW_TEXT.digit)}</li>
             </ul>
+            {r.cyrillic && <p className="text-xs -mt-1" style={{ color: "#b42318" }}>{t(locale, PW_TEXT.cyrillic)}</p>}
 
             <div>
               <label className="block text-sm mb-1.5" style={{ color: "#111" }}>{L.dob}</label>

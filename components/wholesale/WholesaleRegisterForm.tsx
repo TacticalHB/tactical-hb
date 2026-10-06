@@ -7,6 +7,7 @@ import { t } from "@/lib/i18n-text";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/AuthContext";
 import { applyForWholesaleAccount } from "@/app/actions/wholesale";
+import { PW_TEXT, authErrorText, confirmEmailCode, passwordOk, passwordRules, setPassword as savePassword } from "@/lib/signup-flow";
 
 /* ---------------------------------------------------------------------------
    Applying for a wholesale account.
@@ -23,12 +24,6 @@ import { applyForWholesaleAccount } from "@/app/actions/wholesale";
    instead of waiting.
 --------------------------------------------------------------------------- */
 
-const pwRules = (pw: string) => ({
-  len: pw.length >= 8,
-  cases: /[a-z]/.test(pw) && /[A-Z]/.test(pw),
-  num: /[0-9]/.test(pw),
-});
-
 export default function WholesaleRegisterForm({ locale }: { locale: string }) {
   const { supabase } = useAuth();
   const router = useRouter();
@@ -41,6 +36,9 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
   const [step, setStep] = useState<"email" | "details" | "done">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  /* Confirmed as soon as the code is entered — see lib/signup-flow. */
+  const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [company, setCompany] = useState("");
   const [contactName, setContactName] = useState("");
   const [phone, setPhone] = useState("");
@@ -85,8 +83,9 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
       ar: "أخبرنا عن نشاطك التجاري (اختياري)",
     }),
     password: t(locale, { en: "Password", uk: "Пароль", ja: "パスワード", ar: "كلمة المرور" }),
-    min8: t(locale, { en: "Minimum of 8 characters", uk: "Мінімум 8 символів", ja: "8文字以上", ar: "8 أحرف على الأقل" }),
-    mixed: t(locale, { en: "Uppercase, lowercase and one number", uk: "Великі, малі літери та цифра", ja: "大文字・小文字・数字を含む", ar: "حروف كبيرة وصغيرة ورقم واحد" }),
+    confirm: t(locale, { en: "Confirm", uk: "Підтвердити", ja: "確認", ar: "تأكيد" }),
+    codeOk: t(locale, { en: "Email confirmed", uk: "Пошту підтверджено", ja: "メールアドレスを確認しました", ar: "تم تأكيد البريد الإلكتروني" }),
+    resend: t(locale, { en: "Send a new code", uk: "Надіслати новий код", ja: "新しいコードを送信", ar: "أرسل رمزًا جديدًا" }),
     submit: t(locale, { en: "Submit application", uk: "Надіслати заявку", ja: "申し込む", ar: "إرسال الطلب" }),
     doneTitle: t(locale, {
       en: "Application received",
@@ -119,7 +118,6 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     needCode: t(locale, { en: "Enter the code from your email.", uk: "Введіть код з листа.", ja: "メールに記載のコードをご入力ください。", ar: "أدخل الرمز الوارد في بريدك." }),
     needCompany: t(locale, { en: "Please enter your company name.", uk: "Вкажіть назву компанії.", ja: "会社名をご入力ください。", ar: "يرجى إدخال اسم شركتك." }),
     weakPw: t(locale, { en: "Password doesn't meet the requirements.", uk: "Пароль не відповідає вимогам.", ja: "パスワードが条件を満たしていません。", ar: "كلمة المرور لا تستوفي المتطلبات." }),
-    badCode: t(locale, { en: "Invalid or expired code.", uk: "Невірний або застарілий код.", ja: "コードが正しくないか、有効期限が切れています。", ar: "الرمز غير صحيح أو منتهي الصلاحية." }),
     taken: t(locale, {
       en: "That company is already registered to another account. Email us and we'll sort it out.",
       uk: "Ця компанія вже зареєстрована на інший акаунт. Напишіть нам, і ми розберемося.",
@@ -147,37 +145,50 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
       options: { shouldCreateUser: true },
     });
     setLoading(false);
-    if (err) return setError(err.message);
+    if (err) return setError(authErrorText(err, locale));
+    setVerified(false);
+    setCode("");
     setStep("details");
+  };
+
+  const confirmCode = async () => {
+    setError(null);
+    if (!supabase) return setError(L.unavailable);
+    if (!code.trim()) return setError(L.needCode);
+    setVerifying(true);
+    const res = await confirmEmailCode(supabase, email, code);
+    setVerifying(false);
+    if (!res.ok) return setError(authErrorText(res.error, locale));
+    setVerified(true);
   };
 
   const submit = async () => {
     setError(null);
     if (!supabase) return setError(L.unavailable);
-    const r = pwRules(password);
-    if (!code.trim()) return setError(L.needCode);
+    if (!verified && !code.trim()) return setError(L.needCode);
     if (!company.trim()) return setError(L.needCompany);
     if (!businessType) return setError(L.needType);
-    if (!(r.len && r.cases && r.num)) return setError(L.weakPw);
+    if (passwordRules(password).cyrillic) return setError(t(locale, PW_TEXT.cyrillic));
+    if (!passwordOk(password)) return setError(L.weakPw);
 
     setLoading(true);
 
-    // A brand-new signup verifies as type "signup"; an address that already
-    // has a retail account verifies as "email". Try both, so a existing
-    // customer applying for trade is not turned away.
-    let verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "email" });
-    if (verify.error) {
-      verify = await supabase.auth.verifyOtp({ email, token: code.trim(), type: "signup" });
-    }
-    if (verify.error || !verify.data.user) {
+    /* Confirms the code if that has not happened yet; a session already
+       confirmed for this address skips it, so a retry never re-sends a used
+       code. Existing retail customers verify as "email", new ones may verify
+       as "signup" — confirmEmailCode tries both. */
+    const verify = await confirmEmailCode(supabase, email, code);
+    if (!verify.ok) {
       setLoading(false);
-      return setError(verify.error?.message || L.badCode);
+      return setError(authErrorText(verify.error, locale));
     }
+    setVerified(true);
 
-    const { error: pwErr } = await supabase.auth.updateUser({ password });
-    if (pwErr) {
+    // Keeping the password an existing account already has is fine.
+    const pw = await savePassword(supabase, password);
+    if (!pw.ok) {
       setLoading(false);
-      return setError(pwErr.message);
+      return setError(authErrorText(pw.error, locale));
     }
 
     const result = await applyForWholesaleAccount({
@@ -199,7 +210,7 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     router.refresh();
   };
 
-  const r = pwRules(password);
+  const r = passwordRules(password);
 
   if (step === "done") {
     return (
@@ -305,16 +316,41 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
             <label className={label} style={labelStyle} htmlFor="wh-code">
               {L.code}
             </label>
-            <input
-              id="wh-code"
-              className="field"
-              dir="ltr"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
+            {verified ? (
+              <p className="text-sm font-medium" style={{ color: "var(--accent-ink)" }}>✓ {L.codeOk}</p>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    id="wh-code"
+                    className="field flex-1"
+                    dir="ltr"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={confirmCode}
+                    disabled={verifying}
+                    className="h-12 px-5 rounded-full text-[14px] font-medium shrink-0 disabled:opacity-50"
+                    style={{ background: "var(--accent)", color: "#111114" }}
+                  >
+                    {verifying ? "…" : L.confirm}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={sendCode}
+                  disabled={loading}
+                  className="mt-2 text-xs underline underline-offset-4"
+                  style={{ color: "var(--text-faint)" }}
+                >
+                  {L.resend}
+                </button>
+              </>
+            )}
           </div>
 
           <div>
@@ -440,9 +476,13 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
               onChange={(e) => setPassword(e.target.value)}
             />
             <ul className="mt-2 text-xs flex flex-col gap-1" style={{ color: "var(--text-faint)" }}>
-              <li style={{ color: r.len ? "var(--accent-ink)" : undefined }}>{L.min8}</li>
-              <li style={{ color: r.cases && r.num ? "var(--accent-ink)" : undefined }}>{L.mixed}</li>
+              <li style={{ color: r.len ? "var(--accent-ink)" : undefined }}>{r.len ? "✓" : "○"} {t(locale, PW_TEXT.len)}</li>
+              <li style={{ color: r.lower && r.upper ? "var(--accent-ink)" : undefined }}>{r.lower && r.upper ? "✓" : "○"} {t(locale, PW_TEXT.cases)}</li>
+              <li style={{ color: r.digit ? "var(--accent-ink)" : undefined }}>{r.digit ? "✓" : "○"} {t(locale, PW_TEXT.digit)}</li>
             </ul>
+            {r.cyrillic && (
+              <p className="mt-2 text-xs" style={{ color: "#b42318" }}>{t(locale, PW_TEXT.cyrillic)}</p>
+            )}
           </div>
 
           <button

@@ -136,31 +136,10 @@ function HomeContent({ locale }: { locale: string }) {
                 <span className="sr-only">{tf("countdown_label")}</span>
                 <Countdown locale={locale} />
               </div>
-              {/* THE EMAIL FIELD USED TO SIT HERE and it is now a door instead.
-                  A bare capture box in the hero asks for an address before the
-                  visitor has been told anything about what they are signing up
-                  to — the countdown above it names a month and nothing else.
-                  The file behind this link is where the asking belongs, once
-                  they have seen the spec sheet and how much of it is closed. */}
-              <div className="md:pb-1 w-full md:w-auto">
-                <Link
-                  href={`/${locale}/flagship`}
-                  className="flagship-door group inline-flex items-center gap-4 min-h-11 py-1 text-[0.72rem] sm:text-[0.62rem] tracking-[0.28em] uppercase"
-                  style={{ color: "var(--text)" }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="flagship-door-rule"
-                    style={{ display: "block", width: 34, height: 1, background: "var(--accent-ink)" }}
-                  />
-                  <span className="flex flex-col gap-1">
-                    <span className="font-semibold">{tf("file_link")}</span>
-                    <span style={{ color: "var(--text-faint)", letterSpacing: "0.2em" }}>
-                      {tf("file_link_note")}
-                    </span>
-                  </span>
-                </Link>
-              </div>
+              {/* The "Open the file · Clearance required" door that stood here
+                  was removed on 6 Oct 2026 (Mario): the flagship is on sale as
+                  Project KI 06, so a link promising a classified file under the
+                  countdown no longer told the truth. */}
             </div>
           </div>
         </Reveal>

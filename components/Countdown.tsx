@@ -2,12 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 
-/* 15 October 2026, set on 18 September 2026 (previously the 20th of
-   September, and the 10th and 11th of August before that). MIDNIGHT IN KYIV
+/* 20 October 2026 — Project KI 06's ship date — set on 6 Oct 2026 (previously
+   15 October, set 18 September; the 20th of September, and the 10th and 11th
+   of August before that). MIDNIGHT IN KYIV
    (Mario, 6 Oct 2026 — it used to be midnight UTC, which is 03:00 in Kyiv).
    Still one fixed instant worldwide, not midnight in the reader's own zone:
    Kyiv is on summer time (UTC+3) until 25 October, so this is 21:00 UTC on
-   the 14th.
+   the 19th.
 
    THIS CONSTANT IS THE LAUNCH DATE FOR THE WHOLE SITE, and it is NOT the only
    copy of it. The previous note here said the date lived in three places; by
@@ -24,7 +25,7 @@ import { useSyncExternalStore } from "react";
    That is four keys in each of messages/{en,uk,ja,ar}.json plus this line.
    If it moves again, grep for "2026-10" AND for the month name in each
    language, and fix every hit in the same commit. */
-const LAUNCH = new Date("2026-10-15T00:00:00+03:00").getTime();
+const LAUNCH = new Date("2026-10-20T00:00:00+03:00").getTime();
 
 type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
 

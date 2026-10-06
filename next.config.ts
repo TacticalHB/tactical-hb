@@ -31,6 +31,17 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
   /* No "x-powered-by: Next.js" — it tells a scanner which exploits to try. */
   poweredByHeader: false,
+  /* THE FLAGSHIP FILE IS CLOSED (Mario, 6 Oct 2026). The teaser page with its
+     withheld rows and early-access list has served its purpose: the flagship
+     is on sale as Project KI 06, so every old link — campaign posts, QR codes,
+     search results — lands on the product itself. Permanent (308), so search
+     engines move the page's standing over to the product page. */
+  async redirects() {
+    return [
+      { source: "/:locale(uk|en|ja|ar)/flagship", destination: "/:locale/products/incoming-hookah", permanent: true },
+      { source: "/flagship", destination: "/uk/products/incoming-hookah", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },

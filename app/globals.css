@@ -246,7 +246,9 @@ body {
    Scaling about that origin is what keeps the point fixed while the frame
    widens around it. */
 .tct-mark {
-  width: 76%;
+  /* 92% of the 9:16 card (360px) ≈ the 76% it had in the old 3:4 card
+     (480px), so the mark kept its size when the card narrowed (7 Oct 2026). */
+  width: 92%;
   aspect-ratio: 1;
   position: relative;
   transform-origin: 75% 48%;

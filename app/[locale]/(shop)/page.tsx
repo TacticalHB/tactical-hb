@@ -8,6 +8,7 @@ import Countdown from "@/components/Countdown";
 import MissionMonitor from "@/components/MissionMonitor";
 import Reveal from "@/components/Reveal";
 import SearchlightHero from "@/components/SearchlightHero";
+import HeroScreen from "@/components/HeroScreen";
 
 
 export async function generateMetadata({
@@ -99,23 +100,11 @@ function HomeContent({ locale }: { locale: string }) {
             </Reveal>
           </div>
 
-          {/* Vertical cinematic screen.
-              Same framing language as the promo band below (#000 + 20px
-              radius + overflow-hidden), turned portrait, and now playing the
-              brand loop rather than holding a static mark.
-
-              The mark reveals itself here rather than a film doing it: the card
-              holds the official SVG masked over metal (see .tct-mark), pulling
-              back from inside the scope rings to the whole logo and holding.
-              Drawn rather than filmed, so the geometry is exactly the artwork,
-              it is sharp at any size, and it costs 6KB instead of megabytes. */}
+          {/* Vertical cinematic screen: the TCT mark and the Project KI 06
+              film taking turns — one mark cycle, then the film, then the mark
+              again (Mario, 7 Oct 2026). See components/HeroScreen. */}
           <Reveal delay={200}>
-            <div
-              className="hero-screen relative w-full max-w-[480px] mx-auto aspect-[3/4] rounded-[20px] overflow-hidden grid place-items-center"
-              style={{ background: "#000000" }}
-            >
-              <div className="tct-mark" aria-hidden="true" />
-            </div>
+            <HeroScreen />
           </Reveal>
         </div>
 

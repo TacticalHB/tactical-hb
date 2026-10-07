@@ -110,8 +110,8 @@ const BOOKS: Record<PartnerType, Book> = {
       "incoming-hookah": m(175, 8060),
     },
     addons: {
-      lid: m(2.5, 150),
-      rubber: m(2.3, 120), // FEAR 9E418 — the key stayed `rubber`, see 0029.
+      lid: m(3.0, 130), // 7 Oct 2026 (Mario) — shop + distribution only; lounge unchanged.
+      rubber: m(2.8, 120), // FEAR 9E418 — the key stayed `rubber`, see 0029.
       timer: m(10.0, 450), // 24.30 − 14.30 / 1100 − 650
     },
   },
@@ -139,8 +139,8 @@ const BOOKS: Record<PartnerType, Book> = {
       "incoming-hookah": m(175, 8060),
     },
     addons: {
-      lid: m(2.5, 150),
-      rubber: m(2.3, 120),
+      lid: m(3.0, 130),
+      rubber: m(2.8, 120),
       timer: m(10.0, 450),
     },
   },

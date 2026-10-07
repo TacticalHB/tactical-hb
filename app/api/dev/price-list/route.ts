@@ -20,6 +20,8 @@ export const runtime = "nodejs";
 
 /** The rows the printed list carries, in its own order. */
 const ROWS: { slug: string; label: string; variant?: string }[] = [
+  /* The flagship leads, as it leads the catalogue and the portal (7 Oct 2026). */
+  { slug: "incoming-hookah", label: "Project KI 06 — hookah (pre-order · min. 5 units)" },
   { slug: "hmd-tct-classic", label: "HMD TCT Classic" },
   { slug: "hmd-a-craft", label: "HMD A.Craft" },
   { slug: "hmd-tct-op", label: "HMD TCT OP — Black", variant: "Black" },

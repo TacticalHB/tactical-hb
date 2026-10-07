@@ -31,7 +31,7 @@ OUT = os.environ.get(
     "PRICE_LIST_OUT",
     os.path.expanduser(
         "~/Library/CloudStorage/OneDrive-LiverpoolJohnMooresUniversity/"
-        "tct project/Tactical_HB_Wholesale_Price_List.pdf"
+        "tct project/Wholesale/Wholesale price list.pdf"
     ),
 )
 
@@ -53,7 +53,7 @@ LEFT, RIGHT = 48, W - 48
 FOOTER_Y = 40
 # The lowest a line of body copy may sit before it starts fighting the footer.
 FLOOR = FOOTER_Y + 18
-ROW = 18  # One table row, baseline to baseline.
+ROW = 16.5  # One table row, baseline to baseline. (18 until the hookah row, 7 Oct 2026)
 
 
 def register_fonts():
@@ -89,7 +89,9 @@ COPY = {
         "terms": [
             "Prices apply only to approved wholesale partners. Access is granted after application review.",
             "Orders are submitted as quantity requests in the trade portal — nothing is charged on the website.",
-            "Payment details are confirmed by email. Prices exclude shipping unless otherwise agreed.",
+            "Minimum order value: €1,500 per order. Project KI 06 is ordered from 5 units.",
+            "Delivery is not sold separately: once confirmed, carriage is spread across the unit prices — one total.",
+            "Payment details are confirmed by email.",
             "Tactical HB reserves the right to update this list. Confidential — do not redistribute.",
         ],
         "footer": "Confidential — for approved partners only  ·  tactical-hb.com",
@@ -111,7 +113,9 @@ COPY = {
         "terms": [
             "Ціни діють лише для схвалених оптових партнерів. Доступ — після розгляду заявки.",
             "Замовлення надсилаються як запити на кількість у порталі — на сайті нічого не списується.",
-            "Реквізити для оплати підтверджуємо листом. Ціни без вартості доставки, якщо не погоджено інакше.",
+            "Мінімальна сума замовлення: €1 500. Project KI 06 замовляється від 5 одиниць.",
+            "Доставка не продається окремо: після підтвердження вартість перевезення розподіляється в цінах за одиницю.",
+            "Реквізити для оплати підтверджуємо листом.",
             "Tactical HB має право оновлювати цей прайс. Конфіденційно — не розповсюджувати.",
         ],
         "footer": "Confidential — for approved partners only  ·  tactical-hb.com",

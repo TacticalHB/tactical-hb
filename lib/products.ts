@@ -1278,16 +1278,15 @@ export const products: Product[] = [
     /* On sale as a pre-order from 4 Oct 2026 (Mario): 11 180 ₴ / €268, paid
        in full now.
 
-       PROVISIONAL PARCEL — REPLACE WITH MARIO'S BOXED FIGURES. He asked for
-       the button live before he had them. A zero weight is dropped from the
-       delivery quote (lib/parcel), which would ship the hookah free, so these
-       are deliberately generous placeholders (3 kg, 450×350×150 mm): delivery
-       may be slightly over-quoted until the real figures land, never under. */
+       THE PARCEL IS THE CASE (Mario, 7 Oct 2026): 2,500 g packed, in a
+       400 × 400 × 250 mm case. These replace the 3 kg / 450×350×150 mm
+       placeholder and are what delivery is quoted on. The same figures are
+       printed under the materials table (components/hookah/MaterialsTable). */
     price: 268,
     priceUah: 11180,
     currency: "EUR",
-    weightG: 3000,
-    dims: { l: 450, w: 350, h: 150 },
+    weightG: 2500,
+    dims: { l: 400, w: 400, h: 250 },
     category: "hookah",
     featured: false,
     preorder: true,

@@ -57,6 +57,12 @@ const ROWS: Row[] = [
   },
 ];
 
+const SIZE: { label: Record<"uk" | "en" | "ja" | "ar", string>; value: Record<"uk" | "en" | "ja" | "ar", string> }[] = [
+  { label: { en: "Stem height", uk: "Висота шахти", ja: "ステムの高さ", ar: "ارتفاع الجسم" }, value: { en: "430 mm", uk: "430 мм", ja: "430 mm", ar: "430 mm" } },
+  { label: { en: "Weight in case", uk: "Вага в кейсі", ja: "ケース込み重量", ar: "الوزن مع الحقيبة" }, value: { en: "2.5 kg", uk: "2,5 кг", ja: "2.5 kg", ar: "2.5 kg" } },
+  { label: { en: "Case dimensions", uk: "Розміри кейсу", ja: "ケースのサイズ", ar: "أبعاد الحقيبة" }, value: { en: "400 × 400 × 250 mm", uk: "400 × 400 × 250 мм", ja: "400 × 400 × 250 mm", ar: "400 × 400 × 250 mm" } },
+];
+
 export default function MaterialsTable({ locale }: { locale: string }) {
   const L = {
     kicker: t(locale, { uk: "Матеріали та обробка", en: "Materials & finishes", ja: "素材と仕上げ", ar: "المواد والتشطيبات" }),
@@ -143,6 +149,23 @@ export default function MaterialsTable({ locale }: { locale: string }) {
             </tbody>
           </table>
           <div aria-hidden="true" style={{ borderTop: "1px solid var(--border)" }} />
+
+          {/* SIZE AND WEIGHT (Mario, 7 Oct 2026). Weight and dimensions are the
+              case as shipped — the same figures delivery is quoted on
+              (lib/products) — so they are labelled "in case" rather than
+              passed off as the bare hookah's. Stem height is the hookah's own. */}
+          <dl className="mt-8 grid grid-cols-1 sm:grid-cols-[0.8fr_0.8fr_1.4fr] gap-y-5 gap-x-6">
+            {SIZE.map((s) => (
+              <div key={s.label.en} style={{ borderTop: "2px solid var(--accent)" }} className="pt-3">
+                <dt className="text-[11px] tracking-[0.2em] uppercase font-medium" style={{ color: "var(--text-muted)" }}>
+                  {t(locale, s.label)}
+                </dt>
+                <dd dir="ltr" className="mt-1.5 text-[20px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--text)" }}>
+                  {t(locale, s.value)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div></div>
     </section>

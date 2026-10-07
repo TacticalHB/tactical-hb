@@ -1279,14 +1279,14 @@ export const products: Product[] = [
        in full now.
 
        THE PARCEL IS THE CASE (Mario, 7 Oct 2026): 2,500 g packed, in a
-       400 × 400 × 250 mm case. These replace the 3 kg / 450×350×150 mm
+       300 × 300 × 150 mm case (was 400 × 400 × 250 earlier the same day). These replace the 3 kg / 450×350×150 mm
        placeholder and are what delivery is quoted on. The same figures are
        printed under the materials table (components/hookah/MaterialsTable). */
     price: 268,
     priceUah: 11180,
     currency: "EUR",
     weightG: 2500,
-    dims: { l: 400, w: 400, h: 250 },
+    dims: { l: 300, w: 300, h: 150 },
     category: "hookah",
     featured: false,
     preorder: true,

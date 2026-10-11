@@ -18,7 +18,7 @@ import { money, type Money } from "./currency";
 
      wind cover, no timer     ₴850  / €23   (the catalogue price)
      timer add-on             ₴850  / €15   (was €22 until 11 Oct 2026)
-     wind cover with timer    ₴1700 / €45
+     wind cover with timer    ₴1700 / €38
 --------------------------------------------------------------------------- */
 
 export type WindcoverOptions = { timer: boolean };

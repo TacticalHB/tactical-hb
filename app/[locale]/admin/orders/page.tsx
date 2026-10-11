@@ -276,7 +276,18 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           before the paper receipt exists. */}
       <footer className="px-5 py-4 flex flex-wrap gap-x-8 gap-y-4" style={{ borderTop: "1px solid var(--console-border)" }}>
         {(order.carrier !== "ukrposhta" || order.ttn) && (
-          <OrderTtnForm orderId={order.id} initial={order.ttn} locale={locale} />
+          <OrderTtnForm
+            orderId={order.id}
+            initial={order.ttn}
+            locale={locale}
+            canCreate={
+              order.source === "monobank" &&
+              order.status === "paid" &&
+              !order.ttn &&
+              order.carrier !== "ukrposhta" &&
+              (order.deliveryKind === "warehouse" || order.deliveryKind === "courier")
+            }
+          />
         )}
         {(order.carrier === "ukrposhta" ||
           order.deliveryKind === "international" ||

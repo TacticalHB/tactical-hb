@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
+import { createTtnForOrder } from "@/lib/order-ttn";
+import type { PaymentRow } from "@/lib/fulfilment";
 
 /* ---------------------------------------------------------------------------
    Admin: attach a carrier's tracking number to an order — one action per
@@ -81,6 +83,61 @@ export async function saveOrderTtn(orderId: string, ttn: string): Promise<SaveTt
     return { ok: true, ttn: value || null };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not save the TTN." };
+  }
+}
+
+export type CreateTtnResult = { ok: true; ttn: string } | { ok: false; error: string };
+
+/**
+ * Book the Nova Poshta waybill for a paid order — the same code the payment
+ * webhook runs, pressed by a human.
+ *
+ * WHY IT EXISTS. When the automatic booking failed, the only way out was the
+ * Nova Poshta cabinet and a pasted number, and the reason it failed was in a
+ * log nobody could read. This retries the real thing with production's own
+ * settings and puts Nova Poshta's answer on the screen.
+ *
+ * NEVER A SECOND WAYBILL. Refused unless the order is still 'paid' with no
+ * number on it, re-read here rather than trusted from the page — a stale tab
+ * pressed after someone pasted a number must not book the parcel twice.
+ */
+export async function createOrderTtn(orderId: string): Promise<CreateTtnResult> {
+  const supabase = await createClient();
+  const caller = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (!isAdminEmail(caller?.email)) {
+    console.warn("[createOrderTtn] refused for", caller?.email ?? "anonymous");
+    return { ok: false, error: "Not authorised." };
+  }
+
+  const id = orderId?.trim();
+  if (!id) return { ok: false, error: "An order id is required." };
+
+  try {
+    const admin = createAdminClient();
+    const { data: order, error: oErr } = await admin
+      .from("orders")
+      .select("id, status, np_ttn")
+      .eq("id", id)
+      .maybeSingle();
+    if (oErr || !order) return { ok: false, error: oErr?.message ?? "Order not found." };
+    if (order.np_ttn) return { ok: false, error: `This order already has a waybill: ${order.np_ttn}.` };
+    if (order.status !== "paid") return { ok: false, error: `Only a paid order can be booked (this one is ${order.status}).` };
+
+    // The payment row carries the delivery details the waybill is built from.
+    const { data: payment, error: pErr } = await admin
+      .from("payments")
+      .select("*")
+      .eq("order_id", id)
+      .maybeSingle();
+    if (pErr || !payment) {
+      return { ok: false, error: "No payment is linked to this order — create the waybill in the Nova Poshta cabinet." };
+    }
+
+    const res = await createTtnForOrder(id, payment as PaymentRow, { alert: false });
+    revalidatePath("/[locale]/admin/orders", "page");
+    return res.ok ? { ok: true, ttn: res.number } : { ok: false, error: res.reason };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not create the waybill." };
   }
 }
 

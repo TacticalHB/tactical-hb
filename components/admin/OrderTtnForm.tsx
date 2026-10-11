@@ -1,29 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { saveOrderTtn } from "@/app/actions/orders";
+import { createOrderTtn, saveOrderTtn } from "@/app/actions/orders";
 
 /* ---------------------------------------------------------------------------
    Paste a Nova Poshta TTN against one order.
 
    The action re-checks admin rights server-side, so this form is a convenience
    rather than the security boundary.
+
+   "Create waybill" books it with Nova Poshta instead — the same call the
+   payment webhook makes — for a paid order whose automatic booking failed.
+   Nova Poshta's answer appears under the field when it refuses.
 --------------------------------------------------------------------------- */
 
 export default function OrderTtnForm({
   orderId,
   initial,
   locale,
+  canCreate = false,
 }: {
   orderId: string;
   initial: string | null;
   locale: string;
+  /** A paid Nova Poshta order with no waybill yet — offer to book it. */
+  canCreate?: boolean;
 }) {
   const uk = locale === "uk";
   const [ttn, setTtn] = useState(initial ?? "");
   const [saved, setSaved] = useState<string | null>(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const L = {
     label: uk ? "ТТН Нової Пошти" : "Nova Poshta TTN",
@@ -33,7 +41,23 @@ export default function OrderTtnForm({
     savedMsg: uk ? "Збережено" : "Saved",
     cleared: uk ? "ТТН видалено" : "TTN cleared",
     track: uk ? "Відстежити" : "Track",
+    create: uk ? "Створити ТТН" : "Create waybill",
+    creating: uk ? "Створення…" : "Creating…",
+    npSaid: uk ? "Нова Пошта відповіла:" : "Nova Poshta said:",
   };
+
+  async function onCreate() {
+    setCreating(true);
+    setError(null);
+    const res = await createOrderTtn(orderId);
+    setCreating(false);
+    if (res.ok) {
+      setSaved(res.ttn);
+      setTtn(res.ttn);
+    } else {
+      setError(`${L.npSaid} ${res.error}`);
+    }
+  }
 
   const dirty = ttn.replace(/\s+/g, "") !== (saved ?? "");
 
@@ -79,6 +103,17 @@ export default function OrderTtnForm({
         >
           {busy ? L.saving : L.save}
         </button>
+        {canCreate && !saved && (
+          <button
+            type="button"
+            onClick={onCreate}
+            disabled={creating || busy}
+            className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
+            style={{ border: "1px solid var(--console-accent-line)", color: "var(--console-text)", background: "transparent" }}
+          >
+            {creating ? L.creating : L.create}
+          </button>
+        )}
         {!dirty && saved && !error && (
           <span className="text-[12px]" style={{ color: "var(--console-ok)" }}>
             {L.savedMsg}

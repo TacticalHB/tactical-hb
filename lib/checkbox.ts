@@ -199,7 +199,11 @@ export async function fiscaliseOrder(order: FiscalOrder): Promise<FiscalResult> 
       cashier_name: process.env.CHECKBOX_CASHIER_NAME || undefined,
       goods,
       payments: [{ type: "CASHLESS", value: order.amountKop, label: "Картка" }],
-      order_id: order.reference,
+      /* NO order_id. Checkbox's order_id must be a UUID of an order in
+         Checkbox's own order module; ours is "TCT-XXXXXX", and sending it made
+         the very first live receipt fail with 422 "Невірне значення uuid"
+         (TCT-LAS6TL, 10 Oct 2026). The receipt's own id (receiptIdFor, a UUID
+         derived from the reference) already ties it to the order. */
       // The e-receipt. NOT shipping — see the header note.
       ...(order.email ? { delivery: { email: order.email } } : {}),
     };

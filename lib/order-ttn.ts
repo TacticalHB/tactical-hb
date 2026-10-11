@@ -1,5 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ADMIN_EMAIL } from "@/lib/contact-info";
+import { esc, sendMail } from "@/lib/email";
 import { createTtn, type TtnDestination } from "@/lib/nova-poshta-ttn";
 import { parcelFor } from "@/lib/parcel";
 import { products } from "@/lib/products";
@@ -97,7 +99,13 @@ function destinationFor(p: PaymentRow): TtnDestination {
  * would look like a delivery failure to Monobank and trigger pointless retries
  * against an order that is already complete.
  */
-export async function createTtnForOrder(orderId: string, payment: PaymentRow): Promise<TtnOutcome> {
+export async function createTtnForOrder(
+  orderId: string,
+  payment: PaymentRow,
+  /* The webhook emails the reason; the admin button shows it on screen and
+     passes false, so a retry from the console doesn't also fill the inbox. */
+  { alert = true }: { alert?: boolean } = {}
+): Promise<TtnOutcome> {
   const why = ineligible(payment);
   if (why) {
     console.log("[ttn] skipped for", payment.reference, "—", why);
@@ -138,7 +146,9 @@ export async function createTtnForOrder(orderId: string, payment: PaymentRow): P
         "order:", orderId, "reference:", payment.reference,
         "ttn:", ttn.number, "error:", error.code, error.message
       );
-      return { ok: false, reason: `created ${ttn.number} but the database write failed` };
+      const reason = `created ${ttn.number} but the database write failed`;
+      if (alert) await alertTtnFailure(payment.reference, `${reason} — paste ${ttn.number} into the order by hand. Do NOT create a second waybill.`);
+      return { ok: false, reason };
     }
 
     console.log("[ttn] created", ttn.number, "for", payment.reference,
@@ -147,6 +157,37 @@ export async function createTtnForOrder(orderId: string, payment: PaymentRow): P
   } catch (e) {
     // Order stays 'paid' — the admin queue for waybills made by hand.
     console.error("[ttn] creation failed for", payment.reference, "—", e);
-    return { ok: false, reason: e instanceof Error ? e.message : "unknown error" };
+    const reason = e instanceof Error ? e.message : "unknown error";
+    if (alert) await alertTtnFailure(payment.reference, reason);
+    return { ok: false, reason };
   }
+}
+
+/**
+ * Tell a human why, by email.
+ *
+ * THE REASON USED TO LIVE ONLY IN VERCEL'S LOG, which this account's plan
+ * doesn't keep long enough to read back — so the first live order (TCT-LAS6TL, 10 Oct 2026)
+ * failed to book with Nova Poshta and nobody could see why. Nova Poshta's own
+ * words go in the mail, verbatim; they carry no secrets (the API key travels
+ * in the request body, never in an error). Never throws.
+ */
+async function alertTtnFailure(reference: string, reason: string): Promise<void> {
+  await sendMail({
+    to: ADMIN_EMAIL,
+    subject: `Nova Poshta: waybill NOT created — ${reference}`,
+    text:
+      `Order ${reference} is paid, but the Nova Poshta waybill could not be created automatically.\n\n` +
+      `Nova Poshta said: ${reason}\n\n` +
+      `Open Admin › Orders and press "Create waybill" to try again, or create it in the ` +
+      `Nova Poshta cabinet and paste the number into the order.`,
+    html: `<p style="font-family:sans-serif;font-size:15px">
+        Order <b>${esc(reference)}</b> is paid, but the <b>Nova Poshta waybill could not be created</b> automatically.
+      </p>
+      <p style="font-family:sans-serif;font-size:14px;color:#96322c">${esc(reason)}</p>
+      <p style="font-family:sans-serif;font-size:14px;max-width:560px">
+        Open Admin › Orders and press <b>Create waybill</b> to try again, or create it in the
+        Nova Poshta cabinet and paste the number into the order.
+      </p>`,
+  }).catch((e) => console.error("[ttn] alert email failed:", e));
 }

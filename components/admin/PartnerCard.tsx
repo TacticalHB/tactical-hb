@@ -3,7 +3,7 @@
 import { isAppLocale, locales, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setPartnerAccountStatus, setPartnerPriceBook } from "@/app/actions/wholesale-admin";
+import { setPartnerAccountStatus, setPartnerCurrency, setPartnerPriceBook } from "@/app/actions/wholesale-admin";
 import {
   deletePartner,
   linkMatchingOrders,
@@ -19,7 +19,7 @@ import {
   type Partner,
   type PartnerStatus,
 } from "@/lib/partners-display";
-import { ADMIN_ACCOUNT_STATUS, type AccountStatus } from "@/lib/wholesale-display";
+import { ADMIN_ACCOUNT_STATUS, partnerCurrency, type AccountStatus } from "@/lib/wholesale-display";
 import { formatUah } from "@/lib/stock-display";
 import type { PartnerOrder } from "@/lib/partners-admin";
 
@@ -94,6 +94,8 @@ export default function PartnerCard({
     restore: uk ? "Відновити" : "Restore",
     application: uk ? "Заявка партнера" : "Partner's application",
     priceBook: uk ? "Прайс" : "Price book",
+    currency: uk ? "Валюта" : "Currency",
+    currencyAuto: uk ? "авто — з країни" : "auto — from country",
     bookNone: uk ? "Не задано" : "Not set",
     /* Distribution left this label on 18 September 2026 and became its own
        book. A selector still offering "Shop / Distribution" beside a separate
@@ -126,6 +128,9 @@ export default function PartnerCard({
     linked_elsewhere: uk
       ? "Замовлення прив'язане до іншого партнера — спершу відв'яжіть його там."
       : "That order is linked to another partner — unlink it there first.",
+    migration_0043: uk
+      ? "Спершу запустіть міграцію 0043 у Supabase — тоді валюту можна буде зберегти."
+      : "Run migration 0043 in Supabase first — then the currency can be saved.",
   };
 
   function report(err: string) {
@@ -201,6 +206,18 @@ export default function PartnerCard({
     setError(null);
     setInfo(null);
     const res = await setPartnerPriceBook(p.id, next);
+    setBusy(null);
+    if (res.ok) router.refresh();
+    else report(res.error);
+  }
+
+  /* The currency is its own write too: it decides which of two price columns
+     the partner ever sees, on every storefront (0043). */
+  async function onCurrency(next: string) {
+    setBusy("currency");
+    setError(null);
+    setInfo(null);
+    const res = await setPartnerCurrency(p.id, next);
     setBusy(null);
     if (res.ok) router.refresh();
     else report(res.error);
@@ -368,6 +385,32 @@ export default function PartnerCard({
               {p.partnerTypeChangedAt && (
                 <span className="text-[12px] ms-auto" style={{ color: "var(--console-faint)" }}>
                   {L.bookBy} {p.partnerTypeChangedBy ?? "—"} · {p.partnerTypeChangedAt.slice(0, 10)}
+                </span>
+              )}
+            </div>
+
+            {/* CURRENCY (0043): the only one this partner is shown and quoted
+                in, whatever language they browse in. Until it is set, the
+                selector shows what the rule resolves to — country first
+                (Ukraine → UAH, else EUR) — and says so. */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-[12px] font-medium" style={{ color: "var(--console-muted)" }}>
+                {L.currency}:
+              </span>
+              <select
+                value={p.currency ?? partnerCurrency({ country: p.country, locale: p.locale })}
+                disabled={busy === "currency"}
+                onChange={(e) => onCurrency(e.target.value)}
+                aria-label={`${L.currency} — ${p.company}`}
+                className={inputClass}
+                style={inputStyle}
+              >
+                <option value="EUR">EUR €</option>
+                <option value="UAH">UAH ₴</option>
+              </select>
+              {!p.currency && (
+                <span className="text-[12px]" style={{ color: "var(--console-faint)" }}>
+                  {L.currencyAuto}
                 </span>
               )}
             </div>

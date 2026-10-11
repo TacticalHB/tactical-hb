@@ -164,7 +164,7 @@ export default async function WholesalePortalPage({
           initialQty={initialQty}
           initialOpts={initialOpts}
         />
-        {history.length > 0 && <RequestHistory locale={locale} requests={history} />}
+        {history.length > 0 && <RequestHistory locale={locale} requests={history} currency={partner.currency} />}
       </div>
     </div>
   );

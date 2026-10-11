@@ -17,13 +17,13 @@ import { money, type Money } from "./currency";
    ever edited:
 
      wind cover, no timer     ₴850  / €23   (the catalogue price)
-     timer add-on             ₴850  / €15   (was €22 until 11 Oct 2026)
-     wind cover with timer    ₴1700 / €38
+     timer add-on             ₴800  / €15   (was ₴850 / €22 until 11 Oct 2026)
+     wind cover with timer    ₴1650 / €38
 --------------------------------------------------------------------------- */
 
 export type WindcoverOptions = { timer: boolean };
 
-export const TIMER_PRICE: Money = money(15, 850); // €15 from 11 Oct 2026 (Mario); UAH unchanged
+export const TIMER_PRICE: Money = money(15, 800); // €15 / ₴800 from 11 Oct 2026 (Mario)
 
 export function timerUpcharge(sel: WindcoverOptions): Money {
   return sel.timer ? TIMER_PRICE : money(0, 0);

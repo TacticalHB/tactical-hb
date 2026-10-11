@@ -4,7 +4,7 @@ import Image from "next/image";
 import { colourName } from "@/lib/colour-names";
 import { useMemo, useState } from "react";
 import { t } from "@/lib/i18n-text";
-import { currencyForLocale, formatMoney, money, type Money } from "@/lib/currency";
+import { formatMoney, money, type Money } from "@/lib/currency";
 import { submitWholesaleRequest } from "@/app/actions/wholesale";
 import { NO_ADDONS, type LineAddons } from "@/lib/wholesale-display";
 import type { AddonKey } from "@/lib/wholesale-portal";
@@ -250,7 +250,14 @@ export default function PortalClient({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
-  const currency = currencyForLocale(locale);
+  /* THE PARTNER'S CURRENCY, NOT THE STOREFRONT'S (Mario, 11 Oct 2026): a
+     euro partner who switches to /uk still sees euro, and a hryvnia partner
+     on /en still sees hryvnia — the same currency their request is priced
+     in. See partnerCurrency in lib/wholesale-display. */
+  const currency = partner.currency;
+  /* The sheet prints trade prices, so it follows the currency too: hryvnia
+     partners get the Ukrainian sheet, euro partners the English one. */
+  const sheetLang = currency === "UAH" ? "uk" : "en";
   /* One product carries the answer for all of them: the book is a property of
      the partner, so if any line is priced they all are. */
   const hasBook = partner.partnerType !== null;
@@ -305,7 +312,10 @@ export default function PortalClient({
       ar: "أحد المنتجات التي اخترتها لا يحمل سعرًا بعد. أزِله أو راسلنا وسنعالج الأمر.",
     }),
     qtyLabel: t(locale, { en: "Quantity", uk: "Кількість", ja: "数量", ar: "الكمية" }),
-    sheetTitle: t(locale, { en: "Project KI 06 — product sheet (PDF)", uk: "Project KI 06 — опис продукту (PDF)", ja: "Project KI 06 — 製品資料（PDF・英語）", ar: "Project KI 06 — ملف المنتج (PDF، بالإنجليزية)" }),
+    sheetTitle:
+      currency === "UAH"
+        ? t(locale, { en: "Project KI 06 — product sheet (PDF, in Ukrainian)", uk: "Project KI 06 — опис продукту (PDF)", ja: "Project KI 06 — 製品資料（PDF・ウクライナ語）", ar: "Project KI 06 — ملف المنتج (PDF، بالأوكرانية)" })
+        : t(locale, { en: "Project KI 06 — product sheet (PDF)", uk: "Project KI 06 — опис продукту (PDF, англійською)", ja: "Project KI 06 — 製品資料（PDF・英語）", ar: "Project KI 06 — ملف المنتج (PDF، بالإنجليزية)" }),
     sheetSub: t(locale, { en: "Materials, case contents, photos and partner terms", uk: "Матеріали, комплектація, фото та умови для партнерів", ja: "素材、同梱物、写真、パートナー条件", ar: "المواد ومحتويات الحقيبة والصور وشروط الشركاء" }),
     minOrder: (n: number) => t(locale, { en: `Minimum order ${n}`, uk: `Мінімальне замовлення — ${n}`, ja: `最小注文数 ${n}`, ar: `الحد الأدنى للطلب ${n}` }),
     preorder: (d: string) => t(locale, { en: `Pre-order · ships ${d}`, uk: `Передзамовлення · відправка ${d}`, ja: `予約注文 · ${d}発送`, ar: `طلب مسبق · الشحن في ${d}` }),
@@ -526,7 +536,7 @@ export default function PortalClient({
             other storefront (Mario: those two languages only). Served by a
             route that re-checks approval; the file is not in public/. */}
         <a
-          href={`/api/wholesale/sheet/${locale === "uk" ? "uk" : "en"}`}
+          href={`/api/wholesale/sheet/${sheetLang}`}
           className="mt-6 max-w-2xl flex items-center gap-4 rounded-[6px] px-5 py-4 transition-colors hover:bg-[var(--bg-card)]"
           style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
         >

@@ -79,6 +79,9 @@ export type Partner = {
   /** Who last set the book, and when — 0035. */
   partnerTypeChangedAt: string | null;
   partnerTypeChangedBy: string | null;
+  /** The only currency this partner sees and is quoted in — 0043. Null = not
+      set yet; partnerCurrency() resolves it from country, then locale. */
+  currency: "EUR" | "UAH" | null;
   /** Who last moved account_status, and when — 0032. */
   statusChangedAt: string | null;
   statusChangedBy: string | null;

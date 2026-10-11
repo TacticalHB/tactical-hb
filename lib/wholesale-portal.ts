@@ -2,9 +2,8 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { products, isPurchasable, type Product, type Variant } from "@/lib/products";
-import { currencyForLocale } from "@/lib/currency";
 import { isPartnerType, unitPrice, type PartnerType } from "@/lib/wholesale-prices";
-import { addonsFor } from "@/lib/wholesale-display";
+import { addonsFor, partnerCurrency } from "@/lib/wholesale-display";
 export { addonsFor };
 import {
   canAccessPortal,
@@ -157,7 +156,10 @@ export async function partnerForUser(userId: string): Promise<PortalPartner | nu
   const db = createAdminClient();
   const { data, error } = await db
     .from("wholesale_partners")
-    .select("id, company, contact_name, email, phone, locale, account_status, partner_type")
+    /* "*", not a column list: currency (0043) is read when the column exists
+       and simply absent before the migration has been run, rather than
+       failing the lookup and locking every partner out of the portal. */
+    .select("*")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -179,6 +181,7 @@ export async function partnerForUser(userId: string): Promise<PortalPartner | nu
     accountStatus: isAccountStatus(status) ? status : ("pending" as AccountStatus),
     // Same posture for the book: anything unrecognised is no book at all.
     partnerType: isPartnerType(data.partner_type) ? data.partner_type : null,
+    currency: partnerCurrency(data),
   };
 }
 
@@ -342,9 +345,9 @@ export async function submitRequest(
     return { ok: false, error: "no_price_book" };
   }
 
-  /* The currency follows the STOREFRONT, not the partner — a Ukrainian
-     partner ordering from /en is quoted in euro, the same rule retail uses. */
-  const currency = currencyForLocale(partner.locale);
+  /* The partner's own currency, set on their card (0043) — the same one the
+     portal showed them, whatever storefront they ordered from. */
+  const currency = partner.currency;
 
   const bySlug = new Map(products.map((p) => [p.slug, p]));
   const items: RequestItem[] = [];
@@ -712,6 +715,22 @@ export async function setPartnerType(
     return false;
   }
   return true;
+}
+
+/**
+ * Set the one currency a partner is shown and quoted in (0043). Admin-only
+ * callers. Returns "no_column" when the migration has not been run yet, so the
+ * card can say what to do rather than a generic failure.
+ */
+export async function setPartnerCurrencyRow(
+  partnerId: string,
+  currency: "EUR" | "UAH",
+): Promise<"ok" | "no_column" | "failed"> {
+  const db = createAdminClient();
+  const { error } = await db.from("wholesale_partners").update({ currency }).eq("id", partnerId);
+  if (!error) return "ok";
+  console.error("[wholesale] currency write failed:", error.message);
+  return /currency/i.test(error.message) && /column|schema/i.test(error.message) ? "no_column" : "failed";
 }
 
 export type StatusChange = {

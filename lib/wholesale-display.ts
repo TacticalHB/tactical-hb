@@ -1,5 +1,6 @@
 import type { Text } from "@/lib/i18n-text";
 import type { PartnerType } from "@/lib/wholesale-prices";
+import type { Currency } from "@/lib/currency";
 import { addonAvailable, products, type Product } from "@/lib/products";
 import { describeAddons } from "@/lib/cart-display";
 import { colourName } from "@/lib/colour-names";
@@ -112,7 +113,28 @@ export type PortalPartner = {
      an approved partner nobody has assigned a book to sees "—" everywhere and
      cannot submit. Deliberately not defaulted: see 0034. */
   partnerType: PartnerType | null;
+  /* THE ONE CURRENCY this partner sees and is quoted in, on every storefront
+     (Mario, 11 Oct 2026). Already resolved — see partnerCurrency. */
+  currency: Currency;
 };
+
+/* ---- Currency --------------------------------------------------------------
+   A euro partner never sees hryvnia, and a hryvnia partner never sees euro,
+   whichever language they browse in. Staff set it on the partner card (0043);
+   until they have, the country decides (Ukraine → UAH, anywhere else → EUR),
+   and with no country, the language they registered in — which is what
+   requests were priced in before this rule existed, so nobody's quote moves.
+--------------------------------------------------------------------------- */
+export function countryCurrency(country: string | null | undefined): Currency | null {
+  const c = (country ?? "").trim();
+  if (!c) return null;
+  return /ukrain|україн/i.test(c) || /^(ua|ukr)$/i.test(c) ? "UAH" : "EUR";
+}
+
+export function partnerCurrency(p: { currency?: unknown; country?: string | null; locale?: string | null }): Currency {
+  if (p.currency === "EUR" || p.currency === "UAH") return p.currency;
+  return countryCurrency(p.country) ?? (p.locale === "uk" ? "UAH" : "EUR");
+}
 
 /* ---- Reference ------------------------------------------------------------
    WH-XXXX from a crypto-random alphabet, not a counter. A sequential

@@ -1,5 +1,5 @@
 import { t } from "@/lib/i18n-text";
-import { currencyForLocale, formatMoney, money } from "@/lib/currency";
+import { formatMoney, money, type Currency } from "@/lib/currency";
 import { REQUEST_STATUS_TEXT, requestLineText, type WholesaleRequest } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
@@ -31,11 +31,13 @@ import { REQUEST_STATUS_TEXT, requestLineText, type WholesaleRequest } from "@/l
 export default function RequestHistory({
   locale,
   requests,
+  currency: partnerCurrency,
 }: {
   locale: string;
   requests: WholesaleRequest[];
+  /** The partner's own currency — never the storefront's (11 Oct 2026). */
+  currency: Currency;
 }) {
-  const currency = currencyForLocale(locale);
 
   const L = {
     title: t(locale, { en: "Your requests", uk: "Ваші запити", ja: "これまでのリクエスト", ar: "طلباتك" }),
@@ -72,7 +74,7 @@ export default function RequestHistory({
         {requests.map((r, i) => {
           const total =
             r.subtotalEur !== null && r.subtotalUah !== null
-              ? formatMoney(money(r.subtotalEur, r.subtotalUah), currency)
+              ? formatMoney(money(r.subtotalEur, r.subtotalUah), partnerCurrency)
               : null;
           return (
             <li
@@ -116,7 +118,7 @@ export default function RequestHistory({
                       {requestLineText(it, locale).detail && <span>· {requestLineText(it, locale).detail}</span>}
                       <span className="ms-auto tabular-nums">
                         {it.lineTotalEur !== null && it.lineTotalUah !== null
-                          ? formatMoney(money(it.lineTotalEur, it.lineTotalUah), currency)
+                          ? formatMoney(money(it.lineTotalEur, it.lineTotalUah), partnerCurrency)
                           : L.quote}
                       </span>
                     </li>

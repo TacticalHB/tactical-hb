@@ -5,6 +5,7 @@ import { requireAdminActor } from "@/lib/admin-guard";
 import {
   setAccountStatus,
   setPartnerType,
+  setPartnerCurrencyRow,
   setRequestStatus,
   replaceRequestLines,
 } from "@/lib/wholesale-portal";
@@ -117,6 +118,25 @@ export async function setPartnerPriceBook(
   if (!(await setPartnerType(id, next, actor))) return { ok: false, error: "write_failed" };
   console.info(`[wholesale] ${actor} set partner_type=${next ?? "none"} for partner ${id}`);
 
+  revalidatePath("/[locale]/admin/partners", "page");
+  return { ok: true };
+}
+
+/** Set the partner's currency — the only one they see and are quoted in (0043). */
+export async function setPartnerCurrency(
+  partnerId: string,
+  currency: string,
+): Promise<AdminResult> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "forbidden" };
+  const id = String(partnerId ?? "").trim();
+  if (!id) return { ok: false, error: "not_found" };
+  if (currency !== "EUR" && currency !== "UAH") return { ok: false, error: "bad_currency" };
+
+  const res = await setPartnerCurrencyRow(id, currency);
+  if (res === "no_column") return { ok: false, error: "migration_0043" };
+  if (res !== "ok") return { ok: false, error: "write_failed" };
+  console.info(`[wholesale] ${actor} set currency=${currency} for partner ${id}`);
   revalidatePath("/[locale]/admin/partners", "page");
   return { ok: true };
 }

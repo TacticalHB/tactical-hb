@@ -63,9 +63,9 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
     const [pRes, oRes] = await Promise.all([
       admin
         .from("wholesale_partners")
-        .select(
-          "id, company, contact_name, email, phone, country, city, business_type, locale, status, next_follow_up, notes, created_at, user_id, account_status, application_note, account_status_changed_at, account_status_changed_by, partner_type, partner_type_changed_at, partner_type_changed_by"
-        ),
+        /* "*": currency (0043) is read when the column exists and simply
+           absent before the migration has been run. */
+        .select("*"),
       admin
         .from("orders")
         .select("id, external_ref, created_at, status, email, amount_uah, wholesale_partner_id")
@@ -130,6 +130,9 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
         partnerType: isPartnerType(row.partner_type) ? row.partner_type : null,
         partnerTypeChangedAt: text(row.partner_type_changed_at),
         partnerTypeChangedBy: text(row.partner_type_changed_by),
+        /* Stored currency, or null when staff have not set it yet — the card
+           then shows what the rule resolves to (partnerCurrency). */
+        currency: row.currency === "EUR" ? ("EUR" as const) : row.currency === "UAH" ? ("UAH" as const) : null,
         city: text(row.city),
         businessType: text(row.business_type),
         statusChangedAt: text(row.account_status_changed_at),

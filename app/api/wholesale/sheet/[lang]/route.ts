@@ -12,8 +12,8 @@ import { canAccessPortal } from "@/lib/wholesale-display";
    a signed-in partner whose account is approved — the same gate the portal
    page applies. Anyone else gets a 404, which does not confirm the file exists.
 
-   TWO LANGUAGES ONLY (Mario, 4 Oct 2026): Ukrainian for /uk, English for
-   every other storefront. The files are traced into the function by
+   TWO LANGUAGES ONLY (Mario, 4 Oct 2026). Which one a partner gets follows
+   their currency (11 Oct 2026): UAH → Ukrainian, EUR → English. The files are traced into the function by
    outputFileTracingIncludes in next.config.ts.
 --------------------------------------------------------------------------- */
 
@@ -28,8 +28,7 @@ const FILES = {
 const notFound = () => new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
-  const sheet = lang === "uk" ? FILES.uk : FILES.en;
+  await params; // the path names a language, but the partner's currency decides — see below
 
   const supabase = await createClient();
   if (!supabase) return notFound();
@@ -37,6 +36,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ lang: s
   if (!data.user) return notFound();
   const partner = await partnerForUser(data.user.id);
   if (!partner || !canAccessPortal(partner.accountStatus)) return notFound();
+
+  /* THE SHEET PRINTS TRADE PRICES, SO IT FOLLOWS THE PARTNER'S CURRENCY, not
+     the URL (Mario, 11 Oct 2026): hryvnia partners get the Ukrainian sheet,
+     euro partners the English one, whichever link or storefront they came
+     from — editing the address cannot show a partner the other currency. */
+  const sheet = partner.currency === "UAH" ? FILES.uk : FILES.en;
 
   try {
     const body = await readFile(path.join(process.cwd(), "private", "wholesale", sheet.file));

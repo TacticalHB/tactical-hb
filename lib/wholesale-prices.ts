@@ -107,7 +107,7 @@ const BOOKS: Record<PartnerType, Book> = {
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
-      "incoming-hookah": m(175, 8060),
+      "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
     },
     addons: {
       lid: m(3.0, 130), // 7 Oct 2026 (Mario) — shop + distribution only; lounge unchanged.
@@ -136,7 +136,7 @@ const BOOKS: Record<PartnerType, Book> = {
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
-      "incoming-hookah": m(175, 8060),
+      "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
     },
     addons: {
       lid: m(3.0, 130),
@@ -164,7 +164,7 @@ const BOOKS: Record<PartnerType, Book> = {
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
-      "incoming-hookah": m(175, 8060),
+      "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
     },
     addons: {
       lid: m(3.5, 190),

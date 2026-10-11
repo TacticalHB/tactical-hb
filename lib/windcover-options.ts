@@ -9,7 +9,7 @@ import { money, type Money } from "./currency";
    BOTH CURRENCIES ARE HAND-SET, and that is the one real difference from the
    HMD add-ons. Those derive their hryvnia from euro at the display rate, which
    works because they are small round numbers. The timer is not a conversion of
-   anything — Mario set ₴850 and €22 as retail prices, and 850 is nowhere near
+   anything — Mario set ₴850 and €22 (now €15, 11 Oct 2026) as retail prices, and 850 is nowhere near
    22 × 51.5. Deriving either from the other would silently reprice it, so both
    are passed explicitly.
 
@@ -17,13 +17,13 @@ import { money, type Money } from "./currency";
    ever edited:
 
      wind cover, no timer     ₴850  / €23   (the catalogue price)
-     timer add-on             ₴850  / €22
+     timer add-on             ₴850  / €15   (was €22 until 11 Oct 2026)
      wind cover with timer    ₴1700 / €45
 --------------------------------------------------------------------------- */
 
 export type WindcoverOptions = { timer: boolean };
 
-export const TIMER_PRICE: Money = money(22, 850);
+export const TIMER_PRICE: Money = money(15, 850); // €15 from 11 Oct 2026 (Mario); UAH unchanged
 
 export function timerUpcharge(sel: WindcoverOptions): Money {
   return sel.timer ? TIMER_PRICE : money(0, 0);

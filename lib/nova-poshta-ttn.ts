@@ -146,6 +146,13 @@ export type Sender = {
 
 let senderCache: Sender | null = null;
 
+/** An env override, trimmed — a pasted value often carries a stray space or newline. */
+function envRef(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
+type RawSenderBranch = { Ref: string; CityRef?: string; WarehouseStatus?: string };
+
 /**
  * Our own dispatch details.
  *
@@ -153,17 +160,35 @@ let senderCache: Sender | null = null;
  * account, and cached for the life of the instance because they never change
  * mid-run. Every part is env-overridable for accounts with more than one
  * sender, contact or dispatch branch, where "the first one" is a coin toss.
+ *
+ * AN OVERRIDE IS CHECKED AGAINST THE CABINET, NOT TRUSTED. The first live
+ * order (TCT-LAS6TL, 10 Oct 2026) was refused with "SenderAddress is
+ * incorrect; ContactSender is removed": the contact person named in the
+ * environment no longer existed on the account, and the branch didn't hold
+ * up either. Both are now looked up before the waybill is attempted:
+ *
+ *   - a contact that isn't on the sender any more falls back to the
+ *     cabinet's first contact. A removed person can never be right, and the
+ *     contact is only the name printed on the waybill;
+ *   - a branch that isn't a working branch in the dispatch city is refused
+ *     with the variable's name in the message. The branch is where the
+ *     parcel is handed in, which is not ours to guess.
  */
 export async function resolveSender(): Promise<Sender> {
   if (senderCache) return senderCache;
 
-  const cityRef = process.env.NOVA_POSHTA_SENDER_CITY_REF || (await getSenderCityRef());
+  const cityRef = envRef("NOVA_POSHTA_SENDER_CITY_REF") || (await getSenderCityRef());
 
   const counterparties = await npCall<RawCounterparty>("Counterparty", "getCounterparties", {
     CounterpartyProperty: "Sender",
     Page: "1",
   });
-  const counterpartyRef = process.env.NOVA_POSHTA_SENDER_REF || counterparties[0]?.Ref;
+  const wantedSender = envRef("NOVA_POSHTA_SENDER_REF");
+  if (wantedSender && !counterparties.some((c) => c.Ref === wantedSender)) {
+    console.warn("[ttn] NOVA_POSHTA_SENDER_REF is not a sender on this account — using the cabinet's own");
+  }
+  const counterpartyRef =
+    counterparties.find((c) => c.Ref === wantedSender)?.Ref ?? counterparties[0]?.Ref;
   if (!counterpartyRef) {
     throw new NovaPoshtaError("No sender counterparty on this Nova Poshta account");
   }
@@ -172,20 +197,35 @@ export async function resolveSender(): Promise<Sender> {
     Ref: counterpartyRef,
     Page: "1",
   });
-  const contact = contacts[0];
-  const contactRef = process.env.NOVA_POSHTA_SENDER_CONTACT_REF || contact?.Ref;
-  if (!contactRef) {
+  const wantedContact = envRef("NOVA_POSHTA_SENDER_CONTACT_REF");
+  if (wantedContact && !contacts.some((c) => c.Ref === wantedContact)) {
+    console.warn("[ttn] NOVA_POSHTA_SENDER_CONTACT_REF is not a contact on the sender any more — using the cabinet's first");
+  }
+  const contact = contacts.find((c) => c.Ref === wantedContact) ?? contacts[0];
+  if (!contact?.Ref) {
     throw new NovaPoshtaError("Sender counterparty has no contact person");
   }
 
-  const phone = normalisePhone(process.env.NOVA_POSHTA_SENDER_PHONE || contact?.Phones || "");
+  const phone = normalisePhone(envRef("NOVA_POSHTA_SENDER_PHONE") || contact.Phones || "");
   if (!phone) throw new NovaPoshtaError("No sender phone available");
 
-  // The branch we hand parcels over at. Explicit env wins; otherwise take the
-  // first branch in the dispatch city, which is right for a single-branch
-  // sender and overridable for anyone else.
-  let addressRef = process.env.NOVA_POSHTA_SENDER_WAREHOUSE_REF || "";
-  if (!addressRef) {
+  // The branch we hand parcels over at. Explicit env wins — once it is shown
+  // to be a working branch in the dispatch city; otherwise take the first
+  // branch there, which is right for a single-branch sender and overridable
+  // for anyone else.
+  let addressRef = envRef("NOVA_POSHTA_SENDER_WAREHOUSE_REF");
+  if (addressRef) {
+    // A malformed ref makes the lookup itself fail ("Ref is invalid"); that
+    // is the same answer as "no such branch", so it gets the same message.
+    const rows = await npCall<RawSenderBranch>("Address", "getWarehouses", { Ref: addressRef }).catch(() => []);
+    const branch = rows.find((w) => w.Ref === addressRef);
+    if (!branch || branch.CityRef !== cityRef || (branch.WarehouseStatus && branch.WarehouseStatus !== "Working")) {
+      throw new NovaPoshtaError(
+        "NOVA_POSHTA_SENDER_WAREHOUSE_REF in Vercel is not a working branch in the dispatch city — " +
+          "correct it, or delete it to use the city's first branch"
+      );
+    }
+  } else {
     const branches = await getWarehouses(cityRef);
     addressRef = branches[0]?.ref ?? "";
   }
@@ -193,7 +233,14 @@ export async function resolveSender(): Promise<Sender> {
     throw new NovaPoshtaError("Could not resolve a sender warehouse — set NOVA_POSHTA_SENDER_WAREHOUSE_REF");
   }
 
-  senderCache = { cityRef, counterpartyRef, contactRef, phone, addressRef, contactName: (contact?.Description || "").trim() };
+  senderCache = {
+    cityRef,
+    counterpartyRef,
+    contactRef: contact.Ref,
+    phone,
+    addressRef,
+    contactName: (contact.Description || "").trim(),
+  };
   return senderCache;
 }
 

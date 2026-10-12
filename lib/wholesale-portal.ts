@@ -110,7 +110,7 @@ export type AddonKey = keyof LineAddons;
    portal and in their copy of the letter. */
 const ADDON_LABEL: Record<AddonKey, string> = {
   lid: "With Lid 9E418",
-  rubber: "With FEAR 9E418",
+  rubber: "With FEAR Stabiliser Ring 9E418",
   timer: "With Timer",
 };
 

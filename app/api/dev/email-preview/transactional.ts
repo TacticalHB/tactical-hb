@@ -194,7 +194,7 @@ function sampleRequest(locale: string): WholesaleRequest {
 const SAMPLE_LINES = [
   { productSlug: "hmd-tct-classic", sku: "hmd-tct-classic", variant: null,
     addons: { lid: true, rubber: true, timer: false },
-    optionsLabel: "With Lid 9E418 + With FEAR 9E418",
+    optionsLabel: "With Lid 9E418 + With FEAR Stabiliser Ring 9E418",
     name: "HMD TCT Classic", qty: 5 },
   { productSlug: "hmd-tct-op", sku: "hmd-tct-op__purple", variant: "Purple",
     addons: { lid: true, rubber: false, timer: false },

@@ -84,7 +84,7 @@ COPY = {
             ("SHOP / DISTRIBUTION", "Wholesale book for specialty shops, online retailers and distributors"),
             ("LOUNGE / BAR", "Partner book for shisha lounges and bars"),
         ],
-        "note": "Unit prices in euro. Add-ons (Lid 9E418, FEAR 9E418) are listed separately.",
+        "note": "Unit prices in euro. Add-ons (Lid 9E418, FEAR Stabiliser Ring 9E418) are listed separately.",
         "terms_title": "Terms",
         "terms": [
             "Prices apply only to approved wholesale partners. Access is granted after application review.",
@@ -108,7 +108,7 @@ COPY = {
             ("LOUNGE / BAR · КАЛЬЯННА",
              "Прайс для кальянних та барів"),
         ],
-        "note": "Ціни за одиницю в гривні. Додатки (Lid 9E418, FEAR 9E418) вказано окремо.",
+        "note": "Ціни за одиницю в гривні. Додатки (Lid 9E418, FEAR Stabiliser Ring 9E418) вказано окремо.",
         "terms_title": "Умови",
         "terms": [
             "Ціни діють лише для схвалених оптових партнерів. Доступ — після розгляду заявки.",

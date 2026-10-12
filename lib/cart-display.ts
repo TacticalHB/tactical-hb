@@ -71,7 +71,7 @@ export function describeAddons(
   /* FEAR 9E418 is a product name and stays Latin in every language — only the
      word around it changes. */
   if (options?.lid) addons.push(t(locale, { uk: "З Lid 9E418", en: "With Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418" }));
-  if (options?.rubber) addons.push(t(locale, { uk: "З FEAR 9E418", en: "With FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418" }));
+  if (options?.rubber) addons.push(t(locale, { uk: "З FEAR Stabiliser Ring 9E418", en: "With FEAR Stabiliser Ring 9E418", ja: "FEAR Stabiliser Ring 9E418 付き", ar: "مع FEAR Stabiliser Ring 9E418" }));
   if (options?.timer) addons.push(t(locale, { uk: "З таймером", en: "With Timer", ja: "タイマー付き", ar: "مع المؤقّت" }));
   return addons.length ? addons.join(" + ") : null;
 }

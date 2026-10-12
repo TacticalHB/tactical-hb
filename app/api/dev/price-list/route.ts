@@ -57,7 +57,7 @@ export async function GET() {
         });
       }
       lines.push({ label: "Lid 9E418", ...addonPrice(book, "lid") });
-      lines.push({ label: "FEAR 9E418", ...addonPrice(book, "rubber") });
+      lines.push({ label: "FEAR Stabiliser Ring 9E418", ...addonPrice(book, "rubber") });
 
       return [book, lines];
     })

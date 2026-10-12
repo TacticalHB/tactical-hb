@@ -57,7 +57,7 @@ export const HMD_OPTIONS: OptionSpec[] = [
      (order_items.addon_rubber) and the stock sku part__rubber, and renaming it
      would orphan every order already placed. Only the two labels are the
      product's name. */
-  { key: "rubber", en: "With FEAR 9E418", uk: "З FEAR 9E418", ja: "FEAR 9E418 付き", ar: "مع FEAR 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber, status: addonAvailability("rubber") },
+  { key: "rubber", en: "With FEAR Stabiliser Ring 9E418", uk: "З FEAR Stabiliser Ring 9E418", ja: "FEAR Stabiliser Ring 9E418 付き", ar: "مع FEAR Stabiliser Ring 9E418", glyph: "ring", price: MATERIAL_PRICE.rubber, status: addonAvailability("rubber") },
 ];
 
 export const WINDCOVER_OPTIONS: OptionSpec[] = [

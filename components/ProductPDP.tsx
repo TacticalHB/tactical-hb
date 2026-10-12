@@ -838,6 +838,11 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
         </div>
       </div>
 
+      {/* Buyer questions, tap to open — straight under the product, ABOVE the
+          slogan (Mario, 12 Oct 2026: "faq has to be higher"). First used on
+          the FEAR Stabiliser Ring 9E418. */}
+      {pdp?.faq && pdp.faq.length > 0 && <ProductFaq faq={pdp.faq} locale={locale} />}
+
       {/* ---- Brand slogan statement (every product) + optional features band ---- */}
       <div className="page-container pb-20">
         <h2 className="font-display text-4xl md:text-6xl tracking-wide leading-[0.95]" style={{ color: "#111" }}>
@@ -857,11 +862,6 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           </div>
         )}
       </div>
-
-      {/* Buyer questions, tap to open — after the slogan and features band,
-          like every other below-the-fold extra (FEAR 9E418 first; Mario,
-          12 Oct 2026). */}
-      {pdp?.faq && pdp.faq.length > 0 && <ProductFaq faq={pdp.faq} locale={locale} />}
 
       {/* The hookah's materials table follows the slogan and features band,
           which sit straight after Delivery & Returns as on every product

@@ -121,7 +121,11 @@ export default function HmdViewer3D({
           const tx = new THREE.CanvasTexture(c); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(1, repeat); return tx;
         };
         const hmdMat = new THREE.MeshPhysicalMaterial({ color: "#c7cacd", metalness: 1, roughness: 1, roughnessMap: brushed(6) });
-        const steelMat = new THREE.MeshPhysicalMaterial({ color: "#c3c5c7", metalness: 1, roughness: 1, roughnessMap: brushed(10) });
+        /* Brighter than the aluminium on purpose (Mario, 14 Oct 2026: "make the
+           lid brighter"): full metalness on a rough brushed disc read as dull
+           grey; half metal and a paler colour keep it steel, not plastic. Same
+           values as the photo renderer, so the photos and the viewer agree. */
+        const steelMat = new THREE.MeshPhysicalMaterial({ color: "#eceef0", metalness: 0.5, roughness: 1, roughnessMap: brushed(10) });
         const siliconeMat = new THREE.MeshPhysicalMaterial({ color: "#141517", metalness: 0, roughness: 0.78, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color("#3a3c40") });
         /* THE FEAR GRIPS THE HMD SURFACE-TO-SURFACE, and the lid's silicone sits
            on its steel the same way: coincident faces fought triangle by

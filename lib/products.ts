@@ -1307,12 +1307,12 @@ export const products: Product[] = [
     /* The catalogue renders from the CAD (Classic HMD; Mario, 4 Oct 2026):
        -1 the part alone (main), -2 fitted, -3 separated. v3 (14 Oct 2026):
        the floor shadow is a ring now, so the hollow centre stays clean. */
-    image: "/images/accessories/lid-9e418-1-v2.jpg",
-    gridImage: "/images/accessories/lid-9e418-1-v2.jpg",
+    image: "/images/accessories/lid-9e418-1-v3.jpg",
+    gridImage: "/images/accessories/lid-9e418-1-v3.jpg",
     /* In stock 4 Oct 2026 (Mario) — on sale on its own and as the HMD add-on. */
     tags: ["accessory", "lid", "9e418", "cap", "cover", "кришка"],
     pdp: {
-      photos: ["/images/accessories/lid-9e418-1-v2.jpg", "/images/accessories/lid-9e418-2-v2.jpg", "/images/accessories/lid-9e418-3-v2.jpg"],
+      photos: ["/images/accessories/lid-9e418-1-v3.jpg", "/images/accessories/lid-9e418-2-v3.jpg", "/images/accessories/lid-9e418-3-v3.jpg"],
       shortEn:
         "The lid for Tactical HB heat devices, sold on its own. HMD TCT Classic ships without one unless it is added at checkout, and this is the same lid offered there.",
       shortUk:

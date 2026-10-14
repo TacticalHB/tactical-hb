@@ -1148,13 +1148,13 @@ export const products: Product[] = [
     /* Copy from Mario's FEAR spec sheet (12 Oct 2026). "Smoke" became clouds,
        per the house rule; the code is 9E418, as on the pouch. */
     descriptionUk:
-      "Силіконовий рукав із глибоким бортиком, точно відлитий під HMD Tactical HB 9E418. Охоплює зовнішній край чаші, тримає її на місці, закриває мікрозазори та захищає від упалого вугілля. Продається окремо. Те саме кільце можна додати під час налаштування пристрою нагріву.",
+      "Силіконовий рукав із глибоким бортиком, точно відлитий під HMD Tactical HB. Охоплює зовнішній край чаші, тримає її на місці, закриває мікрозазори та захищає від упалого вугілля. Продається окремо. Те саме кільце можна додати під час налаштування пристрою нагріву.",
     descriptionEn:
-      "A deep-lipped silicone sleeve precision-moulded for the Tactical HB 9E418 HMD. It cups the outside of the bowl rim, stops the heat device slipping, seals micro-gaps and guards against dropped coals. Sold separately. The same ring can be added while configuring a heat device.",
+      "A deep-lipped silicone sleeve precision-moulded for the Tactical HB HMD. It cups the outside of the bowl rim, stops the heat device slipping, seals micro-gaps and guards against dropped coals. Sold separately. The same ring can be added while configuring a heat device.",
     descriptionJa:
-      "Tactical HB 9E418 HMD に合わせて精密成形した、深いリップ付きのシリコンスリーブ。ボウルの縁を外側から包み、横ずれを防ぎ、すき間をふさぎ、落ちた炭から守ります。単品販売。ヒートデバイスの設定時に追加することもできます。",
+      "Tactical HB HMD に合わせて精密成形した、深いリップ付きのシリコンスリーブ。ボウルの縁を外側から包み、横ずれを防ぎ、すき間をふさぎ、落ちた炭から守ります。単品販売。ヒートデバイスの設定時に追加することもできます。",
     descriptionAr:
-      "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD 9E418 من Tactical HB. يحتضن الحافة الخارجية للرأس، ويمنع انزلاق جهاز الحرارة، ويسدّ الفجوات الدقيقة، ويحمي من الفحم المتساقط. يُباع منفصلًا. ويمكن إضافة الحلقة نفسها عند تجهيز جهاز الحرارة.",
+      "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD من Tactical HB. يحتضن الحافة الخارجية للرأس، ويمنع انزلاق جهاز الحرارة، ويسدّ الفجوات الدقيقة، ويحمي من الفحم المتساقط. يُباع منفصلًا. ويمكن إضافة الحلقة نفسها عند تجهيز جهاز الحرارة.",
     price: MATERIAL_PRICE.rubber.eur,
     priceUah: MATERIAL_PRICE.rubber.uah,
     currency: "EUR",
@@ -1181,13 +1181,13 @@ export const products: Product[] = [
     pdp: {
       photos: ["/images/accessories/fear-9e418-1-v3.jpg", "/images/accessories/fear-9e418-2-v3.jpg", "/images/accessories/fear-9e418-3-v3.jpg"],
       shortEn:
-        "A deep-lipped silicone sleeve, precision-moulded for the Tactical HB 9E418 HMD. It cups the outside of the bowl rim and holds the bowl on the device's radiator: no sideways slip, no micro-gaps, and a guard against dropped coals. The same ring is offered as an option when you configure a heat device.",
+        "A deep-lipped silicone sleeve, precision-moulded for the Tactical HB HMD. It cups the outside of the bowl rim and holds the bowl on the device's radiator: no sideways slip, no micro-gaps, and a guard against dropped coals. The same ring is offered as an option when you configure a heat device.",
       shortUk:
-        "Силіконовий рукав із глибоким бортиком, точно відлитий під HMD Tactical HB 9E418. Охоплює зовнішній край чаші й тримає її на радіаторі пристрою: чаша не зсувається вбік, мікрозазори закриті, а від упалого вугілля є захист. Те саме кільце пропонується як опція під час налаштування пристрою нагріву.",
+        "Силіконовий рукав із глибоким бортиком, точно відлитий під HMD Tactical HB. Охоплює зовнішній край чаші й тримає її на радіаторі пристрою: чаша не зсувається вбік, мікрозазори закриті, а від упалого вугілля є захист. Те саме кільце пропонується як опція під час налаштування пристрою нагріву.",
       shortJa:
-        "Tactical HB 9E418 HMD に合わせて精密成形した、深いリップ付きのシリコンスリーブ。ボウルの縁を外側から包み込み、デバイスのラジエーターの上に固定します。横ずれを防ぎ、微細なすき間をふさぎ、落ちた炭からも守ります。ヒートデバイスの設定時に選べるものと同じリングです。",
+        "Tactical HB HMD に合わせて精密成形した、深いリップ付きのシリコンスリーブ。ボウルの縁を外側から包み込み、デバイスのラジエーターの上に固定します。横ずれを防ぎ、微細なすき間をふさぎ、落ちた炭からも守ります。ヒートデバイスの設定時に選べるものと同じリングです。",
       shortAr:
-        "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD 9E418 من Tactical HB. يحتضن الحافة الخارجية للرأس ويثبّته على مشتّت حرارة الجهاز: لا انزلاق جانبي، ولا فجوات دقيقة، وحماية من الفحم المتساقط. وهي الحلقة نفسها المتاحة كخيار عند تجهيز جهاز الحرارة.",
+        "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD من Tactical HB. يحتضن الحافة الخارجية للرأس ويثبّته على مشتّت حرارة الجهاز: لا انزلاق جانبي، ولا فجوات دقيقة، وحماية من الفحم المتساقط. وهي الحلقة نفسها المتاحة كخيار عند تجهيز جهاز الحرارة.",
       benefitsEn: [
         "Stops the heat device from slipping sideways",
         "Seals the micro-gaps between bowl and device for denser clouds",
@@ -1217,11 +1217,11 @@ export const products: Product[] = [
         "غلاف متشابك بحافة عميقة يحتضن الحافة الخارجية للرأس",
       ],
       specs: [
-        { labelEn: "Compatibility", labelUk: "Сумісність", labelJa: "対応機種", labelAr: "التوافق", valueEn: "Precision-moulded for the Tactical HB 9E418 HMD", valueUk: "Точно відлитий під HMD Tactical HB 9E418", valueJa: "Tactical HB 9E418 HMD に合わせて精密成形", valueAr: "مصبوب بدقة لجهاز HMD 9E418 من Tactical HB" },
+        { labelEn: "Compatibility", labelUk: "Сумісність", labelJa: "対応機種", labelAr: "التوافق", valueEn: "Precision-moulded for the Tactical HB HMD", valueUk: "Точно відлитий під HMD Tactical HB", valueJa: "Tactical HB HMD に合わせて精密成形", valueAr: "مصبوب بدقة لجهاز HMD من Tactical HB" },
         { labelEn: "Bowl compatibility", labelUk: "Сумісні чаші", labelJa: "対応ボウル", labelAr: "الرؤوس المتوافقة", valueEn: "Outer rim up to 75–77 mm", valueUk: "Зовнішній діаметр краю до 75–77 мм", valueJa: "縁の外径 最大75〜77 mm", valueAr: "قطر الحافة الخارجية حتى 75–77 مم" },
         { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", labelAr: "المادة", valueEn: "100% high-temp, food-grade silicone", valueUk: "100% термостійкий харчовий силікон", valueJa: "高耐熱・食品グレードシリコン 100%", valueAr: "سيليكون غذائي مقاوم للحرارة 100%" },
         { labelEn: "Flavour", labelUk: "Смак", labelJa: "風味", labelAr: "النكهة", valueEn: "Neutral", valueUk: "Нейтральний", valueJa: "ニュートラル", valueAr: "محايدة" },
-        { labelEn: "Thermal guard", labelUk: "Термозахист", labelJa: "耐熱", labelAr: "الحماية الحرارية", valueEn: "Built for the 9E418 outer radiator's 240 °C (464 °F) peak", valueUk: "Розрахований на пік зовнішнього радіатора 9E418 — 240 °C (464 °F)", valueJa: "9E418 外側ラジエーターの最高 240 °C（464 °F）に対応", valueAr: "مصمّم لذروة السطح الخارجي لمشتّت 9E418 البالغة \u2066240 °C (464 °F)\u2069" },
+        { labelEn: "Thermal guard", labelUk: "Термозахист", labelJa: "耐熱", labelAr: "الحماية الحرارية", valueEn: "Built for the HMD outer radiator's 240 °C (464 °F) peak", valueUk: "Розрахований на пік зовнішнього радіатора HMD — 240 °C (464 °F)", valueJa: "HMD 外側ラジエーターの最高 240 °C（464 °F）に対応", valueAr: "مصمّم لذروة السطح الخارجي لمشتّت جهاز HMD البالغة \u2066240 °C (464 °F)\u2069" },
         { labelEn: "Design", labelUk: "Конструкція", labelJa: "構造", labelAr: "التصميم", valueEn: "Deep-lipped interlocking sleeve", valueUk: "Рукав із глибоким бортиком і фіксацією", valueJa: "深いリップのインターロック式スリーブ", valueAr: "غلاف متشابك بحافة عميقة" },
       ],
       /* Mario's Tips for Use (14 Oct 2026). The first, third and fourth are
@@ -1251,29 +1251,29 @@ export const products: Product[] = [
         "قطع السيليكون مقاومة للحرارة، لكنها غير مقاومة للنار!",
         "كن tct عند استخدام هذا الجهاز.",
       ],
-      /* \u2066…\u2069 (LRI/PDI) keep "240 °C (464 °F)" in reading order inside
+      /* \u2066…\u2069 (LRI/PDI) keep "240 °C (464 °F)" in reading order inside
          the Arabic sentences; without them the bidi algorithm scrambled it
          to "C (500 °F)° 260". */
       faq: [
         {
           qEn: "Will the FEAR ring fit other HMDs?",
-          aEn: "No. FEAR is precision-moulded exclusively for the unique radiator profile of the Tactical HB 9E418 HMD. It will not fit properly on standard cylindrical HMDs.",
+          aEn: "No. FEAR is precision-moulded exclusively for the unique radiator profile of the Tactical HB HMD. It will not fit properly on standard cylindrical HMDs.",
           qUk: "Чи підійде кільце FEAR до інших HMD?",
-          aUk: "Ні. FEAR точно відлитий виключно під унікальний профіль радіатора HMD Tactical HB 9E418. На звичайних циліндричних HMD він не сяде як слід.",
+          aUk: "Ні. FEAR точно відлитий виключно під унікальний профіль радіатора HMD Tactical HB. На звичайних циліндричних HMD він не сяде як слід.",
           qJa: "FEAR リングは他の HMD にも合いますか？",
-          aJa: "いいえ。FEAR は Tactical HB 9E418 HMD 独自のラジエーター形状に合わせて精密成形しています。一般的な円筒形の HMD にはきちんと収まりません。",
+          aJa: "いいえ。FEAR は Tactical HB HMD 独自のラジエーター形状に合わせて精密成形しています。一般的な円筒形の HMD にはきちんと収まりません。",
           qAr: "هل تناسب حلقة FEAR أجهزة HMD أخرى؟",
-          aAr: "لا. حلقة FEAR مصبوبة بدقة حصريًا لشكل مشتّت الحرارة الفريد في جهاز HMD 9E418 من Tactical HB، ولن تستقر جيدًا على أجهزة HMD الأسطوانية العادية.",
+          aAr: "لا. حلقة FEAR مصبوبة بدقة حصريًا لشكل مشتّت الحرارة الفريد في جهاز HMD من Tactical HB، ولن تستقر جيدًا على أجهزة HMD الأسطوانية العادية.",
         },
         {
           qEn: "Will it melt on the radiator fins under heavy heat?",
-          aEn: "Never. The 9E418's radiator peaks at an outer temperature of 240 °C (464 °F) for about 10 minutes when running 4 coals. FEAR is made from extreme-heat, food-grade silicone built to survive that threshold without cracking, melting or degrading.",
+          aEn: "Never. The Tactical HB HMD's radiator peaks at an outer temperature of 240 °C (464 °F) for about 10 minutes when running 4 coals. FEAR is made from extreme-heat, food-grade silicone built to survive that threshold without cracking, melting or degrading.",
           qUk: "Чи не розплавиться воно на ребрах радіатора за сильного жару?",
-          aUk: "Ніколи. Зовні радіатор 9E418 нагрівається щонайбільше до 240 °C (464 °F) — приблизно 10 хвилин із 4 вуглинками. FEAR виготовлено з особливо термостійкого харчового силікону, який витримує цей поріг без тріщин, плавлення та руйнування.",
+          aUk: "Ніколи. Зовні радіатор HMD Tactical HB нагрівається щонайбільше до 240 °C (464 °F) — приблизно 10 хвилин із 4 вуглинками. FEAR виготовлено з особливо термостійкого харчового силікону, який витримує цей поріг без тріщин, плавлення та руйнування.",
           qJa: "強い熱でラジエーターのフィンの上で溶けたりしませんか？",
-          aJa: "溶けません。9E418 のラジエーターは炭4個で使用した場合、外側の最高温度が 240 °C（464 °F）に達し、それが約10分続きます。FEAR はこの温度に耐えるよう作られた高耐熱の食品グレードシリコン製で、ひび割れ・溶融・劣化を起こしません。",
+          aJa: "溶けません。Tactical HB HMD のラジエーターは炭4個で使用した場合、外側の最高温度が 240 °C（464 °F）に達し、それが約10分続きます。FEAR はこの温度に耐えるよう作られた高耐熱の食品グレードシリコン製で、ひび割れ・溶融・劣化を起こしません。",
           qAr: "هل تذوب على زعانف مشتّت الحرارة تحت الحرارة الشديدة؟",
-          aAr: "أبدًا. تبلغ حرارة السطح الخارجي لمشتّت 9E418 ذروتها عند \u2066240 °C (464 °F)\u2069 لنحو 10 دقائق عند استخدام 4 قطع فحم. وFEAR مصنوعة من سيليكون غذائي فائق المقاومة للحرارة صُمّم لتحمّل هذه العتبة دون تشقق أو ذوبان أو تلف.",
+          aAr: "أبدًا. تبلغ حرارة السطح الخارجي لمشتّت جهاز HMD من Tactical HB ذروتها عند \u2066240 °C (464 °F)\u2069 لنحو 10 دقائق عند استخدام 4 قطع فحم. وFEAR مصنوعة من سيليكون غذائي فائق المقاومة للحرارة صُمّم لتحمّل هذه العتبة دون تشقق أو ذوبان أو تلف.",
         },
       ],
     },
@@ -1287,14 +1287,17 @@ export const products: Product[] = [
     taglineEn: "Lid accessory for Tactical HB heat devices.",
     taglineJa: "Tactical HB ヒートデバイス用のリッド。",
     taglineAr: "غطاء لأجهزة الحرارة من Tactical HB.",
+    /* Copy from Mario's LID text (14 Oct 2026), lightly rephrased with his
+       go-ahead. "9E418 series" became "the Tactical HB HMD" on his
+       instruction the same day — no 9E418-only compatibility claims. */
     descriptionUk:
-      "Кришка для пристроїв нагріву Tactical HB. Продається окремо. HMD TCT Classic продається без кришки, якщо її не додано під час замовлення. Ту саму кришку можна додати під час налаштування пристрою нагріву.",
+      "LID 9E418 для HMD Tactical HB: пластина з нержавіючої сталі з круговими отворами в рамці з термостійкого силікону — тримає жар усередині й керує потоком повітря. Продається окремо. Ту саму кришку можна додати під час налаштування пристрою нагріву.",
     descriptionEn:
-      "A lid for Tactical HB heat devices. Sold separately. HMD TCT Classic ships without a lid unless one is added at checkout. The same lid can be added while configuring a heat device.",
+      "LID 9E418 for the Tactical HB HMD: a vented stainless steel plate in a high-temperature silicone frame that keeps the heat in and the airflow under control. Sold separately. The same lid can be added while configuring a heat device.",
     descriptionJa:
-      "Tactical HB ヒートデバイス用のリッド。単品販売。HMD TCT Classic は、注文時に追加しない限りリッドなしで出荷されます。ヒートデバイスの設定時に同じリッドを追加することもできます。",
+      "Tactical HB HMD 用の LID 9E418。円形の通気孔を備えたステンレス鋼プレートを高耐熱シリコンのフレームで囲み、熱を閉じ込めて空気の流れをコントロールします。単品販売。ヒートデバイスの設定時に同じリッドを追加することもできます。",
     descriptionAr:
-      "غطاء لأجهزة الحرارة من Tactical HB. يُباع منفصلاً. يُشحن HMD TCT Classic دون غطاء ما لم يُضف عند الطلب. ويمكن إضافة الغطاء نفسه عند تجهيز جهاز الحرارة.",
+      "LID 9E418 لجهاز HMD من Tactical HB: لوح من الفولاذ المقاوم للصدأ بفتحات دائرية داخل إطار من السيليكون المقاوم للحرارة العالية، يحبس الحرارة ويتحكّم في تدفّق الهواء. يُباع منفصلًا. ويمكن إضافة الغطاء نفسه عند تجهيز جهاز الحرارة.",
     price: MATERIAL_PRICE.lid.eur,
     priceUah: MATERIAL_PRICE.lid.uah,
     currency: "EUR",
@@ -1314,13 +1317,67 @@ export const products: Product[] = [
     pdp: {
       photos: ["/images/accessories/lid-9e418-1-v3.jpg", "/images/accessories/lid-9e418-2-v3.jpg", "/images/accessories/lid-9e418-3-v3.jpg"],
       shortEn:
-        "The lid for Tactical HB heat devices, sold on its own. HMD TCT Classic ships without one unless it is added at checkout, and this is the same lid offered there.",
+        "Complete your setup with LID 9E418, made for the Tactical HB HMD. It keeps the heat in and the airflow under control: a stainless steel plate with circular vents, framed in thick, high-temperature silicone.",
       shortUk:
-        "Кришка для пристроїв нагріву Tactical HB, окремо. HMD TCT Classic постачається без кришки, якщо її не додати при оформленні, — і це та сама кришка.",
+        "Доповніть свій сетап кришкою LID 9E418, створеною для HMD Tactical HB. Вона тримає жар усередині й керує потоком повітря: пластина з нержавіючої сталі з круговими отворами в рамці з товстого термостійкого силікону.",
       shortJa:
-        "Tactical HB ヒートデバイス用のリッドを単品で。HMD TCT Classic は注文時に追加しない限りリッドなしで出荷されます。そこで選べるものと同じリッドです。",
+        "Tactical HB HMD のために作られた LID 9E418 で、セットアップを完成させましょう。熱を閉じ込め、空気の流れをコントロールします。円形の通気孔を備えたステンレス鋼プレートを、厚みのある高耐熱シリコンのフレームで囲みました。",
       shortAr:
-        "غطاء أجهزة الحرارة من Tactical HB، يُباع منفصلاً. يُشحن HMD TCT Classic دونه ما لم يُضف عند الطلب، وهو الغطاء نفسه المتاح هناك.",
+        "أكمل تجهيزك مع LID 9E418، المصمَّم لجهاز HMD من Tactical HB. يحبس الحرارة في الداخل ويتحكّم في تدفّق الهواء: لوح من الفولاذ المقاوم للصدأ بفتحات دائرية، داخل إطار سميك من السيليكون المقاوم للحرارة العالية.",
+      benefitsEn: [
+        "Made for the Tactical HB HMD: sits flush on the device and seals the heat in, so none escapes",
+        "Stainless steel plate with circular vents spreads heat evenly across the bowl and lets air through freely",
+        "Thick, food-grade, high-temperature silicone frame handles intense coal heat",
+        "Lift, adjust or remove it with your coal tongs mid-session to regulate the heat",
+      ],
+      benefitsUk: [
+        "Створена для HMD Tactical HB: щільно сідає на пристрій і тримає жар усередині",
+        "Пластина з нержавіючої сталі з круговими отворами рівномірно віддає тепло чаші й вільно пропускає повітря",
+        "Рамка з товстого харчового термостійкого силікону витримує сильний жар вугілля",
+        "Піднімайте, поправляйте чи знімайте її щипцями для вугілля просто під час сесії, щоб регулювати жар",
+      ],
+      benefitsJa: [
+        "Tactical HB HMD 用設計：デバイスにぴったり収まり、熱を逃さず閉じ込めます",
+        "円形の通気孔を備えたステンレス鋼プレートが、ボウル全体に熱を均一に伝え、空気をスムーズに通します",
+        "厚みのある食品グレードの高耐熱シリコンフレームが、炭の強い熱に耐えます",
+        "セッション中も炭用トングで持ち上げ・調整・取り外しができ、熱をコントロールできます",
+      ],
+      benefitsAr: [
+        "مصمَّم لجهاز HMD من Tactical HB: يستقر بإحكام على الجهاز ويحبس الحرارة فلا تتسرّب",
+        "لوح فولاذي مقاوم للصدأ بفتحات دائرية يوزّع الحرارة بالتساوي على الرأس ويمرّر الهواء بسلاسة",
+        "إطار سميك من سيليكون غذائي مقاوم للحرارة العالية يتحمّل حرارة الفحم الشديدة",
+        "ارفعه أو عدّله أو انزعه بملقط الفحم أثناء الجلسة للتحكّم في الحرارة",
+      ],
+      /* "Material" is spelled exactly so — lib/field-card lifts that row onto
+         the card under the description. */
+      specs: [
+        { labelEn: "Compatibility", labelUk: "Сумісність", labelJa: "対応機種", labelAr: "التوافق", valueEn: "Made for the Tactical HB HMD", valueUk: "Створена для HMD Tactical HB", valueJa: "Tactical HB HMD 用に設計", valueAr: "مصمَّم لجهاز HMD من Tactical HB" },
+        { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", labelAr: "المادة", valueEn: "Stainless steel + high-temp silicone", valueUk: "Нержавіюча сталь + термостійкий силікон", valueJa: "ステンレス鋼 + 高耐熱シリコン", valueAr: "فولاذ مقاوم للصدأ + سيليكون مقاوم للحرارة" },
+        { labelEn: "Plate", labelUk: "Пластина", labelJa: "プレート", labelAr: "اللوح", valueEn: "Stainless steel, circular vents", valueUk: "Нержавіюча сталь, кругові отвори", valueJa: "ステンレス鋼、円形の通気孔", valueAr: "فولاذ مقاوم للصدأ، فتحات دائرية" },
+        { labelEn: "Frame", labelUk: "Рамка", labelJa: "フレーム", labelAr: "الإطار", valueEn: "Thick, food-grade, high-temp silicone", valueUk: "Товстий харчовий термостійкий силікон", valueJa: "厚手の食品グレード高耐熱シリコン", valueAr: "سيليكون غذائي سميك مقاوم للحرارة العالية" },
+      ],
+      /* Mario's Tips for Use (14 Oct 2026), word for word the HMDs' and
+         FEAR's, translations included. */
+      tipsEn: [
+        "Never cool the device with water.",
+        "Silicone parts are heat-resistant, not fire-resistant!",
+        "Be tct when using this device.",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте пристрій водою.",
+        "Силіконові деталі термостійкі, але не вогнестійкі!",
+        "Будьте tct, користуючись цим пристроєм.",
+      ],
+      tipsJa: [
+        "水で本体を冷やさないでください。",
+        "シリコン部品は耐熱性ですが、耐火性ではありません！",
+        "このデバイスを使うときは tct であれ。",
+      ],
+      tipsAr: [
+        "لا تبرّد الجهاز بالماء أبدًا.",
+        "قطع السيليكون مقاومة للحرارة، لكنها غير مقاومة للنار!",
+        "كن tct عند استخدام هذا الجهاز.",
+      ],
     },
   },
 

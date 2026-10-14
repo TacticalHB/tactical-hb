@@ -3,6 +3,8 @@ import { fetchPartners } from "@/lib/partners-admin";
 import { byAttention, followUpDue } from "@/lib/partners-display";
 import PartnerForm from "@/components/admin/PartnerForm";
 import PartnerCard from "@/components/admin/PartnerCard";
+import { fetchAllRequests } from "@/lib/wholesale-portal";
+import type { WholesaleRequest } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
    Admin: the wholesale CRM.
@@ -29,7 +31,11 @@ export default async function AdminPartnersPage({
   const uk = locale === "uk";
   const today = new Date().toISOString().slice(0, 10);
 
-  const read = await fetchPartners();
+  const [read, requests] = await Promise.all([fetchPartners(), fetchAllRequests(2000)]);
+  /* Each partner's wholesale requests, for the order history on their card
+     (Mario, 14 Oct 2026). The card shows the approved ones. */
+  const requestsByPartner: Record<string, WholesaleRequest[]> = {};
+  for (const r of requests ?? []) (requestsByPartner[r.partnerId] ??= []).push(r);
   const partners = read === null ? null : [...read.partners].sort(byAttention(today));
   const dueCount = (partners ?? []).filter((p) => followUpDue(p, today)).length;
 
@@ -88,6 +94,8 @@ export default async function AdminPartnersPage({
                 key={p.id}
                 partner={p}
                 orders={read!.ordersByPartner[p.id] ?? []}
+                requests={requestsByPartner[p.id] ?? []}
+                locale={locale}
                 today={today}
                 uk={uk}
               />

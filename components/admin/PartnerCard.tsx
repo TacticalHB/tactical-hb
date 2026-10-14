@@ -19,7 +19,15 @@ import {
   type Partner,
   type PartnerStatus,
 } from "@/lib/partners-display";
-import { ADMIN_ACCOUNT_STATUS, partnerCurrency, type AccountStatus } from "@/lib/wholesale-display";
+import {
+  ADMIN_ACCOUNT_STATUS,
+  ADMIN_REQUEST_STATUS,
+  partnerCurrency,
+  type AccountStatus,
+  type RequestStatus,
+  type WholesaleRequest,
+} from "@/lib/wholesale-display";
+import { formatMoney } from "@/lib/currency";
 import { formatUah } from "@/lib/stock-display";
 import type { PartnerOrder } from "@/lib/partners-admin";
 
@@ -34,17 +42,40 @@ import type { PartnerOrder } from "@/lib/partners-admin";
    history and should never feel incidental.
 --------------------------------------------------------------------------- */
 
+/* APPROVED MEANS WE SAID YES: payment details sent, or paid. Submitted and
+   in-discussion requests are still open, and cancelled ones never happened,
+   so neither belongs in the history (Mario, 14 Oct 2026: "the history of
+   their approved orders"). */
+const APPROVED_REQUEST: RequestStatus[] = ["payment_sent", "paid"];
+
 export default function PartnerCard({
   partner,
   orders,
+  requests = [],
+  locale: pageLocale = "en",
   today,
   uk,
 }: {
   partner: Partner;
   orders: PartnerOrder[];
+  /** Every wholesale request this partner has sent, newest first. */
+  requests?: WholesaleRequest[];
+  locale?: string;
   today: string;
   uk: boolean;
 }) {
+  const approved = requests.filter((r) => APPROVED_REQUEST.includes(r.status));
+  /* Totals per currency: a request is priced in the currency it was quoted
+     in, and a partner moved from one to the other must not have the two
+     added together. */
+  const paidTotals = (["EUR", "UAH"] as const)
+    .map((cur) => {
+      const paid = approved.filter((r) => r.status === "paid" && (r.currency ?? "UAH") === cur);
+      const sum = paid.reduce((s, r) => s + ((cur === "EUR" ? r.subtotalEur : r.subtotalUah) ?? 0), 0);
+      return paid.length ? formatMoney(cur === "EUR" ? { eur: sum, uah: 0 } : { eur: 0, uah: sum }, cur) : null;
+    })
+    .filter(Boolean)
+    .join(" + ");
   const router = useRouter();
   const p = partner;
 
@@ -86,6 +117,12 @@ export default function PartnerCard({
     linkRef: uk ? "Прив'язати" : "Link",
     refPlaceholder: uk ? "TCT-… або id замовлення" : "TCT-… or order id",
     linkedOrders: uk ? "Прив'язані замовлення" : "Linked orders",
+    wholesaleOrders: uk ? "Оптові замовлення (схвалені)" : "Wholesale orders (approved)",
+    noWholesale: uk ? "Схвалених оптових замовлень ще немає." : "No approved wholesale orders yet.",
+    wholesaleCount: (n: number) =>
+      uk ? `${n} опт. ${n === 1 ? "замовлення" : "замовлень"}` : `${n} wholesale order${n === 1 ? "" : "s"}`,
+    paidTotal: uk ? "оплачено" : "paid",
+    units: (n: number) => (uk ? `${n} од.` : `${n} unit${n === 1 ? "" : "s"}`),
     account: uk ? "Доступ до порталу" : "Portal access",
     noLogin: uk ? "Без логіна" : "No login",
     approve: uk ? "Схвалити" : "Approve",
@@ -307,6 +344,12 @@ export default function PartnerCard({
         {p.email && (
           <span className="font-mono text-[12px]" style={{ color: "var(--console-muted)" }}>
             {p.email}
+          </span>
+        )}
+        {approved.length > 0 && (
+          <span style={{ color: "var(--console-muted)" }}>
+            {L.wholesaleCount(approved.length)}
+            {paidTotals && ` · ${paidTotals} ${L.paidTotal}`}
           </span>
         )}
         {p.orderCount > 0 && (
@@ -621,6 +664,56 @@ export default function PartnerCard({
               {error ?? info}
             </p>
           )}
+
+          {/* ---- Wholesale order history (Mario, 14 Oct 2026) ----------------
+              The partner's requests that we approved, newest first. Each one
+              opens its card in the Requests inbox, where its lines live. */}
+          <div className="mt-4">
+            <div className="text-[12px] font-medium mb-1" style={{ color: "var(--console-muted)" }}>
+              {L.wholesaleOrders}
+            </div>
+            {approved.length === 0 && (
+              <p className="text-[12.5px]" style={{ color: "var(--console-faint)" }}>
+                {L.noWholesale}
+              </p>
+            )}
+            {approved.map((r) => {
+              const cur = r.currency ?? "UAH";
+              const units = r.items.reduce((s, i) => s + i.qty, 0);
+              return (
+                <div key={r.id} className="py-1.5 text-[12.5px]">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                  <a
+                    href={`/${pageLocale}/admin/wholesale#req-${r.reference}`}
+                    className="font-mono underline-offset-2 hover:underline"
+                    style={{ color: "var(--console-text)" }}
+                  >
+                    {r.reference}
+                  </a>
+                  <span className="tabular-nums" style={{ color: "var(--console-muted)" }}>
+                    {r.createdAt.slice(0, 10)}
+                  </span>
+                  <span style={{ color: r.status === "paid" ? "var(--console-ok)" : "var(--console-muted)" }}>
+                    {uk ? ADMIN_REQUEST_STATUS[r.status].uk : ADMIN_REQUEST_STATUS[r.status].en}
+                  </span>
+                  <span style={{ color: "var(--console-muted)" }}>{L.units(units)}</span>
+                  <span className="tabular-nums" style={{ color: "var(--console-text)" }}>
+                    {(cur === "EUR" ? r.subtotalEur : r.subtotalUah) === null
+                      ? "—"
+                      : formatMoney({ eur: r.subtotalEur ?? 0, uah: r.subtotalUah ?? 0 }, cur)}
+                  </span>
+                </div>
+                {/* What was in it, so the history reads without opening the
+                    request: "40 × Tactical Killer · 10 × HMD TCT OP Black …" */}
+                <div className="mt-0.5" style={{ color: "var(--console-faint)" }}>
+                  {r.items
+                    .map((i) => `${i.qty} × ${i.name}${i.variant ? ` ${i.variant}` : ""}${i.optionsLabel ? ` (${i.optionsLabel})` : ""}`)
+                    .join(" · ")}
+                </div>
+                </div>
+              );
+            })}
+          </div>
 
           <div className="mt-4">
             <div className="text-[12px] font-medium mb-1" style={{ color: "var(--console-muted)" }}>

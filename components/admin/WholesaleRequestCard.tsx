@@ -99,7 +99,8 @@ export default function WholesaleRequestCard({
   const total = fmt(r.subtotalEur, r.subtotalUah);
 
   return (
-    <div style={{ borderTop: "1px solid var(--console-border)" }}>
+    /* The id is the anchor a partner card's order history links to. */
+    <div id={`req-${r.reference}`} className="scroll-mt-24" style={{ borderTop: "1px solid var(--console-border)" }}>
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-5 py-3 text-[13.5px]">
         <span className="font-mono font-medium tracking-[0.04em]" style={{ color: "var(--console-text)" }}>
           {r.reference}

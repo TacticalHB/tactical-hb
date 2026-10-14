@@ -54,14 +54,11 @@ FOOTER_Y = 40
 FLOOR = FOOTER_Y + 24
 ROW = 22  # baseline to baseline
 
-MONTHS_UK = ["січня", "лютого", "березня", "квітня", "травня", "червня", "липня",
-             "серпня", "вересня", "жовтня", "листопада", "грудня"]
-
 COPY = {
     "uah": {
         "rail": "Роздрібні ціни · UAH",
         "title": "Роздрібні ціни",
-        "sub": lambda d: "Ціни на tactical-hb.com для покупців в Україні · станом на %d %s %d" % (d.day, MONTHS_UK[d.month - 1], d.year),
+        "sub": "Ціни на tactical-hb.com для покупців в Україні",
         "cats": {"hookah": "КАЛЬЯНИ", "bowl": "ЧАШІ", "hmd": "ПРИСТРОЇ НАГРІВУ", "windcover": "КОВПАКИ", "accessory": "АКСЕСУАРИ"},
         "timer": "Таймер — додається до ковпака",
         "colours": {"Black": "Чорний", "Purple": "Фіолетовий"},
@@ -70,7 +67,8 @@ COPY = {
     "eur": {
         "rail": "Retail prices · EUR",
         "title": "Retail prices",
-        "sub": lambda d: "Prices on tactical-hb.com for customers outside Ukraine · as of %d %s %d" % (d.day, d.strftime("%B"), d.year),
+        # Mario, 14 Oct 2026: this wording, and no date on either list.
+        "sub": "Worldwide prices on tactical-hb.com",
         "cats": {"hookah": "HOOKAHS", "bowl": "BOWLS", "hmd": "HEAT DEVICES", "windcover": "WIND COVERS", "accessory": "ACCESSORIES"},
         "timer": "Timer — added to a wind cover",
         "colours": {"Black": "Black", "Purple": "Purple"},
@@ -95,7 +93,7 @@ def money(v, cur):
     return "€%.2f" % v
 
 
-def page(c, rows, cur, today):
+def page(c, rows, cur):
     t = COPY[cur]
     y = H - 58
     c.setFont("THB-Bold", 12.5)
@@ -118,7 +116,7 @@ def page(c, rows, cur, today):
     y -= 17
     c.setFont("THB", 9)
     c.setFillColor(MUTED)
-    c.drawString(LEFT, y, t["sub"](today))
+    c.drawString(LEFT, y, t["sub"])
     y -= 14
 
     last = None
@@ -176,7 +174,7 @@ def main():
         c = canvas.Canvas(out, pagesize=A4)
         c.setTitle("Tactical HB — " + COPY[cur]["title"])
         c.setAuthor("Tactical HB")
-        page(c, rows, cur, today)
+        page(c, rows, cur)
         c.showPage()
         c.save()
         print("wrote %s" % out)

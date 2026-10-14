@@ -1139,8 +1139,8 @@ export const products: Product[] = [
     slug: "fear-9e418",
     /* A product name, so it is the same string in every language — the same
        rule 0029 set when the ring stopped being called a rubber. */
-    nameUk: "FEAR Stabiliser Ring 9E418",
-    nameEn: "FEAR Stabiliser Ring 9E418",
+    nameUk: "FEAR Stabiliser 9E418",
+    nameEn: "FEAR Stabiliser 9E418",
     taglineUk: "Ущільнювальне кільце для пристроїв нагріву Tactical HB.",
     taglineEn: "Seal and fitment accessory for Tactical HB heat devices.",
     taglineJa: "Tactical HB ヒートデバイス用のシーリングリング。",

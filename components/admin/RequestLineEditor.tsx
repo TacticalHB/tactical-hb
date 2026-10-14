@@ -120,7 +120,7 @@ export default function RequestLineEditor({
     quotedAt: uk ? "за старою ціною" : "at quoted price",
     addonLabels: {
       lid: "Lid 9E418",
-      rubber: "FEAR Stabiliser Ring 9E418",
+      rubber: "FEAR Stabiliser 9E418",
       timer: uk ? "Таймер" : "Timer",
     } as Record<AddonKey, string>,
     bookLabel: uk ? "Прайс запиту" : "Priced from",

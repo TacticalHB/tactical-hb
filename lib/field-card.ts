@@ -56,7 +56,7 @@ export function selectedConfig(
   const out: string[] = [];
   if (product.category === "hmd") {
     if (material?.lid) out.push(t(locale, { uk: "з Lid 9E418", en: "with Lid 9E418", ja: "Lid 9E418 付き", ar: "مع Lid 9E418" }));
-    if (material?.rubber) out.push(t(locale, { uk: "з FEAR Stabiliser Ring 9E418", en: "with FEAR Stabiliser Ring 9E418", ja: "FEAR Stabiliser Ring 9E418 付き", ar: "مع FEAR Stabiliser Ring 9E418" }));
+    if (material?.rubber) out.push(t(locale, { uk: "з FEAR Stabiliser 9E418", en: "with FEAR Stabiliser 9E418", ja: "FEAR Stabiliser 9E418 付き", ar: "مع FEAR Stabiliser 9E418" }));
   }
   if (product.category === "windcover" && windcover?.timer) {
     out.push(t(locale, { uk: "з таймером", en: "with timer", ja: "タイマー付き", ar: "مع المؤقّت" }));

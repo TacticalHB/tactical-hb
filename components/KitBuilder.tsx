@@ -66,7 +66,7 @@ const SLOT_ORDER: SlotKey[] = ["bowl", "hmd", "windcover"];
 
 
 /** The ring add-on's product name. Same string in both languages. */
-const FEAR_9E418 = "FEAR Stabiliser Ring 9E418";
+const FEAR_9E418 = "FEAR Stabiliser 9E418";
 
 /* Hairline ghosts from the design export, normalised on extract to
    public/setup/ghost-<slot>-hairline.png. The fill variants and the lineup /

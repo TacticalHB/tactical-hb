@@ -529,7 +529,7 @@ export const products: Product[] = [
     descriptionJa: "完全な非粘着表面、100% PFOA フリー。フレーバーがこびりつかず、お手入れも簡単です。パープルとブラックをご用意しています。",
     descriptionAr: "سطح غير لاصق تمامًا، خالٍ من PFOA بنسبة 100٪. يمنع التصاق الخلطة ويسهّل التنظيف. متوفر بالبنفسجي والأسود.",
     price: 30,
-    priceUah: 1180,
+    priceUah: 1250, // ₴1250 from 14 Oct 2026 (Mario) — follows Black, the first variant
     currency: "EUR",
     weightG: 125,
     dims: { l: 122, w: 122, h: 42 },
@@ -547,7 +547,7 @@ export const products: Product[] = [
         swatch: "#1c1c1e",
         image: "/images/hmd-op-black.png",
         price: 30,
-        priceUah: 1180,
+        priceUah: 1250, // was ₴1180; 14 Oct 2026 (Mario)
         /* Black's own gallery: the cut-out it has always had, then the
            packaging shot. Declared PER COLOUR rather than on the product,
            because a product-level list would replace the swatch-driven gallery
@@ -558,7 +558,7 @@ export const products: Product[] = [
           "/images/hmd-op-black-2.jpg", // 2nd — boxed, with the PFOA-free mark
         ],
       },
-      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1260 },
+      { name: "Purple", swatch: "#4a3d84", image: "/images/hmd-op-purple.png", price: 32, priceUah: 1280 }, // was ₴1260; 14 Oct 2026 (Mario)
     ],
     pdp: {
       /* No `photos` key on purpose: a list here outranks everything and would
@@ -752,7 +752,7 @@ export const products: Product[] = [
     descriptionJa: "天然クレイの手づくり。35〜40分の明るくやわらかな味わい。おひとり用。容量 10〜12g。",
     descriptionAr: "مصنوع يدويًا من طين طبيعي. جلسة مشرقة وناعمة لمدة 35–40 دقيقة. للاستخدام الفردي. السعة 10–12 غ.",
     price: 10,
-    priceUah: 380,
+    priceUah: 390, // was ₴380; 14 Oct 2026 (Mario)
     currency: "EUR",
     weightG: 300,
     dims: { l: 109, w: 82, h: 82 },
@@ -845,7 +845,7 @@ export const products: Product[] = [
     descriptionJa: "独自のインサートを備えたクラシックなファンネル。驚くほど濃厚でまろやかな香味。過程を大切にする方へ。",
     descriptionAr: "فانل كلاسيكي بقطعة داخلية مميّزة. نكهة غنية ولطيفة إلى حد مذهل. لمن يقدّر التجربة.",
     price: 13,
-    priceUah: 510,
+    priceUah: 520, // was ₴510; 14 Oct 2026 (Mario)
     currency: "EUR",
     weightG: 345,
     dims: { l: 109, w: 82, h: 82 },

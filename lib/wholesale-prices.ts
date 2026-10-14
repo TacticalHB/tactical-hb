@@ -55,7 +55,9 @@ import type { LineAddons } from "@/lib/wholesale-display";
    printed list quotes it once; these eight figures were set afterwards by
    Mario and are a deliberate departure from it:
 
-     shop    Black €19.00 / ₴820    Purple €20.00 / ₴890    (list: €19.50 / ₴860)
+     shop    Black €19.00 / ₴850    Purple €20.00 / ₴915    (list: €19.50 / ₴860)
+             (hryvnia raised from ₴820 / ₴890 on 14 Oct 2026, Mario — shop and
+              distribution only; lounge unchanged, as with the lid on 7 Oct)
      lounge  Black €25.50 / ₴1080   Purple €27.00 / ₴1125   (list: €25.50 / ₴1035)
 
    Each was given explicitly. None is a conversion of another — the hryvnia
@@ -97,8 +99,8 @@ const BOOKS: Record<PartnerType, Book> = {
          same money to a shop, the way they are not at retail. The bare slug
          stays as the fallback for any colour not listed. */
       "hmd-tct-op": m(19.5, 860),
-      "hmd-tct-op__black": m(19.0, 820),
-      "hmd-tct-op__purple": m(20.0, 890),
+      "hmd-tct-op__black": m(19.0, 850), // ₴850 from 14 Oct 2026 (Mario); was ₴820
+      "hmd-tct-op__purple": m(20.0, 915), // ₴915 from 14 Oct 2026 (Mario); was ₴890
       "bowl-killer": m(6.9, 320),
       "bowl-livanka": m(6.0, 280),
       "bowl-phunnel": m(8.0, 375),
@@ -126,8 +128,8 @@ const BOOKS: Record<PartnerType, Book> = {
       "hmd-tct-classic": m(12.0, 550),
       "hmd-a-craft": m(14.5, 640),
       "hmd-tct-op": m(19.5, 860),
-      "hmd-tct-op__black": m(19.0, 820),
-      "hmd-tct-op__purple": m(20.0, 890),
+      "hmd-tct-op__black": m(19.0, 850), // ₴850 from 14 Oct 2026 (Mario); was ₴820
+      "hmd-tct-op__purple": m(20.0, 915), // ₴915 from 14 Oct 2026 (Mario); was ₴890
       "bowl-killer": m(6.9, 320),
       "bowl-livanka": m(6.0, 280),
       "bowl-phunnel": m(8.0, 375),

@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { isWholesaleUser } from "@/lib/wholesale-portal";
 import { requireUser } from "@/lib/supabase/require-user";
 import { DEFAULT_LOYALTY_CONFIG, type LoyaltyConfig, type Milestone } from "@/lib/loyalty/config";
 import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
@@ -15,6 +17,9 @@ export default async function LoyaltyPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   const { supabase, user } = await requireUser(locale);
   const uid = user.id;
+  /* Hidden from wholesale accounts, by address too (Mario, 14 Oct 2026): a
+     separate wholesale loyalty programme comes later. */
+  if (await isWholesaleUser(uid)) redirect(`/${locale}/account`);
 
   const [{ data: cfgRow }, { data: orders }, { data: points }, { data: vouchers }] = await Promise.all([
     supabase.from("loyalty_config").select("*").eq("id", 1).single(),

@@ -96,11 +96,14 @@ function IdentityOption({
 export default function CheckoutClient({
   locale,
   rankDiscountRate = 0,
+  vouchers = true,
 }: {
   locale: string;
   /** The signed-in customer's permanent rank discount — 0.07 for Colonel, 0
       for everyone else. Display only; the server prices it independently. */
   rankDiscountRate?: number;
+  /** False for a wholesale account: no voucher field (Mario, 14 Oct 2026). */
+  vouchers?: boolean;
 }) {
   const uk = locale === "uk";
   const router = useRouter();
@@ -1071,6 +1074,7 @@ export default function CheckoutClient({
 
               {/* Voucher — last thing before paying, so the total it changes is
                   the one directly above the pay button. */}
+              {vouchers && (
               <div className="mb-6">
                 <VoucherField
                   locale={locale}
@@ -1081,6 +1085,7 @@ export default function CheckoutClient({
                   onRemove={() => setVoucher(null)}
                 />
               </div>
+              )}
 
               {/* A priced international order pays like any other and must not
                   be told it is a request; only an unquotable one gets the

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "@/components/account/AccountNav";
 import { rankForUser } from "@/lib/loyalty/rank-server";
+import { isWholesaleUser } from "@/lib/wholesale-portal";
 
 /**
  * The whole account area is never indexed — profile, orders, loyalty,
@@ -41,12 +42,15 @@ export default async function AccountLayout({
   /* The nav shows the rank as a small mark beside Loyalty. Resolved here
      because this layout already holds both the client and the user — the
      alternative was a second round trip from a client component. */
-  const rank = user && supabase ? (await rankForUser(supabase, user.id)).rank : null;
+  /* Wholesale accounts get no Loyalty link and no rank (Mario, 14 Oct 2026 —
+     a wholesale programme comes later), so the rank isn't worked out for them. */
+  const wholesale = user ? await isWholesaleUser(user.id) : false;
+  const rank = user && supabase && !wholesale ? (await rankForUser(supabase, user.id)).rank : null;
 
   return (
     <div className="min-h-screen pt-24 pb-20 page-container" style={{ background: "#ffffff" }}>
       <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-        {user && <AccountNav locale={locale} rank={rank} />}
+        {user && <AccountNav locale={locale} rank={rank} hideLoyalty={wholesale} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>

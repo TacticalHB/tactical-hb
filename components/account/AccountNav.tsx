@@ -7,7 +7,16 @@ import { useAuth } from "@/components/AuthContext";
 import RankBadge from "./RankBadge";
 import type { Rank } from "@/lib/loyalty/ranks";
 
-export default function AccountNav({ locale, rank }: { locale: string; rank?: Rank | null }) {
+export default function AccountNav({
+  locale,
+  rank,
+  hideLoyalty = false,
+}: {
+  locale: string;
+  rank?: Rank | null;
+  /** Wholesale accounts have no retail loyalty (Mario, 14 Oct 2026). */
+  hideLoyalty?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useAuth();
@@ -19,7 +28,7 @@ export default function AccountNav({ locale, rank }: { locale: string; rank?: Ra
     { href: `${base}/favourites`, label: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り", ar: "المفضّلة" }) },
     { href: `${base}/loyalty`, label: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" }), badge: true },
     { href: `${base}/settings`, label: t(locale, { uk: "Налаштування", en: "Account Settings", ja: "アカウント設定", ar: "إعدادات الحساب" }) },
-  ];
+  ].filter((it) => !(hideLoyalty && it.badge));
 
   // The admin links that used to pile up here were Phase A–D scaffolding.
   // Phase E gave the OS its own shell: admins enter through the person icon

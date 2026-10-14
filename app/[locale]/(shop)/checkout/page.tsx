@@ -1,6 +1,7 @@
 import CheckoutClient from "@/components/checkout/CheckoutClient";
 import { createClient } from "@/lib/supabase/server";
 import { rankForUser, GUEST_RANK } from "@/lib/loyalty/rank-server";
+import { isWholesaleUser } from "@/lib/wholesale-portal";
 import { privatePageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -21,7 +22,10 @@ export default async function CheckoutPage({
      tampered prop changes the wording on screen and nothing about the charge. */
   const supabase = await createClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
-  const { rank } = user && supabase ? await rankForUser(supabase, user.id) : GUEST_RANK;
+  /* A wholesale account has no retail loyalty — no rank perk, no vouchers
+     (Mario, 14 Oct 2026); create-invoice applies the same rule. */
+  const wholesale = user ? await isWholesaleUser(user.id) : false;
+  const { rank } = user && supabase && !wholesale ? await rankForUser(supabase, user.id) : GUEST_RANK;
 
   /* KEYED ON THE LOCALE, which is how the shipping state is guaranteed to be
      dropped when someone moves between /uk/checkout and /en/checkout.
@@ -38,6 +42,6 @@ export default async function CheckoutPage({
      guarantee, and the failure it would produce is a quote from the wrong
      country surviving into an invoice. */
   return (
-    <CheckoutClient key={locale} locale={locale} rankDiscountRate={rank.discountRate} />
+    <CheckoutClient key={locale} locale={locale} rankDiscountRate={rank.discountRate} vouchers={!wholesale} />
   );
 }

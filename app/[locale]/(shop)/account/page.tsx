@@ -2,6 +2,7 @@ import Link from "next/link";
 import { t } from "@/lib/i18n-text";
 import { requireUser } from "@/lib/supabase/require-user";
 import { privatePageMetadata } from "@/lib/seo";
+import { isWholesaleUser } from "@/lib/wholesale-portal";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -11,6 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const { supabase, user } = await requireUser(locale);
+  const wholesale = await isWholesaleUser(user.id);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -29,7 +31,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   );
 
   const cards = [
-    { href: `/${locale}/account/loyalty`, title: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" }), desc: t(locale, { uk: "XP, прогрес та ваучери", en: "XP, progress & vouchers", ja: "XP、進捗、バウチャー", ar: "نقاط الخبرة والتقدّم والقسائم" }) },
+    // No retail loyalty for wholesale accounts (Mario, 14 Oct 2026).
+    ...(wholesale ? [] : [{ href: `/${locale}/account/loyalty`, title: t(locale, { uk: "Бонуси", en: "Loyalty", ja: "ロイヤルティ", ar: "الولاء" }), desc: t(locale, { uk: "XP, прогрес та ваучери", en: "XP, progress & vouchers", ja: "XP、進捗、バウチャー", ar: "نقاط الخبرة والتقدّم والقسائم" }) }]),
     { href: `/${locale}/account/orders`, title: t(locale, { uk: "Замовлення", en: "Orders", ja: "ご注文", ar: "الطلبات" }), desc: t(locale, { uk: "Історія покупок", en: "Your purchase history", ja: "購入履歴", ar: "سجل مشترياتك" }) },
     { href: `/${locale}/account/favourites`, title: t(locale, { uk: "Обране", en: "Favourites", ja: "お気に入り", ar: "المفضّلة" }), desc: t(locale, { uk: "Збережені товари", en: "Saved products", ja: "保存した製品", ar: "المنتجات المحفوظة" }) },
   ];

@@ -6,6 +6,7 @@ import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money, eurToUahFixed } from "@/lib/currency";
 import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import { rankForUser } from "@/lib/loyalty/rank-server";
+import { isWholesaleUser } from "@/lib/wholesale-portal";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational as quoteNovaPost } from "@/lib/novapost";
@@ -110,9 +111,15 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   userId = user?.id ?? null;
+  /* NO RETAIL LOYALTY FOR A WHOLESALE ACCOUNT (Mario, 14 Oct 2026): neither a
+     voucher nor the rank perk comes off their order. The cart and checkout
+     already show none; this is where it is enforced. */
+  const wholesale = user ? await isWholesaleUser(user.id) : false;
 
   const requestedCode = String(b.voucherCode ?? "").trim().toUpperCase();
-  if (requestedCode) {
+  if (requestedCode && wholesale) {
+    console.warn("[invoice] voucher sent by a wholesale account — ignored");
+  } else if (requestedCode) {
     if (!supabase || !user) {
       // Vouchers belong to an account. A guest sending one is either confused
       // or probing; either way it is simply not applied.
@@ -155,7 +162,7 @@ export async function POST(request: NextRequest) {
      voucherCode is cleared with it, or the order would record a code it never
      charged for. */
   let discountSource: "voucher" | "rank" | "none" = voucherCode ? "voucher" : "none";
-  if (user && supabase) {
+  if (user && supabase && !wholesale) {
     const { rank, lifetime } = await rankForUser(supabase, user.id);
     const perk = permanentDiscount(rank.discountRate, priced.subtotal);
 

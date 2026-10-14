@@ -152,6 +152,30 @@ export function sanitiseAddons(p: Product, wanted?: Partial<LineAddons> | null):
  * created_by never leave the server: they are staff-owned and a partner
  * reading their own file would be a leak, not a feature.
  */
+/**
+ * Is this user a wholesale account — any partner row, whatever its status?
+ *
+ * WHY (Mario, 14 Oct 2026): wholesale accounts don't see the retail loyalty
+ * programme at all for now; a separate wholesale one will come later. An
+ * applicant still under review counts too: they signed up as a business, and
+ * an XP ladder built for retail spending is not theirs.
+ *
+ * Fails to false: a lookup error shows a partner the loyalty link for one
+ * page, which is harmless; failing the other way would hide it from shoppers.
+ */
+export async function isWholesaleUser(userId: string): Promise<boolean> {
+  const { data, error } = await createAdminClient()
+    .from("wholesale_partners")
+    .select("id")
+    .eq("user_id", userId)
+    .limit(1);
+  if (error) {
+    console.error("[wholesale] partner check failed:", error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
+}
+
 export async function partnerForUser(userId: string): Promise<PortalPartner | null> {
   const db = createAdminClient();
   const { data, error } = await db

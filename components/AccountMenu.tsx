@@ -21,6 +21,10 @@ export default function AccountMenu({ locale }: { locale: string }) {
   // Holds the user id admin status was confirmed FOR, so a sign-out or a
   // switch to another account can never leave a stale "yes" behind.
   const [adminFor, setAdminFor] = useState<string | null>(null);
+  /* Which signed-in user is a wholesale account — no Loyalty link for them
+     (Mario, 14 Oct 2026). Keyed by id like adminFor, so a sign-out and
+     sign-in as someone else can't inherit the last answer. */
+  const [wholesaleFor, setWholesaleFor] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -41,9 +45,17 @@ export default function AccountMenu({ locale }: { locale: string }) {
     const uid = user.id;
     let cancelled = false;
     fetch("/api/admin/me")
-      .then((r) => (r.ok ? r.json() : { admin: false }))
-      .then((d) => !cancelled && setAdminFor(d.admin === true ? uid : null))
-      .catch(() => !cancelled && setAdminFor(null));
+      .then((r) => (r.ok ? r.json() : { admin: false, wholesale: false }))
+      .then((d) => {
+        if (cancelled) return;
+        setAdminFor(d.admin === true ? uid : null);
+        setWholesaleFor(d.wholesale === true ? uid : null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAdminFor(null);
+        setWholesaleFor(null);
+      });
     return () => {
       cancelled = true;
     };
@@ -85,7 +97,7 @@ export default function AccountMenu({ locale }: { locale: string }) {
     { href: `/${locale}/account/favourites`, label: L.favourites },
     { href: `/${locale}/account/loyalty`, label: L.loyalty },
     { href: `/${locale}/account/settings`, label: L.settings },
-  ];
+  ].filter((l) => !(l.label === L.loyalty && user && wholesaleFor === user.id));
 
   return (
     <div className="relative flex items-center" ref={wrapRef}>

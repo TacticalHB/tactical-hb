@@ -1150,11 +1150,11 @@ export const products: Product[] = [
     descriptionUk:
       "Силіконовий рукав із глибоким бортиком, точно відлитий під HMD Tactical HB 9E418. Охоплює зовнішній край чаші, тримає її на місці, закриває мікрозазори та захищає від упалого вугілля. Продається окремо. Те саме кільце можна додати під час налаштування пристрою нагріву.",
     descriptionEn:
-      "A deep-lipped silicone sleeve precision-moulded for the Tactical HB 9E418 HMD. It cups the outside of the bowl rim, stops the bowl slipping, seals micro-gaps and guards against dropped coals. Sold separately. The same ring can be added while configuring a heat device.",
+      "A deep-lipped silicone sleeve precision-moulded for the Tactical HB 9E418 HMD. It cups the outside of the bowl rim, stops the heat device slipping, seals micro-gaps and guards against dropped coals. Sold separately. The same ring can be added while configuring a heat device.",
     descriptionJa:
       "Tactical HB 9E418 HMD に合わせて精密成形した、深いリップ付きのシリコンスリーブ。ボウルの縁を外側から包み、横ずれを防ぎ、すき間をふさぎ、落ちた炭から守ります。単品販売。ヒートデバイスの設定時に追加することもできます。",
     descriptionAr:
-      "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD 9E418 من Tactical HB. يحتضن الحافة الخارجية للرأس، ويمنع انزلاقه، ويسدّ الفجوات الدقيقة، ويحمي من الفحم المتساقط. يُباع منفصلًا. ويمكن إضافة الحلقة نفسها عند تجهيز جهاز الحرارة.",
+      "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD 9E418 من Tactical HB. يحتضن الحافة الخارجية للرأس، ويمنع انزلاق جهاز الحرارة، ويسدّ الفجوات الدقيقة، ويحمي من الفحم المتساقط. يُباع منفصلًا. ويمكن إضافة الحلقة نفسها عند تجهيز جهاز الحرارة.",
     price: MATERIAL_PRICE.rubber.eur,
     priceUah: MATERIAL_PRICE.rubber.uah,
     currency: "EUR",
@@ -1169,16 +1169,17 @@ export const products: Product[] = [
     category: "accessory",
     featured: false,
     /* The catalogue renders from the CAD (Classic HMD; Mario, 4 Oct 2026):
-       -1 the part alone (main), -2 fitted, -3 separated. */
-    image: "/images/accessories/fear-9e418-1-v2.jpg",
-    gridImage: "/images/accessories/fear-9e418-1-v2.jpg",
+       -1 the part alone (main), -2 fitted, -3 separated. v3 (14 Oct 2026):
+       the floor shadow is a ring now, so the hollow centre stays clean. */
+    image: "/images/accessories/fear-9e418-1-v3.jpg",
+    gridImage: "/images/accessories/fear-9e418-1-v3.jpg",
     /* Findable by what the part used to be called, without the old word
        appearing anywhere on the page. Someone who knows it as a гумка still
        lands on it — `tags` is what site search reads. */
     /* In stock 4 Oct 2026 (Mario) — on sale on its own and as the HMD add-on. */
     tags: ["accessory", "fear", "9e418", "stabiliser", "stabilizer", "rubber", "ring", "seal", "гумка", "гумове кільце", "кільце"],
     pdp: {
-      photos: ["/images/accessories/fear-9e418-1-v2.jpg", "/images/accessories/fear-9e418-2-v2.jpg", "/images/accessories/fear-9e418-3-v2.jpg"],
+      photos: ["/images/accessories/fear-9e418-1-v3.jpg", "/images/accessories/fear-9e418-2-v3.jpg", "/images/accessories/fear-9e418-3-v3.jpg"],
       shortEn:
         "A deep-lipped silicone sleeve, precision-moulded for the Tactical HB 9E418 HMD. It cups the outside of the bowl rim and holds the bowl on the device's radiator: no sideways slip, no micro-gaps, and a guard against dropped coals. The same ring is offered as an option when you configure a heat device.",
       shortUk:
@@ -1188,28 +1189,28 @@ export const products: Product[] = [
       shortAr:
         "غلاف سيليكون بحافة عميقة، مصبوب بدقة لجهاز HMD 9E418 من Tactical HB. يحتضن الحافة الخارجية للرأس ويثبّته على مشتّت حرارة الجهاز: لا انزلاق جانبي، ولا فجوات دقيقة، وحماية من الفحم المتساقط. وهي الحلقة نفسها المتاحة كخيار عند تجهيز جهاز الحرارة.",
       benefitsEn: [
-        "Stops the bowl slipping sideways on the heat device",
+        "Stops the heat device from slipping sideways",
         "Seals the micro-gaps between bowl and device for denser clouds",
         "Guards against dropped coals",
         "Flavour-neutral, food-grade silicone built for high heat",
         "Deep-lipped interlocking sleeve that cups the outside of the bowl rim",
       ],
       benefitsUk: [
-        "Чаша не зсувається вбік на пристрої нагріву",
+        "Пристрій нагріву не зсувається вбік",
         "Закриває мікрозазори між чашею і пристроєм — хмари щільніші",
         "Захищає від упалого вугілля",
         "Термостійкий харчовий силікон, нейтральний до смаку",
         "Рукав із глибоким бортиком, що охоплює зовнішній край чаші",
       ],
       benefitsJa: [
-        "ヒートデバイスの上でボウルが横にずれない",
+        "ヒートデバイスが横にずれない",
         "ボウルとデバイスの微細なすき間をふさぎ、より濃いクラウドに",
         "落ちた炭から守る",
         "風味に影響しない、高耐熱の食品グレードシリコン",
         "ボウルの縁を外側から包む、深いリップのインターロック構造",
       ],
       benefitsAr: [
-        "يمنع انزلاق الرأس جانبيًا على جهاز الحرارة",
+        "يمنع انزلاق جهاز الحرارة جانبيًا",
         "يسدّ الفجوات الدقيقة بين الرأس والجهاز لسحاب أكثف",
         "يحمي من الفحم المتساقط",
         "سيليكون غذائي مقاوم للحرارة العالية ولا يؤثر في النكهة",
@@ -1220,10 +1221,10 @@ export const products: Product[] = [
         { labelEn: "Bowl compatibility", labelUk: "Сумісні чаші", labelJa: "対応ボウル", labelAr: "الرؤوس المتوافقة", valueEn: "Outer rim up to 75–77 mm", valueUk: "Зовнішній діаметр краю до 75–77 мм", valueJa: "縁の外径 最大75〜77 mm", valueAr: "قطر الحافة الخارجية حتى 75–77 مم" },
         { labelEn: "Material", labelUk: "Матеріал", labelJa: "素材", labelAr: "المادة", valueEn: "100% high-temp, food-grade silicone", valueUk: "100% термостійкий харчовий силікон", valueJa: "高耐熱・食品グレードシリコン 100%", valueAr: "سيليكون غذائي مقاوم للحرارة 100%" },
         { labelEn: "Flavour", labelUk: "Смак", labelJa: "風味", labelAr: "النكهة", valueEn: "Neutral", valueUk: "Нейтральний", valueJa: "ニュートラル", valueAr: "محايدة" },
-        { labelEn: "Thermal guard", labelUk: "Термозахист", labelJa: "耐熱", labelAr: "الحماية الحرارية", valueEn: "Built for the 9E418 radiator's 260 °C (500 °F) peak", valueUk: "Розрахований на пік радіатора 9E418 — 260 °C (500 °F)", valueJa: "9E418 ラジエーターの最高 260 °C（500 °F）に対応", valueAr: "مصمّم لذروة مشتّت 9E418 البالغة \u2066260 °C (500 °F)\u2069" },
+        { labelEn: "Thermal guard", labelUk: "Термозахист", labelJa: "耐熱", labelAr: "الحماية الحرارية", valueEn: "Built for the 9E418 outer radiator's 240 °C (464 °F) peak", valueUk: "Розрахований на пік зовнішнього радіатора 9E418 — 240 °C (464 °F)", valueJa: "9E418 外側ラジエーターの最高 240 °C（464 °F）に対応", valueAr: "مصمّم لذروة السطح الخارجي لمشتّت 9E418 البالغة \u2066240 °C (464 °F)\u2069" },
         { labelEn: "Design", labelUk: "Конструкція", labelJa: "構造", labelAr: "التصميم", valueEn: "Deep-lipped interlocking sleeve", valueUk: "Рукав із глибоким бортиком і фіксацією", valueJa: "深いリップのインターロック式スリーブ", valueAr: "غلاف متشابك بحافة عميقة" },
       ],
-      /* \u2066…\u2069 (LRI/PDI) keep "260 °C (500 °F)" in reading order inside
+      /* \u2066…\u2069 (LRI/PDI) keep "240 °C (464 °F)" in reading order inside
          the Arabic sentences; without them the bidi algorithm scrambled it
          to "C (500 °F)° 260". */
       faq: [
@@ -1239,13 +1240,13 @@ export const products: Product[] = [
         },
         {
           qEn: "Will it melt on the radiator fins under heavy heat?",
-          aEn: "Never. The 9E418's radiator peaks at an outer temperature of 260 °C (500 °F) for about 10 minutes when running 4 coals. FEAR is made from extreme-heat, food-grade silicone built to survive that threshold without cracking, melting or degrading.",
+          aEn: "Never. The 9E418's radiator peaks at an outer temperature of 240 °C (464 °F) for about 10 minutes when running 4 coals. FEAR is made from extreme-heat, food-grade silicone built to survive that threshold without cracking, melting or degrading.",
           qUk: "Чи не розплавиться воно на ребрах радіатора за сильного жару?",
-          aUk: "Ніколи. Зовні радіатор 9E418 нагрівається щонайбільше до 260 °C (500 °F) — приблизно 10 хвилин із 4 вуглинками. FEAR виготовлено з особливо термостійкого харчового силікону, який витримує цей поріг без тріщин, плавлення та руйнування.",
+          aUk: "Ніколи. Зовні радіатор 9E418 нагрівається щонайбільше до 240 °C (464 °F) — приблизно 10 хвилин із 4 вуглинками. FEAR виготовлено з особливо термостійкого харчового силікону, який витримує цей поріг без тріщин, плавлення та руйнування.",
           qJa: "強い熱でラジエーターのフィンの上で溶けたりしませんか？",
-          aJa: "溶けません。9E418 のラジエーターは炭4個で使用した場合、外側の最高温度が 260 °C（500 °F）に達し、それが約10分続きます。FEAR はこの温度に耐えるよう作られた高耐熱の食品グレードシリコン製で、ひび割れ・溶融・劣化を起こしません。",
+          aJa: "溶けません。9E418 のラジエーターは炭4個で使用した場合、外側の最高温度が 240 °C（464 °F）に達し、それが約10分続きます。FEAR はこの温度に耐えるよう作られた高耐熱の食品グレードシリコン製で、ひび割れ・溶融・劣化を起こしません。",
           qAr: "هل تذوب على زعانف مشتّت الحرارة تحت الحرارة الشديدة؟",
-          aAr: "أبدًا. تبلغ حرارة السطح الخارجي لمشتّت 9E418 ذروتها عند \u2066260 °C (500 °F)\u2069 لنحو 10 دقائق عند استخدام 4 قطع فحم. وFEAR مصنوعة من سيليكون غذائي فائق المقاومة للحرارة صُمّم لتحمّل هذه العتبة دون تشقق أو ذوبان أو تلف.",
+          aAr: "أبدًا. تبلغ حرارة السطح الخارجي لمشتّت 9E418 ذروتها عند \u2066240 °C (464 °F)\u2069 لنحو 10 دقائق عند استخدام 4 قطع فحم. وFEAR مصنوعة من سيليكون غذائي فائق المقاومة للحرارة صُمّم لتحمّل هذه العتبة دون تشقق أو ذوبان أو تلف.",
         },
       ],
     },
@@ -1277,7 +1278,8 @@ export const products: Product[] = [
     category: "accessory",
     featured: false,
     /* The catalogue renders from the CAD (Classic HMD; Mario, 4 Oct 2026):
-       -1 the part alone (main), -2 fitted, -3 separated. */
+       -1 the part alone (main), -2 fitted, -3 separated. v3 (14 Oct 2026):
+       the floor shadow is a ring now, so the hollow centre stays clean. */
     image: "/images/accessories/lid-9e418-1-v2.jpg",
     gridImage: "/images/accessories/lid-9e418-1-v2.jpg",
     /* In stock 4 Oct 2026 (Mario) — on sale on its own and as the HMD add-on. */

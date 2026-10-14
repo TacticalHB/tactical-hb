@@ -157,16 +157,26 @@ export default function HmdViewer3D({
             if (y < 16.7 || y > 24.1) continue;
             const ang = Math.atan2(x, z);
             if (ang < a0 || ang > a1) continue;
-            if (rAt(y) - Math.hypot(x, z) > 0.05) col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = 0.14;
+            /* A band, not a floor: the cut is ~0.1 mm deep. "Anything below the
+               cone" also caught the inner wall behind the mark, 3 mm and more
+               in, which drew a black square inside the device (Mario,
+               14 Oct 2026). */
+            const depth = rAt(y) - Math.hypot(x, z);
+            if (depth > 0.05 && depth < 0.5) col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = 0.14;
           }
           g.setAttribute("color", new THREE.BufferAttribute(col, 3));
           hmdMat.vertexColors = true;
         }
 
-        /* Soft contact shadow under the lowest part. */
+        /* Soft contact shadow under the lowest part — A RING, CLEAR IN THE
+           MIDDLE. Every part here is open at the centre, and a disc of shadow
+           showed through FEAR's hollow as a dark blot (Mario, 14 Oct 2026).
+           The plane is 95 mm across, so 1.0 is r 47.5 mm: the band sits under
+           the HMD's rim (r 37) and FEAR's wall (r 33.5–40.5). */
         const sc = document.createElement("canvas"); sc.width = sc.height = 256;
-        const sx = sc.getContext("2d")!, sg = sx.createRadialGradient(128, 128, 20, 128, 128, 128);
-        sg.addColorStop(0, "rgba(0,0,0,0.22)"); sg.addColorStop(0.55, "rgba(0,0,0,0.12)"); sg.addColorStop(0.82, "rgba(0,0,0,0.03)"); sg.addColorStop(1, "rgba(0,0,0,0)");
+        const sx = sc.getContext("2d")!, sg = sx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        sg.addColorStop(0, "rgba(0,0,0,0)"); sg.addColorStop(0.6, "rgba(0,0,0,0)"); sg.addColorStop(0.72, "rgba(0,0,0,0.16)");
+        sg.addColorStop(0.84, "rgba(0,0,0,0.14)"); sg.addColorStop(0.94, "rgba(0,0,0,0.03)"); sg.addColorStop(1, "rgba(0,0,0,0)");
         sx.fillStyle = sg; sx.fillRect(0, 0, 256, 256);
         const shadow = new THREE.Mesh(new THREE.PlaneGeometry(95, 95), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
         shadow.rotation.x = -Math.PI / 2; scene.add(shadow);

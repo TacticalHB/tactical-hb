@@ -645,6 +645,43 @@ export const products: Product[] = [
         { icon: "wave", titleEn: "Draw", titleUk: "Тяга", titleJa: "吸い込み", titleAr: "السحب", textEn: "Smooth & clean", textUk: "М'яка і чиста", textJa: "なめらかで澄んだ", textAr: "سلس ونظيف" },
         { icon: "sparkle", titleEn: "Cleaning", titleUk: "Очищення", titleJa: "お手入れ", titleAr: "التنظيف", textEn: "Wipes clean", textUk: "Легко витирається", textJa: "拭くだけ", textAr: "يُمسح بسهولة" },
       ],
+      /* Mario's FAQ (14 Oct 2026), reworded at his request. The 240 °C is the
+         OUTER surface at peak heat with 4 coals — the same figure FEAR's page
+         quotes for the radiator. No-break spaces keep "464 °F" whole; LRI/PDI
+         keep it in reading order inside the Arabic. */
+      faq: [
+        /* First, at Mario's request: what the treatment IS, then whether it is safe. */
+        {
+          qEn: "What surface treatment is applied?",
+          aEn: "A Platinum grey non-stick coating (PTFE), PFOA-free.",
+          qUk: "Яке покриття нанесено на поверхню?",
+          aUk: "Антипригарне покриття Platinum grey (PTFE), без PFOA.",
+          qJa: "どのような表面処理が施されていますか？",
+          aJa: "Platinum grey の非粘着コーティング（PTFE）で、PFOA フリーです。",
+          qAr: "ما المعالجة المطبّقة على السطح؟",
+          aAr: "طلاء غير لاصق Platinum grey ‏(PTFE)، خالٍ من PFOA.",
+        },
+        {
+          qEn: "Is the HMD TCT OP's surface treatment harmful?",
+          aEn: "No. At peak heat with 4 coals, the HMD's outer surface reaches 240\u00a0°C (464\u00a0°F) at most. At temperatures this low, the surface treatment is completely safe.",
+          qUk: "Чи шкідливе покриття HMD TCT OP?",
+          aUk: "Ні. На піку жару з 4 вуглинками зовнішня поверхня HMD нагрівається щонайбільше до 240\u00a0°C (464\u00a0°F). За таких низьких температур покриття абсолютно безпечне.",
+          qJa: "HMD TCT OP の表面処理は有害ですか？",
+          aJa: "いいえ。炭4個を使った最も熱い状態でも、HMD の外側表面は最高 240\u00a0°C（464\u00a0°F）までしか上がりません。この程度の低い温度であれば、表面処理は完全に安全です。",
+          qAr: "هل معالجة سطح HMD TCT OP ضارّة؟",
+          aAr: "لا. عند ذروة الحرارة باستخدام 4 قطع فحم، لا تتجاوز حرارة السطح الخارجي للجهاز \u2066240\u00a0°C (464\u00a0°F)\u2069. وعند درجات حرارة منخفضة كهذه، تكون معالجة السطح آمنة تمامًا.",
+        },
+        {
+          qEn: "Is it fully coated?",
+          aEn: "No — only the outer surface and the working surface are coated.",
+          qUk: "Чи повністю він покритий?",
+          aUk: "Ні — покрито лише зовнішню та робочу поверхні.",
+          qJa: "全体がコーティングされていますか？",
+          aJa: "いいえ。コーティングされているのは外側の表面と作業面のみです。",
+          qAr: "هل الجهاز مطليّ بالكامل؟",
+          aAr: "لا — الطلاء يقتصر على السطح الخارجي وسطح العمل فقط.",
+        },
+      ],
     },
     tags: ["non-stick", "PFOA free", "premium"],
   },

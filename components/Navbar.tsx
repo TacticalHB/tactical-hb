@@ -101,27 +101,14 @@ export default function Navbar({ locale }: { locale: string }) {
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50"
-        /* THE RIB FIELD, and it is the packaging's, not a texture for its own
-           sake: fine vertical slats in the matt black the pouch is printed on.
-
-           DARK ON DARKER, NOT LIGHT ON DARK. A white-alpha rib would lighten
-           the ground, and .nav-link (#9a978f) already sits at about 4.6:1 here
-           — barely over AA. Lightening the bar would push it under. Darkening
-           it moves the other way, so the ribs make the links slightly EASIER
-           to read than the flat bar did, never harder.
-
-           AMPLITUDE IS THE DIAL. If this ever reads as busy, lower the alpha
-           rather than widening the pitch: wider slats start to look like bars
-           behind the type, which is the failure mode to avoid.
-
-           Static, so there is nothing for prefers-reduced-motion to turn off. */
+        /* THE FLAT BAR, ribs removed (Mario, 14 Oct 2026: "just remove the
+           ribbed texture, keep the current font and stuff"). From 27 Aug the
+           bar carried the pouch's fine vertical slats as a dark-on-darker
+           repeating gradient over --fog; the lockup, the links and the
+           border are unchanged. .nav-link sits at about 4.6:1 on this ground
+           — over AA, so lighten nothing behind it. */
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg," +
-            " rgba(0,0,0,0.20) 0px," +
-            " rgba(0,0,0,0.00) 5px," +
-            " rgba(0,0,0,0.00) 9px," +
-            " rgba(0,0,0,0.20) 14px), var(--fog)",
+          backgroundImage: "var(--fog)",
           borderBottom: "1px solid var(--border-dark)",
         }}
       >

@@ -10,6 +10,8 @@ import { NO_ADDONS, type LineAddons } from "@/lib/wholesale-display";
 import type { AddonKey } from "@/lib/wholesale-portal";
 import type { PortalPartner } from "@/lib/wholesale-display";
 import { HMD_OPTIONS, WINDCOVER_OPTIONS, type OptionSpec } from "@/components/HmdMaterialSelector";
+import RetailPrices, { retailLabels } from "@/components/wholesale/RetailPrices";
+import type { RetailRow } from "@/lib/retail-reference";
 
 /* ---------------------------------------------------------------------------
    The request builder.
@@ -22,9 +24,10 @@ import { HMD_OPTIONS, WINDCOVER_OPTIONS, type OptionSpec } from "@/components/Hm
    has agreed it at the moment this form is submitted.
 
    PRICES ARRIVE AS PROPS, RESOLVED SERVER-SIDE. A null means no dealer price
-   exists for that product yet, and the line reads "quote on request". The
-   retail price is not in this component at all, so there is nothing here to
-   fall back to it by accident.
+   exists for that product yet, and the line reads "—". Retail prices reach
+   this component only as the separate `retail` rows behind the "Retail
+   prices" tab (14 Oct 2026); nothing on a request line ever reads them, so a
+   missing trade price can never fall back to retail.
 
    THE TOTAL IS A COURTESY, NOT AN INVOICE. It appears only when every line in
    the request has a dealer price — a partial sum would read as the cost of the
@@ -230,10 +233,13 @@ export default function PortalClient({
   products,
   initialQty,
   initialOpts,
+  retail = [],
 }: {
   locale: string;
   partner: PortalPartner;
   products: PortalProduct[];
+  /** The storefront's retail prices, for reference beside the request. */
+  retail?: RetailRow[];
   /** Quantities keyed by line sku, from a repeated request. */
   initialQty?: Record<string, number>;
   /** Add-ons keyed by line sku, so a repeat brings its timer with it. */
@@ -249,6 +255,7 @@ export default function PortalClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [railTab, setRailTab] = useState<"request" | "retail">("request");
 
   /* THE PARTNER'S CURRENCY, NOT THE STOREFRONT'S (Mario, 11 Oct 2026): a
      euro partner who switches to /uk still sees euro, and a hryvnia partner
@@ -513,6 +520,10 @@ export default function PortalClient({
     return u ? formatMoney(u, currency) : null;
   };
 
+  /* Served by a route that re-checks approval and picks the file by the
+     partner's currency, like the product sheet. */
+  const retailPdf = "/api/wholesale/retail-prices";
+
   const grouped = CATEGORY_ORDER.map((c) => ({
     key: c,
     label: L.categories[c] ?? c,
@@ -769,13 +780,44 @@ export default function PortalClient({
         {/* The summary rail. Sticky on desktop, and on a phone it simply falls
             below the list — a fixed bar would sit on top of the quantity boxes
             it exists to summarise. */}
+        {/* THE RAIL: one card, two tabs (Mario, 14 Oct 2026 — "the tidiest
+            option"). "Your request" is the default; "Retail prices" swaps the
+            same card to the storefront's prices, so the rail never grows a
+            second card to scroll past. */}
         <aside
           className="lg:sticky lg:top-28 p-6 rounded-[6px]"
           style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
         >
-          <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>
-            {L.summary}
-          </h2>
+          {retail.length > 0 ? (
+            <div role="tablist" className="grid grid-cols-2 p-1 mb-5 rounded-full" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+              {(["request", "retail"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  id={`rail-tab-${tab}`}
+                  aria-selected={railTab === tab}
+                  aria-controls="rail-panel"
+                  onClick={() => setRailTab(tab)}
+                  className="h-9 px-2 rounded-full text-[13px] font-medium transition-colors"
+                  style={railTab === tab ? { background: "var(--text)", color: "var(--bg)" } : { color: "var(--text-muted)" }}
+                >
+                  {tab === "request" ? L.summary : retailLabels(locale).title}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <h2 className="text-[15px] font-medium mb-4" style={{ color: "var(--text)" }}>
+              {L.summary}
+            </h2>
+          )}
+          <div id="rail-panel" role={retail.length > 0 ? "tabpanel" : undefined} aria-labelledby={retail.length > 0 ? `rail-tab-${railTab}` : undefined}>
+          {railTab === "retail" && retail.length > 0 ? (
+            <>
+              <p className="text-[12.5px] leading-snug mb-4" style={{ color: "var(--text-faint)" }}>{retailLabels(locale).sub}</p>
+              <RetailPrices rows={retail} currency={currency} locale={locale} pdfHref={retailPdf} />
+            </>
+          ) : (<>
 
           {chosen.length === 0 ? (
             <p className="text-[13px] leading-relaxed mb-5" style={{ color: "var(--text-faint)" }}>
@@ -879,6 +921,8 @@ export default function PortalClient({
               {L.clear}
             </button>
           )}
+          </>)}
+          </div>
         </aside>
       </div>
     </div>

@@ -50,6 +50,7 @@ const nextConfig: NextConfig = {
      function that serves them. */
   outputFileTracingIncludes: {
     "/api/wholesale/sheet/[lang]": ["./private/wholesale/**/*"],
+    "/api/wholesale/retail-prices": ["./private/wholesale/**/*"],
   },
 };
 

@@ -1,0 +1,70 @@
+{
+ "built": "2026-10-14",
+ "rows": [
+  {
+   "key": "incoming-hookah",
+   "eur": 268,
+   "uah": 11180
+  },
+  {
+   "key": "bowl-killer",
+   "eur": 11,
+   "uah": 430
+  },
+  {
+   "key": "bowl-livanka",
+   "eur": 10,
+   "uah": 390
+  },
+  {
+   "key": "bowl-phunnel",
+   "eur": 13,
+   "uah": 520
+  },
+  {
+   "key": "hmd-tct-classic",
+   "eur": 23,
+   "uah": 850
+  },
+  {
+   "key": "hmd-a-craft",
+   "eur": 25,
+   "uah": 950
+  },
+  {
+   "key": "hmd-tct-op__black",
+   "eur": 30,
+   "uah": 1250
+  },
+  {
+   "key": "hmd-tct-op__purple",
+   "eur": 32,
+   "uah": 1280
+  },
+  {
+   "key": "windcover-detonator",
+   "eur": 23,
+   "uah": 850
+  },
+  {
+   "key": "windcover-kh",
+   "eur": 23,
+   "uah": 850
+  },
+  {
+   "key": "addon:timer",
+   "eur": 15,
+   "uah": 800
+  },
+  {
+   "key": "fear-9e418",
+   "eur": 4.9,
+   "uah": 210
+  },
+  {
+   "key": "lid-9e418",
+   "eur": 5.5,
+   "uah": 220
+  }
+ ]
+}

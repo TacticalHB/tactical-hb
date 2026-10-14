@@ -13,6 +13,7 @@ import { ACCOUNT_STATUS_TEXT, canAccessPortal } from "@/lib/wholesale-display";
 import { addonPrice, bookPrice } from "@/lib/wholesale-prices";
 import PortalClient, { type PortalProduct } from "@/components/wholesale/PortalClient";
 import RequestHistory from "@/components/wholesale/RequestHistory";
+import { retailRows } from "@/lib/retail-reference";
 import { SALES_EMAIL } from "@/lib/contact-info";
 import { privatePageMetadata } from "@/lib/seo";
 
@@ -163,6 +164,7 @@ export default async function WholesalePortalPage({
           products={items}
           initialQty={initialQty}
           initialOpts={initialOpts}
+          retail={retailRows()}
         />
         {history.length > 0 && <RequestHistory locale={locale} requests={history} currency={partner.currency} />}
       </div>

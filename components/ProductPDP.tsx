@@ -85,7 +85,11 @@ const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
 
    Not tokens, because this bar is deliberately its own thing rather than a
    dark-mode surface — the console's token set would drag the whole page's
-   palette in behind it. */
+   palette in behind it.
+
+   HEAVIER TYPE (Mario, 14 Oct 2026: "make the yellow font thicker"): the
+   lines are semibold, not medium. A softer charcoal ground was tried the same
+   day and reverted — he wants the black. */
 const BANNER_BG = "#111114";
 const BANNER_FG = "#ffee8c";
 
@@ -147,7 +151,7 @@ function Banner() {
         return (
           <p
             key={line}
-            className={`promo-line ${motion} absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-medium`}
+            className={`promo-line ${motion} absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-semibold tracking-[0.02em]`}
             style={{
               color: BANNER_FG,
               /* Only the line on stage may take the pointer, or the stack would

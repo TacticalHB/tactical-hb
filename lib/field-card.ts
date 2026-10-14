@@ -103,7 +103,9 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
     value: `${selectedWeightG(product, material, windcover)} ${g}`,
   });
 
-  rows.push({
+  /* Some products show no dimensions at all (FEAR and LID: the posting carton
+     says nothing useful about a ring or a lid). Shipping still reads them. */
+  if (!product.hideDimensions) rows.push({
     key: "dimensions",
     label: t(locale, { uk: "Розміри", en: "Dimensions", ja: "サイズ", ar: "الأبعاد" }),
     value: `${product.dims.l} × ${product.dims.w} × ${product.dims.h} ${t(locale, { uk: "мм", en: "mm", ja: "mm", ar: "مم" })}`,

@@ -1224,6 +1224,33 @@ export const products: Product[] = [
         { labelEn: "Thermal guard", labelUk: "Термозахист", labelJa: "耐熱", labelAr: "الحماية الحرارية", valueEn: "Built for the 9E418 outer radiator's 240 °C (464 °F) peak", valueUk: "Розрахований на пік зовнішнього радіатора 9E418 — 240 °C (464 °F)", valueJa: "9E418 外側ラジエーターの最高 240 °C（464 °F）に対応", valueAr: "مصمّم لذروة السطح الخارجي لمشتّت 9E418 البالغة \u2066240 °C (464 °F)\u2069" },
         { labelEn: "Design", labelUk: "Конструкція", labelJa: "構造", labelAr: "التصميم", valueEn: "Deep-lipped interlocking sleeve", valueUk: "Рукав із глибоким бортиком і фіксацією", valueJa: "深いリップのインターロック式スリーブ", valueAr: "غلاف متشابك بحافة عميقة" },
       ],
+      /* Mario's Tips for Use (14 Oct 2026). The first, third and fourth are
+         word for word the ones on the HMDs and the hookah, translations too;
+         "Be tct" is the brand mark used as a word, lowercase in every locale. */
+      tipsEn: [
+        "Never cool the device with water.",
+        "Let the seal cool down before removing it from the device.",
+        "Silicone parts are heat-resistant, not fire-resistant!",
+        "Be tct when using this device.",
+      ],
+      tipsUk: [
+        "Ніколи не охолоджуйте пристрій водою.",
+        "Дайте ущільнювачу охолонути, перш ніж знімати його з пристрою.",
+        "Силіконові деталі термостійкі, але не вогнестійкі!",
+        "Будьте tct, користуючись цим пристроєм.",
+      ],
+      tipsJa: [
+        "水で本体を冷やさないでください。",
+        "シールが冷めてから、デバイスから取り外してください。",
+        "シリコン部品は耐熱性ですが、耐火性ではありません！",
+        "このデバイスを使うときは tct であれ。",
+      ],
+      tipsAr: [
+        "لا تبرّد الجهاز بالماء أبدًا.",
+        "اترك الحلقة تبرد قبل نزعها عن الجهاز.",
+        "قطع السيليكون مقاومة للحرارة، لكنها غير مقاومة للنار!",
+        "كن tct عند استخدام هذا الجهاز.",
+      ],
       /* \u2066…\u2069 (LRI/PDI) keep "240 °C (464 °F)" in reading order inside
          the Arabic sentences; without them the bidi algorithm scrambled it
          to "C (500 °F)° 260". */

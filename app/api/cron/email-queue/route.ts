@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runDueJobs } from "@/lib/email/flows";
 import { runWholesaleDormant } from "@/lib/wholesale-dormant";
+import { runBackInStock } from "@/lib/back-in-stock";
 
 /* ---------------------------------------------------------------------------
    Cron: send whatever the email flows have become due.
@@ -72,8 +73,13 @@ async function run(request: NextRequest) {
      through. */
   const dormant = await runWholesaleDormant();
 
-  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant }));
-  return NextResponse.json({ ok: true, ...result, dormant });
+  /* Back-in-stock notices (15 Oct 2026): everyone waiting on a product that
+     can be bought again gets their one email. Third, for the same reason the
+     dormant scan is second; it never throws either. */
+  const backInStock = await runBackInStock();
+
+  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant, backInStock }));
+  return NextResponse.json({ ok: true, ...result, dormant, backInStock });
 }
 
 export async function GET(request: NextRequest) {

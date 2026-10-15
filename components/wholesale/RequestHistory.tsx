@@ -41,6 +41,7 @@ export default function RequestHistory({
 
   const L = {
     title: t(locale, { en: "Your requests", uk: "Ваші запити", ja: "これまでのリクエスト", ar: "طلباتك" }),
+    document: t(locale, { en: "Order confirmation (PDF)", uk: "Підтвердження замовлення (PDF)", ja: "ご注文確認書（PDF）", ar: "تأكيد الطلب (PDF)" }),
     ref: t(locale, { en: "Reference", uk: "Номер", ja: "番号", ar: "الرقم" }),
     units: t(locale, { en: "units", uk: "одиниць", ja: "点", ar: "وحدة" }),
     quote: t(locale, { en: "To be quoted", uk: "Буде прораховано", ja: "お見積り予定", ar: "بانتظار التسعير" }),
@@ -134,6 +135,22 @@ export default function RequestHistory({
                 >
                   {L.again}
                 </a>
+                {/* The order confirmation, printable to PDF — once we have
+                    approved it (payment details sent, or paid). 15 Oct 2026. */}
+                {(r.status === "payment_sent" || r.status === "paid") && (
+                  <a
+                    href={`/${locale}/wholesale-document/${encodeURIComponent(r.reference)}`}
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-flex h-9 px-4 items-center gap-2 rounded-full text-[13px] font-medium transition-colors hover:bg-[var(--bg-soft)]"
+                    style={{ border: "1px solid var(--border-strong)", color: "var(--text)" }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      <path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14" />
+                    </svg>
+                    {L.document}
+                  </a>
+                )}
                 <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
                   {L.againNote}
                 </span>

@@ -21,6 +21,7 @@ import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
 import ProductFaq from "./ProductFaq";
 import CompleteTheSet from "./CompleteTheSet";
+import BackInStockForm from "./BackInStockForm";
 import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
@@ -735,6 +736,9 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                         ar: "نفدت الكمية حاليًا. سيعود المنتج كما هو دون أي تغيير.",
                       })}
                 </p>
+                {/* Leave an address, hear once when it can be bought again
+                    (lib/back-in-stock; 15 Oct 2026). */}
+                <BackInStockForm slug={product.slug} locale={locale} />
               </div>
             )}
             {isPurchasable(product) && (

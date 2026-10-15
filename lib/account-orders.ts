@@ -97,8 +97,17 @@ export const CUSTOMER_ORDER_COLUMNS =
   "id, created_at, status, external_ref, amount_eur, amount_uah, shipping_uah, np_ttn, np_city_name, np_warehouse_name, np_address, " +
   "order_items(id, product_id, product_name, quantity, price_eur, price_uah, variant, addon_lid, addon_rubber)";
 
+/**
+ * What a CUSTOMER is shown: one order total, never "goods + delivery".
+ *
+ * Under the FOP-2 one-total model delivery is not sold as a service, so no
+ * customer surface prices it as a line (see fop2-one-total-model). The split
+ * used to leak here in English — "goods ₴430 + delivery ₴90" on the Ukrainian
+ * order pages — and is now kept to the admin, which reads totalFromAmounts
+ * directly. (15 Oct 2026.)
+ */
 export function orderTotalText(o: CustomerOrder): { text: string; sub: string | null } {
-  return totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah);
+  return { text: totalFromAmounts(o.amountEur, o.amountUah, o.shippingUah).text, sub: null };
 }
 
 /* ---- The timeline ------------------------------------------------------ */

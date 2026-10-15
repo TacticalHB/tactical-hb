@@ -55,6 +55,9 @@ export default function Footer() {
           <Link href={`/${locale}/delivery`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
             {t("link_delivery")}
           </Link>
+          <Link href={`/${locale}/track`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
+            {t("link_track")}
+          </Link>
           <Link href={`/${locale}/offer`} className="text-sm tracking-[0.2em] uppercase nav-link flex items-center h-11">
             {t("link_offer")}
           </Link>

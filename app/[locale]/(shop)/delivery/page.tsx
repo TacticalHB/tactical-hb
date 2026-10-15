@@ -109,8 +109,11 @@ function DeliveryContent({ locale }: { locale: string }) {
                 {t("ua_tag")}
               </span>
               <ul className="flex flex-col gap-4">
-                {[t("ua_1"), t("ua_2")].map((line) => (
-                  <li key={line} className="flex gap-4 text-sm md:text-base leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                {/* ua_3 — free delivery from ₴5 000 — exists on /uk only, the one
+                    storefront that ships inside Ukraine (lib/free-shipping;
+                    Mario, 15 Oct 2026). Set in full ink so the offer stands out. */}
+                {[t("ua_1"), t("ua_2"), ...(locale === "uk" ? [t("ua_3")] : [])].map((line, i) => (
+                  <li key={line} className="flex gap-4 text-sm md:text-base leading-relaxed" style={{ color: i === 2 ? "var(--text)" : "var(--text-muted)" }}>
                     <span aria-hidden="true" className="mt-[0.62em] w-5 h-px shrink-0" style={{ background: "var(--accent-ink)" }} />
                     {line}
                   </li>

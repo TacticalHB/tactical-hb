@@ -262,9 +262,10 @@ export default function PortalClient({
      on /en still sees hryvnia — the same currency their request is priced
      in. See partnerCurrency in lib/wholesale-display. */
   const currency = partner.currency;
-  /* The sheet prints trade prices, so it follows the currency too: hryvnia
-     partners get the Ukrainian sheet, euro partners the English one. */
-  const sheetLang = currency === "UAH" ? "uk" : "en";
+  /* Language from the storefront (Ukrainian on /uk, English elsewhere —
+     the two the sheet is written in); the route picks the price version by
+     the partner's currency. 15 Oct 2026. */
+  const sheetLang = locale === "uk" ? "uk" : "en";
   /* One product carries the answer for all of them: the book is a property of
      the partner, so if any line is priced they all are. */
   const hasBook = partner.partnerType !== null;
@@ -320,7 +321,7 @@ export default function PortalClient({
     }),
     qtyLabel: t(locale, { en: "Quantity", uk: "Кількість", ja: "数量", ar: "الكمية" }),
     sheetTitle:
-      currency === "UAH"
+      sheetLang === "uk"
         ? t(locale, { en: "Project KI 06 — product sheet (PDF, in Ukrainian)", uk: "Project KI 06 — опис продукту (PDF)", ja: "Project KI 06 — 製品資料（PDF・ウクライナ語）", ar: "Project KI 06 — ملف المنتج (PDF، بالأوكرانية)" })
         : t(locale, { en: "Project KI 06 — product sheet (PDF)", uk: "Project KI 06 — опис продукту (PDF, англійською)", ja: "Project KI 06 — 製品資料（PDF・英語）", ar: "Project KI 06 — ملف المنتج (PDF، بالإنجليزية)" }),
     sheetSub: t(locale, { en: "Materials, case contents, photos and partner terms", uk: "Матеріали, комплектація, фото та умови для партнерів", ja: "素材、同梱物、写真、パートナー条件", ar: "المواد ومحتويات الحقيبة والصور وشروط الشركاء" }),

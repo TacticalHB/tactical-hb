@@ -12,23 +12,34 @@ import { canAccessPortal } from "@/lib/wholesale-display";
    a signed-in partner whose account is approved — the same gate the portal
    page applies. Anyone else gets a 404, which does not confirm the file exists.
 
-   TWO LANGUAGES ONLY (Mario, 4 Oct 2026). Which one a partner gets follows
-   their currency (11 Oct 2026): UAH → Ukrainian, EUR → English. The files are traced into the function by
+   TWO LANGUAGES ONLY (Mario, 4 Oct 2026), each in both currencies — see
+   FILES below. The files are traced into the function by
    outputFileTracingIncludes in next.config.ts.
 --------------------------------------------------------------------------- */
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/* LANGUAGE FROM THE PAGE, PRICES FROM THE PARTNER (Mario, 15 Oct 2026). The
+   sheet is read in the language of the storefront the partner is browsing —
+   Ukrainian partners on /uk asked for Ukrainian — while its two price rows
+   follow the currency on their partner card, so nobody is ever shown the
+   other currency. Four files, one per pair. */
 const FILES = {
-  uk: { file: "project-ki-06-uk.pdf", name: "Tactical_HB_Project_KI_06_UK.pdf" },
-  en: { file: "project-ki-06-en.pdf", name: "Tactical_HB_Project_KI_06_EN.pdf" },
+  uk: {
+    UAH: { file: "project-ki-06-uk.pdf", name: "Tactical_HB_Project_KI_06_UK.pdf" },
+    EUR: { file: "project-ki-06-uk-eur.pdf", name: "Tactical_HB_Project_KI_06_UK_EUR.pdf" },
+  },
+  en: {
+    EUR: { file: "project-ki-06-en.pdf", name: "Tactical_HB_Project_KI_06_EN.pdf" },
+    UAH: { file: "project-ki-06-en-uah.pdf", name: "Tactical_HB_Project_KI_06_EN_UAH.pdf" },
+  },
 } as const;
 
 const notFound = () => new Response("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ lang: string }> }) {
-  await params; // the path names a language, but the partner's currency decides — see below
+  const { lang } = await params;
 
   const supabase = await createClient();
   if (!supabase) return notFound();
@@ -37,11 +48,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ lang: s
   const partner = await partnerForUser(data.user.id);
   if (!partner || !canAccessPortal(partner.accountStatus)) return notFound();
 
-  /* THE SHEET PRINTS TRADE PRICES, SO IT FOLLOWS THE PARTNER'S CURRENCY, not
-     the URL (Mario, 11 Oct 2026): hryvnia partners get the Ukrainian sheet,
-     euro partners the English one, whichever link or storefront they came
-     from — editing the address cannot show a partner the other currency. */
-  const sheet = partner.currency === "UAH" ? FILES.uk : FILES.en;
+  /* The URL names the language (Ukrainian or English — the two the sheet is
+     written in); the partner's currency picks the prices. Editing the URL can
+     change the language, never the currency. */
+  const sheet = FILES[lang === "uk" ? "uk" : "en"][partner.currency];
 
   try {
     const body = await readFile(path.join(process.cwd(), "private", "wholesale", sheet.file));

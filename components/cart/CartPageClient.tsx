@@ -16,6 +16,8 @@ import { subtractMoney } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE, permanentDiscount } from "@/lib/loyalty/ranks";
 import { freeShippingApplies } from "@/lib/free-shipping";
 import FreeShippingProgress from "@/components/FreeShippingProgress";
+import FreeShippingSuggestions from "./FreeShippingSuggestions";
+import AddonUpsell from "./AddonUpsell";
 
 /* ---------------------------------------------------------------------------
    Full shopping bag.
@@ -186,6 +188,9 @@ export default function CartPageClient({
                     {d.addons && <div>{d.addons}</div>}
                     {d.preorder && <div style={{ color: "var(--accent-ink)", fontWeight: 500 }}>{d.preorder}</div>}
                   </dl>
+                  {/* Lid / FEAR on a heat device, the timer on a cover — one
+                      press upgrades this line (15 Oct 2026). */}
+                  <AddonUpsell line={l} locale={locale} mode="line" />
 
                   <div className="flex items-center justify-between gap-4 mt-auto pt-5">
                     <div className="flex items-center" style={{ border: "1px solid var(--border-strong)" }}>
@@ -262,6 +267,7 @@ export default function CartPageClient({
           </div>
 
           <FreeShippingProgress locale={locale} goodsUah={goods.uah} className="mt-5" />
+          <FreeShippingSuggestions locale={locale} goodsUah={goods.uah} rankDiscountRate={rankDiscountRate} />
 
           <div
             className="flex items-center justify-between mt-5 pt-5"

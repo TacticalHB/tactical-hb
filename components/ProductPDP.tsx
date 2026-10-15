@@ -20,6 +20,7 @@ import { useCart } from "./CartContext";
 import { useFavourites } from "@/hooks/useFavourites";
 import HmdMaterialSelector, { ConfigSelector, WINDCOVER_OPTIONS } from "./HmdMaterialSelector";
 import ProductFaq from "./ProductFaq";
+import CompleteTheSet from "./CompleteTheSet";
 import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
 import Price from "./Price";
@@ -922,6 +923,21 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
       {/* Buyer questions, tap to open — straight under the product, ABOVE the
           slogan (Mario, 12 Oct 2026: "faq has to be higher"). First used on
           the FEAR Stabiliser 9E418. */}
+      {/* Complete the set — bowls, heat devices and wind covers (15 Oct 2026),
+          with this page's own piece in the configuration chosen above. */}
+      {isPurchasable(product) && ["bowl", "hmd", "windcover"].includes(product.category) && (
+        <CompleteTheSet
+          product={product}
+          locale={locale}
+          options={{
+            variant: variants?.[variantIdx]?.name,
+            lid: isHmd ? material.lid : undefined,
+            rubber: isHmd ? material.rubber : undefined,
+            timer: isWindcover ? windcover.timer : undefined,
+          }}
+        />
+      )}
+
       {pdp?.faq && pdp.faq.length > 0 && <ProductFaq faq={pdp.faq} locale={locale} />}
 
       {/* ---- Brand slogan statement (every product) + optional features band ---- */}

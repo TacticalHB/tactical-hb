@@ -8,6 +8,7 @@ import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
 import CartSuggestion from "./CartSuggestion";
+import AddonUpsell, { missingAddons } from "./cart/AddonUpsell";
 
 /* ---------------------------------------------------------------------------
    "Added to Shopping Bag" — the confirmation slide-over shown after adding
@@ -72,6 +73,10 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
           </div>
         )}
 
+        {/* Lid / FEAR for a heat device, the timer for a cover — right under
+            the thing just added, before anything else (15 Oct 2026). */}
+        {lastAdded && <AddonUpsell line={lastAdded} locale={locale} mode="panel" />}
+
       {/* The success actions, and the pairing card beneath them.
 
           Both moved INSIDE the scroller rather than staying pinned to the
@@ -104,7 +109,9 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
             button at two weights: the accent above already belongs to "View
             your shopping bag", and two orange pills this close read as two
             primaries competing rather than an offer inside a card. */}
-        <CartSuggestion locale={locale} cta="quiet" />
+        {/* Not while the timer row above is offering the same thing — the
+            pairing card's windcover → timer poster would say it twice. */}
+        {!(lastAdded && missingAddons(lastAdded).includes("timer")) && <CartSuggestion locale={locale} cta="quiet" />}
       </div>
       </div>
     </SlideOver>

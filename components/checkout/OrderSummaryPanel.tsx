@@ -8,7 +8,9 @@ import { describeLine } from "@/lib/cart-display";
 import Price from "@/components/Price";
 import LineTotal from "@/components/LineTotal";
 import { WasPrice, SetupNote } from "@/components/SetupSaving";
-import { addMoney, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
+import { addMoney, money, moneyFromUah, subtractMoney, type Money } from "@/lib/currency";
+import { freeShippingApplies } from "@/lib/free-shipping";
+import FreeShippingProgress from "@/components/FreeShippingProgress";
 import { COLONEL_DISCOUNT_RATE } from "@/lib/loyalty/ranks";
 
 /* ---------------------------------------------------------------------------
@@ -43,7 +45,10 @@ export default function OrderSummaryPanel({
   // sides — the "includes shipping" line under the total must be true in
   // whichever currency the page is showing. (Loyalty is unaffected: it reads
   // the goods value the server stores, never this display figure.)
-  const shipping: Money | null = shippingUah != null ? moneyFromUah(shippingUah) : null;
+  /* Free from ₴5 000 on /uk (lib/free-shipping) — the same rule create-invoice
+     charges by, so a free row here is a ₴0 shipping line on the invoice. */
+  const free = freeShippingApplies(locale, goods.uah);
+  const shipping: Money | null = free ? money(0, 0) : shippingUah != null ? moneyFromUah(shippingUah) : null;
   const total: Money = shipping ? addMoney(goods, shipping) : goods;
 
   const L = {
@@ -53,6 +58,7 @@ export default function OrderSummaryPanel({
       subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計", ar: "المجموع الفرعي" },
       discount: { uk: "Ваучер", en: "Voucher", ja: "バウチャー", ar: "قسيمة" },
       shipping: { uk: "Доставка", en: "Shipping", ja: "配送", ar: "الشحن" },
+      free: { uk: "Безкоштовно", en: "Free", ja: "無料", ar: "مجاني" },
       shippingNote: { uk: "Розраховується згодом", en: "Calculated later", ja: "後ほど計算します", ar: "يُحتسب لاحقًا" },
       shippingAfter: { uk: "Підтвердимо листом", en: "Confirmed by email", ja: "メールでご確認します", ar: "نؤكّده بالبريد الإلكتروني" },
       total: { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" },
@@ -143,7 +149,9 @@ export default function OrderSummaryPanel({
           <span style={{ color: shipping ? "var(--text)" : "var(--text-muted)" }}>
             {/* Through <Price>, like every other figure — a ₴ quote on a €
                 page was exactly the bug this row used to have. */}
-            {shipping ? (
+            {free ? (
+              <span style={{ color: "#2e7d32", fontWeight: 500 }}>{L.free}</span>
+            ) : shipping ? (
               <Price money={shipping} locale={locale} />
             ) : shippingPending ? (
               L.shippingAfter
@@ -152,6 +160,7 @@ export default function OrderSummaryPanel({
             )}
           </span>
         </div>
+        <FreeShippingProgress locale={locale} goodsUah={goods.uah} className="mt-1" />
       </div>
 
       <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: "1px solid var(--border-strong)" }}>

@@ -14,6 +14,8 @@ import LineTotal from "@/components/LineTotal";
 import { WasPrice, SetupNote } from "@/components/SetupSaving";
 import { subtractMoney } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE, permanentDiscount } from "@/lib/loyalty/ranks";
+import { freeShippingApplies } from "@/lib/free-shipping";
+import FreeShippingProgress from "@/components/FreeShippingProgress";
 
 /* ---------------------------------------------------------------------------
    Full shopping bag.
@@ -37,6 +39,10 @@ export default function CartPageClient({
      Checkout is where the two are compared and only one survives. */
   const rankPerk = permanentDiscount(rankDiscountRate, subtotal);
   const goods = subtractMoney(subtotal, rankPerk);
+  /* Free delivery inside Ukraine from ₴5 000 on /uk (lib/free-shipping). The
+     basket shows it so the customer knows before checkout; create-invoice is
+     what actually charges ₴0. */
+  const freeShip = freeShippingApplies(locale, goods.uah);
   const router = useRouter();
   const L = {
     ...pick(locale, {
@@ -54,6 +60,7 @@ export default function CartPageClient({
       subtotal: { uk: "Проміжний підсумок", en: "Subtotal", ja: "小計", ar: "المجموع الفرعي" },
       shipping: { uk: "Доставка", en: "Shipping", ja: "配送", ar: "الشحن" },
       shippingNote: { uk: "Розраховується далі", en: "Calculated at checkout", ja: "お会計時に計算します", ar: "يُحتسب عند الدفع" },
+      free: { uk: "Безкоштовно", en: "Free", ja: "無料", ar: "مجاني" },
       total: { uk: "Разом", en: "Total", ja: "合計", ar: "الإجمالي" },
       totalNote: {
         uk: "Доставку буде розраховано на оформленні та включено до суми замовлення.",
@@ -246,9 +253,15 @@ export default function CartPageClient({
             )}
             <div className="flex items-center justify-between">
               <span style={{ color: "var(--text-muted)" }}>{L.shipping}</span>
-              <span style={{ color: "var(--text-muted)" }}>{L.shippingNote}</span>
+              {freeShip ? (
+                <span style={{ color: "#2e7d32", fontWeight: 500 }}>{L.free}</span>
+              ) : (
+                <span style={{ color: "var(--text-muted)" }}>{L.shippingNote}</span>
+              )}
             </div>
           </div>
+
+          <FreeShippingProgress locale={locale} goodsUah={goods.uah} className="mt-5" />
 
           <div
             className="flex items-center justify-between mt-5 pt-5"

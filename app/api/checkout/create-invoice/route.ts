@@ -7,6 +7,7 @@ import { subtractMoney, money, eurToUahFixed } from "@/lib/currency";
 import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
 import { rankForUser } from "@/lib/loyalty/rank-server";
 import { isWholesaleUser } from "@/lib/wholesale-portal";
+import { freeShippingApplies } from "@/lib/free-shipping";
 import { createInvoice, toKopiyky, MonobankError, type BasketItem } from "@/lib/monobank";
 import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational as quoteNovaPost } from "@/lib/novapost";
@@ -263,7 +264,14 @@ export async function POST(request: NextRequest) {
       if (!npWarehouseRef) return NextResponse.json({ ok: false, error: "no_branch" }, { status: 400 });
     }
 
-    try {
+    /* FREE FROM ₴5 000 ON THE UKRAINIAN STOREFRONT (Mario, 15 Oct 2026),
+       measured on the goods after any discount — lib/free-shipping. Nothing
+       is quoted then: the customer pays ₴0 for delivery, and the waybill is
+       still booked and billed to us after payment exactly as before. */
+    if (freeShippingApplies(locale, goods.uah)) {
+      shippingUah = 0;
+      console.info(`[invoice] free delivery: goods ₴${goods.uah} ≥ threshold`);
+    } else try {
       shippingUah = await getDeliveryPrice({
         cityRecipientRef: npCityRef,
         declaredValueUah: goods.uah,

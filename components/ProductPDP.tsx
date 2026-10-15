@@ -109,9 +109,11 @@ const BANNER_OUT_MS = 360;
      2 premium accessories → the catalogue on its Accessories filter
      3 "Something new is incoming" → Project KI 06
      4 the 10% set → the set builder
+     5 free delivery from ₴5 000 → the delivery page — /uk ONLY: the other
+       locales carry five lines, because the offer is Ukraine's (15 Oct 2026)
    A line past the end of this list (a sixth one added later) simply renders
    as text until it is given a destination. */
-const BANNER_HREFS = ["/products", "/about", "/products?category=accessory", "/products/incoming-hookah", "/setup"];
+const BANNER_HREFS = ["/products", "/about", "/products?category=accessory", "/products/incoming-hookah", "/setup", "/delivery"];
 
 /* The orange of the wordmark's HB on the dark bar — the one spot of colour
    that draws the eye along the strip. */

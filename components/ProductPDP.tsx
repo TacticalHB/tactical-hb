@@ -91,7 +91,9 @@ const SITE_SLOGAN = "IT'S FOOL TO MAKE A WAR ON US.";
    lines are semibold, not medium. A softer charcoal ground was tried the same
    day and reverted — he wants the black. */
 const BANNER_BG = "#111114";
-const BANNER_FG = "#ffee8c";
+/* White since 15 Oct 2026 (Mario: "try making the text … white instead of
+   yellow, keep the thickness"). Was #ffee8c; the semibold weight stays. */
+const BANNER_FG = "#ffffff";
 
 /* Kept in step with the keyframe durations in globals.css (.promo-in/.promo-out
    are 360ms each). The travel distance lives there too. */
@@ -99,9 +101,32 @@ const BANNER_IN_MS = 360;
 const BANNER_HOLD_MS = 3500;
 const BANNER_OUT_MS = 360;
 
-function Banner() {
+/* WHERE EACH LINE GOES (Mario, 15 Oct 2026 — the strip said "look at this"
+   and went nowhere). By position, because banner_lines is the same five lines
+   in the same order in every locale:
+     0 new arrivals → the catalogue
+     1 "Precision. Built to last." → About
+     2 premium accessories → the catalogue on its Accessories filter
+     3 "Something new is incoming" → Project KI 06
+     4 the 10% set → the set builder
+   A line past the end of this list (a sixth one added later) simply renders
+   as text until it is given a destination. */
+const BANNER_HREFS = ["/products", "/about", "/products?category=accessory", "/products/incoming-hookah", "/setup"];
+
+/* The orange of the wordmark's HB on the dark bar — the one spot of colour
+   that draws the eye along the strip. */
+const BANNER_ACCENT = "#F48140";
+
+function Banner({ locale }: { locale: string }) {
   const t = useTranslations("pdp");
   const lines = t.raw("banner_lines") as string[];
+  /* Held while the pointer or keyboard focus is on the strip, so a line can
+     be read and clicked without it sliding away mid-reach. */
+  const [paused, setPaused] = useState(false);
+  /* Arabic is cursive: letter-spacing pulls the joined letters apart, so the
+     tracked-out uppercase look stops at the Arabic storefront. Japanese has
+     no case and reads better untracked too. */
+  const tracked = locale === "en" || locale === "uk";
 
   /* Which line owns the stage, and whether it is still on it. Together these
      are the whole state machine: onStage true means arriving-then-holding,
@@ -121,6 +146,7 @@ function Banner() {
     if (reduced) return;
 
     if (onStage) {
+      if (paused) return;
       /* Arrive, then stand still. The hold is measured from the end of the
          entrance, so 3.5s is time fully visible rather than time on screen. */
       const t = setTimeout(() => setOnStage(false), BANNER_IN_MS + BANNER_HOLD_MS);
@@ -134,10 +160,17 @@ function Banner() {
       setOnStage(true);
     }, BANNER_OUT_MS);
     return () => clearTimeout(t);
-  }, [onStage, reduced, lines.length]);
+  }, [onStage, reduced, lines.length, paused]);
 
   return (
-    <div className="h-10 relative overflow-hidden" style={{ background: BANNER_BG }}>
+    <div
+      className="h-10 relative overflow-hidden"
+      style={{ background: BANNER_BG }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
       {lines.map((line, k) => {
         const isActive = k === i && onStage;
         const isExiting = k === i && !onStage;
@@ -147,19 +180,61 @@ function Banner() {
            reset behind the scenes — which is what the old transform parking
            was for, and what made the arrival unreliable. */
         const motion = isActive ? "promo-in" : isExiting ? "promo-out" : "";
+        const href = BANNER_HREFS[k];
 
-        return (
-          <p
+        /* ALL FOUR AT ONCE (Mario, 15 Oct 2026, to draw more attention):
+           a link, an orange arrow, uppercase tracked-out type like the main
+           menu, and a size up to 13px on wider screens. */
+        const body = (
+          <>
+            {/* One row, always: the strip is 40px tall, and the set line
+                wrapped onto two at 375px, so on phones the caps go untracked
+                (the Ukrainian set line is the longest; it fits with ~10px to
+                spare). */}
+            <span className="whitespace-nowrap">{line}</span>
+            {href && (
+              <svg
+                aria-hidden="true"
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke={BANNER_ACCENT}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 rtl:-scale-x-100"
+              >
+                <path d="M3 8h10M9 4l4 4-4 4" />
+              </svg>
+            )}
+          </>
+        );
+        const cls = `promo-line ${motion} group absolute inset-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 text-center font-semibold text-[11px] sm:text-[13px] ${
+          tracked ? "uppercase tracking-normal sm:tracking-[0.14em]" : ""
+        }`;
+        const style = {
+          color: BANNER_FG,
+          /* Only the line on stage may take the pointer, or the stack would
+             put three invisible paragraphs over the top of it. */
+          pointerEvents: isActive ? undefined : ("none" as const),
+        };
+
+        return href ? (
+          <Link
             key={line}
-            className={`promo-line ${motion} absolute inset-0 flex items-center justify-center px-4 text-center text-xs font-semibold tracking-[0.02em]`}
-            style={{
-              color: BANNER_FG,
-              /* Only the line on stage may take the pointer, or the stack would
-                 put three invisible paragraphs over the top of it. */
-              pointerEvents: isActive ? undefined : "none",
-            }}
+            href={`/${locale}${href}`}
+            className={`${cls} hover:underline underline-offset-4 decoration-1`}
+            style={style}
+            /* Off stage, out of the tab order: an invisible link that takes
+               focus is a trap. Screen readers still read every line. */
+            tabIndex={isActive ? undefined : -1}
           >
-            {line}
+            {body}
+          </Link>
+        ) : (
+          <p key={line} className={cls} style={style}>
+            {body}
           </p>
         );
       })}
@@ -418,7 +493,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
 
   return (
     <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
-      <Banner />
+      <Banner locale={locale} />
 
       {/* ---- Main PDP grid ---- */}
       <div className="page-container pt-8 md:pt-12 pb-16">

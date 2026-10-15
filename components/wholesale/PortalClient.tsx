@@ -262,10 +262,9 @@ export default function PortalClient({
      on /en still sees hryvnia — the same currency their request is priced
      in. See partnerCurrency in lib/wholesale-display. */
   const currency = partner.currency;
-  /* Language from the storefront (Ukrainian on /uk, English elsewhere —
-     the two the sheet is written in); the route picks the price version by
-     the partner's currency. 15 Oct 2026. */
-  const sheetLang = locale === "uk" ? "uk" : "en";
+  /* Ukrainian/hryvnia or English/euro — the side the partner is locked to
+     (portalLocaleFor), which is also the side this page is on. */
+  const sheetLang = currency === "UAH" ? "uk" : "en";
   /* One product carries the answer for all of them: the book is a property of
      the partner, so if any line is priced they all are. */
   const hasBook = partner.partnerType !== null;

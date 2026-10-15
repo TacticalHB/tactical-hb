@@ -9,7 +9,7 @@ import {
   requestsForUser,
   wholesaleCatalogue,
 } from "@/lib/wholesale-portal";
-import { ACCOUNT_STATUS_TEXT, canAccessPortal } from "@/lib/wholesale-display";
+import { ACCOUNT_STATUS_TEXT, canAccessPortal, portalLocaleFor } from "@/lib/wholesale-display";
 import { addonPrice, bookPrice } from "@/lib/wholesale-prices";
 import PortalClient, { type PortalProduct } from "@/components/wholesale/PortalClient";
 import RequestHistory from "@/components/wholesale/RequestHistory";
@@ -68,6 +68,12 @@ export default async function WholesalePortalPage({
   if (!canAccessPortal(status)) {
     return <NotApproved locale={locale} status={status} company={partner.company} />;
   }
+
+  /* LOCKED TO ONE SIDE (15 Oct 2026): hryvnia partners on the Ukrainian
+     portal, euro partners on en/ja/ar — see portalLocaleFor. Switching
+     language to the other side brings them back, "order again" intact. */
+  const home = portalLocaleFor(partner.currency, locale, partner.locale);
+  if (home !== locale) redirect(`/${home}/wholesale/portal${repeat ? `?repeat=${encodeURIComponent(repeat)}` : ""}`);
 
   /* Dealer prices are resolved on the server and only for an approved reader.
      Where a product has none, the client is handed nulls and prints "quote on

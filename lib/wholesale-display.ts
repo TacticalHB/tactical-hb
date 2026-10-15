@@ -125,6 +125,23 @@ export type PortalPartner = {
    and with no country, the language they registered in — which is what
    requests were priced in before this rule existed, so nobody's quote moves.
 --------------------------------------------------------------------------- */
+/**
+ * The one storefront a partner's portal lives on (Mario, 15 Oct 2026).
+ *
+ * THE MAIN RULE: the Ukrainian site shows hryvnia and the Ukrainian sheet,
+ * never euro; English, Japanese and Arabic show euro and the English sheet,
+ * never hryvnia. A partner is LOCKED to the side that matches their currency,
+ * so their language and their prices can never disagree and nobody can flip
+ * the language to pick the cheaper list. A hryvnia partner is on /uk; a euro
+ * partner stays on whichever of en/ja/ar they are on, and is sent from /uk to
+ * their registration language (or English).
+ */
+export function portalLocaleFor(currency: Currency, current: string, registered: string): string {
+  if (currency === "UAH") return "uk";
+  if (current !== "uk") return current;
+  return ["en", "ja", "ar"].includes(registered) ? registered : "en";
+}
+
 export function countryCurrency(country: string | null | undefined): Currency | null {
   const c = (country ?? "").trim();
   if (!c) return null;

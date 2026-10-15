@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { partnerForUser, requestsForUser } from "@/lib/wholesale-portal";
-import { canAccessPortal, type RequestStatus } from "@/lib/wholesale-display";
+import { canAccessPortal, portalLocaleFor, type RequestStatus } from "@/lib/wholesale-display";
 import { privatePageMetadata } from "@/lib/seo";
 import PrintDocumentButton from "@/components/wholesale/PrintDocumentButton";
 import OrderDocument, { documentLabels } from "@/components/wholesale/OrderDocument";
@@ -47,6 +47,10 @@ export default async function WholesaleDocumentPage({ params }: { params: Promis
 
   const partner = await partnerForUser(user.id);
   if (!partner || !canAccessPortal(partner.accountStatus)) notFound();
+  /* The portal's side lock applies here too: a Ukrainian page never carries
+     euro, an English/Japanese/Arabic one never hryvnia. */
+  const home = portalLocaleFor(partner.currency, locale, partner.locale);
+  if (home !== locale) redirect(`/${home}/wholesale-document/${reference}`);
   const r = (await requestsForUser(user.id)).find((x) => x.reference === decodeURIComponent(reference));
   if (!r || !DOCUMENT_STATUSES.includes(r.status)) notFound();
 

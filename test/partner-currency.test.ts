@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countryCurrency, partnerCurrency } from "@/lib/wholesale-display";
+import { countryCurrency, partnerCurrency, portalLocaleFor } from "@/lib/wholesale-display";
 
 /* ---------------------------------------------------------------------------
    One currency per wholesale partner (Mario, 11 Oct 2026).
@@ -28,4 +28,11 @@ test("no country either: the registration language, as requests were priced befo
 
 test("an unrecognised stored value is ignored, never trusted through", () => {
   assert.equal(partnerCurrency({ currency: "USD", country: "Germany", locale: "en" }), "EUR");
+});
+
+test("the portal side lock: hryvnia only on /uk, euro only on en/ja/ar (15 Oct 2026)", () => {
+  for (const l of ["en", "ja", "ar", "uk"]) assert.equal(portalLocaleFor("UAH", l, "en"), "uk", l);
+  for (const l of ["en", "ja", "ar"]) assert.equal(portalLocaleFor("EUR", l, "uk"), l, l);
+  assert.equal(portalLocaleFor("EUR", "uk", "ja"), "ja");
+  assert.equal(portalLocaleFor("EUR", "uk", "uk"), "en");
 });

@@ -8,7 +8,9 @@ import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
 import CartSuggestion from "./CartSuggestion";
-import AddonUpsell, { missingAddons } from "./cart/AddonUpsell";
+import AddonUpsell from "./cart/AddonUpsell";
+import CoverPairings from "./cart/CoverPairings";
+import { products } from "@/lib/products";
 
 /* ---------------------------------------------------------------------------
    "Added to Shopping Bag" — the confirmation slide-over shown after adding
@@ -21,6 +23,7 @@ import AddonUpsell, { missingAddons } from "./cart/AddonUpsell";
 export default function AddedToBagPanel({ locale }: { locale: string }) {
   const { addedOpen, setAddedOpen, lastAdded } = useCart();
   const d = lastAdded ? describeLine(lastAdded, locale) : null;
+  const isCover = !!lastAdded && products.find((p) => p.slug === lastAdded.slug)?.category === "windcover";
 
   const L = pick(locale, {
     title: { uk: "Додано в кошик", en: "Added to Shopping Bag", ja: "バッグに追加しました", ar: "أُضيف إلى الحقيبة" },
@@ -76,6 +79,9 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
         {/* Lid / FEAR for a heat device, the timer for a cover — right under
             the thing just added, before anything else (15 Oct 2026). */}
         {lastAdded && <AddonUpsell line={lastAdded} locale={locale} mode="panel" />}
+        {/* A cover then offers what the session still needs — the missing
+            set piece, then Project KI 06 (15 Oct 2026). */}
+        {isCover && <CoverPairings locale={locale} />}
 
       {/* The success actions, and the pairing card beneath them.
 
@@ -109,9 +115,9 @@ export default function AddedToBagPanel({ locale }: { locale: string }) {
             button at two weights: the accent above already belongs to "View
             your shopping bag", and two orange pills this close read as two
             primaries competing rather than an offer inside a card. */}
-        {/* Not while the timer row above is offering the same thing — the
-            pairing card's windcover → timer poster would say it twice. */}
-        {!(lastAdded && missingAddons(lastAdded).includes("timer")) && <CartSuggestion locale={locale} cta="quiet" />}
+        {/* Not after a cover: the timer row and the session rows above already
+            say what its pairing card would (the timer poster), and more. */}
+        {!isCover && <CartSuggestion locale={locale} cta="quiet" />}
       </div>
       </div>
     </SlideOver>

@@ -110,6 +110,7 @@ const BOOKS: Record<PartnerType, Book> = {
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
+      "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },
     addons: {
       lid: m(3.0, 130), // 7 Oct 2026 (Mario) — shop + distribution only; lounge unchanged.
@@ -139,6 +140,7 @@ const BOOKS: Record<PartnerType, Book> = {
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
+      "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },
     addons: {
       lid: m(3.0, 130),
@@ -167,6 +169,7 @@ const BOOKS: Record<PartnerType, Book> = {
          will reprice per book later). Minimum order 5, enforced in
          lib/wholesale-portal. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
+      "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },
     addons: {
       lid: m(3.5, 190),

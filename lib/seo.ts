@@ -124,9 +124,23 @@ const PRODUCT_KIND: Record<string, Record<string, string>> = {
   },
 };
 
-/** The descriptor for one product category, or "" when there is none to give. */
-export function productKind(category: string, locale: string): string {
-  return PRODUCT_KIND[category]?.[locale] ?? PRODUCT_KIND[category]?.en ?? "";
+/* AN ACCESSORY IS NOT ALWAYS FOR A HEAT DEVICE. The category line above was
+   written for LID and FEAR; the Tactical Mouthpiece (17 Oct 2026) is an
+   accessory too, and a title calling it a part for heat devices would be
+   wrong. A product that needs its own descriptor gets one here by slug. */
+const PRODUCT_KIND_BY_SLUG: Record<string, Record<string, string>> = {
+  "tactical-mouthpiece": {
+    en: "hookah mouthpiece",
+    uk: "мундштук для кальяну",
+    ja: "シーシャ用マウスピース",
+    ar: "مبسم للشيشة",
+  },
+};
+
+/** The descriptor for one product, or "" when there is none to give. */
+export function productKind(category: string, locale: string, slug?: string): string {
+  const row = (slug && PRODUCT_KIND_BY_SLUG[slug]) || PRODUCT_KIND[category];
+  return row?.[locale] ?? row?.en ?? "";
 }
 
 /* ---------------------------------------------------------------------------

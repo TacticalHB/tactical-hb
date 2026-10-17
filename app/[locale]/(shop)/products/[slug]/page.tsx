@@ -43,7 +43,7 @@ export async function generateMetadata({
      the category and is empty for the withheld listing, which keeps a bare
      name on purpose — see productKind(). The brand is appended by the title
      template in app/layout.tsx, so it is not repeated here. */
-  const kind = productKind(product.category, locale);
+  const kind = productKind(product.category, locale, product.slug);
 
   /* An unphotographed product falls back to the site card rather than passing
      an empty url — `images: [{ url: "" }]` renders og:image as the bare

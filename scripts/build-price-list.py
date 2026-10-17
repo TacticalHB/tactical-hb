@@ -53,7 +53,7 @@ LEFT, RIGHT = 48, W - 48
 FOOTER_Y = 40
 # The lowest a line of body copy may sit before it starts fighting the footer.
 FLOOR = FOOTER_Y + 18
-ROW = 16.5  # One table row, baseline to baseline. (18 until the hookah row, 7 Oct 2026)
+ROW = 15.8  # One table row, baseline to baseline. (18 until the hookah row, 7 Oct 2026; 16.5 until the mouthpiece row, 17 Oct)
 
 
 def register_fonts():

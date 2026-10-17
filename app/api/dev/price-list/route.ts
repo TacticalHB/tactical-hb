@@ -58,6 +58,9 @@ export async function GET() {
       }
       lines.push({ label: "Lid 9E418", ...addonPrice(book, "lid") });
       lines.push({ label: "FEAR Stabiliser 9E418", ...addonPrice(book, "rubber") });
+      /* A product of its own, not an add-on (17 Oct 2026). */
+      const mp = bookPrice(book, "tactical-mouthpiece");
+      if (mp) lines.push({ label: "Tactical Mouthpiece", ...mp });
 
       return [book, lines];
     })

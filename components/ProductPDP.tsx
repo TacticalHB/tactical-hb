@@ -722,12 +722,21 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                         ja: "予約受付はまもなく開始します。",
                         ar: "يُفتح الطلب المسبق قريبًا.",
                       })
-                    : status === "coming_soon"
+                    : status === "coming_soon" && (Object.values(ADDON_PRODUCT) as string[]).includes(product.slug)
                     ? t(locale, {
                         en: "This one has not reached us yet. It cannot be ordered today — and it is not available as an option on a heat device either.",
                         uk: "Цей товар до нас ще не надійшов. Замовити його сьогодні не можна — і як опцію до пристрою теж.",
                         ja: "こちらはまだ入荷していません。本日はご注文いただけず、ヒートデバイスのオプションとしてもお選びいただけません。",
                         ar: "لم يصلنا هذا المنتج بعد. لا يمكن طلبه اليوم، ولا اختياره كإضافة على جهاز حرارة.",
+                      })
+                    : status === "coming_soon"
+                    /* Not every coming-soon item is an HMD option — only
+                       the lid and the ring are (ADDON_PRODUCT). */
+                    ? t(locale, {
+                        en: "This one has not reached us yet. It cannot be ordered today.",
+                        uk: "Цей товар до нас ще не надійшов. Замовити його сьогодні не можна.",
+                        ja: "こちらはまだ入荷していません。本日はご注文いただけません。",
+                        ar: "لم يصلنا هذا المنتج بعد. لا يمكن طلبه اليوم.",
                       })
                     : t(locale, {
                         en: "Out of stock for now. It will return — nothing about it has changed.",

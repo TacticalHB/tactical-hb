@@ -462,7 +462,9 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
              fallback below labelled the withheld listing "Accessory", which is
              both wrong and the sort of small lie that makes a page look unread. */
           ? t(locale, { uk: "Кальян", en: "Hookah", ja: "シーシャ", ar: "شيشة" })
-          : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
+          : product.category === "mouthpiece"
+            ? t(locale, { uk: "Мундштук", en: "Mouthpiece", ja: "マウスピース", ar: "مبسم" })
+            : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
 
   const L = {
     addToBag: t(locale, { uk: "Додати в кошик", en: "Add to Shopping Bag", ja: "バッグに追加", ar: "أضف إلى الحقيبة" }),
@@ -904,7 +906,12 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             )}
 
             {/* Accordions */}
-            {pdp?.specs && pdp.specs.length > 0 && (
+            {/* NOT TWICE. The card above lifts Material and Finish out of
+               this table; when that is all the table holds (Tactical
+               Mouthpiece: one Finish row), the accordion would only repeat
+               the card, so it is left out (Mario, 17 Oct 2026). */}
+            {pdp?.specs && pdp.specs.length > 0 &&
+              !pdp.specs.every((s) => fieldRows.some((r) => r.key === s.labelEn.toLowerCase())) && (
               <Accordion title={L.specs}>
                 <table className="w-full text-[15px]">
                   <tbody>

@@ -57,6 +57,11 @@
    "uah": 800
   },
   {
+   "key": "tactical-mouthpiece",
+   "eur": 32,
+   "uah": 1200
+  },
+  {
    "key": "fear-9e418",
    "eur": 4.9,
    "uah": 210
@@ -65,11 +70,6 @@
    "key": "lid-9e418",
    "eur": 5.5,
    "uah": 220
-  },
-  {
-   "key": "tactical-mouthpiece",
-   "eur": 32,
-   "uah": 1200
   }
  ]
 }

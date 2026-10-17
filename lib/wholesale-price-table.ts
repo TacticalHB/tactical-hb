@@ -132,7 +132,7 @@ export function priceTable(locale: string): PriceRow[] {
 
   for (const p of priced) {
     const availability = availabilityOf(p);
-    const group = (p.category === "hookah" ? "accessory" : p.category) as PriceRow["group"];
+    const group = (p.category === "hookah" || p.category === "mouthpiece" ? "accessory" : p.category) as PriceRow["group"];
     const name = uk ? p.nameUk : p.nameEn;
 
     if (p.variants?.length) {

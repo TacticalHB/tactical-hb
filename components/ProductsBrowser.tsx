@@ -9,8 +9,10 @@ import { currencyForLocale, formatMoney, type Currency } from "@/lib/currency";
 import { ADDONS } from "@/lib/addons";
 import NikeProductCard from "./NikeProductCard";
 
-type CatKey = "all" | "hmd" | "bowl" | "windcover" | "accessory";
-const CAT_KEYS: CatKey[] = ["all", "hmd", "bowl", "windcover", "accessory"];
+/* "hookah" and "mouthpiece" got their own tabs on 17 Oct 2026 (Mario):
+   Project KI 06 under Hubble-bubble, the Tactical Mouthpiece under Mouthpieces. */
+type CatKey = "all" | "hookah" | "hmd" | "bowl" | "windcover" | "mouthpiece" | "accessory";
+const CAT_KEYS: CatKey[] = ["all", "hookah", "hmd", "bowl", "windcover", "mouthpiece", "accessory"];
 
 /* ---------------------------------------------------------------------------
    ?category=hmd opens the catalogue on that filter.
@@ -100,6 +102,8 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       hmd: t(locale, { uk: "Пристрої для нагріву", en: "Heat Devices", ja: "ヒートデバイス", ar: "أجهزة الحرارة" }),
       bowl: t(locale, { uk: "Чаші", en: "Bowls", ja: "ボウル", ar: "الرؤوس" }),
       windcover: t(locale, { uk: "Ковпаки", en: "Windcovers", ja: "ウインドカバー", ar: "أغطية الرياح" }),
+      hookah: t(locale, { uk: "Кальяни", en: "Hubble-bubble", ja: "シーシャ", ar: "الشيشة" }),
+      mouthpiece: t(locale, { uk: "Мундштуки", en: "Mouthpieces", ja: "マウスピース", ar: "المباسم" }),
       accessory: t(locale, { uk: "Аксесуари", en: "Accessories", ja: "アクセサリー", ar: "الإكسسوارات" }),
     } as Record<CatKey, string>,
     incoming: t(locale, { uk: "Скоро", en: "Incoming", ja: "近日入荷", ar: "قريبًا" }),

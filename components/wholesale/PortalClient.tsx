@@ -88,7 +88,7 @@ const ADDON_SPEC: Record<AddonKey, OptionSpec> = {
 };
 
 /* The flagship leads the portal, as it leads the catalogue (4 Oct 2026). */
-const CATEGORY_ORDER = ["hookah", "bowl", "hmd", "windcover", "accessory"] as const;
+const CATEGORY_ORDER = ["hookah", "bowl", "hmd", "windcover", "mouthpiece", "accessory"] as const;
 
 /* ---------------------------------------------------------------------------
    Both of these live at module scope, NOT inside PortalClient.
@@ -400,6 +400,7 @@ export default function PortalClient({
       bowl: t(locale, { en: "Bowls", uk: "Чаші", ja: "ボウル", ar: "الرؤوس" }),
       hmd: t(locale, { en: "Heat devices", uk: "Пристрої нагріву", ja: "ヒートデバイス", ar: "أجهزة الحرارة" }),
       windcover: t(locale, { en: "Wind covers", uk: "Ковпаки", ja: "ウインドカバー", ar: "أغطية الرياح" }),
+      mouthpiece: t(locale, { en: "Mouthpieces", uk: "Мундштуки", ja: "マウスピース", ar: "المباسم" }),
       accessory: t(locale, { en: "Accessories", uk: "Аксесуари", ja: "アクセサリー", ar: "الإكسسوارات" }),
     } as Record<string, string>,
   };

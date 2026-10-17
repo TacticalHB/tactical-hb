@@ -59,7 +59,7 @@ COPY = {
         "rail": "Роздрібні ціни · UAH",
         "title": "Роздрібні ціни",
         "sub": "Ціни на tactical-hb.com для покупців в Україні",
-        "cats": {"hookah": "КАЛЬЯНИ", "bowl": "ЧАШІ", "hmd": "ПРИСТРОЇ НАГРІВУ", "windcover": "КОВПАКИ", "accessory": "АКСЕСУАРИ"},
+        "cats": {"hookah": "КАЛЬЯНИ", "bowl": "ЧАШІ", "hmd": "ПРИСТРОЇ НАГРІВУ", "windcover": "КОВПАКИ", "mouthpiece": "МУНДШТУКИ", "accessory": "АКСЕСУАРИ"},
         "timer": "Таймер — додається до ковпака",
         "colours": {"Black": "Чорний", "Purple": "Фіолетовий"},
         "note": "Для орієнтиру. Ваші оптові ціни — у порталі партнера.",
@@ -69,7 +69,7 @@ COPY = {
         "title": "Retail prices",
         # Mario, 14 Oct 2026: this wording, and no date on either list.
         "sub": "Worldwide prices on tactical-hb.com",
-        "cats": {"hookah": "HOOKAHS", "bowl": "BOWLS", "hmd": "HEAT DEVICES", "windcover": "WIND COVERS", "accessory": "ACCESSORIES"},
+        "cats": {"hookah": "HOOKAHS", "bowl": "BOWLS", "hmd": "HEAT DEVICES", "windcover": "WIND COVERS", "mouthpiece": "MOUTHPIECES", "accessory": "ACCESSORIES"},
         "timer": "Timer — added to a wind cover",
         "colours": {"Black": "Black", "Purple": "Purple"},
         "note": "For reference. Your trade prices are in the partner portal.",

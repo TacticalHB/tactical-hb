@@ -82,7 +82,7 @@ export type Product = {
       shipping estimate, not a measurement (Tactical Mouthpiece, 17 Oct 2026).
       Shipping still uses it. */
   hideWeight?: boolean;
-  category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah";
+  category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah" | "mouthpiece";
   featured: boolean;
   image: string;
   photos?: string[];
@@ -720,6 +720,7 @@ export const products: Product[] = [
         "/images/killer-hero-v2.png",
         "/images/killer-2.png",
         "/images/killer-3.png",
+        "/images/killer-4.jpg", // Mario, 17 Oct 2026 — house standard, 80% height
       ],
       colourShownEn: "Matte Black",
       colourShownUk: "Матовий чорний",
@@ -1464,7 +1465,8 @@ export const products: Product[] = [
     dims: { l: 320, w: 50, h: 50 },
     hideDimensions: true,
     hideWeight: true,
-    category: "accessory",
+    /* Its own category, "Mouthpieces" (Mario, 17 Oct 2026). */
+    category: "mouthpiece",
     featured: false,
     /* In stock 17 Oct 2026 (Mario). */
     /* Photos 17 Oct 2026, house standard (1200², bg 245): -2 standing (main, Mario 17 Oct), -1 diagonal, -3 the two parts, -4 grip, -5 tip. */

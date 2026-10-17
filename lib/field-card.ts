@@ -76,6 +76,7 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
   /* Nothing is claimed to pair with it. What it fits is part of the withheld
      file, and a compatibility note would be the first invented fact. */
   hookah: [],
+  mouthpiece: [],
 };
 
 const CATEGORY_NAME: Record<Product["category"], Text> = {
@@ -84,6 +85,7 @@ const CATEGORY_NAME: Record<Product["category"], Text> = {
   windcover: { en: "wind covers", uk: "ковпаки", ja: "ウインドカバー", ar: "أغطية الرياح" },
   accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー", ar: "الإكسسوارات" },
   hookah: { en: "hookahs", uk: "кальяни", ja: "シーシャ", ar: "الشيشة" },
+  mouthpiece: { en: "mouthpieces", uk: "мундштуки", ja: "マウスピース", ar: "المباسم" },
 };
 
 export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {

@@ -27,7 +27,7 @@ import Price from "@/components/Price";
    default configuration (first colour, no add-ons). Ukrainian copy only: it never renders anywhere else.
 --------------------------------------------------------------------------- */
 
-const SUGGESTABLE = new Set(["bowl", "hmd", "windcover", "accessory"]);
+const SUGGESTABLE = new Set(["bowl", "hmd", "windcover", "mouthpiece", "accessory"]);
 const MAX = 3;
 
 /* Mirrors CartContext's subtotal exactly (one bundle item per line, as there),

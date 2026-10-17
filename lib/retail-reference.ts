@@ -38,7 +38,7 @@ export function retailKey(slug: string, variant?: string | null): string {
   return variant ? `${slug}__${variant.toLowerCase()}` : slug;
 }
 
-const ORDER = ["hookah", "bowl", "hmd", "windcover", "accessory"];
+const ORDER = ["hookah", "bowl", "hmd", "windcover", "mouthpiece", "accessory"];
 
 export function retailRows(): RetailRow[] {
   const rows: RetailRow[] = [];

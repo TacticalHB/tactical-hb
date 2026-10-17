@@ -116,6 +116,12 @@ const PRODUCT_KIND: Record<string, Record<string, string>> = {
     ja: "シーシャ用ウインドカバー",
     ar: "غطاء رياح للشيشة",
   },
+  mouthpiece: {
+    en: "hookah mouthpiece",
+    uk: "мундштук для кальяну",
+    ja: "シーシャ用マウスピース",
+    ar: "مبسم للشيشة",
+  },
   accessory: {
     en: "accessory for Tactical HB heat devices",
     uk: "аксесуар для пристроїв Tactical HB",

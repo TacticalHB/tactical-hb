@@ -89,7 +89,7 @@ COPY = {
         "terms": [
             "Prices apply only to approved wholesale partners. Access is granted after application review.",
             "Orders are submitted as quantity requests in the trade portal — nothing is charged on the website.",
-            "Minimum order value: €1,500 per order. Project KI 06 is ordered from 5 units.",
+            "Minimum order value: €1,500 per order.",
             "Delivery is not sold separately: once confirmed, carriage is spread across the unit prices — one total.",
             "Payment details are confirmed by email.",
             "Tactical HB reserves the right to update this list. Confidential — do not redistribute.",
@@ -113,7 +113,7 @@ COPY = {
         "terms": [
             "Ціни діють лише для схвалених оптових партнерів. Доступ — після розгляду заявки.",
             "Замовлення надсилаються як запити на кількість у порталі — на сайті нічого не списується.",
-            "Мінімальна сума замовлення: €1 500. Project KI 06 замовляється від 5 одиниць.",
+            "Мінімальна сума замовлення: €1 500.",
             "Доставка не продається окремо: після підтвердження вартість перевезення розподіляється в цінах за одиницю.",
             "Реквізити для оплати підтверджуємо листом.",
             "Tactical HB має право оновлювати цей прайс. Конфіденційно — не розповсюджувати.",

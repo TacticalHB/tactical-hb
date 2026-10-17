@@ -1598,7 +1598,8 @@ export const products: Product[] = [
     featured: false,
     preorder: true,
     shipsOn: "2026-10-20", // Mario, 4 Oct 2026
-    wholesaleMinQty: 5, // Mario, 4 Oct 2026 — partner minimum order
+    /* No partner minimum since 17 Oct 2026 (Mario: "remove the minimum order
+       everywhere"); it was 5 from 4 Oct. */
     image: "/images/hookah/hookah-1.jpg",
     gridImage: "/images/hookah/hookah-1.jpg",
     tags: ["hookah", "incoming", "classified", "top secret", "mr hb", "кальян"],

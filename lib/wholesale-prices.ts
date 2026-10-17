@@ -107,8 +107,7 @@ const BOOKS: Record<PartnerType, Book> = {
       "windcover-detonator": m(14.3, 650),
       "windcover-kh": m(14.3, 650),
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
-         will reprice per book later). Minimum order 5, enforced in
-         lib/wholesale-portal. */
+         will reprice per book later). No minimum order since 17 Oct 2026. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
       "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },
@@ -137,8 +136,7 @@ const BOOKS: Record<PartnerType, Book> = {
       "windcover-detonator": m(14.3, 650),
       "windcover-kh": m(14.3, 650),
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
-         will reprice per book later). Minimum order 5, enforced in
-         lib/wholesale-portal. */
+         will reprice per book later). No minimum order since 17 Oct 2026. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
       "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },
@@ -166,8 +164,7 @@ const BOOKS: Record<PartnerType, Book> = {
       "windcover-detonator": m(19.5, 765),
       "windcover-kh": m(19.5, 765),
       /* Project KI 06 — €175 / ₴8 060 on EVERY book (Mario, 4 Oct 2026; he
-         will reprice per book later). Minimum order 5, enforced in
-         lib/wholesale-portal. */
+         will reprice per book later). No minimum order since 17 Oct 2026. */
       "incoming-hookah": m(160, 8060), // €160 from 11 Oct 2026 (Mario); UAH unchanged
       "tactical-mouthpiece": m(19, 750), // 17 Oct 2026 (Mario) — one figure, every book.
     },

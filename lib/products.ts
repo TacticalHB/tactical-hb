@@ -78,6 +78,10 @@ export type Product = {
   /** Keep the dimensions off the product page (shipping still uses them).
       FEAR and LID, Mario 14 Oct 2026: "no need for them". */
   hideDimensions?: boolean;
+  /** Keep the weight off the product page too — for a weight that is a
+      shipping estimate, not a measurement (Tactical Mouthpiece, 17 Oct 2026).
+      Shipping still uses it. */
+  hideWeight?: boolean;
   category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah";
   featured: boolean;
   image: string;
@@ -1427,10 +1431,10 @@ export const products: Product[] = [
      Added 17 Oct 2026 (Mario: "we will have a new product in accessories").
      The mouthpiece that ships in the Project KI 06 case, sold on its own.
 
-     COMING SOON UNTIL MARIO CONFIRMS STOCK. Priced 17 Oct 2026; materials,
-     weight and the boxed size are not known yet, so `comingSoon` keeps it
-     unbuyable (lib/pricing refuses it). The parcel below is a PLACEHOLDER —
-     replace it, then remove `comingSoon`. The copy says only what the photos show: no material
+     IN STOCK AND ON SALE from 17 Oct 2026. The boxed weight and size are
+     not known yet: the parcel below is a PLACEHOLDER that errs heavy, so
+     delivery is over- rather than under-quoted. Replace it with Mario's
+     figures. The copy says only what the photos show: no material
      claims until Mario gives them.
   --------------------------------------------------------------------------- */
   {
@@ -1443,13 +1447,13 @@ export const products: Product[] = [
     taglineJa: "Tactical HB のマウスピース。",
     taglineAr: "مبسم من Tactical HB.",
     descriptionUk:
-      "Tactical Mouthpiece — глянцева чорна трубка, що вкручується в матове руків'я з тисненням TACTICAL і знаком tct. Розбирається на дві частини, щоб її було легко мити. Той самий мундштук входить у кейс Project KI 06.",
+      "Мундштук із кейсу Project KI 06 — тепер окремо. Глянцеві чорні безшовні трубки з PVD-покриттям і руків'я із силікону soft touch. Універсальний для всіх стандартних силіконових шлангів.",
     descriptionEn:
-      "Tactical Mouthpiece: a glossy black tube that screws into a matte grip embossed with TACTICAL and the tct mark. It comes apart in two for easy cleaning. The same mouthpiece ships in the Project KI 06 case.",
+      "The mouthpiece from the Project KI 06 case, now on its own. Glossy black PVD seamless pipes with a soft-touch silicone handle. Universal for all standard silicone hoses.",
     descriptionJa:
-      "Tactical Mouthpiece：光沢のあるブラックのチューブを、TACTICAL と tct マークを型押ししたマットなグリップにねじ込む構造。2つに分解でき、お手入れも簡単です。Project KI 06 のケースに入っているものと同じマウスピースです。",
+      "Project KI 06 のケースに入っているマウスピースを単品で。光沢ブラックの PVD コーティングを施したシームレスパイプに、ソフトタッチシリコンのハンドル。一般的なシリコンホースすべてに対応します。",
     descriptionAr:
-      "Tactical Mouthpiece: أنبوب أسود لامع يُثبَّت باللولبة في مقبض مطفأ منقوش عليه TACTICAL وعلامة tct. يُفكّ إلى جزأين لتسهيل التنظيف. وهو المبسم نفسه الموجود في حقيبة Project KI 06.",
+      "مبسم حقيبة Project KI 06، متاح الآن منفصلًا. أنابيب سوداء لامعة غير ملحومة بطلاء PVD مع مقبض من سيليكون ناعم الملمس. متوافق مع جميع خراطيم السيليكون القياسية.",
     /* Mario, 17 Oct 2026: €32 / ₴1 200 retail (wholesale €19 / ₴750, in
        lib/wholesale-prices). */
     price: 32,
@@ -1459,9 +1463,10 @@ export const products: Product[] = [
     weightG: 100,
     dims: { l: 320, w: 50, h: 50 },
     hideDimensions: true,
+    hideWeight: true,
     category: "accessory",
     featured: false,
-    comingSoon: true,
+    /* In stock 17 Oct 2026 (Mario). */
     /* Photos 17 Oct 2026, house standard (1200², bg 245): -2 standing (main, Mario 17 Oct), -1 diagonal, -3 the two parts, -4 grip, -5 tip. */
     image: "/images/accessories/tactical-mouthpiece-2-d.jpg",
     gridImage: "/images/accessories/tactical-mouthpiece-2-d.jpg",
@@ -1475,40 +1480,31 @@ export const products: Product[] = [
         "/images/accessories/tactical-mouthpiece-5-d.jpg",
       ],
       shortEn:
-        "The mouthpiece from the Project KI 06 case, now on its own. A glossy black tube screws into a matte grip embossed with TACTICAL and the tct mark, and the two come apart for cleaning.",
+        "The mouthpiece from the Project KI 06 case, now on its own. Glossy black PVD seamless pipes with a soft-touch silicone handle. Universal for all standard silicone hoses.",
       shortUk:
-        "Мундштук із кейсу Project KI 06 — тепер окремо. Глянцева чорна трубка вкручується в матове руків'я з тисненням TACTICAL і знаком tct, а для миття вони розбираються.",
+        "Мундштук із кейсу Project KI 06 — тепер окремо. Глянцеві чорні безшовні трубки з PVD-покриттям і руків'я із силікону soft touch. Універсальний для всіх стандартних силіконових шлангів.",
       shortJa:
-        "Project KI 06 のケースに入っているマウスピースを単品で。光沢のあるブラックのチューブを、TACTICAL と tct マークを型押ししたマットなグリップにねじ込みます。お手入れの際は2つに分解できます。",
+        "Project KI 06 のケースに入っているマウスピースを単品で。光沢ブラックの PVD コーティングを施したシームレスパイプに、ソフトタッチシリコンのハンドル。一般的なシリコンホースすべてに対応します。",
       shortAr:
-        "مبسم حقيبة Project KI 06، متاح الآن منفصلًا. أنبوب أسود لامع يُثبَّت باللولبة في مقبض مطفأ منقوش عليه TACTICAL وعلامة tct، ويُفكّ الجزآن للتنظيف.",
+        "مبسم حقيبة Project KI 06، متاح الآن منفصلًا. أنابيب سوداء لامعة غير ملحومة بطلاء PVD مع مقبض من سيليكون ناعم الملمس. متوافق مع جميع خراطيم السيليكون القياسية.",
       benefitsEn: [
         "Unscrews into two parts for easy cleaning",
-        "Matte grip embossed with TACTICAL and the tct mark",
-        "Glossy black tube and tip",
-        "The same mouthpiece that ships in the Project KI 06 case",
+        "Matte grip embossed with TACTICAL and the tct mark; glossy black PVD seamless pipes",
       ],
       benefitsUk: [
         "Розкручується на дві частини — легко мити",
-        "Матове руків'я з тисненням TACTICAL і знаком tct",
-        "Глянцева чорна трубка та наконечник",
-        "Той самий мундштук, що входить у кейс Project KI 06",
+        "Матове руків'я з тисненням TACTICAL і знаком tct; глянцеві чорні безшовні трубки з PVD-покриттям",
       ],
       benefitsJa: [
         "2つに分解でき、お手入れが簡単",
-        "TACTICAL と tct マークを型押ししたマットなグリップ",
-        "光沢のあるブラックのチューブと先端",
-        "Project KI 06 のケースに入っているものと同じマウスピース",
+        "TACTICAL と tct マークを型押ししたマットなグリップ、光沢ブラックの PVD シームレスパイプ",
       ],
       benefitsAr: [
         "يُفكّ إلى جزأين لتسهيل التنظيف",
-        "مقبض مطفأ منقوش عليه TACTICAL وعلامة tct",
-        "أنبوب وطرف باللون الأسود اللامع",
-        "المبسم نفسه الموجود في حقيبة Project KI 06",
+        "مقبض مطفأ منقوش عليه TACTICAL وعلامة tct؛ أنابيب سوداء لامعة غير ملحومة بطلاء PVD",
       ],
       specs: [
-        { labelEn: "Parts", labelUk: "Частини", labelJa: "構成", labelAr: "الأجزاء", valueEn: "Tube + grip, screw-fit", valueUk: "Трубка + руків'я, різьбове з'єднання", valueJa: "チューブ + グリップ（ねじ込み式）", valueAr: "أنبوب + مقبض، تثبيت باللولبة" },
-        { labelEn: "Finish", labelUk: "Обробка", labelJa: "仕上げ", labelAr: "التشطيب", valueEn: "Glossy black tube, matte black grip", valueUk: "Глянцева чорна трубка, матове чорне руків'я", valueJa: "光沢ブラックのチューブ、マットブラックのグリップ", valueAr: "أنبوب أسود لامع، مقبض أسود مطفأ" },
+        { labelEn: "Finish", labelUk: "Обробка", labelJa: "仕上げ", labelAr: "التشطيب", valueEn: "Glossy black; matte black grip", valueUk: "Глянцевий чорний; матове чорне руків'я", valueJa: "光沢ブラック、マットブラックのグリップ", valueAr: "أسود لامع؛ مقبض أسود مطفأ" },
       ],
       /* The KI 06 sheet's care tips that apply to a mouthpiece, word for word. */
       tipsEn: [

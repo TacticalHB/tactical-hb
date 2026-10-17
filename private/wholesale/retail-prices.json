@@ -1,5 +1,5 @@
 {
- "built": "2026-10-14",
+ "built": "2026-10-17",
  "rows": [
   {
    "key": "incoming-hookah",
@@ -65,6 +65,11 @@
    "key": "lid-9e418",
    "eur": 5.5,
    "uah": 220
+  },
+  {
+   "key": "tactical-mouthpiece",
+   "eur": 32,
+   "uah": 1200
   }
  ]
 }

@@ -97,7 +97,8 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
   const rows: FieldRow[] = [];
   const g = t(locale, { uk: "г", en: "g", ja: "g", ar: "غ" });
 
-  rows.push({
+  /* An estimated weight is for the courier, not a spec to print. */
+  if (!product.hideWeight) rows.push({
     key: "weight",
     label: t(locale, { uk: "Вага", en: "Weight", ja: "重量", ar: "الوزن" }),
     value: `${selectedWeightG(product, material, windcover)} ${g}`,

@@ -117,7 +117,7 @@ export function buildFieldCard({ product, locale, material, windcover }: FieldCa
   /* Material and finish are lifted from the product's own spec table rather
      than restated, so correcting one corrects both — which is exactly what the
      laser-to-UV change on the camo cover needed. */
-  for (const wanted of ["Material", "Finish"]) {
+  for (const wanted of product.specsOffCard ? [] : ["Material", "Finish"]) {
     const spec = product.pdp?.specs?.find((s) => s.labelEn === wanted);
     if (spec) {
       rows.push({

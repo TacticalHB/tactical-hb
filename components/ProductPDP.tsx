@@ -906,12 +906,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             )}
 
             {/* Accordions */}
-            {/* NOT TWICE. The card above lifts Material and Finish out of
-               this table; when that is all the table holds (Tactical
-               Mouthpiece: one Finish row), the accordion would only repeat
-               the card, so it is left out (Mario, 17 Oct 2026). */}
-            {pdp?.specs && pdp.specs.length > 0 &&
-              !pdp.specs.every((s) => fieldRows.some((r) => r.key === s.labelEn.toLowerCase())) && (
+            {pdp?.specs && pdp.specs.length > 0 && (
               <Accordion title={L.specs}>
                 <table className="w-full text-[15px]">
                   <tbody>

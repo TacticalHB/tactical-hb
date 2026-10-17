@@ -82,6 +82,10 @@ export type Product = {
       shipping estimate, not a measurement (Tactical Mouthpiece, 17 Oct 2026).
       Shipping still uses it. */
   hideWeight?: boolean;
+  /** Keep Material / Finish in Tech Specs only, not lifted onto the card
+      under the description (Tactical Mouthpiece, Mario 17 Oct 2026: "finish
+      has to be in tech specs as usual"). */
+  specsOffCard?: boolean;
   category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah" | "mouthpiece";
   featured: boolean;
   image: string;
@@ -1465,6 +1469,7 @@ export const products: Product[] = [
     dims: { l: 320, w: 50, h: 50 },
     hideDimensions: true,
     hideWeight: true,
+    specsOffCard: true,
     /* Its own category, "Mouthpieces" (Mario, 17 Oct 2026). */
     category: "mouthpiece",
     featured: false,

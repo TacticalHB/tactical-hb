@@ -323,6 +323,8 @@ export default function PortalClient({
       sheetLang === "uk"
         ? t(locale, { en: "Project KI 06 — product sheet (PDF, in Ukrainian)", uk: "Project KI 06 — опис продукту (PDF)", ja: "Project KI 06 — 製品資料（PDF・ウクライナ語）", ar: "Project KI 06 — ملف المنتج (PDF، بالأوكرانية)" })
         : t(locale, { en: "Project KI 06 — product sheet (PDF)", uk: "Project KI 06 — опис продукту (PDF, англійською)", ja: "Project KI 06 — 製品資料（PDF・英語）", ar: "Project KI 06 — ملف المنتج (PDF، بالإنجليزية)" }),
+    photosTitle: t(locale, { en: "Project KI 06 — photo pack (ZIP, 13 photos)", uk: "Project KI 06 — фотопак (ZIP, 13 фото)", ja: "Project KI 06 — 写真パック（ZIP・13枚）", ar: "Project KI 06 — حزمة الصور (ZIP، 13 صورة)" }),
+    photosSub: t(locale, { en: "Full-size 1200 × 1200 photos, free to use in your shop and media", uk: "Фото 1200 × 1200, вільно використовуйте у своєму магазині та медіа", ja: "1200 × 1200 のフルサイズ写真。ショップやメディアで自由にお使いいただけます", ar: "صور بحجم 1200 × 1200، استخدمها بحرية في متجرك ووسائطك" }),
     sheetSub: t(locale, { en: "Materials, case contents, photos and partner terms", uk: "Матеріали, комплектація, фото та умови для партнерів", ja: "素材、同梱物、写真、パートナー条件", ar: "المواد ومحتويات الحقيبة والصور وشروط الشركاء" }),
     minOrder: (n: number) => t(locale, { en: `Minimum order ${n}`, uk: `Мінімальне замовлення — ${n}`, ja: `最小注文数 ${n}`, ar: `الحد الأدنى للطلب ${n}` }),
     preorder: (d: string) => t(locale, { en: `Pre-order · ships ${d}`, uk: `Передзамовлення · відправка ${d}`, ja: `予約注文 · ${d}発送`, ar: `طلب مسبق · الشحن في ${d}` }),
@@ -558,6 +560,24 @@ export default function PortalClient({
           <span className="flex-1">
             <span className="block text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.sheetTitle}</span>
             <span className="block text-[13px]" style={{ color: "var(--text-muted)" }}>{L.sheetSub}</span>
+          </span>
+        </a>
+
+        {/* The photos as files (Mario, 17 Oct 2026: the photo pages in the
+            PDF could not be saved). Public on purpose: every one of them is
+            already on the product page. */}
+        <a
+          href="/downloads/project-ki-06-photos.zip"
+          download
+          className="mt-3 max-w-2xl flex items-center gap-4 rounded-[6px] px-5 py-4 transition-colors hover:bg-[var(--bg-card)]"
+          style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" strokeWidth="1.6" aria-hidden="true">
+            <path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14" />
+          </svg>
+          <span className="flex-1">
+            <span className="block text-[15px] font-medium" style={{ color: "var(--text)" }}>{L.photosTitle}</span>
+            <span className="block text-[13px]" style={{ color: "var(--text-muted)" }}>{L.photosSub}</span>
           </span>
         </a>
 

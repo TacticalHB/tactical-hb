@@ -43,7 +43,13 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+    return [
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      /* Partner downloads (the Project KI 06 photo pack) save as files
+         instead of opening in the browser — linked from the wholesale sheet
+         PDF, where an embedded image cannot be saved (17 Oct 2026). */
+      { source: "/downloads/:path*", headers: [{ key: "Content-Disposition", value: "attachment" }] },
+    ];
   },
   /* The partner-only product sheets live outside public/ (they carry trade
      prices) and are read at request time, so they must be traced into the

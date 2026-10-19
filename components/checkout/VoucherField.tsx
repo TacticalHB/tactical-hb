@@ -39,7 +39,6 @@ export default function VoucherField({
 
   const L = {
     title: t(locale, { uk: "Ваучер або подарунковий код", en: "Voucher or gift code", ja: "バウチャー / ギフトコード", ar: "قسيمة أو رمز هدية" }),
-    placeholder: "GIFT20-XXXXXX",
     apply: t(locale, { uk: "Застосувати", en: "Apply", ja: "適用する", ar: "تطبيق" }),
     remove: t(locale, { uk: "Видалити", en: "Remove", ja: "削除", ar: "إزالة" }),
     signIn: t(locale, { uk: "Ваучер програми лояльності? Увійдіть, щоб його використати.", en: "Loyalty voucher? Sign in to use it.", ja: "ロイヤルティ バウチャーをお持ちの方はログインしてください。", ar: "لديك قسيمة ولاء؟ سجّل الدخول لاستخدامها." }),
@@ -124,7 +123,6 @@ export default function VoucherField({
         <input
           id="voucher-code"
           className="field font-mono tracking-wider"
-          placeholder={L.placeholder}
           value={code}
           autoComplete="off"
           spellCheck={false}

@@ -209,7 +209,15 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
                   <span className="tabular-nums shrink-0" style={{ color: "var(--console-muted)" }}>
                     {it.qty}×
                   </span>
-                  <span>{it.name}</span>
+                  <span>
+                    {it.name}
+                    {it.variant && <span style={{ color: "var(--console-muted)" }}> · {it.variant}</span>}
+                    {(it.lid || it.rubber) && (
+                      <span className="block text-[12px]" style={{ color: "var(--console-muted)" }}>
+                        + {[it.lid && "LID 9E418", it.rubber && "FEAR Stabiliser 9E418"].filter(Boolean).join(" + ")}
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

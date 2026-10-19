@@ -396,7 +396,7 @@ export function buildOrderEmail(
     `${t.orderNo}: ${p.reference}`,
     `${t.orderDate}: ${date}`,
     "",
-    ...p.lines.map((l) => `  ${l.qty} × ${l.name} — ${uah(l.unit_uah * l.qty)}`),
+    ...p.lines.map((l) => `  ${l.qty} × ${l.name} — ${line(l)}`), // same list as the HTML rows (19 Oct 2026)
     "",
     `${t.subtotal}: ${amounts.subtotal}`,
     ...(hasSetup ? [`${t.setup}: −${amounts.setup}`] : []),

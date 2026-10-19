@@ -478,16 +478,35 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
         .filter(Boolean).join("\n");
 
   const totalUah = Math.round(p.amount_uah + p.shipping_uah);
+  const goodsUah = Math.round(p.amount_uah);
+  const shipUah = Math.round(p.shipping_uah);
+  const ua = (n: number) => `₴${Math.round(n).toLocaleString("uk-UA")}`;
+
+  /* WHICH PRICE LIST THE LINES COME FROM (19 Oct 2026). The Ukrainian site
+     charges the hryvnia list; every other locale charges the EURO list at the
+     fixed rate — the same rule create-invoice and the fiscal receipt follow.
+     This email printed unit_uah regardless, so an English order (TCT-BCWJ4J:
+     €11 + €35.40 = €46.40 → ₴2 366) listed ₴430 + ₴1 380 = ₴1 810 and could
+     never add up to what was paid. Now each line shows the list it was bought
+     from, with its charged hryvnia beside it on a euro order. */
+  const inEur = p.locale !== "uk";
+  const lineText = (l: PaymentRow["lines"][number]) =>
+    inEur
+      ? `€${(l.unit_eur * l.qty).toFixed(2)} (${ua(l.unit_eur * l.qty * UAH_PER_EUR_FIXED)})`
+      : ua(l.unit_uah * l.qty);
 
   const rows: [string, string][] = [
     ["Order", p.reference],
-    ["Paid", `₴${totalUah.toLocaleString("uk-UA")}  (goods ₴${Math.round(p.amount_uah).toLocaleString("uk-UA")} / €${p.amount_eur.toFixed(2)})`],
+    ["Paid", `${ua(totalUah)} = goods ${ua(goodsUah)} + delivery ${ua(shipUah)}`],
+    ...(inEur
+      ? ([["Goods in euro", `€${p.amount_eur.toFixed(2)} × ${UAH_PER_EUR_FIXED} = ${ua(goodsUah)} (English site, euro prices)`]] as [string, string][])
+      : []),
     // Internal breakdown only — the customer-facing documents state one order
-    // total. An international row reaching this point was paid via a manual
-    // one-total request, so its delivery is already inside the amount.
+    // total. International delivery is quoted and charged on the site now, so
+    // it is shown like any other delivery.
     ["Shipping", np
-      ? `Nova Poshta ${courier ? "courier" : "branch"} — ₴${Math.round(p.shipping_uah).toLocaleString("uk-UA")}`
-      : "International — included in the paid total"],
+      ? `Nova Poshta ${courier ? "courier" : "branch"} — ${ua(shipUah)}`
+      : `International (${(p.shipping_carrier ?? "nova_poshta") === "ukrposhta" ? "Ukrposhta" : "Nova Post"}) — ${ua(shipUah)}`],
     ["Customer", name],
     ["Email", p.email],
     ["Telephone", d.phone ?? ""],
@@ -505,7 +524,7 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
             : ""
         }</td>
         <td style="padding:8px 12px;vertical-align:top;white-space:nowrap">× ${l.qty}</td>
-        <td style="padding:8px 0;vertical-align:top;text-align:right;white-space:nowrap">₴${Math.round(l.unit_uah * l.qty)}</td>
+        <td style="padding:8px 0;vertical-align:top;text-align:right;white-space:nowrap">${esc(lineText(l))}</td>
       </tr>`)
     .join("");
 
@@ -519,7 +538,7 @@ async function notifySales(p: PaymentRow, orderId: string): Promise<void> {
       ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
       "",
       "Items:",
-      ...p.lines.map((l) => `  ${l.qty} × ${l.name} — ₴${Math.round(l.unit_uah * l.qty)}`),
+      ...p.lines.map((l) => `  ${l.qty} × ${l.name}${l.addons ? ` (${l.addons})` : ""} — ${lineText(l)}`),
       "",
       "Ship to:",
       address,

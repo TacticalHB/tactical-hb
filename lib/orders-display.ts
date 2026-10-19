@@ -20,6 +20,11 @@ export type AdminOrderItem = {
   qty: number;
   priceEur: number | null;
   priceUah: number | null;
+  /** Colour variant (HMD TCT OP Black/Purple), when the product has one. */
+  variant: string | null;
+  /** HMD add-ons ticked on this line (19 Oct 2026 — the list used to drop them). */
+  lid: boolean;
+  rubber: boolean;
 };
 
 export type DeliveryKind = "warehouse" | "courier" | "international" | "unknown";
@@ -131,6 +136,9 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
       qty: Number(i.quantity ?? 1),
       priceEur: num(i.price_eur),
       priceUah: num(i.price_uah),
+      variant: text(i.variant),
+      lid: i.addon_lid === true,
+      rubber: i.addon_rubber === true,
     };
   });
 

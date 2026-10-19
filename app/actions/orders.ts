@@ -116,12 +116,18 @@ export async function createOrderTtn(orderId: string): Promise<CreateTtnResult> 
     const admin = createAdminClient();
     const { data: order, error: oErr } = await admin
       .from("orders")
-      .select("id, status, np_ttn")
+      .select("id, status, np_ttn, np_status_code")
       .eq("id", id)
       .maybeSingle();
     if (oErr || !order) return { ok: false, error: oErr?.message ?? "Order not found." };
-    if (order.np_ttn) return { ok: false, error: `This order already has a waybill: ${order.np_ttn}.` };
-    if (order.status !== "paid") return { ok: false, error: `Only a paid order can be booked (this one is ${order.status}).` };
+    /* A waybill Nova Poshta has DELETED (2) or does not know (3) was never
+       handed over, so it may be replaced (19 Oct 2026, TCT-LAS6TL). Any other
+       existing waybill is real and is not touched. */
+    const dead = !!order.np_ttn && (order.np_status_code === "2" || order.np_status_code === "3");
+    if (order.np_ttn && !dead) return { ok: false, error: `This order already has a waybill: ${order.np_ttn}.` };
+    if (order.status !== "paid" && !(dead && order.status === "processing")) {
+      return { ok: false, error: `Only a paid order can be booked (this one is ${order.status}).` };
+    }
 
     // The payment row carries the delivery details the waybill is built from.
     const { data: payment, error: pErr } = await admin

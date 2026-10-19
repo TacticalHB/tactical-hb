@@ -48,7 +48,7 @@ const RANK: Record<string, number> = { paid: 0, processing: 1, shipped: 2, deliv
 const ORDER_COLUMNS =
   "id, external_ref, email, locale, status, shipping_method, shipping_carrier, " +
   "np_ttn, np_city_name, np_warehouse_name, np_address, np_delivery_type, " +
-  "ukrposhta_barcode, shipped_email_at, delivery";
+  "ukrposhta_barcode, shipped_email_at, delivery, np_status_code";
 
 type TrackableOrder = {
   id: string;
@@ -68,6 +68,8 @@ type TrackableOrder = {
   ukrposhta_barcode: string | null;
   shipped_email_at: string | null;
   delivery: Record<string, string> | null;
+  /** The last Nova Poshta status code we saw — to alert only on a change. */
+  np_status_code?: string | null;
 };
 
 export type TrackingRunResult = {
@@ -296,9 +298,26 @@ async function novaPoshtaPass(out: TrackingRunResult): Promise<void> {
     out.checked += 1;
 
     if (t.stage === "unknown") {
-      // Deleted, unrecognised, or a number Nova Poshta doesn't know. Recorded
-      // for diagnosis but never acted on.
+      // Deleted, unrecognised, or a number Nova Poshta doesn't know. Never
+      // moves the order — but a DELETED (2) or UNKNOWN (3) waybill means the
+      // parcel was never handed over, and until 19 Oct 2026 that was silent:
+      // TCT-LAS6TL sat "processing" for a week on a waybill Nova Poshta had
+      // deleted. Now Mario is told once, on the change.
       console.warn("[tracking]", o.external_ref, "unmapped status", t.statusCode, "—", t.status);
+      if ((t.statusCode === "2" || t.statusCode === "3") && o.np_status_code !== t.statusCode) {
+        const msg =
+          `Nova Poshta reports waybill ${o.np_ttn} for order ${o.external_ref} as "${t.status}". ` +
+          `The parcel was never handed over under that number, so the order is stuck as Processing.`;
+        const todo =
+          `If you sent it with a different waybill, paste that number into the order in Admin › Orders. ` +
+          `If it has not been sent, press "Create new waybill" on the order.`;
+        await sendMail({
+          to: ADMIN_EMAIL,
+          subject: `Nova Poshta waybill ${t.statusCode === "2" ? "DELETED" : "NOT FOUND"} — ${o.external_ref}`,
+          text: `${msg}\n\n${todo}`,
+          html: `<p style="font-family:sans-serif;font-size:15px">${msg}</p><p style="font-family:sans-serif;font-size:14px">${todo}</p>`,
+        }).catch((e) => console.error("[tracking] deleted-waybill alert failed:", e));
+      }
     }
 
     await applyStage(o, t.stage, { np_status_code: t.statusCode, np_status_checked_at: now }, out);

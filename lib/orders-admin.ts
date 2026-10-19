@@ -20,7 +20,7 @@ export const ORDER_SELECT = `
   email, delivery,
   amount_eur, amount_uah, currency, discount_eur, voucher_code,
   shipping_method, shipping_uah, shipping_carrier,
-  np_delivery_type, np_city_name, np_warehouse_name, np_address, np_notes, np_ttn,
+  np_delivery_type, np_city_name, np_warehouse_name, np_address, np_notes, np_ttn, np_status_code,
   ukrposhta_barcode, ukrposhta_uuid,
   checkbox_receipt_id, checkbox_fiscalised_at, checkbox_error,
   order_items ( product_id, product_name, quantity, price_eur, price_uah, variant, addon_lid, addon_rubber )

@@ -290,10 +290,11 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
             orderId={order.id}
             initial={order.ttn}
             locale={locale}
+            dead={order.ttnDead}
             canCreate={
               order.source === "monobank" &&
-              order.status === "paid" &&
-              !order.ttn &&
+              (order.status === "paid" || order.ttnDead) &&
+              (!order.ttn || order.ttnDead) &&
               order.carrier !== "ukrposhta" &&
               (order.deliveryKind === "warehouse" || order.deliveryKind === "courier")
             }

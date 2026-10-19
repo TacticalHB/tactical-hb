@@ -58,6 +58,8 @@ export type AdminOrder = {
   deliveryNotes: string | null;
   /** Nova Poshta's waybill number. Null on an Ukrposhta parcel. */
   ttn: string | null;
+  /** Nova Poshta reports the waybill deleted (2) or unknown (3): never handed over. */
+  ttnDead: boolean;
   /** 'nova_poshta' | 'ukrposhta'. Null on orders predating the choice. */
   carrier: string | null;
   /** Ukrposhta's tracking barcode. Null on a Nova Poshta parcel. */
@@ -167,6 +169,7 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
     deliveryDetail: detail,
     deliveryNotes: text(row.np_notes),
     ttn: text(row.np_ttn),
+    ttnDead: !!text(row.np_ttn) && (text(row.np_status_code) === "2" || text(row.np_status_code) === "3"),
     /* WHO IS CARRYING IT. Null on every row placed before carriers were a
        choice, which the admin renders as Nova Post rather than as a gap —
        that is what those orders were. */

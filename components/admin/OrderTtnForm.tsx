@@ -19,12 +19,15 @@ export default function OrderTtnForm({
   initial,
   locale,
   canCreate = false,
+  dead = false,
 }: {
   orderId: string;
   initial: string | null;
   locale: string;
   /** A paid Nova Poshta order with no waybill yet — offer to book it. */
   canCreate?: boolean;
+  /** Nova Poshta reports the saved waybill deleted / unknown — never handed over. */
+  dead?: boolean;
 }) {
   const uk = locale === "uk";
   const [ttn, setTtn] = useState(initial ?? "");
@@ -44,6 +47,10 @@ export default function OrderTtnForm({
     create: uk ? "Створити ТТН" : "Create waybill",
     creating: uk ? "Створення…" : "Creating…",
     npSaid: uk ? "Нова Пошта відповіла:" : "Nova Poshta said:",
+    dead: uk
+      ? "Нова Пошта видалила цю накладну — посилку за нею не передали. Створіть нову або вставте номер, з яким її відправили."
+      : "Nova Poshta deleted this waybill — the parcel was never handed over on it. Create a new one, or paste the number it was sent with.",
+    createNew: uk ? "Створити нову ТТН" : "Create new waybill",
   };
 
   async function onCreate() {
@@ -77,6 +84,9 @@ export default function OrderTtnForm({
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-1.5">
+      {dead && saved === initial && (
+        <p className="text-[12.5px] max-w-[460px]" style={{ color: "var(--console-alert)" }}>{L.dead}</p>
+      )}
       <label
         htmlFor={`ttn-${orderId}`}
         className="text-[11px] tracking-[0.12em] uppercase"
@@ -103,7 +113,7 @@ export default function OrderTtnForm({
         >
           {busy ? L.saving : L.save}
         </button>
-        {canCreate && !saved && (
+        {canCreate && (!saved || (dead && saved === initial)) && (
           <button
             type="button"
             onClick={onCreate}
@@ -111,7 +121,7 @@ export default function OrderTtnForm({
             className="h-9 px-4 text-[13px] rounded transition-opacity hover:opacity-85 disabled:opacity-40 disabled:cursor-default"
             style={{ border: "1px solid var(--console-accent-line)", color: "var(--console-text)", background: "transparent" }}
           >
-            {creating ? L.creating : L.create}
+            {creating ? L.creating : dead && saved === initial ? L.createNew : L.create}
           </button>
         )}
         {!dirty && saved && !error && (

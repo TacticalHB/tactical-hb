@@ -135,7 +135,7 @@ export async function createTtnForOrder(
     const admin = createAdminClient();
     const { error } = await admin
       .from("orders")
-      .update({ np_ttn: ttn.number, np_ttn_ref: ttn.ref, status: "processing" })
+      .update({ np_ttn: ttn.number, np_ttn_ref: ttn.ref, status: "processing", np_status_code: null, np_status_checked_at: null })
       .eq("id", orderId);
 
     if (error) {

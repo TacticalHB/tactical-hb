@@ -10,6 +10,7 @@ import {
   type AdminOrder,
 } from "@/lib/orders-display";
 import OrderTtnForm from "@/components/admin/OrderTtnForm";
+import ReissueReceiptButton from "@/components/admin/ReissueReceiptButton";
 import OrderUkrposhtaForm from "@/components/admin/OrderUkrposhtaForm";
 import { carrierName, isShippingCarrier } from "@/lib/shipping-carriers";
 
@@ -254,6 +255,7 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
               {uk ? "ЧЕК НЕ ВИДАНО" : "NO RECEIPT"}
             </span>
             <span style={{ color: "var(--console-muted)" }}>{order.fiscalError}</span>
+            <ReissueReceiptButton orderId={order.id} locale={locale} />
           </>
         ) : (
           <span style={{ color: "var(--console-warn)" }}>

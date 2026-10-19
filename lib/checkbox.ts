@@ -122,32 +122,83 @@ async function token(): Promise<string> {
 
 /* ---- Shift --------------------------------------------------------------- */
 
-type Shift = { id?: string; status?: string };
+type Shift = { id?: string; status?: string; opened_at?: string };
 
-/**
- * Make sure a shift is open, opening one if not.
- *
- * Auto-open IS supported: POST /shifts (bearer + X-License-Key) returns 202 with
- * status CREATED and the shift becomes OPENED a second or two later, so this
- * polls rather than assuming.
- *
- * IT NEVER CLOSES ONE. Ukrainian rules require a shift to be closed within 24
- * hours, and closing produces a Z-report — that is a decision for whoever runs
- * the till, not for a webhook handler that happens to be last through the door.
- * Checkbox's own auto_close_at handles the legal deadline.
- */
-async function ensureShift(tok: string): Promise<void> {
-  const current = await call<Shift | null>("GET", "/cashier/shift", { token: tok });
-  if (current?.status === "OPENED") return;
+/* ---------------------------------------------------------------------------
+   SHIFTS ARE CLOSED BY US, AND THIS IS WHY (19 Oct 2026).
 
+   The first version never closed a shift, leaving the 24-hour legal deadline
+   to Checkbox's auto_close_at. That setting is not on in the cabinet: shift
+   #2 opened with the first live order (10 Oct) and stayed open nine days, and
+   order TCT-BCWJ4J (18 Oct) was refused with `shift.opened_too_long` — no
+   receipt. Ukrainian rules require the shift (and its Z-report) to be closed
+   within 24 hours, so closing it IS the compliant act, not a liberty.
+
+   Three layers, any one of which is enough:
+   1. Both daily crons call closeStaleShift(): a shift with sales gets its
+      Z-report the same day.
+   2. ensureShift() closes a shift older than SHIFT_MAX_AGE before selling.
+   3. A sale refused with shift.opened_too_long closes, reopens and retries once.
+--------------------------------------------------------------------------- */
+
+/** Older than this, a shift is closed before the next sale. Under 24 h on purpose. */
+const SHIFT_MAX_AGE_MS = 20 * 60 * 60 * 1000;
+
+const ageMs = (s: Shift | null) => (s?.opened_at ? Date.now() - new Date(s.opened_at).getTime() : 0);
+
+/** Close the current shift (writes the Z-report) and wait until it is CLOSED. */
+async function closeShift(tok: string): Promise<void> {
+  const closing = await call<Shift>("POST", "/shifts/close", { body: {}, token: tok });
+  for (let i = 0; i < 30; i++) {
+    await new Promise((r) => setTimeout(r, 1000));
+    const s = closing.id
+      ? await call<Shift>("GET", `/shifts/${closing.id}`, { token: tok })
+      : await call<Shift | null>("GET", "/cashier/shift", { token: tok });
+    if (!s?.status || s.status === "CLOSED") return;
+  }
+  throw new CheckboxError("shift did not reach CLOSED in time");
+}
+
+async function openShift(tok: string): Promise<void> {
   await call<Shift>("POST", "/shifts", { body: { id: crypto.randomUUID() }, token: tok, licence: true });
-
   for (let i = 0; i < 15; i++) {
     await new Promise((r) => setTimeout(r, 1000));
     const s = await call<Shift | null>("GET", "/cashier/shift", { token: tok });
     if (s?.status === "OPENED") return;
   }
   throw new CheckboxError("shift did not reach OPENED in time");
+}
+
+/**
+ * Make sure a fresh shift is open: open one if there is none, and close and
+ * replace one that has been open too long (see the note above).
+ */
+async function ensureShift(tok: string, forceNew = false): Promise<void> {
+  const current = await call<Shift | null>("GET", "/cashier/shift", { token: tok });
+  if (current?.status === "OPENED" && !forceNew && ageMs(current) < SHIFT_MAX_AGE_MS) return;
+  if (current?.status === "OPENED") await closeShift(tok);
+  await openShift(tok);
+}
+
+/**
+ * For the daily crons: close the open shift so its Z-report is written within
+ * the day. A shift opened in the last few minutes is left alone, so a sale in
+ * flight is never cut off mid-receipt. Never throws.
+ */
+export async function closeStaleShift(): Promise<{ closed: boolean; detail: string }> {
+  try {
+    if (!process.env.CHECKBOX_LICENSE_KEY || !process.env.CHECKBOX_CASHIER_PIN) {
+      return { closed: false, detail: "Checkbox not configured" };
+    }
+    const tok = await token();
+    const current = await call<Shift | null>("GET", "/cashier/shift", { token: tok });
+    if (current?.status !== "OPENED") return { closed: false, detail: "no open shift" };
+    if (ageMs(current) < 10 * 60 * 1000) return { closed: false, detail: "shift opened under 10 minutes ago" };
+    await closeShift(tok);
+    return { closed: true, detail: `closed shift opened ${current.opened_at}` };
+  } catch (e) {
+    return { closed: false, detail: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 /* ---- Receipt ------------------------------------------------------------- */
@@ -208,10 +259,17 @@ export async function fiscaliseOrder(order: FiscalOrder): Promise<FiscalResult> 
       ...(order.email ? { delivery: { email: order.email } } : {}),
     };
 
-    const receipt = await call<{ id?: string; total_sum?: number }>("POST", "/receipts/sell", {
-      body: payload,
-      token: tok,
-    });
+    const sell = () =>
+      call<{ id?: string; total_sum?: number }>("POST", "/receipts/sell", { body: payload, token: tok });
+    let receipt: { id?: string; total_sum?: number };
+    try {
+      receipt = await sell();
+    } catch (e) {
+      // Layer 3: a shift Checkbox calls too old — close it, open a new one, retry once.
+      if (!(e instanceof Error) || !/shift\.opened_too_long/.test(e.message)) throw e;
+      await ensureShift(tok, true);
+      receipt = await sell();
+    }
 
     // Belt and braces: Checkbox should have refused an unbalanced receipt, but
     // confirm the fiscal document really carries the amount the card was charged.

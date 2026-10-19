@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { runDueJobs } from "@/lib/email/flows";
 import { runWholesaleDormant } from "@/lib/wholesale-dormant";
 import { runBackInStock } from "@/lib/back-in-stock";
+import { closeStaleShift } from "@/lib/checkbox";
 
 /* ---------------------------------------------------------------------------
    Cron: send whatever the email flows have become due.
@@ -61,6 +62,11 @@ async function run(request: NextRequest) {
     return new NextResponse("Not found", { status: 404 });
   }
 
+  /* Close yesterday's Checkbox shift FIRST, so its Z-report is written within
+     the legal 24 hours (19 Oct 2026 — see lib/checkbox.ts). Never throws;
+     normally a couple of seconds. */
+  const shift = await closeStaleShift();
+
   const result = await runDueJobs(25);
 
   /* The wholesale dormant scan rides the same sweep. It is a SCAN rather than
@@ -78,8 +84,8 @@ async function run(request: NextRequest) {
      dormant scan is second; it never throws either. */
   const backInStock = await runBackInStock();
 
-  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant, backInStock }));
-  return NextResponse.json({ ok: true, ...result, dormant, backInStock });
+  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant, backInStock, shift }));
+  return NextResponse.json({ ok: true, ...result, dormant, backInStock, shift });
 }
 
 export async function GET(request: NextRequest) {

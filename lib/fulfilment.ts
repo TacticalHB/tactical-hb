@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { esc, rowsHtml, sendMail } from "@/lib/email";
 import { buildOrderEmail } from "@/lib/order-email";
-import { createTtnForOrder } from "@/lib/order-ttn";
+import { createTtnForOrder, parcelForOrder } from "@/lib/order-ttn";
 import { createUkrposhtaShipmentForOrder } from "@/lib/order-ukrposhta";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
@@ -183,6 +183,42 @@ export async function fiscaliseOrderRow(orderId: string, payment: PaymentRow): P
     );
     await alertFiscalFailure(payment.reference, msg).catch(() => {});
   }
+}
+
+/** A paid Nova Post order abroad: book it by hand, with everything needed in one email. */
+async function alertManualNovaPost(p: PaymentRow): Promise<void> {
+  const d = (p.delivery ?? {}) as Record<string, string>;
+  const parcel = parcelForOrder(p);
+  const rows: [string, string][] = [
+    ["Order", p.reference],
+    ["Recipient", `${d.firstName ?? ""} ${d.surname ?? ""}`.trim()],
+    ["Phone", d.phone ?? ""],
+    ["Email", d.email ?? p.email ?? ""],
+    ["Country", d.country ?? ""],
+    ["City", d.city ?? ""],
+    ["Address", [d.address, d.apartment].filter(Boolean).join(", ")],
+    ["Postcode", d.postcode ?? ""],
+    ["Contents", p.lines.map((l) => `${l.qty} × ${l.name}`).join(", ")],
+    ["Declared value (goods)", `${p.amount_uah} UAH`],
+    ["Delivery charged", `${p.shipping_uah} UAH`],
+    ["Parcel", `${parcel.weightKg} kg · ${parcel.dims.l}×${parcel.dims.w}×${parcel.dims.h} mm`],
+  ];
+  await sendMail({
+    to: ADMIN_EMAIL,
+    subject: `Nova Post ABROAD — book by hand — ${p.reference}`,
+    text:
+      `Order ${p.reference} is paid and goes abroad with Nova Post. The site cannot book ` +
+      `cross-border parcels (customs needs an HS code per item), so create the shipment in the ` +
+      `Nova Post business cabinet, then paste its number into Admin › Orders.\n\n` +
+      rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+    html: `<p style="font-family:sans-serif;font-size:15px">Order <b>${esc(p.reference)}</b> is paid and goes
+        <b>abroad with Nova Post</b>. The site cannot book cross-border parcels (customs needs an HS code
+        per item), so create the shipment in the Nova Post business cabinet, then paste its number into
+        Admin › Orders.</p>
+      <table style="font-family:sans-serif;font-size:14px;border-collapse:collapse">${rows
+        .map(([k, v]) => `<tr><td style="padding:4px 14px 4px 0;color:#707072">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`)
+        .join("")}</table>`,
+  });
 }
 
 /** Tell a human. A missing fiscal receipt is a tax problem, not a log line. */
@@ -397,6 +433,15 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
     //     that is not a Nova Poshta order, and this one returns early for
     //     anything that is not Ukrposhta — so exactly one of them acts.
     await createUkrposhtaShipmentForOrder(order.id, payment);
+
+    // 6c. Nova Post ABROAD (the USA) cannot be booked automatically: the
+    //     cross-border API needs a customs declaration with an HS code per
+    //     item, which the catalogue does not hold. Both steps above skip such
+    //     an order, and until 19 Oct 2026 they did so SILENTLY — TCT-BCWJ4J
+    //     sat paid and unbooked with nothing in anyone's inbox. Now it emails.
+    if (payment.shipping_method === "international" && (payment.shipping_carrier ?? "nova_poshta") === "nova_poshta") {
+      await alertManualNovaPost(payment).catch((e) => console.error("[fulfil] NP-abroad alert failed:", e));
+    }
 
     // 7. Fiscalise with Checkbox. After the waybill because a fiscal receipt is
     //    a legal record of a sale that HAS happened — it must never gate the

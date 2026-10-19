@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { closeStaleShift } from "@/lib/checkbox";
 import { runTracking } from "@/lib/order-tracking";
 import { runStockAlert } from "@/lib/stock-alert";
 import { runWeeklyBrief } from "@/lib/weekly-brief";
@@ -72,6 +73,10 @@ export async function GET(request: NextRequest) {
   // None of these throws — each reports what it managed to do. Awaited in
   // sequence rather than in parallel so a slow Nova Poshta batch cannot push
   // the others past maxDuration together, and so the logs read in order.
+  // The evening Checkbox shift close (the morning one rides email-queue): a
+  // shift opened by today's sales gets its Z-report today. First, and cheap.
+  const shift = await closeStaleShift();
+
   const tracking = await runTracking();
   const stock = await runStockAlert();
 
@@ -110,5 +115,5 @@ export async function GET(request: NextRequest) {
     ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
     : null;
 
-  return NextResponse.json({ ok: true, ...tracking, stock, margin, brief });
+  return NextResponse.json({ ok: true, ...tracking, stock, margin, brief, shift });
 }

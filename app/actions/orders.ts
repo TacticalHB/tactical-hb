@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { createTtnForOrder } from "@/lib/order-ttn";
-import type { PaymentRow } from "@/lib/fulfilment";
+import { fiscaliseOrderRow, type PaymentRow } from "@/lib/fulfilment";
 
 /* ---------------------------------------------------------------------------
    Admin: attach a carrier's tracking number to an order — one action per
@@ -244,5 +244,47 @@ export async function saveOrderUkrposhtaBarcode(
     return { ok: true, barcode: value || null };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not save the barcode." };
+  }
+}
+
+export type ReissueReceiptResult = { ok: true; receiptId: string } | { ok: false; error: string };
+
+/**
+ * Re-issue the Checkbox fiscal receipt for a paid order whose receipt failed
+ * (19 Oct 2026 — TCT-BCWJ4J was refused by an expired shift). Runs the very
+ * same step the payment webhook runs; the receipt id is derived from the order
+ * reference, so pressing it twice can never create two fiscal documents.
+ */
+export async function reissueOrderReceipt(orderId: string): Promise<ReissueReceiptResult> {
+  const supabase = await createClient();
+  const caller = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (!isAdminEmail(caller?.email)) {
+    console.warn("[reissueOrderReceipt] refused for", caller?.email ?? "anonymous");
+    return { ok: false, error: "Not authorised." };
+  }
+  const id = orderId?.trim();
+  if (!id) return { ok: false, error: "An order id is required." };
+
+  try {
+    const admin = createAdminClient();
+    const { data: order } = await admin.from("orders").select("id, checkbox_receipt_id").eq("id", id).maybeSingle();
+    if (!order) return { ok: false, error: "Order not found." };
+    if (order.checkbox_receipt_id) return { ok: true, receiptId: order.checkbox_receipt_id };
+
+    const { data: payment } = await admin.from("payments").select("*").eq("order_id", id).maybeSingle();
+    if (!payment) return { ok: false, error: "No payment is linked to this order — issue the receipt in the Checkbox app." };
+
+    await fiscaliseOrderRow(id, payment as PaymentRow);
+    const { data: after } = await admin
+      .from("orders")
+      .select("checkbox_receipt_id, checkbox_error")
+      .eq("id", id)
+      .maybeSingle();
+    revalidatePath("/[locale]/admin/orders", "page");
+    return after?.checkbox_receipt_id
+      ? { ok: true, receiptId: after.checkbox_receipt_id }
+      : { ok: false, error: after?.checkbox_error ?? "Checkbox did not issue the receipt." };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not issue the receipt." };
   }
 }

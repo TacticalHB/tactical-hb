@@ -63,7 +63,7 @@ function describeParcel(p: PaymentRow): string {
  * doesn't change with the options. Older orders without a stored weight fall
  * back to the catalogue, then to parcelFor's own default.
  */
-function parcelForOrder(p: PaymentRow) {
+export function parcelForOrder(p: PaymentRow) {
   const lines = p.lines.map((l) => {
     const product = products.find((pr) => pr.slug === l.slug);
     return {

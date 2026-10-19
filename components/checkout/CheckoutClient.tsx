@@ -182,7 +182,14 @@ export default function CheckoutClient({
      screen is arrived at by the same rule that will charge the card, rather
      than by a second implementation that could drift from it. */
   const perk = permanentDiscount(rankDiscountRate, subtotal);
-  const chosen = chooseDiscount(voucher ? money(voucher.amountEur) : null, perk);
+  /* A gift code is a percentage of the goods (before delivery), worked out with
+     the same helper the invoice uses; a loyalty voucher is its euro amount. */
+  const voucherMoney = voucher
+    ? voucher.percent
+      ? permanentDiscount(voucher.percent / 100, subtotal)
+      : money(voucher.amountEur)
+    : null;
+  const chosen = chooseDiscount(voucherMoney, perk);
   const discount = chosen.amount;
   const discountSource = chosen.source;
   const goods = subtractMoney(subtotal, discount);

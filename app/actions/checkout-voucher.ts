@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
+import { findGiftCode, isGiftCodeShape } from "@/lib/gift-codes";
 
 /* ---------------------------------------------------------------------------
    Validate a voucher a customer is trying to apply at checkout.
@@ -23,12 +24,22 @@ import { priceCart } from "@/lib/pricing";
 --------------------------------------------------------------------------- */
 
 export type VoucherCheck =
-  | { ok: true; code: string; amountEur: number }
+  /** amountEur for a loyalty voucher; percent (and amountEur 0) for a gift code. */
+  | { ok: true; code: string; amountEur: number; percent?: number }
   | { ok: false; reason: "auth" | "not_found" | "used" | "expired" | "min_order"; minOrderEur?: number };
 
 export async function checkVoucher(rawCode: string, cart: unknown): Promise<VoucherCheck> {
   const code = String(rawCode ?? "").trim().toUpperCase();
   if (!code) return { ok: false, reason: "not_found" };
+
+  /* GIFT CODES FIRST (19 Oct 2026): a percentage off the goods, single-use,
+     open to guests — so no sign-in check. Told apart by shape. */
+  if (isGiftCodeShape(code)) {
+    const gift = await findGiftCode(code);
+    if (!gift) return { ok: false, reason: "not_found" };
+    if (gift.usedAt) return { ok: false, reason: "used" };
+    return { ok: true, code: gift.code, amountEur: 0, percent: gift.percent };
+  }
 
   const supabase = await createClient();
   if (!supabase) return { ok: false, reason: "auth" };

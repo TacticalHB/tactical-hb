@@ -2,6 +2,7 @@ import { requireAdminPage } from "@/lib/admin-guard";
 import { splitVouchers, VOUCHER_COLUMNS, type Voucher } from "@/lib/loyalty/vouchers";
 import VoucherRedeemForm from "@/components/account/VoucherRedeemForm";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { listGiftCodes } from "@/lib/gift-codes";
 
 /* ---------------------------------------------------------------------------
    Admin: redeem a voucher. Lived at /account/admin/vouchers until Phase E
@@ -51,6 +52,10 @@ export default async function AdminVouchersPage({
 
   const { activeVouchers, usedVouchers } = splitVouchers(recent);
 
+  /* Gift codes (migration 0046, 19 Oct 2026). Null when the table is not
+     there yet — the section then says to run the migration. */
+  const gifts = await listGiftCodes();
+
   return (
     <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
       <div className="page-container max-w-3xl">
@@ -62,6 +67,61 @@ export default async function AdminVouchersPage({
           ? "Позначає ваучер як використаний. Дія безпечна для повторного виконання — перше погашення залишається."
           : "Marks a voucher as used. Safe to run twice — the first redemption stands."}
       </p>
+
+      {/* ---- Gift codes ----------------------------------------------------
+          Single-use, a percentage off the goods, open to guests. A code is
+          crossed out the moment the order it was used on is paid. */}
+      <section className="console-card p-6 mb-10">
+        <h2 className="text-lg font-semibold" style={{ color: "var(--console-text)" }}>
+          {uk ? "Подарункові промокоди" : "Gift codes"}
+        </h2>
+        <p className="text-[13.5px] mt-1 mb-5" style={{ color: "var(--console-muted)" }}>
+          {uk
+            ? "Одноразові. Знижка на товари, доставка рахується після. Використаний код закреслюється, щойно замовлення оплачено."
+            : "Single-use. The discount comes off the goods; delivery is added after. A code is crossed out as soon as its order is paid."}
+        </p>
+        {gifts === null ? (
+          <p className="text-sm" style={{ color: "var(--console-alert)" }}>
+            {uk ? "Таблиці ще немає — запустіть міграцію 0046_gift_codes.sql у Supabase." : "No table yet — run migration 0046_gift_codes.sql in Supabase."}
+          </p>
+        ) : (
+          <div className="grid gap-8 sm:grid-cols-2">
+            {[20, 15].map((pct) => {
+              const group = gifts.filter((g) => g.percent === pct);
+              const left = group.filter((g) => !g.usedAt).length;
+              return (
+                <div key={pct}>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-[15px] font-semibold" style={{ color: "var(--console-accent-ink)" }}>−{pct}%</span>
+                    <span className="text-[12.5px]" style={{ color: "var(--console-muted)" }}>
+                      {uk ? `${left} з ${group.length} доступно` : `${left} of ${group.length} left`}
+                    </span>
+                  </div>
+                  <ul className="text-sm">
+                    {group.map((g) => (
+                      <li key={g.code} className="flex items-baseline justify-between gap-3 py-1.5" style={{ borderTop: "1px solid var(--console-border-soft)" }}>
+                        <span
+                          className="font-mono tracking-wider select-all"
+                          style={g.usedAt
+                            ? { color: "var(--console-faint)", textDecoration: "line-through" }
+                            : { color: "var(--console-text)" }}
+                        >
+                          {g.code}
+                        </span>
+                        {g.usedAt && (
+                          <span className="text-[12px] text-right" style={{ color: "var(--console-muted)" }}>
+                            {g.usedReference ?? ""} · {new Date(g.usedAt).toLocaleDateString(uk ? "uk-UA" : "en-GB")}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <VoucherRedeemForm locale={locale} />
 

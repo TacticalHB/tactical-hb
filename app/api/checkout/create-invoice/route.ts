@@ -1,3 +1,4 @@
+import { findGiftCode, isGiftCodeShape } from "@/lib/gift-codes";
 import { NextRequest, NextResponse } from "next/server";
 import { isAppLocale } from "@/i18n/routing";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -120,6 +121,17 @@ export async function POST(request: NextRequest) {
   const requestedCode = String(b.voucherCode ?? "").trim().toUpperCase();
   if (requestedCode && wholesale) {
     console.warn("[invoice] voucher sent by a wholesale account — ignored");
+  } else if (requestedCode && isGiftCodeShape(requestedCode)) {
+    /* A GIFT CODE (19 Oct 2026): a percentage of the goods, after the setup
+       saving and before delivery, open to guests. Re-read here because it may
+       have been spent since it was applied; spent for real only on payment. */
+    const gift = await findGiftCode(requestedCode);
+    if (gift && !gift.usedAt) {
+      discount = permanentDiscount(gift.percent / 100, priced.subtotal);
+      voucherCode = gift.code;
+    } else {
+      console.warn("[invoice] gift code missing or already used, ignored:", requestedCode);
+    }
   } else if (requestedCode) {
     if (!supabase || !user) {
       // Vouchers belong to an account. A guest sending one is either confused

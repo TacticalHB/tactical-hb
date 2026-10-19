@@ -6,6 +6,7 @@ import { buildOrderEmail } from "@/lib/order-email";
 import { createTtnForOrder, parcelForOrder } from "@/lib/order-ttn";
 import { createUkrposhtaShipmentForOrder } from "@/lib/order-ukrposhta";
 import { fiscaliseOrder, type FiscalLine } from "@/lib/checkbox";
+import { isGiftCodeShape, markGiftCodeUsed } from "@/lib/gift-codes";
 import { checkboxCode, unmappedSlugs } from "@/lib/checkbox-catalogue";
 import { UAH_PER_EUR_FIXED } from "@/lib/currency";
 import { cancelCartFlowOnPayment } from "@/lib/email/flows";
@@ -399,7 +400,11 @@ export async function fulfilPayment(reference: string): Promise<FulfilResult> {
 
     // 3. Burn the voucher. Non-fatal for the same reason — refusing to record
     //    a paid order because a voucher update failed would be far worse.
-    if (payment.voucher_code) {
+    if (payment.voucher_code && isGiftCodeShape(payment.voucher_code)) {
+      // A gift code (19 Oct 2026): spent now, on payment, and only once.
+      const spent = await markGiftCodeUsed(payment.voucher_code, payment.reference);
+      if (!spent) console.warn("[fulfil] gift code was already used:", payment.voucher_code, payment.reference);
+    } else if (payment.voucher_code) {
       const { error: vErr } = await admin.rpc("mark_voucher_used", {
         p_code: payment.voucher_code,
         p_order_id: order.id,

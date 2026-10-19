@@ -8,14 +8,15 @@ import { formatMoney, currencyForLocale, money } from "@/lib/currency";
 import type { CartLine } from "@/components/CartContext";
 
 /* ---------------------------------------------------------------------------
-   Apply a loyalty voucher at checkout.
+   Apply a loyalty voucher or a gift code at checkout.
 
-   Only offered to signed-in customers, because vouchers are issued to an
-   account. A guest is told plainly to sign in rather than being given a field
-   that could never work.
+   Gift codes (GIFT20-…, 19 Oct 2026) are open to everyone, so the field shows
+   for guests too; a guest typing a loyalty voucher is told to sign in, since
+   those belong to an account.
 --------------------------------------------------------------------------- */
 
-export type AppliedVoucher = { code: string; amountEur: number };
+/** amountEur for a loyalty voucher; percent for a gift code (GIFT20-…), 19 Oct 2026. */
+export type AppliedVoucher = { code: string; amountEur: number; percent?: number };
 
 export default function VoucherField({
   locale,
@@ -37,11 +38,11 @@ export default function VoucherField({
   const [error, setError] = useState<string | null>(null);
 
   const L = {
-    title: t(locale, { uk: "Ваучер", en: "Voucher", ja: "バウチャー", ar: "قسيمة" }),
-    placeholder: "TCT-XXXXXXXX",
+    title: t(locale, { uk: "Ваучер або подарунковий код", en: "Voucher or gift code", ja: "バウチャー / ギフトコード", ar: "قسيمة أو رمز هدية" }),
+    placeholder: "GIFT20-XXXXXX",
     apply: t(locale, { uk: "Застосувати", en: "Apply", ja: "適用する", ar: "تطبيق" }),
     remove: t(locale, { uk: "Видалити", en: "Remove", ja: "削除", ar: "إزالة" }),
-    signIn: t(locale, { uk: "Увійдіть, щоб використати ваучер.", en: "Sign in to use a voucher.", ja: "バウチャーのご利用にはログインが必要です。", ar: "سجّل الدخول لاستخدام قسيمة." }),
+    signIn: t(locale, { uk: "Ваучер програми лояльності? Увійдіть, щоб його використати.", en: "Loyalty voucher? Sign in to use it.", ja: "ロイヤルティ バウチャーをお持ちの方はログインしてください。", ar: "لديك قسيمة ولاء؟ سجّل الدخول لاستخدامها." }),
     signInCta: t(locale, { uk: "Увійти", en: "Sign in", ja: "ログイン", ar: "تسجيل الدخول" }),
     appliedLabel: t(locale, { uk: "Ваучер застосовано", en: "Voucher applied", ja: "バウチャーを適用しました", ar: "تم تطبيق القسيمة" }),
   };
@@ -75,7 +76,7 @@ export default function VoucherField({
     try {
       const result = await checkVoucher(code, cart);
       if (result.ok) {
-        onApply({ code: result.code, amountEur: result.amountEur });
+        onApply({ code: result.code, amountEur: result.amountEur, percent: result.percent });
         setCode("");
       } else {
         setError(message(result));
@@ -86,21 +87,6 @@ export default function VoucherField({
     } finally {
       setBusy(false);
     }
-  }
-
-  if (!signedIn) {
-    return (
-      <div className="p-4 text-[13px] leading-relaxed" style={{ background: "var(--bg-soft)", color: "var(--text-muted)" }}>
-        {L.signIn}{" "}
-        <Link
-          href={`/${locale}/login?redirect=/${locale}/checkout`}
-          className="underline underline-offset-4"
-          style={{ color: "var(--text)" }}
-        >
-          {L.signInCta}
-        </Link>
-      </div>
-    );
   }
 
   if (applied) {
@@ -162,6 +148,15 @@ export default function VoucherField({
       </div>
       {error && (
         <p role="alert" className="text-[13px] mt-2" style={{ color: "#b42318" }}>{error}</p>
+      )}
+      {/* Gift codes work for everyone; loyalty vouchers belong to an account. */}
+      {!signedIn && (
+        <p className="text-[12.5px] mt-2" style={{ color: "var(--text-muted)" }}>
+          {L.signIn}{" "}
+          <Link href={`/${locale}/login?redirect=/${locale}/checkout`} className="underline underline-offset-4" style={{ color: "var(--text)" }}>
+            {L.signInCta}
+          </Link>
+        </p>
       )}
     </div>
   );

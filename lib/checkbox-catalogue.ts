@@ -51,11 +51,11 @@ const CODES: Record<string, string> = {
   "windcover-detonator": "1786029853412", // Windcover Detonator 85000 kop = ₴850
   "windcover-kh": "1786029854778", // Windcover KH        85000 kop = ₴850
   /* Added 19 Oct 2026, matched to products Mario created in the cabinet
-     (read back with GET /goods). Tactical Mouthpiece has no cabinet product
-     yet — its orders alert "fiscalise by hand" until one is added here. */
+     (read back with GET /goods). Tactical Mouthpiece followed the same day. */
   "incoming-hookah": "1792053265535", // KO-06 (Project KI 06) 1118000 kop = ₴11180
   "lid-9e418": "1792053380771", // Lid 9E418           22000 kop = ₴220
   "fear-9e418": "1792053414611", // Fear Stabiliser 9E418 21000 kop = ₴210
+  "tactical-mouthpiece": "1792415948264", // Tactical Mouthpiece 120000 kop = ₴1200
 };
 
 /** The Checkbox code for a sold line, or null when the product is not in the till. */

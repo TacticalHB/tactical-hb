@@ -110,8 +110,8 @@ function HomeContent({ locale }: { locale: string }) {
         {/* Hero footer. It was the launch countdown until Project KI 06 went
             on sale on 20 Oct 2026; at zero it read 00:00:00:00 under
             "Launching October 2026", so it now says the launch happened and
-            leads to the product (Mario, 20 Oct 2026). Countdown itself lives
-            on for /flagship. */}
+            leads to the product (Mario, 20 Oct 2026). The Countdown component
+            was deleted the same day. */}
         <Reveal delay={480}>
           <div className="w-full page-container pb-12 md:pb-14">
             <div className="h-px w-full mb-8" style={{ background: "var(--border)" }} />

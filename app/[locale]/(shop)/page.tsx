@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import Bestsellers from "@/components/Bestsellers";
-import Countdown from "@/components/Countdown";
 import MissionMonitor from "@/components/MissionMonitor";
 import Reveal from "@/components/Reveal";
 import SearchlightHero from "@/components/SearchlightHero";
@@ -108,28 +107,28 @@ function HomeContent({ locale }: { locale: string }) {
           </Reveal>
         </div>
 
-        {/* Hero footer — launch countdown + notify */}
+        {/* Hero footer. It was the launch countdown until Project KI 06 went
+            on sale on 20 Oct 2026; at zero it read 00:00:00:00 under
+            "Launching October 2026", so it now says the launch happened and
+            leads to the product (Mario, 20 Oct 2026). Countdown itself lives
+            on for /flagship. */}
         <Reveal delay={480}>
           <div className="w-full page-container pb-12 md:pb-14">
             <div className="h-px w-full mb-8" style={{ background: "var(--border)" }} />
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
-              <div>
-                <div
-                  className="text-[0.7rem] sm:text-[0.58rem] tracking-[0.3em] uppercase mb-5"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {tf("eyebrow")}
-                </div>
-                {/* The digits carry their own unit labels; this names the
-                    countdown itself for screen readers. */}
-                <span className="sr-only">{tf("countdown_label")}</span>
-                <Countdown locale={locale} />
+            <Link href={`/${locale}/products/incoming-hookah`} className="group inline-block" style={{ color: "var(--text)" }}>
+              <div
+                className="text-[0.7rem] sm:text-[0.58rem] tracking-[0.3em] uppercase mb-5"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {tf("available_eyebrow")}
               </div>
-              {/* The "Open the file · Clearance required" door that stood here
-                  was removed on 6 Oct 2026 (Mario): the flagship is on sale as
-                  Project KI 06, so a link promising a classified file under the
-                  countdown no longer told the truth. */}
-            </div>
+              <div
+                className="font-display leading-none uppercase transition-colors group-hover:text-[var(--accent-ink)]"
+                style={{ fontSize: "clamp(1.9rem, 4vw, 2.9rem)" }}
+              >
+                {tf("available_now")} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1 rtl:-scale-x-100">→</span>
+              </div>
+            </Link>
           </div>
         </Reveal>
       </section>

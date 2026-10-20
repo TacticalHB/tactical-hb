@@ -585,7 +585,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                 page exists not to do — the stamp under it says everything the
                 file is willing to say. Kept for every other product, where it
                 is orientation rather than a disclosure. */}
-            {status !== "withheld" && !product.preorder ? (
+            {status !== "withheld" && product.category !== "hookah" ? (
               <p className="text-[15px] mt-1" style={{ color: "#707072" }}>{catLabel}</p>
             ) : (
               /* Project KI 06 names no category; under its name it carries only

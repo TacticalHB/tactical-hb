@@ -1578,12 +1578,13 @@ export const products: Product[] = [
     taglineEn: "by Mr HB",
     taglineJa: "Mr HB 作",
     taglineAr: "من Mr HB",
-    descriptionUk: "Флагман від Mr HB: безшовні трубки з нержавіючої сталі, PVD-покриття та система Safety Lock. Передзамовлення.",
-    descriptionEn: "The flagship by Mr HB: seamless stainless steel pipes, PVD treatment and the Safety Lock system. Available to pre-order.",
-    descriptionJa: "Mr HB によるフラッグシップ。シームレスのステンレスパイプ、PVD 処理、Safety Lock システム。予約受付中。",
-    descriptionAr: "الإصدار الرائد من Mr HB: أنابيب فولاذية بلا لحام، ومعالجة PVD، ونظام Safety Lock. متاح للطلب المسبق.",
+    descriptionUk: "Флагман від Mr HB: безшовні трубки з нержавіючої сталі, PVD-покриття та система Safety Lock.",
+    descriptionEn: "The flagship by Mr HB: seamless stainless steel pipes, PVD treatment and the Safety Lock system.",
+    descriptionJa: "Mr HB によるフラッグシップ。シームレスのステンレスパイプ、PVD 処理、Safety Lock システム。",
+    descriptionAr: "الإصدار الرائد من Mr HB: أنابيب فولاذية بلا لحام، ومعالجة PVD، ونظام Safety Lock.",
     /* On sale as a pre-order from 4 Oct 2026 (Mario): 11 180 ₴ / €268, paid
-       in full now.
+       in full. In stock and sold normally from 20 Oct 2026, the ship date
+       (Mario: "remove the pre order sign everywhere now, its available").
 
        THE PARCEL IS THE CASE (Mario, 7 Oct 2026): 2,500 g packed, in a
        300 × 300 × 150 mm case (was 400 × 400 × 250 earlier the same day). These replace the 3 kg / 450×350×150 mm
@@ -1596,8 +1597,6 @@ export const products: Product[] = [
     dims: { l: 300, w: 300, h: 150 },
     category: "hookah",
     featured: false,
-    preorder: true,
-    shipsOn: "2026-10-20", // Mario, 4 Oct 2026
     /* No partner minimum since 17 Oct 2026 (Mario: "remove the minimum order
        everywhere"); it was 5 from 4 Oct. */
     image: "/images/hookah/hookah-1.jpg",

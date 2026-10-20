@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildOrderEmail } from "@/lib/order-email";
 import type { PaymentRow } from "@/lib/fulfilment";
+import { products } from "@/lib/products";
 
 /* ---------------------------------------------------------------------------
    The receipt must not promise a dispatch the cart said would not happen.
@@ -10,6 +11,9 @@ import type { PaymentRow } from "@/lib/fulfilment";
    2026); the bag and checkout already say so, and this pins the confirmation
    email to the same promise — and keeps the ordinary wording for everything
    else.
+
+   No product is on pre-order since KI 06 went on sale (20 Oct 2026), so the
+   first test lends the hookah the flag for its duration.
 --------------------------------------------------------------------------- */
 
 function order(slugs: string[], locale: string): PaymentRow {
@@ -24,7 +28,10 @@ function order(slugs: string[], locale: string): PaymentRow {
   } as unknown as PaymentRow;
 }
 
-test("a pre-order in the order is named with its ship date", () => {
+test("a pre-order in the order is named with its ship date", (t) => {
+  const hookah = products.find((p) => p.slug === "incoming-hookah")!;
+  Object.assign(hookah, { preorder: true, shipsOn: "2026-10-20" });
+  t.after(() => { delete hookah.preorder; delete hookah.shipsOn; });
   const uk = buildOrderEmail(order(["incoming-hookah", "bowl-killer"], "uk"), "https://tactical-hb.com");
   assert.match(uk.text, /передзамовлення/);
   assert.match(uk.text, /однією посилкою, 20 жовтня/);

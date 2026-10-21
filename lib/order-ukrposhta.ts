@@ -4,6 +4,7 @@ import { createShipment, ukrposhtaBookingEnabled } from "@/lib/ukrposhta-shipmen
 import { UkrposhtaNotConfigured } from "@/lib/ukrposhta";
 import { parcelFor } from "@/lib/parcel";
 import { priceCart } from "@/lib/pricing";
+import { stampOrderStep } from "@/lib/order-steps";
 
 /* ---------------------------------------------------------------------------
    Book the Ukrposhta parcel for a paid order.
@@ -111,6 +112,7 @@ export async function createUkrposhtaShipmentForOrder(
       })
       .eq("id", orderId);
 
+    await stampOrderStep(orderId, "packed");
     console.log(`[ukrposhta] booked order ${orderId}: ${result.barcode || result.uuid}`);
   } catch (e) {
     /* NEVER THROWS. The customer has paid; a courier API having a bad day must

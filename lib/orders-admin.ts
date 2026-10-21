@@ -26,6 +26,10 @@ export const ORDER_SELECT = `
   order_items ( product_id, product_name, quantity, price_eur, price_uah, variant, addon_lid, addon_rubber )
 `;
 
+/** The progress line's dates (migration 0047). Asked for separately so the
+    list still loads, without dates, before Mario has run it. */
+const STEP_COLUMNS = ", packed_at, shipped_at, delivered_at";
+
 /**
  * Every order, newest first.
  *
@@ -36,17 +40,17 @@ export const ORDER_SELECT = `
 export async function fetchAdminOrders(limit = 200): Promise<AdminOrder[] | null> {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("orders")
-      .select(ORDER_SELECT)
-      .order("created_at", { ascending: false })
-      .limit(limit);
+    const read = (columns: string) =>
+      admin.from("orders").select(columns).order("created_at", { ascending: false }).limit(limit);
+    let { data, error } = await read(ORDER_SELECT + STEP_COLUMNS);
+    // 42703 = undefined column: 0047 not run yet. Same list, no dates.
+    if (error?.code === "42703") ({ data, error } = await read(ORDER_SELECT));
 
     if (error) {
       console.error("[admin/orders] read failed:", error.code, error.message);
       return null;
     }
-    return (data ?? []).map((r) => toOrder(r as Record<string, unknown>));
+    return (data ?? []).map((r) => toOrder(r as unknown as Record<string, unknown>));
   } catch (e) {
     console.error("[admin/orders] read threw:", e);
     return null;

@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { createTtnForOrder } from "@/lib/order-ttn";
 import { fiscaliseOrderRow, type PaymentRow } from "@/lib/fulfilment";
+import { stampOrderStep } from "@/lib/order-steps";
+import { advanceOrderByHand, runTracking } from "@/lib/order-tracking";
 
 /* ---------------------------------------------------------------------------
    Admin: attach a carrier's tracking number to an order — one action per
@@ -69,7 +71,11 @@ export async function saveOrderTtn(orderId: string, ttn: string): Promise<SaveTt
     const admin = createAdminClient();
     const { error } = await admin
       .from("orders")
-      .update({ np_ttn: value || null })
+      /* The status code belonged to the OLD number. Left behind, a deleted
+         waybill's "2" kept the order red after Mario pasted the number the
+         parcel really went under (TCT-LAS6TL); the next tracking run fills it
+         in for the new one. */
+      .update({ np_ttn: value || null, np_status_code: null, np_status_checked_at: null })
       .eq("id", id);
 
     if (error) {
@@ -172,6 +178,7 @@ async function markProcessing(orderId: string, value: string): Promise<void> {
       .eq("id", orderId)
       .eq("status", "paid");
     if (error) console.error("[orders] could not advance to processing:", error.code, error.message);
+    await stampOrderStep(orderId, "packed");
   } catch (e) {
     console.error("[orders] could not advance to processing:", e);
   }
@@ -234,9 +241,26 @@ export async function saveOrderUkrposhtaBarcode(
 
   try {
     const admin = createAdminClient();
+    /* A BARCODE MEANS UKRPOSHTA IS CARRYING IT (21 Oct 2026). TCT-BCWJ4J was
+       booked as Nova Poshta, sent by Ukrposhta, and kept saying Nova Poshta —
+       so the shipping email would have linked a Nova Poshta tracking page
+       with no number on it. Unless the order also holds a live Nova Poshta
+       waybill (then the barcode is a second document, not a change of
+       carrier), saving a barcode switches the carrier with it. */
+    const { data: current } = await admin
+      .from("orders")
+      .select("shipping_carrier, np_ttn, np_status_code")
+      .eq("id", id)
+      .maybeSingle();
+    const liveWaybill =
+      !!current?.np_ttn && current.np_status_code !== "2" && current.np_status_code !== "3";
+    const patch: Record<string, unknown> = { ukrposhta_barcode: value || null };
+    if (value && current && current.shipping_carrier !== "ukrposhta" && !liveWaybill) {
+      patch.shipping_carrier = "ukrposhta";
+    }
     const { error } = await admin
       .from("orders")
-      .update({ ukrposhta_barcode: value || null })
+      .update(patch)
       .eq("id", id);
 
     if (error) {
@@ -292,5 +316,54 @@ export async function reissueOrderReceipt(orderId: string): Promise<ReissueRecei
       : { ok: false, error: after?.checkbox_error ?? "Checkbox did not issue the receipt." };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Could not issue the receipt." };
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The progress line's buttons (21 Oct 2026).
+
+   Mark as shipped / delivered move an order forward by hand, through the very
+   code the carriers' tracking uses (lib/order-tracking advanceOrderByHand) —
+   so "shipped" sends the customer the usual on-its-way email, once. Check
+   tracking now is the evening cron's tracking pass, run while Mario watches
+   instead of at 21:00 Kyiv, with what it found put on the screen.
+--------------------------------------------------------------------------- */
+
+async function callerIsAdmin(tag: string): Promise<boolean> {
+  const supabase = await createClient();
+  const caller = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (isAdminEmail(caller?.email)) return true;
+  console.warn(`[${tag}] refused for`, caller?.email ?? "anonymous");
+  return false;
+}
+
+export type AdvanceOrderResult = { ok: true; emailed: boolean } | { ok: false; error: string };
+
+export async function markOrderAdvanced(orderId: string, target: "shipped" | "delivered"): Promise<AdvanceOrderResult> {
+  if (!(await callerIsAdmin("markOrderAdvanced"))) return { ok: false, error: "Not authorised." };
+  const id = orderId?.trim();
+  if (!id) return { ok: false, error: "An order id is required." };
+  if (target !== "shipped" && target !== "delivered") return { ok: false, error: "Unknown step." };
+  try {
+    const res = await advanceOrderByHand(id, target);
+    revalidatePath("/[locale]/admin/orders", "page");
+    return res;
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not update the order." };
+  }
+}
+
+export type CheckTrackingResult =
+  | { ok: true; checked: number; shipped: number; delivered: number; emailed: number; notes: string[] }
+  | { ok: false; error: string };
+
+export async function checkTrackingNow(): Promise<CheckTrackingResult> {
+  if (!(await callerIsAdmin("checkTrackingNow"))) return { ok: false, error: "Not authorised." };
+  try {
+    const r = await runTracking();
+    revalidatePath("/[locale]/admin/orders", "page");
+    return { ok: true, checked: r.checked, shipped: r.shipped, delivered: r.delivered, emailed: r.emailed, notes: r.notes };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Tracking could not run." };
   }
 }

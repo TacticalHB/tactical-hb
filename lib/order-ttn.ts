@@ -6,6 +6,7 @@ import { createTtn, type TtnDestination } from "@/lib/nova-poshta-ttn";
 import { parcelFor } from "@/lib/parcel";
 import { products } from "@/lib/products";
 import type { PaymentRow } from "@/lib/fulfilment";
+import { stampOrderStep } from "@/lib/order-steps";
 
 /* ---------------------------------------------------------------------------
    Turning a paid order into a Nova Poshta waybill.
@@ -151,6 +152,7 @@ export async function createTtnForOrder(
       return { ok: false, reason };
     }
 
+    await stampOrderStep(orderId, "packed");
     console.log("[ttn] created", ttn.number, "for", payment.reference,
       ttn.costUah !== null ? `(₴${ttn.costUah})` : "");
     return { ok: true, number: ttn.number };

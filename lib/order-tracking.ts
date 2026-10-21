@@ -7,6 +7,7 @@ import { buildShippedEmail } from "@/lib/shipping-email";
 import { scheduleP1 } from "@/lib/email/flows";
 import { sendMail } from "@/lib/email";
 import { ADMIN_EMAIL } from "@/lib/contact-info";
+import { stampOrderStep } from "@/lib/order-steps";
 
 /* ---------------------------------------------------------------------------
    Advancing order status from carrier tracking, and telling the customer when
@@ -88,11 +89,29 @@ export type TrackingRunResult = {
    * not distinguish it, so today this only ever counts international parcels.
    */
   returned: number;
+  /**
+   * Plain-English lines for Admin › Orders' "Check tracking now" button
+   * (21 Oct 2026): a carrier that is switched off or did not answer. Mario
+   * cannot read Vercel logs, so what the logs say has to reach the screen.
+   * Never carries a token — only a status and the carrier's own message.
+   */
+  notes: string[];
 };
+
+/**
+ * Who is really carrying it. The carrier column, except for the one shape the
+ * old admin could leave behind: a "Nova Poshta" order with no waybill and an
+ * Ukrposhta barcode (TCT-BCWJ4J, 21 Oct 2026). That parcel went by Ukrposhta,
+ * and its email must link Ukrposhta's tracking, not a blank Nova Poshta one.
+ */
+function effectiveCarrier(o: TrackableOrder): "ukrposhta" | "nova_poshta" {
+  if (o.shipping_carrier === "ukrposhta") return "ukrposhta";
+  return !o.np_ttn && o.ukrposhta_barcode ? "ukrposhta" : "nova_poshta";
+}
 
 /** Whatever number the customer would quote for this order. */
 function trackingNumber(o: TrackableOrder): string {
-  return (o.shipping_carrier === "ukrposhta" ? o.ukrposhta_barcode : o.np_ttn) ?? "";
+  return (effectiveCarrier(o) === "ukrposhta" ? o.ukrposhta_barcode : o.np_ttn) ?? "";
 }
 
 /**
@@ -176,7 +195,7 @@ async function sendShippedEmail(o: TrackableOrder): Promise<boolean> {
     /* The letter names the carrier and links its tracking site. Passed rather
        than assumed: an Ukrposhta barcode under a Nova Poshta link finds
        nothing, and the customer is told their parcel does not exist. */
-    carrier: o.shipping_carrier,
+    carrier: effectiveCarrier(o),
     addressLines: addressLines(o),
   });
 
@@ -236,6 +255,8 @@ async function applyStage(
 
   if (!advances) return;
 
+  await stampOrderStep(o.id, target);
+
   if (target === "shipped") {
     out.shipped += 1;
     if (await sendShippedEmail(o)) out.emailed += 1;
@@ -283,6 +304,7 @@ async function novaPoshtaPass(out: TrackingRunResult): Promise<void> {
     // Nova Poshta unreachable — try again next run.
     console.error("[tracking] Nova Poshta lookup failed:", e);
     out.errors += 1;
+    out.notes.push(`Nova Poshta did not answer: ${e instanceof Error ? e.message : "unknown error"}.`);
     return;
   }
 
@@ -363,6 +385,9 @@ async function ukrposhtaPass(out: TrackingRunResult): Promise<void> {
     console.info(
       `[tracking] Ukrposhta is switched off — ${orders.length} parcel(s) in flight are not being tracked`
     );
+    out.notes.push(
+      `Ukrposhta tracking is switched off, so ${orders.length} Ukrposhta parcel(s) can't be checked — use "Mark as shipped" on them.`
+    );
     return;
   }
 
@@ -373,6 +398,7 @@ async function ukrposhtaPass(out: TrackingRunResult): Promise<void> {
     // Unreachable, or the credential is missing. Try again next run.
     console.error("[tracking] Ukrposhta lookup failed:", e instanceof Error ? e.message : e);
     out.errors += 1;
+    out.notes.push(`Ukrposhta did not answer: ${e instanceof Error ? e.message : "unknown error"}.`);
     return;
   }
 
@@ -440,6 +466,7 @@ export async function runTracking(): Promise<TrackingRunResult> {
     emailed: 0,
     errors: 0,
     returned: 0,
+    notes: [],
   };
 
   /* Sequential, and Nova Poshta first: it is the bulk of the parcels and the
@@ -450,4 +477,48 @@ export async function runTracking(): Promise<TrackingRunResult> {
 
   console.log("[tracking] run:", JSON.stringify(out));
   return out;
+}
+
+/* ---- By hand ---------------------------------------------------------------
+
+   Mario's "Mark as shipped" / "Mark as delivered" (21 Oct 2026), for parcels
+   tracking cannot see: Ukrposhta while its tracking is off, a parcel sent
+   under a number the order does not have, anything abroad on Nova Post.
+
+   THE SAME applyStage THE CARRIERS USE, so every rule above holds by hand
+   too: forward only, the shipping email claimed exactly once (Mario: yes,
+   send it), the post-purchase mail scheduled off it, the step's time stamped.
+   Delivered sends nothing, exactly as when a carrier reports it.
+
+   SHIPPED NEEDS A TRACKING NUMBER. The email exists to hand the customer that
+   number; one that says "on its way" over a blank line is worse than none. */
+
+export type HandAdvanceResult = { ok: true; emailed: boolean } | { ok: false; error: string };
+
+export async function advanceOrderByHand(
+  orderId: string,
+  target: "shipped" | "delivered"
+): Promise<HandAdvanceResult> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("orders").select(ORDER_COLUMNS).eq("id", orderId).maybeSingle();
+  if (error || !data) return { ok: false, error: error?.message ?? "Order not found." };
+  const o = data as unknown as TrackableOrder;
+
+  if (o.status === "cancelled") return { ok: false, error: "This order is cancelled." };
+  if ((RANK[o.status] ?? 0) >= RANK[target]) return { ok: false, error: `This order is already ${o.status}.` };
+  if (target === "shipped" && !trackingNumber(o)) {
+    return { ok: false, error: "Add the waybill or barcode first — the shipping email gives the customer that number." };
+  }
+  if (
+    target === "shipped" &&
+    effectiveCarrier(o) === "nova_poshta" &&
+    (o.np_status_code === "2" || o.np_status_code === "3")
+  ) {
+    return { ok: false, error: "Nova Poshta deleted this waybill. Paste the number the parcel really went under first, so the email carries the right one." };
+  }
+
+  const out: TrackingRunResult = { checked: 0, shipped: 0, delivered: 0, emailed: 0, errors: 0, returned: 0, notes: [] };
+  await applyStage(o, target === "shipped" ? "in_transit" : "delivered", {}, out);
+  if (out.errors > 0) return { ok: false, error: "The order could not be updated. Try again." };
+  return { ok: true, emailed: out.emailed > 0 };
 }

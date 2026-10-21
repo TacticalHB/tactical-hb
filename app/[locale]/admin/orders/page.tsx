@@ -4,11 +4,15 @@ import { fetchAdminOrders } from "@/lib/orders-admin";
 import {
   orderTotal,
   deliveryLabel,
-  statusLabel,
   formatWhen,
   awaitingParcel,
+  orderProgress,
+  sortByAttention,
   type AdminOrder,
 } from "@/lib/orders-display";
+import OrderProgress, { TONE_STYLE } from "@/components/admin/OrderProgress";
+import OrderStepButtons from "@/components/admin/OrderStepButtons";
+import CheckTrackingButton from "@/components/admin/CheckTrackingButton";
 import OrderTtnForm from "@/components/admin/OrderTtnForm";
 import ReissueReceiptButton from "@/components/admin/ReissueReceiptButton";
 import OrderUkrposhtaForm from "@/components/admin/OrderUkrposhtaForm";
@@ -28,14 +32,6 @@ import { carrierName, isShippingCarrier } from "@/lib/shipping-carriers";
 --------------------------------------------------------------------------- */
 
 export const dynamic = "force-dynamic";
-
-const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
-  paid: { bg: "var(--console-ok-soft)", fg: "var(--console-ok)" },
-  processing: { bg: "var(--console-warn-soft)", fg: "var(--console-warn)" },
-  shipped: { bg: "var(--console-info-soft)", fg: "var(--console-info)" },
-  delivered: { bg: "var(--console-panel-2)", fg: "var(--console-muted)" },
-  cancelled: { bg: "var(--console-alert-soft)", fg: "var(--console-alert)" },
-};
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -92,31 +88,30 @@ function Tab({
 
 function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; uk: boolean }) {
   const total = orderTotal(order);
-  const tone = STATUS_TONE[order.status] ?? STATUS_TONE.delivered;
+  /* THE PROGRESS LINE REPLACED THE STATUS PILL (21 Oct 2026). "Processing"
+     on its own said nothing about why an order had not moved; the line says
+     which step it is on and what that step is waiting for, and the card's
+     tint says whether anything is left to do (green), it is moving (light
+     orange) or it needs Mario (red). */
+  const progress = orderProgress(order, locale);
+  const tone = TONE_STYLE[progress.tone];
+  const rank = ({ paid: 0, processing: 1, shipped: 2, delivered: 3 } as Record<string, number>)[order.status] ?? 0;
+  const hasNumber = !!order.ttn || !!order.ukrposhtaBarcode;
+  const live = progress.tone !== "cancelled";
 
   return (
-    <article className="rounded-lg" style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}>
-      {/* Header — the scannable line: who, when, how much, what state. */}
+    <article className="rounded-lg overflow-hidden" style={{ border: `1px solid ${tone.border}`, background: "var(--console-panel)" }}>
+      {/* Header — the scannable line: who, when, how much. */}
       <header
         className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3.5"
-        style={{ borderBottom: "1px solid var(--console-border)", background: "var(--console-panel-2)" }}
+        style={{ borderBottom: `1px solid ${tone.border}`, background: tone.head }}
       >
         <span className="font-mono text-[13.5px] tracking-wider" style={{ color: "var(--console-text)" }}>
           {order.reference}
         </span>
-        <span
-          className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
-          style={{ background: tone.bg, color: tone.fg }}
-        >
-          {statusLabel(order.status, locale)}
-        </span>
-        {/* Warn, not accent: the brand orange is not a status colour. */}
-        {awaitingParcel(order) && (
-          <span
-            className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded"
-            style={{ background: "var(--console-warn-soft)", color: "var(--console-warn)" }}
-          >
-            {uk ? "Купити посилку" : "Buy parcel"}
+        {progress.tone === "cancelled" && (
+          <span className="text-[11px] tracking-[0.1em] uppercase px-2 py-0.5 rounded" style={{ background: "var(--console-panel)", color: "var(--console-muted)" }}>
+            {uk ? "Скасовано" : "Cancelled"}
           </span>
         )}
         {order.source !== "monobank" && (
@@ -137,6 +132,21 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
           {total.text}
         </span>
       </header>
+
+      <div
+        className="px-5 py-4 flex flex-col md:flex-row md:items-center gap-4"
+        style={{ borderBottom: "1px solid var(--console-border)" }}
+      >
+        <div className="flex-1 min-w-0 max-w-2xl">
+          <OrderProgress steps={progress.steps} locale={locale} />
+        </div>
+        <OrderStepButtons
+          orderId={order.id}
+          locale={locale}
+          canShip={live && rank < 2}
+          canDeliver={live && rank < 3 && (rank >= 1 || hasNumber)}
+        />
+      </div>
 
       <div className="px-5 py-4 grid gap-5 md:grid-cols-3">
         <Field label={uk ? "Клієнт" : "Customer"}>
@@ -331,7 +341,11 @@ export default async function AdminOrdersPage({
      and had cleared the queue, which is the one number you want to trust. */
   const awaiting = all?.filter(awaitingParcel) ?? [];
   const onlyAwaiting = view === "awaiting";
-  const orders = all === null ? null : onlyAwaiting ? awaiting : all;
+  /* Needs-you first, then orders still moving, then finished ones — newest
+     first within each (21 Oct 2026). A red card at the bottom of a long list
+     is a red card nobody sees. */
+  const listed = all === null ? null : onlyAwaiting ? awaiting : all;
+  const orders = listed === null ? null : sortByAttention(listed, locale);
 
   return (
     <div className="min-h-screen pt-10 pb-24" style={{ background: "var(--console-bg-2)" }}>
@@ -346,8 +360,8 @@ export default async function AdminOrdersPage({
                 ? "Не вдалося завантажити замовлення."
                 : "Couldn't load orders."
               : uk
-                ? `${orders.length} ${orders.length === 1 ? "замовлення" : "замовлень"} · найновіші зверху`
-                : `${orders.length} ${orders.length === 1 ? "order" : "orders"} · newest first`}
+                ? `${orders.length} ${orders.length === 1 ? "замовлення" : "замовлень"} · спершу ті, що потребують уваги`
+                : `${orders.length} ${orders.length === 1 ? "order" : "orders"} · the ones that need you first`}
           </p>
 
           {/* Two tabs, and the second one is a dispatch queue. Links rather
@@ -356,7 +370,8 @@ export default async function AdminOrdersPage({
               somebody can bookmark or send to whoever is going to the post
               office. */}
           {all !== null && (
-            <nav className="flex flex-wrap gap-2 mt-4">
+            <div className="flex flex-wrap items-start justify-between gap-4 mt-4">
+            <nav className="flex flex-wrap gap-2">
               <Tab
                 href={`/${locale}/admin/orders`}
                 active={!onlyAwaiting}
@@ -371,6 +386,8 @@ export default async function AdminOrdersPage({
                 warn={awaiting.length > 0}
               />
             </nav>
+            <CheckTrackingButton locale={locale} />
+            </div>
           )}
         </header>
 

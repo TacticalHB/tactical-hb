@@ -73,6 +73,12 @@ export type AdminOrder = {
   fiscalReceiptId: string | null;
   fiscalisedAt: string | null;
   fiscalError: string | null;
+
+  /* When each later step happened (migration 0047, 21 Oct 2026). Null on
+     older rows and before the migration — the step then shows no date. */
+  packedAt: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
 };
 
 function num(v: unknown): number | null {
@@ -183,6 +189,10 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
     fiscalReceiptId: text(row.checkbox_receipt_id),
     fiscalisedAt: text(row.checkbox_fiscalised_at),
     fiscalError: text(row.checkbox_error),
+
+    packedAt: text(row.packed_at),
+    shippedAt: text(row.shipped_at),
+    deliveredAt: text(row.delivered_at),
   };
 }
 
@@ -298,4 +308,139 @@ export function formatWhen(iso: string, locale: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/* ---------------------------------------------------------------------------
+   The progress line (Mario, 21 Oct 2026).
+
+   Every order reads Paid → Packed → Shipped → Delivered. "Processing" alone
+   said nothing about WHY an order had not moved, and three paid orders sat on
+   it for different reasons — a deleted waybill, a barcode on the wrong
+   carrier, a parcel not yet bought.
+
+   GREEN FILLS IN STEP BY STEP. Paid is green the moment the order exists (an
+   order row is only written once Monobank confirms payment); each later step
+   turns green as it happens. The NEXT step is the orange one — the thing the
+   order is waiting on — and the rest are grey.
+
+   THE CARD TAKES ONE TONE: green when delivered (nothing left to do), red when
+   it needs Mario, light orange otherwise. Red means a human is the only way
+   forward:
+     · Nova Poshta deleted the waybill or never heard of it;
+     · paid two days ago and still no waybill or barcode;
+     · packed five days ago and the carrier has never scanned it.
+   The thresholds are generous on purpose — red that cries wolf stops being
+   read — and "Mark as shipped" clears the last one when the parcel went out
+   under another number.
+
+   Pure, like the rest of this file, and `now` is a parameter so the
+   thresholds can be tested without a clock.
+--------------------------------------------------------------------------- */
+
+export type StepKey = "paid" | "packed" | "shipped" | "delivered";
+export type StepState = "done" | "current" | "todo" | "problem";
+export type OrderTone = "done" | "progress" | "problem" | "cancelled";
+
+export type ProgressStep = {
+  key: StepKey;
+  label: string;
+  state: StepState;
+  /** When it happened, for a done step that knows. */
+  at: string | null;
+  /** A few words under the current or problem step: what it is waiting on. */
+  note: string | null;
+};
+
+const STEP_RANK: Record<string, number> = { paid: 0, processing: 1, shipped: 2, delivered: 3 };
+const PAID_NO_PARCEL_MS = 2 * 24 * 3600 * 1000;
+const PACKED_NO_SCAN_MS = 5 * 24 * 3600 * 1000;
+
+export function orderProgress(
+  o: AdminOrder,
+  locale: string,
+  now: number = Date.now()
+): { steps: ProgressStep[]; tone: OrderTone } {
+  const L = (uk: string, en: string) => t(locale, { uk, en, ja: en, ar: en });
+  const ukrposhta = o.carrier === "ukrposhta" || (!o.ttn && !!o.ukrposhtaBarcode);
+  const hasNumber = ukrposhta ? !!o.ukrposhtaBarcode : !!o.ttn && !o.ttnDead;
+
+  /* How many steps are done. The status is the record, but a number on the
+     order is a parcel even where the status lagged (a waybill saved before
+     the status write existed), so Packed counts either. */
+  const rank = STEP_RANK[o.status] ?? 0;
+  const done = Math.max(rank + 1, hasNumber ? 2 : 1);
+
+  const keys: StepKey[] = ["paid", "packed", "shipped", "delivered"];
+  const labels: Record<StepKey, string> = {
+    paid: L("Оплачено", "Paid"),
+    packed: L("Упаковано", "Packed"),
+    shipped: L("Відправлено", "Shipped"),
+    delivered: L("Доставлено", "Delivered"),
+  };
+  const at: Record<StepKey, string | null> = {
+    paid: o.createdAt,
+    packed: o.packedAt,
+    shipped: o.shippedAt,
+    delivered: o.deliveredAt,
+  };
+
+  const steps: ProgressStep[] = keys.map((key, i) => ({
+    key,
+    label: labels[key],
+    state: i < done ? "done" : i === done ? "current" : "todo",
+    at: i < done ? at[key] : null,
+    note: null,
+  }));
+
+  if (o.status === "cancelled") {
+    return { steps: steps.map((s) => ({ ...s, state: s.key === "paid" ? "done" : "todo", at: s.key === "paid" ? s.at : null })), tone: "cancelled" };
+  }
+  if (done >= 4) return { steps, tone: "done" };
+
+  const current = steps[done];
+  let problem = false;
+
+  if (o.ttnDead && !ukrposhta) {
+    // The waybill is on the order but was never handed over: Packed is the
+    // broken step even though a number exists.
+    const packed = steps[1];
+    packed.state = "problem";
+    packed.at = null;
+    packed.note = L("накладну видалено", "waybill deleted");
+    for (const s of steps.slice(2)) s.state = "todo";
+    steps[2].note = null;
+    problem = true;
+  } else if (current.key === "packed") {
+    const age = now - new Date(o.createdAt).getTime();
+    const what = ukrposhta ? L("потрібен трек-номер", "needs barcode") : L("потрібна накладна", "needs waybill");
+    if (age > PAID_NO_PARCEL_MS) {
+      current.state = "problem";
+      current.note = L(`${what} · 2+ дні`, `${what} · 2+ days`);
+      problem = true;
+    } else {
+      current.note = what;
+    }
+  } else if (current.key === "shipped") {
+    const since = o.packedAt ? new Date(o.packedAt).getTime() : NaN;
+    if (Number.isFinite(since) && now - since > PACKED_NO_SCAN_MS) {
+      current.state = "problem";
+      current.note = L("немає сканування 5+ днів", "no scan in 5+ days");
+      problem = true;
+    } else {
+      current.note = L("чекає сканування", "waiting for scan");
+    }
+  } else if (current.key === "delivered") {
+    current.note = L("в дорозі", "on its way");
+  }
+
+  return { steps, tone: problem ? "problem" : "progress" };
+}
+
+/** Problems first, then orders still moving, then finished ones; newest first within each. */
+export function sortByAttention(orders: AdminOrder[], locale: string, now: number = Date.now()): AdminOrder[] {
+  const weight: Record<OrderTone, number> = { problem: 0, progress: 1, done: 2, cancelled: 3 };
+  return orders
+    .map((o) => ({ o, w: weight[orderProgress(o, locale, now).tone] }))
+    .sort((a, b) => a.w - b.w || b.o.createdAt.localeCompare(a.o.createdAt))
+    .map((x) => x.o);
 }

@@ -816,9 +816,9 @@ export const products: Product[] = [
       colourShownJa: "マットブラック",
       colourShownAr: "أسود مطفأ",
       shortEn:
-        "A hand-made bowl in natural clay, shaped for a bright, soft session that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
+        "Livanka is a hand-made bowl in natural clay, shaped for a bright, soft session that runs 35–40 minutes. A small internal rim holds the molasses in place while the optimal wall thickness keeps the mix from overheating — built for the focused solo session.",
       shortUk:
-        "Чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який смак протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
+        "Livanka — чаша ручної роботи з натуральної глини, форма якої дарує яскравий і м'який смак протягом 35–40 хвилин. Невеликий внутрішній бортик утримує патоку, а оптимальна товщина стінок не дає суміші перегріватися — створена для зосередженої соло-сесії.",
       shortJa:
         "天然クレイを手づくりしたボウル。35〜40分続く、明るくやわらかな味わいのために形づくられています。内側の小さなリムが糖蜜を受け止め、最適な肉厚がミックスの焼けすぎを防ぎます。ひとりでじっくり向き合うセッションのために。",
       shortAr:

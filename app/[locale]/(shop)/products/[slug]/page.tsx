@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { availabilityOf, products } from "@/lib/products";
 import ProductPDP from "@/components/ProductPDP";
-import { SITE_NAME, SITE_URL, jsonLdScript, pageMetadata, productKind, schemaAvailability } from "@/lib/seo";
+import { SITE_NAME, SITE_URL, jsonLdScript, merchantReturnPolicy, pageMetadata, productKind, schemaAvailability } from "@/lib/seo";
 
 /* ---------------------------------------------------------------------------
    A product page describes itself twice: once for a human sharing the link,
@@ -44,6 +44,14 @@ export async function generateMetadata({
      name on purpose — see productKind(). The brand is appended by the title
      template in app/layout.tsx, so it is not repeated here. */
   const kind = productKind(product.category, locale, product.slug);
+  /* THE DISTINCTIVE WORD LEADS (22 Oct 2026). "Tactical Livanka — clay hookah
+     bowl · Tactical HB" said the brand twice and put "Livanka" second; Search
+     Console had the page ~5th for "livanka", its own name. The template
+     appends the brand, so the leading "Tactical" goes — unless the rest of
+     the name is just the descriptor again ("Tactical Mouthpiece — hookah
+     mouthpiece" would become "Mouthpiece — hookah mouthpiece"). */
+  const rest = name.startsWith("Tactical ") ? name.slice("Tactical ".length) : name;
+  const titleName = kind && rest !== name && !kind.toLowerCase().includes(rest.toLowerCase()) ? rest : name;
 
   /* An unphotographed product falls back to the site card rather than passing
      an empty url — `images: [{ url: "" }]` renders og:image as the bare
@@ -54,7 +62,7 @@ export async function generateMetadata({
   return pageMetadata({
     locale,
     path: `/products/${slug}`,
-    title: kind ? `${name} — ${kind}` : name,
+    title: kind ? `${titleName} — ${kind}` : name,
     description: snippet(description, locale === "ja" ? 100 : 160),
     /* The product's own photograph, not the site card — this is the one place
        a bespoke share image already exists and is obviously the right one. */
@@ -113,6 +121,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             price: uk ? product.priceUah : product.price,
             availability: schemaAvailability(availabilityOf(product)),
             seller: { "@type": "Organization", name: SITE_NAME },
+            hasMerchantReturnPolicy: merchantReturnPolicy(locale),
           },
         }),
   };

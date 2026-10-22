@@ -135,6 +135,14 @@ const PRODUCT_KIND: Record<string, Record<string, string>> = {
    accessory too, and a title calling it a part for heat devices would be
    wrong. A product that needs its own descriptor gets one here by slug. */
 const PRODUCT_KIND_BY_SLUG: Record<string, Record<string, string>> = {
+  /* "hb hookah" sat ~10th in Search Console (22 Oct 2026) — the flagship's
+     title now says what it is in those words. */
+  "incoming-hookah": {
+    en: "HB hookah",
+    uk: "кальян HB",
+    ja: "HB シーシャ",
+    ar: "شيشة HB",
+  },
   "tactical-mouthpiece": {
     en: "hookah mouthpiece",
     uk: "мундштук для кальяну",
@@ -142,6 +150,38 @@ const PRODUCT_KIND_BY_SLUG: Record<string, Record<string, string>> = {
     ar: "مبسم للشيشة",
   },
 };
+
+/* ---------------------------------------------------------------------------
+   The returns policy, as Google's merchant listings read it (22 Oct 2026 —
+   Search Console flagged it missing on every Offer).
+
+   EXACTLY WHAT /about#returns AND THE OFFER (§5) SAY, no more: any order, 14
+   days from receipt, sent back by post, nothing excluded. returnFees is left
+   out on purpose — the site says return shipping "depends on the reason for
+   return and the destination", and neither "free" nor "customer pays" would
+   be true of every return.
+
+   applicableCountry follows the storefront's audience, the same way the
+   Offer's currency does: Ukraine for /uk, the export markets for the rest.
+--------------------------------------------------------------------------- */
+const RETURN_COUNTRIES: Record<string, string[]> = {
+  uk: ["UA"],
+  en: ["GB", "IE", "DE", "PL", "US", "CA"],
+  ja: ["JP"],
+  ar: ["AE", "SA"],
+};
+
+export function merchantReturnPolicy(locale: string) {
+  return {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: RETURN_COUNTRIES[locale] ?? RETURN_COUNTRIES.en,
+    returnPolicyCountry: "UA",
+    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: 14,
+    returnMethod: "https://schema.org/ReturnByMail",
+    merchantReturnLink: `${SITE_URL}/${locale}/about#returns`,
+  };
+}
 
 /** The descriptor for one product, or "" when there is none to give. */
 export function productKind(category: string, locale: string, slug?: string): string {
@@ -371,7 +411,9 @@ export function websiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
-    alternateName: ["TCT", "Tactical HB Ukraine", "tactical-hb.com"],
+    /* "HB Tactical" added 22 Oct 2026: Search Console showed people typing the
+       brand back to front, and the site ranked ~6th for its own name that way. */
+    alternateName: ["TCT", "HB Tactical", "Tactical HB Ukraine", "tactical-hb.com"],
     url: `${SITE_URL}/`,
   };
 }

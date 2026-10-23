@@ -1,3 +1,4 @@
+import type { Application } from "@/lib/wholesale-application-display";
 import type { AppLocale } from "@/i18n/routing";
 import type { AccountStatus } from "@/lib/wholesale-display";
 import type { PartnerType } from "@/lib/wholesale-prices";
@@ -71,6 +72,8 @@ export type Partner = {
   hasLogin: boolean;
   /** Free text the applicant wrote. Never mixed into the admin's `notes`. */
   applicationNote: string | null;
+  /** The online application and its documents (0048, 23 Oct 2026). */
+  application: Application;
   city: string | null;
   /** As the applicant chose it, e.g. "Shop / Online Retailer". */
   businessType: string | null;

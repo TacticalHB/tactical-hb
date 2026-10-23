@@ -4,7 +4,17 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendMail } from "@/lib/email";
-import { buildWholesaleApplicationStaffMail } from "@/lib/wholesale-staff-email";
+import { buildApplicationCompleteStaffMail, buildWholesaleApplicationStaffMail } from "@/lib/wholesale-staff-email";
+import { completeApplication, createUploadSlot, registerDocument, removeDocument, saveAnswers } from "@/lib/wholesale-application";
+import {
+  DOC_KIND_TEXT,
+  PRODUCT_INTEREST_TEXT,
+  VOLUME_TEXT,
+  YEARS_TEXT,
+  type ApplicationAnswers,
+  type ApplicationDocument,
+  type Missing,
+} from "@/lib/wholesale-application-display";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 import { applyForAccount, submitRequest, type SubmitLine } from "@/lib/wholesale-portal";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
@@ -117,12 +127,10 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
   });
   if (!mail.ok) console.error("[wholesale] application alert not sent:", mail.error);
 
-  /* THE FORM GOES OUT HERE, and this is the step the whole flow turns on.
-     Registration creates an account that does nothing; the only thing that
-     turns it into a real one is a completed PDF coming back by email. An
-     applicant who never receives the form has no route forward at all, so a
-     failure here is logged loudly — sales can attach it by hand from the
-     alert above, which names the address. */
+  /* THE WAY BACK TO THE APPLICATION. Since 23 Oct 2026 the application is
+     filled in on the site, usually on the very next screen; this letter
+     carries a button back to it for anyone who leaves first (the PDF it used
+     to attach is retired — applicants kept missing it). */
   const reply = buildWholesaleRegistrationReply(locale, site);
   const applicantMail = await sendMail({
     to: user.email,
@@ -135,8 +143,8 @@ export async function applyForWholesaleAccount(fields: ApplyFields): Promise<Who
   });
   if (!applicantMail.ok) {
     console.error(
-      "[wholesale] APPLICATION FORM NOT SENT to", user.email, "-", applicantMail.error,
-      "— send it by hand; they cannot proceed without it"
+      "[wholesale] registration letter not sent to", user.email, "-", applicantMail.error,
+      "— they can still finish the application from the portal"
     );
   }
 
@@ -223,4 +231,101 @@ export async function submitWholesaleRequest(
   revalidatePath("/[locale]/admin/wholesale", "page");
   revalidatePath("/[locale]/wholesale/portal", "page");
   return { ok: true, reference: req.reference };
+}
+
+/* ---- The online application (23 Oct 2026) ----------------------------------
+
+   The PDF applicants kept missing, asked on the site instead. Every action
+   starts from the session — lib/wholesale-application looks the partner up by
+   user_id, so nobody can touch another company's application. Files go
+   browser → private bucket through a one-time signed URL (Vercel would refuse
+   a phone photo over 4.5 MB); these actions only hand out the slot and then
+   record what landed in it. */
+
+export type ApplicationActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string; missing?: Missing[] };
+
+export async function saveWholesaleApplication(answers: Partial<ApplicationAnswers>): Promise<ApplicationActionResult> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "not_signed_in" };
+  return saveAnswers(user.id, answers);
+}
+
+export async function requestDocumentUpload(
+  kind: string,
+  filename: string,
+  contentType: string,
+  size: number
+): Promise<ApplicationActionResult<{ path: string; token: string }>> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "not_signed_in" };
+  return createUploadSlot(user.id, kind, filename, contentType, size);
+}
+
+export async function confirmDocumentUpload(
+  path: string,
+  kind: string,
+  filename: string,
+  contentType: string,
+  size: number
+): Promise<ApplicationActionResult<{ document: ApplicationDocument }>> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "not_signed_in" };
+  return registerDocument(user.id, path, kind, filename, contentType, size);
+}
+
+export async function deleteWholesaleDocument(documentId: string): Promise<ApplicationActionResult> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "not_signed_in" };
+  return removeDocument(user.id, documentId);
+}
+
+/** Send the application. On success sales gets the "ready to review" email. */
+export async function submitWholesaleApplication(
+  answers: Partial<ApplicationAnswers>,
+  confirmedName: string
+): Promise<ApplicationActionResult> {
+  const user = await currentUser();
+  if (!user) return { ok: false, error: "not_signed_in" };
+  const res = await completeApplication(user.id, answers, confirmedName);
+  if (!res.ok) return res;
+
+  const p = res.partner;
+  const a = res.application;
+  const s = (v: unknown) => (typeof v === "string" && v.trim() ? v : null);
+  const staff = buildApplicationCompleteStaffMail(
+    {
+      company: String(p.company ?? ""),
+      contactName: s(p.contact_name),
+      email: s(p.email),
+      phone: s(p.phone),
+      country: s(p.country),
+      city: s(p.city),
+      businessType: s(p.business_type),
+      legalName: a.legalName,
+      address: a.address,
+      taxId: a.taxId,
+      years: a.yearsInBusiness ? YEARS_TEXT[a.yearsInBusiness].en : null,
+      website: a.website || null,
+      volume: a.expectedVolume ? VOLUME_TEXT[a.expectedVolume].en : null,
+      products: a.productsInterest.map((k) => PRODUCT_INTEREST_TEXT[k].en).join(", ") || null,
+      referral: a.referralSource || null,
+      comments: a.comments || null,
+      confirmedName: a.confirmedName ?? "",
+      documents: a.documents.map((d) => `${DOC_KIND_TEXT[d.kind].en} (${d.filename})`),
+      locale: String(p.locale ?? "en"),
+    },
+    (process.env.SITE_URL || "https://tactical-hb.com").replace(/\/$/, "")
+  );
+  const mail = await sendMail({
+    to: SALES_EMAIL,
+    replyTo: s(p.email) ?? undefined,
+    subject: staff.subject,
+    html: staff.html,
+    text: staff.text,
+  });
+  if (!mail.ok) console.error("[wholesale] application-ready alert not sent:", mail.error);
+
+  revalidatePath("/[locale]/wholesale/portal", "page");
+  revalidatePath("/[locale]/admin/partners", "page");
+  return { ok: true };
 }

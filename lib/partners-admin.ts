@@ -4,6 +4,7 @@ import type { Partner, PartnerStatus } from "@/lib/partners-display";
 import { isAppLocale, type AppLocale } from "@/i18n/routing";
 import { isAccountStatus } from "@/lib/wholesale-display";
 import { isPartnerType } from "@/lib/wholesale-prices";
+import { applicationFromRow, documentsByPartner } from "@/lib/wholesale-application";
 
 /* ---------------------------------------------------------------------------
    Reading and writing wholesale partners for /admin/partners.
@@ -60,7 +61,7 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
   try {
     const admin = createAdminClient();
 
-    const [pRes, oRes] = await Promise.all([
+    const [pRes, oRes, docs] = await Promise.all([
       admin
         .from("wholesale_partners")
         /* "*": currency (0043) is read when the column exists and simply
@@ -71,6 +72,7 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
         .select("id, external_ref, created_at, status, email, amount_uah, wholesale_partner_id")
         .order("created_at", { ascending: false })
         .limit(2000),
+      documentsByPartner(),
     ]);
 
     if (pRes.error) {
@@ -127,6 +129,7 @@ export async function fetchPartners(): Promise<PartnersRead | null> {
         accountStatus: isAccountStatus(row.account_status) ? row.account_status : ("pending" as const),
         hasLogin: Boolean(row.user_id),
         applicationNote: text(row.application_note),
+        application: applicationFromRow(row, docs[id] ?? []),
         partnerType: isPartnerType(row.partner_type) ? row.partner_type : null,
         partnerTypeChangedAt: text(row.partner_type_changed_at),
         partnerTypeChangedBy: text(row.partner_type_changed_by),

@@ -16,6 +16,8 @@ import RequestHistory from "@/components/wholesale/RequestHistory";
 import { retailRows } from "@/lib/retail-reference";
 import { SALES_EMAIL } from "@/lib/contact-info";
 import { privatePageMetadata } from "@/lib/seo";
+import { applicationForUser } from "@/lib/wholesale-application";
+import PendingApplication from "@/components/wholesale/PendingApplication";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -66,6 +68,19 @@ export default async function WholesalePortalPage({
      type predicate, which leaves exactly the three closed states below. */
   const status = partner.accountStatus;
   if (!canAccessPortal(status)) {
+    /* PENDING AND NOT FINISHED → the online application (23 Oct 2026), every
+       time they sign in until it is sent. It replaced the PDF applicants kept
+       missing; "under review" only shows once there is something to review. */
+    if (status === "pending") {
+      const app = await applicationForUser(user.id);
+      if (app && !app.application.completedAt) {
+        return (
+          <Shell>
+            <PendingApplication locale={locale} initial={app.application} suggestedName={partner.contactName} />
+          </Shell>
+        );
+      }
+    }
     return <NotApproved locale={locale} status={status} company={partner.company} />;
   }
 
@@ -237,10 +252,10 @@ function NotApproved({
      none of them do is show a price or a quantity box. */
   const body = {
     pending: t(locale, {
-      en: "Your application is with our team. We'll email you as soon as your account is open — usually once we've received your completed application form and trade documents.",
-      uk: "Ваша заявка на розгляді. Ми напишемо, щойно акаунт буде відкрито — зазвичай після отримання заповненої форми та документів.",
-      ja: "お申し込みを確認しています。アカウントを開設し次第メールでご連絡します。多くの場合、申込書と取引書類の到着後となります。",
-      ar: "طلبك قيد المراجعة لدى فريقنا. سنراسلك بمجرد فتح حسابك — عادةً بعد استلام استمارة الطلب والمستندات التجارية.",
+      en: "We have your application and documents. Our team reviews applications within 2–3 business days and will email you as soon as your account is open.",
+      uk: "Ми отримали вашу заявку та документи. Розглядаємо заявки протягом 2–3 робочих днів і напишемо вам, щойно акаунт буде відкрито.",
+      ja: "お申し込みと書類を受け付けました。2〜3営業日以内に審査し、アカウントを開設し次第メールでお知らせします。",
+      ar: "استلمنا طلبك ومستنداتك. يراجع فريقنا الطلبات خلال 2–3 أيام عمل وسيراسلك فور فتح حسابك.",
     }),
     rejected: t(locale, {
       en: "We weren't able to open a trade account on this application. If you think that's a mistake, or your circumstances have changed, please get in touch.",

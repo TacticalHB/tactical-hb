@@ -103,11 +103,11 @@ export function buildWholesaleApplicationStaffMail(
 
   const html = buildStaffLetter({
     title: "New wholesale application",
-    lead: `${f.company} has registered and is awaiting approval.`,
+    lead: `${f.company} has registered. Their online application comes next — you'll get an "Application ready" email when it's complete.`,
     rows,
     blocks: f.note ? [staffQuote("What they told us", f.note)] : [],
     cta: { label: "Approve or decline", url: adminUrl(siteUrl, "/en/admin/partners") },
-    status: "They cannot see wholesale prices or submit anything until approved.",
+    status: "They cannot see wholesale prices or submit anything until approved. Review once the application is complete.",
   });
 
   const text = [
@@ -123,4 +123,73 @@ export function buildWholesaleApplicationStaffMail(
     .join("\n");
 
   return { subject: `Wholesale account application — ${f.company}`, html, text };
+}
+
+/* ---- The online application is complete (23 Oct 2026) --------------------- */
+
+export type CompletedApplication = {
+  company: string;
+  contactName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  country?: string | null;
+  city?: string | null;
+  businessType?: string | null;
+  legalName: string;
+  address: string;
+  taxId: string;
+  years?: string | null;
+  website?: string | null;
+  volume?: string | null;
+  products?: string | null;
+  referral?: string | null;
+  comments?: string | null;
+  confirmedName: string;
+  documents: string[];
+  locale: string;
+};
+
+export function buildApplicationCompleteStaffMail(
+  f: CompletedApplication,
+  siteUrl: string
+): { subject: string; html: string; text: string } {
+  const rows: [string, string | null | undefined][] = [
+    ["Company", f.company],
+    ["Legal name", f.legalName],
+    ["Tax / reg. no.", f.taxId],
+    ["Address", f.address],
+    ["Business type", f.businessType],
+    ["Country", [f.city, f.country].filter(Boolean).join(", ")],
+    ["Contact", f.contactName],
+    ["Email", f.email],
+    ["Telephone", f.phone],
+    ["In business", f.years],
+    ["Website", f.website],
+    ["Volume", f.volume],
+    ["Interested in", f.products],
+    ["Heard from", f.referral],
+    ["Documents", f.documents.join(", ")],
+    ["Confirmed by", f.confirmedName],
+    ["Language", f.locale.toUpperCase()],
+  ];
+  const url = adminUrl(siteUrl, "/en/admin/partners");
+  const html = buildStaffLetter({
+    title: "Application ready to review",
+    lead: `${f.company} has completed their wholesale application and uploaded their documents.`,
+    rows,
+    blocks: f.comments ? [staffQuote("Their comments", f.comments)] : [],
+    cta: { label: "Review in Admin › Partners", url },
+    status: "The documents open from the partner's card — each link lasts five minutes.",
+  });
+  const text = [
+    `${f.company} has completed their wholesale application.`,
+    ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
+    "",
+    f.comments ?? "",
+    "",
+    `Review: ${url}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  return { subject: `Application ready to review — ${f.company}`, html, text };
 }

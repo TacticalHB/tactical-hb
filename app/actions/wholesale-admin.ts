@@ -14,6 +14,7 @@ import { isPartnerType } from "@/lib/wholesale-prices";
 import { isAccountStatus, isRequestStatus } from "@/lib/wholesale-display";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
 import { sendMail } from "@/lib/email";
+import { documentLink } from "@/lib/wholesale-application";
 import { ADMIN_EMAIL, SALES_EMAIL } from "@/lib/contact-info";
 
 /* ---------------------------------------------------------------------------
@@ -205,4 +206,12 @@ export async function saveRequestLines(
   console.info(`[wholesale] lines edited on ${id} by ${actor}`);
   revalidatePath("/[locale]/admin/wholesale", "page");
   return { ok: true, itemCount: res.itemCount, lines: res.lines };
+}
+
+/** A five-minute link to one uploaded application document (23 Oct 2026). */
+export async function wholesaleDocumentLink(documentId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "forbidden" };
+  const url = await documentLink(String(documentId ?? ""));
+  return url ? { ok: true, url } : { ok: false, error: "not_found" };
 }

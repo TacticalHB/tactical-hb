@@ -187,6 +187,7 @@ function PrivacyContent({ locale }: { locale: string }) {
                   t("collect_restock"),
                   t("collect_cart"),
                   t("collect_forms"),
+                  t("collect_wholesale"),
                   t("collect_cookies"),
                 ]}
               />
@@ -225,6 +226,7 @@ function PrivacyContent({ locale }: { locale: string }) {
                   t("retention_newsletter"),
                   t("retention_restock"),
                   t("retention_cart"),
+                  t("retention_wholesale"),
                 ]}
               />
             </Clause>

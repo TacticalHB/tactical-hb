@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { closeStaleShift } from "@/lib/checkbox";
+import { purgeRejectedDocuments } from "@/lib/wholesale-application";
 import { runTracking } from "@/lib/order-tracking";
 import { runStockAlert } from "@/lib/stock-alert";
 import { runWeeklyBrief } from "@/lib/weekly-brief";
@@ -79,6 +80,9 @@ export async function GET(request: NextRequest) {
 
   const tracking = await runTracking();
   const stock = await runStockAlert();
+  // Declined applicants' documents go six months after the decision (the
+  // privacy page promises it). Never throws.
+  const purgedDocuments = await purgeRejectedDocuments();
 
   const kyivWeekday = new Intl.DateTimeFormat("en-US", {
     timeZone: "Europe/Kyiv",
@@ -115,5 +119,5 @@ export async function GET(request: NextRequest) {
     ? await runWeeklyBrief({ trigger: "cron", createdBy: "system", sendEmail: true })
     : null;
 
-  return NextResponse.json({ ok: true, ...tracking, stock, margin, brief, shift });
+  return NextResponse.json({ ok: true, ...tracking, stock, margin, brief, shift, purgedDocuments });
 }

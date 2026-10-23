@@ -3,6 +3,7 @@ import { runDueJobs } from "@/lib/email/flows";
 import { runWholesaleDormant } from "@/lib/wholesale-dormant";
 import { runBackInStock } from "@/lib/back-in-stock";
 import { closeStaleShift } from "@/lib/checkbox";
+import { remindUnfinishedApplications } from "@/lib/wholesale-reminders";
 
 /* ---------------------------------------------------------------------------
    Cron: send whatever the email flows have become due.
@@ -84,8 +85,12 @@ async function run(request: NextRequest) {
      dormant scan is second; it never throws either. */
   const backInStock = await runBackInStock();
 
-  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant, backInStock, shift }));
-  return NextResponse.json({ ok: true, ...result, dormant, backInStock, shift });
+  /* The one "finish your wholesale application" reminder (23 Oct 2026) —
+     fourth, never throws. */
+  const applicationReminders = await remindUnfinishedApplications();
+
+  console.log("[cron/email-queue]", JSON.stringify({ ...result, dormant, backInStock, shift, applicationReminders }));
+  return NextResponse.json({ ok: true, ...result, dormant, backInStock, shift, applicationReminders });
 }
 
 export async function GET(request: NextRequest) {

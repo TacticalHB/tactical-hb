@@ -30,6 +30,7 @@ import {
 import { formatMoney } from "@/lib/currency";
 import { formatUah } from "@/lib/stock-display";
 import type { PartnerOrder } from "@/lib/partners-admin";
+import PartnerApplication, { ApplicationTag } from "@/components/admin/PartnerApplication";
 
 /* ---------------------------------------------------------------------------
    One partner: the reading row, and underneath it (opened on demand) the
@@ -324,6 +325,8 @@ export default function PartnerCard({
             {ADMIN_ACCOUNT_STATUS[p.accountStatus][uk ? "uk" : "en"]}
           </span>
         )}
+        {/* Is there anything to review yet? (online application, 0048) */}
+        {p.hasLogin && p.accountStatus === "pending" && <ApplicationTag app={p.application} uk={uk} />}
         {/* Where they are, and when they arrived. A reviewer triaging a
             pending list sorts on "how long has this been sitting". */}
         {(p.city || p.country) && (
@@ -512,6 +515,7 @@ export default function PartnerCard({
                 {L.changedBy} {p.statusChangedBy ?? "—"} · {p.statusChangedAt.slice(0, 10)}
               </p>
             )}
+            {p.hasLogin && <PartnerApplication app={p.application} uk={uk} />}
             {p.applicationNote && (
               <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--console-border)" }}>
                 <div className="text-[11px] tracking-[0.1em] uppercase mb-1" style={{ color: "var(--console-faint)" }}>

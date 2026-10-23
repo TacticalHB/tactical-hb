@@ -1,5 +1,7 @@
 "use client";
 
+import WholesaleApplication from "@/components/wholesale/WholesaleApplication";
+import { EMPTY_ANSWERS } from "@/lib/wholesale-application-display";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -33,7 +35,9 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
      matching. */
   const w = useTranslations("wholesale");
 
-  const [step, setStep] = useState<"email" | "details" | "done">("email");
+  /* "application" (23 Oct 2026): the account exists, now the online
+     application that replaced the PDF. "done" only once that is sent. */
+  const [step, setStep] = useState<"email" | "details" | "application" | "done">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   /* Confirmed as soon as the code is entered — see lib/signup-flow. */
@@ -58,10 +62,10 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
       ar: "التقديم للحصول على حساب جملة",
     }),
     intro: t(locale, {
-      en: "Trade accounts are approved by hand. Register here, and we'll review your application before your account is opened.",
-      uk: "Оптові акаунти відкриваємо вручну. Зареєструйтеся тут — ми розглянемо заявку, перш ніж відкрити доступ.",
-      ja: "取引アカウントは一件ずつ審査のうえ開設しています。こちらでご登録いただくと、内容を確認したのちアカウントを開設します。",
-      ar: "تُعتمد حسابات الجملة يدويًا. سجّل هنا وسنراجع طلبك قبل فتح حسابك.",
+      en: "Two short steps: create your account, then a five-minute application with one document — your company registration or tax certificate, as a photo or PDF. We approve trade accounts by hand within 2–3 business days.",
+      uk: "Два короткі кроки: створіть акаунт, а потім заповніть заявку на п'ять хвилин з одним документом — витягом про реєстрацію або податковою довідкою, у вигляді фото чи PDF. Оптові акаунти відкриваємо вручну протягом 2–3 робочих днів.",
+      ja: "手続きは2ステップです。アカウントを作成したのち、会社登記書類または納税証明書1点（写真またはPDF）を添えて約5分のお申し込みをお願いします。取引アカウントは2〜3営業日以内に一件ずつ審査のうえ開設します。",
+      ar: "خطوتان قصيرتان: أنشئ حسابك، ثم املأ طلبًا مدته خمس دقائق مع مستند واحد — سجل الشركة أو الشهادة الضريبية، صورةً أو ملف PDF. نعتمد حسابات الجملة يدويًا خلال 2–3 أيام عمل.",
     }),
     emailLabel: t(locale, { en: "Work email address", uk: "Робоча електронна пошта", ja: "会社のメールアドレス", ar: "البريد الإلكتروني للعمل" }),
     sendCode: t(locale, { en: "Send verification code", uk: "Надіслати код", ja: "確認コードを送信", ar: "أرسل رمز التحقق" }),
@@ -88,22 +92,22 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     resend: t(locale, { en: "Send a new code", uk: "Надіслати новий код", ja: "新しいコードを送信", ar: "أرسل رمزًا جديدًا" }),
     submit: t(locale, { en: "Submit application", uk: "Надіслати заявку", ja: "申し込む", ar: "إرسال الطلب" }),
     doneTitle: t(locale, {
-      en: "Application received",
-      uk: "Заявку отримано",
-      ja: "お申し込みを受け付けました",
-      ar: "تم استلام طلبك",
+      en: "Application sent",
+      uk: "Заявку надіслано",
+      ja: "お申し込みを送信しました",
+      ar: "تم إرسال طلبك",
     }),
     doneBody: t(locale, {
-      en: "Our team will review your details and email you once your account is open. Wholesale prices and ordering stay locked until then.",
-      uk: "Ми розглянемо ваші дані й напишемо, щойно акаунт буде відкрито. До того часу оптові ціни та замовлення недоступні.",
-      ja: "内容を確認のうえ、アカウント開設時にメールでご連絡します。それまで卸価格とご注文はご利用いただけません。",
-      ar: "سيراجع فريقنا بياناتك ويراسلك بمجرد فتح حسابك. وتبقى أسعار الجملة والطلب مقفلة حتى ذلك الحين.",
+      en: "We have everything we need. Our team reviews applications within 2–3 business days and will email you as soon as your account is open.",
+      uk: "У нас є все потрібне. Ми розглядаємо заявки протягом 2–3 робочих днів і напишемо вам, щойно акаунт буде відкрито.",
+      ja: "必要な情報はすべて揃いました。2〜3営業日以内に審査し、アカウントを開設し次第メールでお知らせします。",
+      ar: "لدينا كل ما نحتاجه. يراجع فريقنا الطلبات خلال 2–3 أيام عمل وسيراسلك فور فتح حسابك.",
     }),
     doneNext: t(locale, {
-      en: "If you haven't already, email us your completed application form and trade documents — that's usually what we're waiting on.",
-      uk: "Якщо ще не надсилали — надішліть нам заповнену форму заявки та документи. Зазвичай саме на них ми чекаємо.",
-      ja: "申込書と取引書類をまだお送りでない場合は、メールでお送りください。多くの場合それが確認待ちの最後の一点です。",
-      ar: "إن لم تكن قد أرسلت استمارة الطلب والمستندات التجارية بعد، فأرسلها إلينا — فهي عادةً ما ننتظره.",
+      en: "Wholesale prices and ordering unlock the next time you sign in after approval.",
+      uk: "Оптові ціни та замовлення стануть доступними при наступному вході після схвалення.",
+      ja: "承認後、次回ログイン時から卸価格とご注文をご利用いただけます。",
+      ar: "تُفتح أسعار الجملة والطلب في أول تسجيل دخول بعد الاعتماد.",
     }),
     backToWholesale: t(locale, { en: "Back to Wholesale", uk: "Назад до опту", ja: "卸売のページへ戻る", ar: "العودة إلى الجملة" }),
     haveAccount: t(locale, { en: "Already approved?", uk: "Вже маєте доступ?", ja: "すでに承認済みですか？", ar: "معتمَد بالفعل؟" }),
@@ -206,11 +210,27 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
     if (!result.ok) {
       return setError(result.error === "taken" ? L.taken : L.failed);
     }
-    setStep("done");
-    router.refresh();
+    // Straight on to the application — nothing says "received" until it is sent.
+    setStep("application");
+    window.scrollTo({ top: 0 });
   };
 
   const r = passwordRules(password);
+
+  if (step === "application") {
+    return (
+      <WholesaleApplication
+        locale={locale}
+        initial={{ ...EMPTY_ANSWERS, confirmedName: null, confirmedAt: null, completedAt: null, documents: [] }}
+        suggestedName={contactName.trim() || null}
+        onSent={() => {
+          setStep("done");
+          window.scrollTo({ top: 0 });
+          router.refresh();
+        }}
+      />
+    );
+  }
 
   if (step === "done") {
     return (

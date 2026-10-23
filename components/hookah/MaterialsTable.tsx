@@ -58,7 +58,7 @@ const ROWS: Row[] = [
 ];
 
 const SIZE: { label: Record<"uk" | "en" | "ja" | "ar", string>; value: Record<"uk" | "en" | "ja" | "ar", string> }[] = [
-  { label: { en: "Stem height", uk: "Висота шахти", ja: "ステムの高さ", ar: "ارتفاع الجسم" }, value: { en: "430 mm", uk: "430 мм", ja: "430 mm", ar: "430 mm" } },
+  { label: { en: "Stem height", uk: "Висота шахти", ja: "ステムの高さ", ar: "ارتفاع الجسم" }, value: { en: "390 mm", uk: "390 мм", ja: "390 mm", ar: "390 mm" } },
   { label: { en: "Weight in case", uk: "Вага в кейсі", ja: "ケース込み重量", ar: "الوزن مع الحقيبة" }, value: { en: "2.5 kg", uk: "2,5 кг", ja: "2.5 kg", ar: "2.5 kg" } },
   { label: { en: "Case dimensions", uk: "Розміри кейсу", ja: "ケースのサイズ", ar: "أبعاد الحقيبة" }, value: { en: "300 × 300 × 150 mm", uk: "300 × 300 × 150 мм", ja: "300 × 300 × 150 mm", ar: "300 × 300 × 150 mm" } },
 ];

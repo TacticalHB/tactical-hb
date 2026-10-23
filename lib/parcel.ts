@@ -59,3 +59,40 @@ export function parcelFor(lines: ParcelLine[]): Parcel {
   // Round to grams — Nova Poshta accepts up to three decimals of a kilo.
   return { weightKg: Math.round(weightKg * 1000) / 1000, dims };
 }
+
+/* ---------------------------------------------------------------------------
+   EXPORT QUOTING MARGIN (Mario, 23 Oct 2026).
+
+   Abroad, the shop was paying the difference out of pocket: Ukrposhta's
+   counter boxes come out bigger than our catalogue dimensions, and its scales
+   read heavier. So every EXPORT delivery quote is asked for a parcel 13%
+   heavier and 13% larger OVERALL than the catalogue says — 13% more volume,
+   which is about 4.2% on each side (Mario: "13% overall, not each side").
+
+   QUOTING ONLY. The customer sees one delivery figure, as always; nothing
+   else uses this — not the domestic Nova Poshta quote, not the customs
+   declaration, not a shipment booking (lib/order-ukrposhta books the real
+   parcel). The site's delivery copy says only that the cost depends on
+   destination, weight and service and is calculated at checkout, which stays
+   true.
+
+   ONE FUNCTION, TWO CALLERS: the checkout's quote (/api/shipping/quote) and
+   the invoice's re-quote (create-invoice) both go through here, so the price
+   shown and the price charged cannot drift apart.
+
+--------------------------------------------------------------------------- */
+export const EXPORT_PARCEL_MARGIN = 1.13;
+/** Per side, so the box's VOLUME grows by the margin: ∛1.13 ≈ 1.0416. */
+const EXPORT_SIDE_FACTOR = Math.cbrt(EXPORT_PARCEL_MARGIN);
+
+export function forExportQuote(p: Parcel): Parcel {
+  const m = EXPORT_PARCEL_MARGIN;
+  const s = EXPORT_SIDE_FACTOR;
+  // Rounded UP (to the gram and the millimetre): the margin exists so the shop
+  // is never short, and 150 × 1.13 is 169.4999… in floating point.
+  const up = (x: number) => Math.ceil(x - 1e-9);
+  return {
+    weightKg: up(p.weightKg * m * 1000) / 1000,
+    dims: { l: up(p.dims.l * s), w: up(p.dims.w * s), h: up(p.dims.h * s) },
+  };
+}

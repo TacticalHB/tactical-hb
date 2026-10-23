@@ -7,7 +7,7 @@ import {
   UkrposhtaNotConfigured,
 } from "@/lib/ukrposhta";
 import { priceCart } from "@/lib/pricing";
-import { parcelFor } from "@/lib/parcel";
+import { forExportQuote, parcelFor } from "@/lib/parcel";
 import { carriesInternational, type ShippingCarrier } from "@/lib/shipping-carriers";
 import {
   countryAllowedOn,
@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
     const { lines, subtotal } = priceCart(b.lines);
     if (subtotal.uah <= 0) return NextResponse.json({ ok: false, error: "empty_cart" }, { status: 400 });
 
-    const parcel = parcelFor(lines);
+    /* +13% weight and size on every export quote (lib/parcel forExportQuote). */
+    const parcel = forExportQuote(parcelFor(lines));
     const city = String(b.city ?? "").trim() || undefined;
 
     /* BOTH CARRIERS, AT THE SAME TIME. Sequentially this step would cost the

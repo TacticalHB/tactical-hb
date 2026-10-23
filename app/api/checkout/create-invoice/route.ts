@@ -14,7 +14,7 @@ import { getDeliveryPrice, isPostomat } from "@/lib/nova-poshta";
 import { quoteInternational as quoteNovaPost } from "@/lib/novapost";
 import { quoteInternational as quoteUkrposhta } from "@/lib/ukrposhta";
 import { carriersFor, isShippingCarrier, type ShippingCarrier } from "@/lib/shipping-carriers";
-import { parcelFor } from "@/lib/parcel";
+import { forExportQuote, parcelFor } from "@/lib/parcel";
 import { screen } from "@/lib/anti-spam";
 import { describeLine } from "@/lib/cart-display";
 import { Resend } from "resend";
@@ -333,7 +333,9 @@ export async function POST(request: NextRequest) {
   if (shippingMethod === "international") {
     intlCountry = String(shipReq.countryCode ?? "").trim().toUpperCase().slice(0, 2) || null;
     if (intlCountry) {
-      const parcel = parcelFor(priced.lines);
+      /* The same +13% as the checkout's quote (lib/parcel forExportQuote), so
+         the figure charged is the figure shown. */
+      const parcel = forExportQuote(parcelFor(priced.lines));
       const country = intlCountry;
 
       /* THE CARRIER COMES FROM THE BROWSER, THE PRICE NEVER DOES. Which of the

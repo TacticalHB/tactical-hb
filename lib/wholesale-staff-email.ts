@@ -19,59 +19,6 @@ function adminUrl(siteUrl: string, path: string): string {
   return `${siteUrl.replace(/\/$/, "")}${path}`;
 }
 
-/* ---- An enquiry through the public form ----------------------------------- */
-
-export type EnquiryFields = {
-  name: string;
-  company: string;
-  email: string;
-  phone?: string;
-  country?: string;
-  city?: string;
-  businessType?: string;
-  message: string;
-  /** Which storefront it came from — tells sales which language to reply in. */
-  locale: string;
-};
-
-export function buildWholesaleEnquiryStaffMail(
-  f: EnquiryFields,
-  siteUrl: string
-): { subject: string; html: string; text: string } {
-  const rows: [string, string | null | undefined][] = [
-    ["Name", f.name],
-    ["Company", f.company],
-    ["Email", f.email],
-    ["Telephone", f.phone],
-    ["Business type", f.businessType],
-    ["Country", f.country],
-    ["City", f.city],
-    ["Language", f.locale === "uk" ? "Ukrainian" : "English"],
-  ];
-
-  const html = buildStaffLetter({
-    title: "New wholesale enquiry",
-    lead: `${f.company} got in touch through the website.`,
-    rows,
-    blocks: [staffQuote("Their message", f.message)],
-    cta: { label: "Open partners", url: adminUrl(siteUrl, "/en/admin/partners") },
-    status:
-      "The application form has been sent to them automatically. No account exists yet — they have not registered.",
-  });
-
-  const text = [
-    `New wholesale enquiry from ${f.company}.`,
-    ...rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
-    "",
-    f.message,
-    "",
-    adminUrl(siteUrl, "/en/admin/partners"),
-    "The application form has been sent to them automatically. No account exists yet.",
-  ].join("\n");
-
-  return { subject: `Wholesale enquiry — ${f.company}`, html, text };
-}
-
 /* ---- A self-registration awaiting approval -------------------------------- */
 
 export type ApplicationFields = {

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { partnerForUser } from "@/lib/wholesale-portal";
-import WholesaleForm from "@/components/WholesaleForm";
 import Reveal from "@/components/Reveal";
 import { SALES_EMAIL } from "@/lib/contact-info";
 
@@ -128,9 +127,9 @@ function WholesaleContent({ locale }: { locale: string }) {
       </section>
 
       {/* Partner accounts — the way IN for people already approved, and the
-          way to apply for everyone else. Placed above the enquiry form on
-          purpose: a returning partner should not have to scroll past a
-          "tell us about your business" form to find the sign-in. */}
+          way to apply for everyone else. Registering is the ONLY way to
+          apply since 23 Oct 2026: the enquiry form that used to close this
+          page pulled people away from it and led to mix-ups (Mario). */}
       <section className="page-container py-16 md:py-20">
         <Reveal>
           <div
@@ -163,15 +162,21 @@ function WholesaleContent({ locale }: { locale: string }) {
         </Reveal>
       </section>
 
-      {/* Closing + enquiry form */}
-      <section className="page-container py-20 md:py-24 grid md:grid-cols-2 gap-16 items-start">
+      {/* Closing: one more way in, and a person to write to. */}
+      <section className="page-container pb-24 md:pb-28">
         <Reveal>
-          <div className="md:sticky md:top-32">
+          <div className="max-w-2xl">
             <h2 className="font-display text-4xl md:text-5xl mb-6" style={{ color: "var(--text)" }}>{t("form_heading")}</h2>
-            <p className="text-base leading-relaxed max-w-md" style={{ color: "var(--text-muted)" }}>{t("closing")}</p>
+            <p className="text-base leading-relaxed mb-8" style={{ color: "var(--text-muted)" }}>{t("closing")}</p>
+            <Link
+              href={`/${locale}/wholesale/register`}
+              className="inline-flex h-12 px-8 rounded-full items-center justify-center text-[15px] font-medium transition-opacity hover:opacity-85"
+              style={{ background: "var(--accent)", color: "#111114" }}
+            >
+              {t("account_register")}
+            </Link>
 
-            {/* Direct line to sales — the same address the form posts to. */}
-            <div className="mt-10 pt-8 max-w-md" style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="mt-12 pt-8" style={{ borderTop: "1px solid var(--border)" }}>
               <p className="text-xs tracking-[0.25em] uppercase mb-3" style={{ color: "var(--text-faint)" }}>
                 {t("sales_label")}
               </p>
@@ -187,9 +192,6 @@ function WholesaleContent({ locale }: { locale: string }) {
               </p>
             </div>
           </div>
-        </Reveal>
-        <Reveal delay={140}>
-          <WholesaleForm />
         </Reveal>
       </section>
     </div>

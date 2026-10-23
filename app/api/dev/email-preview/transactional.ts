@@ -2,11 +2,10 @@ import "server-only";
 import { buildOrderEmail } from "@/lib/order-email";
 import { buildShippedEmail } from "@/lib/shipping-email";
 import { buildResetEmail } from "@/lib/password-reset";
-import { buildWholesaleReply, buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
+import { buildWholesaleRegistrationReply } from "@/lib/wholesale-email";
 import { buildDecisionMail } from "@/lib/wholesale-decision-email";
 import {
   buildWholesaleApplicationStaffMail,
-  buildWholesaleEnquiryStaffMail,
 } from "@/lib/wholesale-staff-email";
 import { buildPartnerAckMail, buildStaffRequestMail } from "@/lib/wholesale-request-email";
 import type { WholesaleRequest } from "@/lib/wholesale-display";
@@ -135,13 +134,11 @@ export type TransactionalKind =
   | "shipping"
   | "shipping-ukrposhta"
   | "password-reset"
-  | "wholesale"
   | "wholesale-register"
   | "wholesale-approved"
   | "wholesale-declined"
   | "wholesale-request"
   | "wholesale-staff"
-  | "wholesale-staff-enquiry"
   | "wholesale-staff-application"
   | "followup";
 
@@ -151,13 +148,11 @@ export const TRANSACTIONAL_KINDS: TransactionalKind[] = [
   "shipping",
   "shipping-ukrposhta",
   "password-reset",
-  "wholesale",
   "wholesale-register",
   "wholesale-approved",
   "wholesale-declined",
   "wholesale-request",
   "wholesale-staff",
-  "wholesale-staff-enquiry",
   "wholesale-staff-application",
   "followup",
 ];
@@ -283,11 +278,6 @@ export function renderTransactional(
         url: "https://tactical-hb.com/auth/v1/verify?token=PREVIEW-NOT-A-REAL-LINK&type=recovery",
       });
 
-    case "wholesale": {
-      const r = buildWholesaleReply(locale, SITE);
-      return { subject: r.subject, html: r.html, text: r.text };
-    }
-
     case "wholesale-register": {
       const r = buildWholesaleRegistrationReply(locale, SITE);
       return { subject: r.subject, html: r.html, text: r.text };
@@ -308,23 +298,6 @@ export function renderTransactional(
        asked for — that is the point of it, not an oversight. */
     case "wholesale-staff":
       return buildStaffRequestMail(sampleRequest(locale));
-
-    case "wholesale-staff-enquiry":
-      return buildWholesaleEnquiryStaffMail(
-        {
-          name: "Marek Gazo",
-          company: "Arc Ltd",
-          email: "partner@example.com",
-          phone: "+380 66 707 33 07",
-          country: "United Kingdom",
-          city: "London",
-          businessType: "Distribution",
-          message:
-            "We stock premium shisha across 40 venues in the UK and would like to discuss trade terms and lead times.",
-          locale,
-        },
-        SITE
-      );
 
     case "wholesale-staff-application":
       return buildWholesaleApplicationStaffMail(

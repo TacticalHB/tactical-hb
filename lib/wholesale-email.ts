@@ -3,14 +3,16 @@ import { esc } from "@/lib/email";
 import { ACCENT_FILL, ACCENT_TEXT, CARD, INK, MUTED, FONT, emailShell } from "@/lib/email-theme";
 
 /* ---------------------------------------------------------------------------
-   The wholesale letters an applicant gets before they are approved: the reply
-   to an enquiry, the letter a registration gets, and the one reminder.
+   The wholesale letters an applicant gets before they are approved: the letter
+   a registration gets, and the one reminder. (The reply to the /wholesale
+   enquiry form went with the form on 23 Oct 2026 — registering is the only
+   way in now.)
 
    THE PDF IS RETIRED (23 Oct 2026). These letters used to attach a two-page
    application form to be filled in and emailed back — and applicants kept
    missing it, then waited to be approved without ever sending it. The same
    questions are now asked on the site straight after registering, with the
-   trade documents uploaded there (lib/wholesale-application), so every letter
+   trade documents uploaded there (lib/wholesale-application), so each letter
    here carries ONE button to that step instead of an attachment.
 
    Same shell, palette and wordmark as the order confirmation and the shipping
@@ -74,45 +76,6 @@ function letter(t: Copy, locale: string, ctaUrl: string): WholesaleReply {
   const html = emailShell({ lang: locale, title: esc(t.subject), inner });
   const text = [t.greeting, "", ...t.paragraphs.flatMap((p) => [p, ""]), `${t.cta}: ${ctaUrl}`, "", t.signOff, t.signature, "", "TACTICAL HB"].join("\n");
   return { subject: t.subject, html, text, attachments: [] };
-}
-
-/* ---- The enquiry reply (the /wholesale contact form) ----------------------- */
-
-const ENQUIRY: Record<"uk" | "en", Copy> = {
-  en: {
-    subject: "Wholesale Partnership Enquiry – Next Steps | Tactical HB",
-    headline: "Wholesale partnership — next steps",
-    greeting: "Hi,",
-    paragraphs: [
-      "Thank you for your interest in becoming a wholesale partner of Tactical HB.",
-      "We have received your enquiry. To proceed, create your trade account on our site and complete the short application there: a few business details and a photo or PDF of your company registration or tax document. It takes about five minutes.",
-      "Once your application is complete, our team reviews it within 2–3 business days and contacts you to discuss partnership terms.",
-      "If you have any questions, simply reply to this email.",
-    ],
-    cta: "Apply for a trade account",
-    signOff: "Best regards,",
-    signature: "Tactical HB Team.",
-  },
-  uk: {
-    subject: "Заявка на оптове партнерство – Наступні кроки | Tactical HB",
-    headline: "Оптове партнерство — наступні кроки",
-    greeting: "Вітаємо,",
-    paragraphs: [
-      "Дякуємо за інтерес до оптового партнерства з Tactical HB.",
-      "Ми отримали ваше звернення. Щоб продовжити, створіть оптовий акаунт на нашому сайті та заповніть коротку заявку: кілька даних про ваш бізнес і фото або PDF документа про реєстрацію чи податкового документа. Це займе близько п'яти хвилин.",
-      "Щойно заявка буде заповнена, наша команда розгляне її протягом 2–3 робочих днів і зв'яжеться з вами щодо умов співпраці.",
-      "Якщо у вас є запитання, просто дайте відповідь на цей лист.",
-    ],
-    cta: "Подати заявку на оптовий акаунт",
-    signOff: "З повагою,",
-    signature: "Команда Tactical HB.",
-  },
-};
-
-/** The auto-reply to a /wholesale enquiry. `siteUrl` must be absolute. */
-export function buildWholesaleReply(locale: string, siteUrl: string): WholesaleReply {
-  const lang = locale === "uk" ? "uk" : "en";
-  return letter(ENQUIRY[lang], lang, `${siteUrl.replace(/\/$/, "")}/${lang}/wholesale/register`);
 }
 
 /* ---- The registration letter ----------------------------------------------- */

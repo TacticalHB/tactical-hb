@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { EMPTY_ANSWERS, missingFor } from "../lib/wholesale-application-display";
-import { buildApplicationReminder, buildWholesaleRegistrationReply, buildWholesaleReply } from "../lib/wholesale-email";
+import { buildApplicationReminder, buildWholesaleRegistrationReply } from "../lib/wholesale-email";
 
 /* The online wholesale application (23 Oct 2026), which replaced the PDF. */
 
@@ -22,10 +22,6 @@ test("the letters carry a button to the online application, never the old PDF", 
   assert.equal(reg.attachments.length, 0);
   assert.match(reg.html, /https:\/\/tactical-hb\.com\/uk\/wholesale\/portal/);
   assert.doesNotMatch(reg.html + reg.text, /\.pdf/i);
-
-  const enquiry = buildWholesaleReply("en", site);
-  assert.equal(enquiry.attachments.length, 0);
-  assert.match(enquiry.html, /\/en\/wholesale\/register/);
 
   const reminder = buildApplicationReminder("ja", site);
   assert.match(reminder.html, /\/ja\/wholesale\/portal/);

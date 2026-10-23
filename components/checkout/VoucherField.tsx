@@ -62,6 +62,13 @@ export default function VoucherField({
           ja: `このバウチャーは ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))} 以上のご注文が対象です。`,
           ar: `هذه القسيمة صالحة للطلبات من ${formatMoney(money(r.minOrderEur ?? 0), currencyForLocale(locale))} فأكثر.`,
         });
+      case "sale":
+        return t(locale, {
+          uk: "Ціна Halloween вигідніша за цей код — його збережено для наступного замовлення.",
+          en: "The Halloween price already beats this code — it stays saved for your next order.",
+          ja: "ハロウィン価格の方がこのコードよりお得です。コードは次回のご注文まで保存されます。",
+          ar: "سعر الهالوين أفضل من هذا الرمز — يبقى محفوظًا لطلبك القادم.",
+        });
       default:
         return t(locale, { uk: "Ваучер не знайдено.", en: "Voucher not found.", ja: "バウチャーが見つかりません。", ar: "لم يُعثر على القسيمة." });
     }

@@ -11,6 +11,7 @@ import CartInfoSections from "./CartInfoSections";
 import NewsletterPromo from "@/components/NewsletterPromo";
 import Price from "@/components/Price";
 import LineTotal from "@/components/LineTotal";
+import SaleWas from "@/components/halloween/SaleWas";
 import { WasPrice, SetupNote } from "@/components/SetupSaving";
 import { subtractMoney } from "@/lib/currency";
 import { COLONEL_DISCOUNT_RATE, permanentDiscount } from "@/lib/loyalty/ranks";
@@ -35,11 +36,13 @@ export default function CartPageClient({
   /** Colonel's permanent share off the products, 0 for every other rank. */
   rankDiscountRate?: number;
 }) {
-  const { lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count, hydrated } = useCart();
+  const { lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count, hydrated, discountable } = useCart();
   /* A voucher is not applied in the basket — it is entered at checkout — so
      there is nothing to weigh the rank perk against here and it always shows.
      Checkout is where the two are compared and only one survives. */
-  const rankPerk = permanentDiscount(rankDiscountRate, subtotal);
+  /* Off `discountable`: during the Halloween sale (31 Oct 2026) the perk
+     never comes off what is already 20% off. Outside it, the subtotal. */
+  const rankPerk = permanentDiscount(rankDiscountRate, discountable);
   const goods = subtractMoney(subtotal, rankPerk);
   /* Free delivery inside Ukraine from ₴5 000 on /uk (lib/free-shipping). The
      basket shows it so the customer knows before checkout; create-invoice is
@@ -177,8 +180,9 @@ export default function CartPageClient({
                     >
                       {d.name}
                     </Link>
-                    <span className="text-[17px] shrink-0" style={{ color: "var(--text)" }}>
+                    <span className="text-[17px] shrink-0 flex flex-col items-end" style={{ color: "var(--text)" }}>
                       <LineTotal unit={linePrice(l)} qty={l.qty} locale={locale} />
+                      <SaleWas line={l} locale={locale} />
                     </span>
                   </div>
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { localeDir } from "@/i18n/routing";
 import { Bebas_Neue, Inter } from "next/font/google";
+import { halloweenActive } from "@/lib/halloween";
 import { getLocale } from "next-intl/server";
 import { SITE_NAME, SITE_URL, siteMetadata } from "@/lib/seo";
 import "./globals.css";
@@ -88,6 +89,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
       dir={localeDir(locale)}
       className={`${inter.variable} ${bebasNeue.variable} h-full`}
+      /* Room for the Halloween strip under the menu, 31 Oct 2026 only
+         (components/halloween/HalloweenStrip). Delete with lib/halloween. */
+      style={{ ["--sale-strip" as string]: halloweenActive() ? "32px" : "0px" }}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

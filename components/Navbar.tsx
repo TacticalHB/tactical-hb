@@ -11,6 +11,7 @@ import AddedToBagPanel from "./AddedToBagPanel";
 import SearchOverlay from "./SearchOverlay";
 import AccountMenu from "./AccountMenu";
 import LocaleSwitch from "@/components/LocaleSwitch";
+import HalloweenStrip from "@/components/halloween/HalloweenStrip";
 
 function SearchIcon() {
   return (
@@ -187,6 +188,8 @@ export default function Navbar({ locale }: { locale: string }) {
             The bottom padding carries the safe-area inset, so on a notched
             device in landscape the final row does not sit under the home
             indicator. */}
+        {/* Halloween countdown, 31 Oct 2026 only — renders nothing otherwise. */}
+        <HalloweenStrip locale={locale} />
         {menuOpen && (
           <div
             className="md:hidden border-t px-6 pt-2 flex flex-col overflow-y-auto overscroll-contain"

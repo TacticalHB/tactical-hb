@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
 import { subtractMoney, money, eurToUahFixed } from "@/lib/currency";
-import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
+import { BEFORE_HALLOWEEN, settleHalloween, type BroughtCode } from "@/lib/halloween";
 import { rankForUser } from "@/lib/loyalty/rank-server";
 import { isWholesaleUser } from "@/lib/wholesale-portal";
 import { freeShippingApplies } from "@/lib/free-shipping";
@@ -100,14 +100,21 @@ export async function POST(request: NextRequest) {
      Everything below reads priced.subtotal, so the voucher's minimum-order
      test is against what is actually being charged rather than a figure
      nobody pays. */
-  const priced = priceCart(b.lines, locale);
+  let priced = priceCart(b.lines, locale);
   if (priced.lines.length === 0) {
     return NextResponse.json({ ok: false, error: "empty_cart" }, { status: 400 });
   }
+  /* HALLOWEEN (31 Oct 2026): the same bag at regular prices, for the
+     whichever-is-bigger rule below. Outside the sale it equals `priced`.
+     Delete with lib/halloween. */
+  const regularPriced = priceCart(b.lines, locale, BEFORE_HALLOWEEN);
 
   // ---- Re-validate the voucher --------------------------------------------
-  let discount = money(0, 0);
-  let voucherCode: string | null = null;
+  /* The code is VALIDATED here and PRICED below, by settleHalloween — so the
+     sale, the code and the rank perk are weighed against each other in one
+     place, the same function the checkout screen uses. */
+  let brought: BroughtCode = null;
+  let broughtCode: string | null = null;
   let userId: string | null = null;
 
   const supabase = await createClient();
@@ -127,8 +134,8 @@ export async function POST(request: NextRequest) {
        have been spent since it was applied; spent for real only on payment. */
     const gift = await findGiftCode(requestedCode);
     if (gift && !gift.usedAt) {
-      discount = permanentDiscount(gift.percent / 100, priced.subtotal);
-      voucherCode = gift.code;
+      brought = { kind: "percent", percent: gift.percent };
+      broughtCode = gift.code;
     } else {
       console.warn("[invoice] gift code missing or already used, ignored:", requestedCode);
     }
@@ -146,16 +153,18 @@ export async function POST(request: NextRequest) {
         .eq("code", requestedCode)
         .maybeSingle();
 
+      /* The minimum order is checked inside settleHalloween, against whichever
+         pricing it is weighing — the subtotal, or during the sale the part
+         not on sale. Below the minimum the code simply comes to nothing. */
       const usable =
         v &&
         !v.used_at &&
         v.status === "active" &&
-        new Date(String(v.expires_at)).getTime() >= Date.now() &&
-        priced.subtotal.eur >= (Number(v.min_order_eur) || 0);
+        new Date(String(v.expires_at)).getTime() >= Date.now();
 
       if (usable) {
-        discount = money(Number(v.amount_eur));
-        voucherCode = String(v.code);
+        brought = { kind: "amount", amountEur: Number(v.amount_eur), minOrderEur: Number(v.min_order_eur) || 0 };
+        broughtCode = String(v.code);
       } else {
         // Not an error: the basket may have changed since it was applied. The
         // customer pays full price rather than being blocked from paying.
@@ -164,36 +173,47 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  /* ---- The rank discount ---------------------------------------------------
+  /* ---- The rank discount, and the choice -----------------------------------
      Read here rather than taken from the request: the browser is never asked
      what rank it thinks it is, for the same reason it is never asked what the
      basket costs. Lifetime spend comes out of the orders table under the
      signed-in user's own id, and the rank falls out of that.
 
-     It does NOT stack with a voucher. chooseDiscount picks whichever is worth
-     more and leaves the other alone, so a voucher that loses is not spent —
-     voucherCode is cleared with it, or the order would record a code it never
-     charged for. */
-  let discountSource: "voucher" | "rank" | "none" = voucherCode ? "voucher" : "none";
+     NOTHING STACKS. A voucher and the rank perk never sum (chooseDiscount
+     picks the bigger and leaves the other alone), and during the Halloween
+     sale neither stacks with the sale either — settleHalloween prices the bag
+     both ways and charges the cheaper (Mario: "whichever is bigger"). A code
+     that loses is not recorded, so it is not spent. */
+  let rankRate = 0;
+  let rankNote = "";
   if (user && supabase && !wholesale) {
     const { rank, lifetime } = await rankForUser(supabase, user.id);
-    const perk = permanentDiscount(rank.discountRate, priced.subtotal);
+    rankRate = rank.discountRate;
+    rankNote = `rank ${rank.key}, lifetime €${lifetime.eur} / ₴${lifetime.uah}`;
+  }
 
-    const chosen = chooseDiscount(voucherCode ? discount : null, perk);
-    discount = chosen.amount;
-    discountSource = chosen.source;
-    if (chosen.source !== "voucher") voucherCode = null;
+  const settled = settleHalloween({
+    sale: priced,
+    regular: regularPriced,
+    code: brought,
+    rankRate,
+    locale,
+  });
+  if (settled.regular) {
+    console.info("[invoice] the code beats the Halloween sale — charging regular prices");
+    priced = regularPriced;
+  }
+  const discount = settled.amount;
+  const discountSource = settled.source;
+  const voucherCode = settled.source === "voucher" ? broughtCode : null;
 
-    /* No new column for the source: the payments row already distinguishes the
-       two without one. A discount_eur above zero with voucher_code NULL is a
-       rank discount and nothing else can produce that combination. Logged as
-       well, so support can see which perk won without reading the arithmetic
-       back out of two numbers. */
-    if (discountSource !== "none") {
-      console.info(
-        `[invoice] ${discountSource} discount €${discount.eur} / ₴${discount.uah} (rank ${rank.key}, lifetime €${lifetime.eur} / ₴${lifetime.uah})`
-      );
-    }
+  /* No new column for the source: the payments row already distinguishes the
+     two without one. A discount_eur above zero with voucher_code NULL is a
+     rank discount and nothing else can produce that combination. Logged as
+     well, so support can see which perk won without reading the arithmetic
+     back out of two numbers. */
+  if (discountSource !== "none") {
+    console.info(`[invoice] ${discountSource} discount €${discount.eur} / ₴${discount.uah} (${rankNote || "guest"})`);
   }
 
   const goods = subtractMoney(priced.subtotal, discount);

@@ -4,6 +4,7 @@ import { timerUpcharge, timerWeightG } from "@/lib/windcover-options";
 import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
 import { bundleFor, type Bundle, type BundleItem } from "@/lib/bundle";
 import type { Dims } from "@/lib/parcel";
+import { onHalloweenSale, halloweenMoney } from "@/lib/halloween";
 
 /* ---------------------------------------------------------------------------
    Authoritative cart pricing, computed on the server from the catalogue.
@@ -59,13 +60,19 @@ export type PricedCart = {
   subtotalFull: Money;
   /** Null unless a bowl, a device and a cover are all present. */
   bundle: Bundle | null;
+  /**
+   * What a voucher, a gift code or the rank perk may come off. The subtotal,
+   * except during the Halloween sale (31 Oct 2026), when it is only the lines
+   * NOT on sale — no double discounts. Delete with lib/halloween.
+   */
+  discountable: Money;
 };
 
 /** Quantities a real order can contain. Anything else is a mistake or an attack. */
 const MAX_QTY = 99;
 const MAX_LINES = 50;
 
-export function priceCart(input: unknown, locale = "en"): PricedCart {
+export function priceCart(input: unknown, locale = "en", now: number = Date.now()): PricedCart {
   const uk = locale === "uk";
   const raw: PricedLineInput[] = Array.isArray(input) ? (input as PricedLineInput[]).slice(0, MAX_LINES) : [];
 
@@ -74,6 +81,8 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
      is not on PricedLine because nothing else needs it and the persisted order
      line should not grow a field it never reads. */
   const bundleItems: BundleItem[] = [];
+  let notOnSale = money(0, 0);
+  let anyOnSale = false;
   for (const l of raw) {
     const product = products.find((p) => p.slug === l?.slug);
     // Unknown slug: drop the line rather than price it at zero.
@@ -125,6 +134,13 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
       weightG += timerWeightG(windcover);
     }
 
+    /* HALLOWEEN (31 Oct 2026 only): 20% off the whole unit — device, finish
+       and add-ons alike — on everything but the hookah. Here, so Monobank, the
+       receipt and the stored order line all carry the sale price. */
+    const onSale = onHalloweenSale(product.category, now);
+    if (onSale) { unit = halloweenMoney(unit); anyOnSale = true; }
+    if (!onSale) notOnSale = addMoney(notOnSale, scaleMoney(unit, safeQty));
+
     lines.push({
       slug: product.slug,
       qty: safeQty,
@@ -149,5 +165,9 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
   const bundle = bundleFor(bundleItems);
   const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
 
-  return { lines, subtotal, subtotalFull, bundle };
+  /* The bundle needs a bowl, a device and a cover — all on sale during the
+     window — so the saving never touches the not-on-sale part. */
+  const discountable = anyOnSale ? notOnSale : subtotal;
+
+  return { lines, subtotal, subtotalFull, bundle, discountable };
 }

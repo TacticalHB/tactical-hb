@@ -6,7 +6,7 @@ import { MATERIAL_PRICE } from "@/lib/hmd-options";
 import { TIMER_PRICE } from "@/lib/windcover-options";
 import { t } from "@/lib/i18n-text";
 import ProductThumb from "@/components/ProductThumb";
-import Price from "@/components/Price";
+import SalePrice from "@/components/halloween/SalePrice";
 import type { Money } from "@/lib/currency";
 
 /* ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ export default function AddonUpsell({
             <span aria-hidden="true" style={{ color: "var(--accent-ink)" }}>+</span>
             {nameOf(k)}
             <span style={{ color: "var(--text-muted)" }}>
-              · <Price money={OFFER[k].price} locale={locale} />
+              · <SalePrice regular={OFFER[k].price} category="addon" locale={locale} />
               {line.qty > 1 && ` ${L.each}`}
             </span>
           </button>
@@ -122,7 +122,7 @@ export default function AddonUpsell({
             <div className="flex-1 min-w-0">
               <p className="text-[13.5px] font-medium leading-snug" style={{ color: "var(--text)" }}>{nameOf(k)}</p>
               <p className="text-[12.5px] tabular-nums" style={{ color: "var(--text-muted)" }}>
-                +<Price money={OFFER[k].price} locale={locale} />
+                +<SalePrice regular={OFFER[k].price} category="addon" locale={locale} />
               </p>
             </div>
             <button

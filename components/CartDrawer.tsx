@@ -9,6 +9,7 @@ import { describeLine } from "@/lib/cart-display";
 import SlideOver, { CloseButton } from "./SlideOver";
 import Price from "./Price";
 import LineTotal from "@/components/LineTotal";
+import SaleWas from "@/components/halloween/SaleWas";
 import { WasPrice, SetupNote } from "./SetupSaving";
 import CartSuggestion from "./CartSuggestion";
 
@@ -103,8 +104,9 @@ export default function CartDrawer({ locale }: { locale: string }) {
                       <span className="text-[14px] font-medium leading-snug" style={{ color: "var(--text)" }}>
                         {d.name}
                       </span>
-                      <span className="text-[14px] shrink-0" style={{ color: "var(--text)" }}>
+                      <span className="text-[14px] shrink-0 flex flex-col items-end" style={{ color: "var(--text)" }}>
                         <LineTotal unit={linePrice(l)} qty={l.qty} locale={locale} />
+                        <SaleWas line={l} locale={locale} className="text-[12px]" />
                       </span>
                     </div>
                     <div className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-muted)" }}>

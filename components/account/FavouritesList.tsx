@@ -4,7 +4,7 @@ import Link from "next/link";
 import { t } from "@/lib/i18n-text";
 import ProductThumb from "@/components/ProductThumb";
 import { products } from "@/lib/products";
-import Price from "@/components/Price";
+import SalePrice from "@/components/halloween/SalePrice";
 import { money } from "@/lib/currency";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useCart } from "@/components/CartContext";
@@ -123,7 +123,7 @@ export default function FavouritesList({ locale }: { locale: string }) {
                 <Link href={`/${locale}/products/${p.slug}`} className="block text-[15px] font-medium hover:opacity-70" style={{ color: "#111" }}>
                   {uk ? p.nameUk : p.nameEn}
                 </Link>
-                <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></div>
+                <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}><SalePrice regular={money(p.price, p.priceUah)} category={p.category} locale={locale} /></div>
                 <div className="flex items-center gap-3 mt-3">
                   <button
                     onClick={(e) => {

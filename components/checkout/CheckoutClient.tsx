@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
 import { useAuth } from "@/components/AuthContext";
-import { money, moneyFromUah, subtractMoney } from "@/lib/currency";
-import { chooseDiscount, permanentDiscount } from "@/lib/loyalty/ranks";
+import { moneyFromUah, subtractMoney } from "@/lib/currency";
+import { settleHalloween } from "@/lib/halloween";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import NovaPoshtaPicker, { type NovaPoshtaSelection } from "./NovaPoshtaPicker";
 import { countryOptions, countryName, isBlockedManualCountry, OTHER } from "@/lib/countries";
@@ -107,7 +107,7 @@ export default function CheckoutClient({
 }) {
   const uk = locale === "uk";
   const router = useRouter();
-  const { lines, subtotal, clearCart, hydrated } = useCart();
+  const { lines, subtotal: saleSubtotal, subtotalRegular, discountable, clearCart, hydrated } = useCart();
   const { user, profile } = useAuth();
 
   const [step, setStep] = useState<Step>("identification");
@@ -181,17 +181,26 @@ export default function CheckoutClient({
      through the SAME chooseDiscount the invoice route uses — so the figure on
      screen is arrived at by the same rule that will charge the card, rather
      than by a second implementation that could drift from it. */
-  const perk = permanentDiscount(rankDiscountRate, subtotal);
-  /* A gift code is a percentage of the goods (before delivery), worked out with
-     the same helper the invoice uses; a loyalty voucher is its euro amount. */
-  const voucherMoney = voucher
-    ? voucher.percent
-      ? permanentDiscount(voucher.percent / 100, subtotal)
-      : money(voucher.amountEur)
-    : null;
-  const chosen = chooseDiscount(voucherMoney, perk);
-  const discount = chosen.amount;
-  const discountSource = chosen.source;
+  /* settleHalloween is the invoice's own rule: outside the Halloween sale it
+     is chooseDiscount on the subtotal; on 31 Oct 2026 it also weighs the sale
+     against the code and the rank perk and keeps whichever is bigger (Mario).
+     A gift code is a percentage of the goods; a loyalty voucher its euro
+     amount (its minimum order was checked when it was applied). */
+  const settled = settleHalloween({
+    sale: { subtotal: saleSubtotal, discountable },
+    regular: { subtotal: subtotalRegular, discountable: subtotalRegular },
+    code: voucher
+      ? voucher.percent
+        ? { kind: "percent", percent: voucher.percent }
+        : { kind: "amount", amountEur: voucher.amountEur, minOrderEur: 0 }
+      : null,
+    rankRate: rankDiscountRate,
+    locale,
+  });
+  /** The goods total the discount comes off — regular prices only when the code beats the sale. */
+  const subtotal = settled.regular ? subtotalRegular : saleSubtotal;
+  const discount = settled.amount;
+  const discountSource = settled.source;
   const goods = subtractMoney(subtotal, discount);
 
   /* Both carriers quote shipping in hryvnia; OrderSummaryPanel converts the
@@ -1126,6 +1135,7 @@ export default function CheckoutClient({
 
         <OrderSummaryPanel
           locale={locale}
+          regularPrices={settled.regular}
           discount={discount}
           voucherCode={voucher?.code ?? null}
           discountSource={discountSource}

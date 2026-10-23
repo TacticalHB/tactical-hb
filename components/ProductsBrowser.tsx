@@ -161,7 +161,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
   const catKeys = CAT_KEYS;
 
   return (
-    <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
+    <div className="pt-[calc(4rem+var(--sale-strip,0px))] min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
       <Suspense fallback={null}>
         <CategoryFromUrl onCategory={setCat} />
       </Suspense>

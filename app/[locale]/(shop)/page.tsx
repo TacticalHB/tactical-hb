@@ -53,7 +53,7 @@ function HomeContent({ locale }: { locale: string }) {
           launch countdown as a hairline-separated footer rather than its own
           shouty section. The product photo is a transparent cut-out, so it
           floats directly on the page — no panel, no frame. */}
-      <section className="relative min-h-screen pt-16 flex flex-col">
+      <section className="relative min-h-screen pt-[calc(4rem+var(--sale-strip,0px))] flex flex-col">
         <div className="flex-1 w-full page-container grid md:grid-cols-2 gap-8 md:gap-12 items-center py-12 md:py-0">
           {/* Copy. Nudged in from the page gutter on wide screens so the block
               sits nearer the centre of the composition rather than hard against

@@ -5,6 +5,7 @@ import { products, availabilityOf, type Product } from "@/lib/products";
 import { useCart, linePrice, type CartLine } from "@/components/CartContext";
 import { bundleFor } from "@/lib/bundle";
 import { permanentDiscount } from "@/lib/loyalty/ranks";
+import { onHalloweenSale } from "@/lib/halloween";
 import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
 import { FREE_SHIPPING_UAH, freeShippingApplies, toFreeShipping } from "@/lib/free-shipping";
 import ProductThumb from "@/components/ProductThumb";
@@ -41,7 +42,16 @@ function basketGoods(lines: CartLine[], rankDiscountRate: number): Money {
     })
   );
   const subtotal = bundle ? subtractMoney(full, bundle.saved) : full;
-  return subtractMoney(subtotal, permanentDiscount(rankDiscountRate, subtotal));
+  /* HALLOWEEN (31 Oct 2026): the perk only on what is not on sale, as at
+     checkout. Outside the sale every line counts. */
+  const perkBase = lines
+    .filter((l) => {
+      const p = products.find((x) => x.slug === l.slug);
+      return !(p && onHalloweenSale(p.category));
+    })
+    .reduce<Money>((s, l) => addMoney(s, scaleMoney(linePrice(l), l.qty)), money(0, 0));
+  const anySale = perkBase.eur !== full.eur;
+  return subtractMoney(subtotal, permanentDiscount(rankDiscountRate, anySale ? perkBase : subtotal));
 }
 
 export default function FreeShippingSuggestions({

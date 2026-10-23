@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { priceCart } from "@/lib/pricing";
+import { BEFORE_HALLOWEEN, halloweenActive, settleHalloween, type BroughtCode } from "@/lib/halloween";
 import { findGiftCode, isGiftCodeShape } from "@/lib/gift-codes";
 
 /* ---------------------------------------------------------------------------
@@ -26,7 +27,22 @@ import { findGiftCode, isGiftCodeShape } from "@/lib/gift-codes";
 export type VoucherCheck =
   /** amountEur for a loyalty voucher; percent (and amountEur 0) for a gift code. */
   | { ok: true; code: string; amountEur: number; percent?: number }
-  | { ok: false; reason: "auth" | "not_found" | "used" | "expired" | "min_order"; minOrderEur?: number };
+  | { ok: false; reason: "auth" | "not_found" | "used" | "expired" | "min_order" | "sale"; minOrderEur?: number };
+
+/* HALLOWEEN (31 Oct 2026): does this code beat the sale? Weighed by the
+   same whichever-is-bigger rule the invoice uses. If it does not, say so,
+   rather than "applied" with no saving. Delete with lib/halloween. */
+function losesToSale(cart: unknown, code: BroughtCode): boolean {
+  if (!halloweenActive()) return false;
+  const settled = settleHalloween({
+    sale: priceCart(cart),
+    regular: priceCart(cart, "en", BEFORE_HALLOWEEN),
+    code,
+    rankRate: 0,
+    locale: "en",
+  });
+  return settled.source !== "voucher";
+}
 
 export async function checkVoucher(rawCode: string, cart: unknown): Promise<VoucherCheck> {
   const code = String(rawCode ?? "").trim().toUpperCase();
@@ -38,6 +54,7 @@ export async function checkVoucher(rawCode: string, cart: unknown): Promise<Vouc
     const gift = await findGiftCode(code);
     if (!gift) return { ok: false, reason: "not_found" };
     if (gift.usedAt) return { ok: false, reason: "used" };
+    if (losesToSale(cart, { kind: "percent", percent: gift.percent })) return { ok: false, reason: "sale" };
     return { ok: true, code: gift.code, amountEur: 0, percent: gift.percent };
   }
 
@@ -64,8 +81,12 @@ export async function checkVoucher(rawCode: string, cart: unknown): Promise<Vouc
   if (new Date(String(data.expires_at)).getTime() < Date.now()) return { ok: false, reason: "expired" };
 
   const minOrderEur = Number(data.min_order_eur) || 0;
-  const { subtotal } = priceCart(cart);
+  // Against the regular-price bag: the minimum is about the order, not the sale.
+  const { subtotal } = priceCart(cart, "en", BEFORE_HALLOWEEN);
   if (subtotal.eur < minOrderEur) return { ok: false, reason: "min_order", minOrderEur };
+  if (losesToSale(cart, { kind: "amount", amountEur: Number(data.amount_eur), minOrderEur })) {
+    return { ok: false, reason: "sale" };
+  }
 
   return { ok: true, code: String(data.code), amountEur: Number(data.amount_eur) };
 }

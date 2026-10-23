@@ -6,6 +6,8 @@ import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/cu
 import { bundleFor, type Bundle } from "@/lib/bundle";
 import { materialUpcharge } from "@/lib/hmd-options";
 import { timerUpcharge } from "@/lib/windcover-options";
+import { BEFORE_HALLOWEEN, halloweenMoney, onHalloweenSale } from "@/lib/halloween";
+import { useHalloween } from "@/components/halloween/useHalloween";
 
 /** What the shopper chose. Absent fields = the base configuration. */
 export type CartOptions = { variant?: string; lid?: boolean; rubber?: boolean; timer?: boolean };
@@ -21,8 +23,16 @@ export function lineKey(slug: string, o?: CartOptions): string {
   return [slug, o?.variant ?? "", o?.lid ? "lid" : "", o?.rubber ? "rubber" : "", o?.timer ? "timer" : ""].join("|");
 }
 
-/** Price of one unit of a line: variant price + any add-ons. */
-export function linePrice(line: CartLine): Money {
+/** Price of one unit of a line: variant price + any add-ons, at the sale
+    price during the Halloween sale (31 Oct 2026). `now` lets a caller ask for
+    the regular price (BEFORE_HALLOWEEN). Mirrors priceCart. */
+export function linePrice(line: CartLine, now: number = Date.now()): Money {
+  const p = products.find((x) => x.slug === line.slug);
+  const unit = regularLinePrice(line);
+  return p && onHalloweenSale(p.category, now) ? halloweenMoney(unit) : unit;
+}
+
+function regularLinePrice(line: CartLine): Money {
   const p = products.find((x) => x.slug === line.slug);
   if (!p) return money(0, 0);
   const v = line.options?.variant
@@ -47,6 +57,11 @@ type CartCtx = {
   subtotal: Money;
   /** The same basket before the saving — the "Was" figure, or equal to it. */
   subtotalFull: Money;
+  /** HALLOWEEN (31 Oct 2026): the bag at regular prices, setup saving off —
+      the other side of the whichever-is-bigger rule. Equals subtotal otherwise. */
+  subtotalRegular: Money;
+  /** What a code or the rank perk may come off: the part not on sale. Mirrors priceCart. */
+  discountable: Money;
   /** Null unless the bag holds a bowl, a heat device and a wind cover. */
   bundle: Bundle | null;
   cartOpen: boolean;
@@ -177,6 +192,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
   const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
 
+  /* HALLOWEEN (31 Oct 2026). useHalloween re-renders this provider when the
+     sale starts or ends, so every price below follows the clock. The regular
+     side and the not-on-sale part mirror priceCart. Delete after 1 Nov. */
+  const saleOn = useHalloween();
+  const regularFull = lines.reduce<Money>(
+    (s, l) => addMoney(s, scaleMoney(linePrice(l, BEFORE_HALLOWEEN), l.qty)),
+    money(0, 0)
+  );
+  const regularBundle = bundleFor(
+    lines.flatMap((l) => {
+      const p = products.find((x) => x.slug === l.slug);
+      return p ? [{ category: p.category, unit: linePrice(l, BEFORE_HALLOWEEN) }] : [];
+    })
+  );
+  const subtotalRegular = regularBundle ? subtractMoney(regularFull, regularBundle.saved) : regularFull;
+  const saleLines = lines.filter((l) => {
+    const p = products.find((x) => x.slug === l.slug);
+    return saleOn && !!p && onHalloweenSale(p.category);
+  });
+  const discountable = saleLines.length
+    ? lines
+        .filter((l) => !saleLines.includes(l))
+        .reduce<Money>((s, l) => addMoney(s, scaleMoney(linePrice(l), l.qty)), money(0, 0))
+    : subtotal;
+
   const addToCart = useCallback((
     product: Product,
     sourceEl?: HTMLElement | null,
@@ -306,7 +346,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider
       value={{
-        lines, count, subtotal, subtotalFull, bundle, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
+        lines, count, subtotal, subtotalFull, subtotalRegular, discountable, bundle, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
         clearCart, registerCartIcon, bump, lastAdded, addedOpen, setAddedOpen, hydrated,
       }}
     >

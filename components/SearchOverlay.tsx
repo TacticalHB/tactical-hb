@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { products } from "@/lib/products";
 import { searchAddons } from "@/lib/addons";
-import Price from "./Price";
+import SalePrice from "@/components/halloween/SalePrice";
 import { money } from "@/lib/currency";
 import { t } from "@/lib/i18n-text";
 
@@ -149,7 +149,7 @@ export default function SearchOverlay({
                           </div>
                         </div>
                         <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}>
-                          +<Price money={a.price} locale={locale} />
+                          +<SalePrice regular={a.price} category="addon" locale={locale} wasClassName="text-[13px] font-sans" />
                         </span>
                       </button>
                     </li>
@@ -167,7 +167,7 @@ export default function SearchOverlay({
                             <div className="text-sm font-medium truncate" style={{ color: "var(--text)" }}>{name}</div>
                             <div className="text-xs tracking-widest uppercase" style={{ color: "var(--text-faint)" }}>{p.category}</div>
                           </div>
-                          <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}><Price money={money(p.price, p.priceUah)} locale={locale} /></span>
+                          <span className="font-display text-lg" style={{ color: "var(--accent-ink)" }}><SalePrice regular={money(p.price, p.priceUah)} category={p.category} locale={locale} wasClassName="text-[13px] font-sans" /></span>
                         </button>
                       </li>
                     );

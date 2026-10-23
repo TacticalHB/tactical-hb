@@ -6,6 +6,8 @@ import { currencyForLocale, formatMoney, type Money } from "@/lib/currency";
 import { MATERIAL_PRICE, type HmdMaterial } from "@/lib/hmd-options";
 import { addonAvailability, availabilityText, type Availability } from "@/lib/products";
 import { TIMER_PRICE } from "@/lib/windcover-options";
+import { halloweenMoney } from "@/lib/halloween";
+import { useHalloween } from "@/components/halloween/useHalloween";
 
 /* ---------------------------------------------------------------------------
    Configurable add-ons, in two presentations:
@@ -103,6 +105,11 @@ export function ConfigSelector({
                name on the left and price on the right, selected row filled. */
   variant?: "card" | "pdp";
 }) {
+  /* HALLOWEEN (31 Oct 2026): the add-ons are 20% off with the device they go
+     on (every option here belongs to an HMD or a wind cover, both on sale),
+     matching priceCart. Delete with lib/halloween. */
+  const saleOn = useHalloween();
+  const priceOf = (o: OptionSpec) => (saleOn ? halloweenMoney(o.price) : o.price);
   const isPdp = variant === "pdp";
   const [hoverKey, setHoverKey] = useState<string | null>(null);
   const label = t(locale, { uk: "Комплектація", en: "Configuration", ja: "構成", ar: "التكوين" });
@@ -140,7 +147,8 @@ export function ConfigSelector({
             const can = offerable(o);
             const active = can && value[o.key];
             const name = t(locale, o);
-            const price = formatMoney(o.price, currencyForLocale(locale));
+            const price = formatMoney(priceOf(o), currencyForLocale(locale));
+            const was = saleOn ? formatMoney(o.price, currencyForLocale(locale)) : null;
             const hovered = hoverKey === o.key;
             return (
               <button
@@ -198,7 +206,16 @@ export function ConfigSelector({
                 >
                   {/* The state takes the price's place: what it costs is not
                       the question when it cannot be had. */}
-                  {can ? `+${price}` : (
+                  {can ? (
+                    <>
+                      {was && (
+                        <s className="me-1.5 font-normal" style={{ color: active ? "#3a3a3d" : "#8d8d8f", textDecorationThickness: "1px" }}>
+                          +{was}
+                        </s>
+                      )}
+                      +{price}
+                    </>
+                  ) : (
                     <span className="text-[12px] tracking-[0.14em] uppercase font-normal">
                       {availabilityText(o.status ?? "available", locale)}
                     </span>
@@ -222,7 +239,7 @@ export function ConfigSelector({
           const can = offerable(o);
           const active = can && value[o.key];
           const name = t(locale, o);
-          const price = formatMoney(o.price, currencyForLocale(locale));
+          const price = formatMoney(priceOf(o), currencyForLocale(locale));
           const note = can ? `+${price}` : availabilityText(o.status ?? "available", locale);
           return (
             <button

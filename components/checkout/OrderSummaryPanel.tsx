@@ -12,6 +12,8 @@ import { addMoney, money, moneyFromUah, subtractMoney, type Money } from "@/lib/
 import { freeShippingApplies } from "@/lib/free-shipping";
 import FreeShippingProgress from "@/components/FreeShippingProgress";
 import { COLONEL_DISCOUNT_RATE } from "@/lib/loyalty/ranks";
+import { BEFORE_HALLOWEEN } from "@/lib/halloween";
+import SaleWas from "@/components/halloween/SaleWas";
 
 /* ---------------------------------------------------------------------------
    The order summary rail shown beside every checkout step, so what's being
@@ -25,8 +27,12 @@ export default function OrderSummaryPanel({
   discountSource,
   shippingUah,
   shippingPending,
+  regularPrices = false,
 }: {
   locale: string;
+  /** HALLOWEEN (31 Oct 2026): the customer's code beat the sale, so the order
+      is charged at regular prices — show those. Delete with lib/halloween. */
+  regularPrices?: boolean;
   /** Applied voucher value, in both currencies. Omitted when none is applied. */
   discount?: Money;
   voucherCode?: string | null;
@@ -38,7 +44,8 @@ export default function OrderSummaryPanel({
   /** International: shipping is invoiced after the order, not now. */
   shippingPending?: boolean;
 }) {
-  const { lines, subtotal, subtotalFull, bundle, count } = useCart();
+  const { lines, subtotal: saleSubtotal, subtotalRegular, subtotalFull, bundle, count } = useCart();
+  const subtotal = regularPrices ? subtotalRegular : saleSubtotal;
   const goods = discount ? subtractMoney(subtotal, discount) : subtotal;
   // Carriers quote shipping in UAH; the summary shows ONE currency, so the
   // quote is converted at the display rate and the total includes it on BOTH
@@ -114,8 +121,9 @@ export default function OrderSummaryPanel({
                   <div className="text-[12px] mt-0.5" style={{ color: "var(--accent-ink)", fontWeight: 500 }}>{d.preorder}</div>
                 )}
               </div>
-              <div className="text-[13px] shrink-0" style={{ color: "var(--text)" }}>
-                <LineTotal unit={linePrice(l)} qty={l.qty} locale={locale} />
+              <div className="text-[13px] shrink-0 flex flex-col items-end" style={{ color: "var(--text)" }}>
+                <LineTotal unit={regularPrices ? linePrice(l, BEFORE_HALLOWEEN) : linePrice(l)} qty={l.qty} locale={locale} />
+                {!regularPrices && <SaleWas line={l} locale={locale} className="text-[12px]" />}
               </div>
             </li>
           );

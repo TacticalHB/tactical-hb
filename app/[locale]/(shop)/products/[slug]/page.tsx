@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { availabilityOf, products } from "@/lib/products";
 import ProductPDP from "@/components/ProductPDP";
+import { money } from "@/lib/currency";
+import { onHalloweenSale, salePriceFor } from "@/lib/halloween";
 import { SITE_NAME, SITE_URL, jsonLdScript, merchantReturnPolicy, pageMetadata, productKind, schemaAvailability } from "@/lib/seo";
 
 /* ---------------------------------------------------------------------------
@@ -78,6 +80,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const uk = locale === "uk";
   const name = uk ? product.nameUk : product.nameEn;
   const photo = product.gridImage || product.image;
+  /* HALLOWEEN (31 Oct 2026): the Offer quotes what the page shows, so on the
+     day it is the sale price, valid until the day ends. Delete after 1 Nov. */
+  const offerPrice = salePriceFor(product.category, money(product.price, product.priceUah));
+  const saleToday = onHalloweenSale(product.category);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -118,7 +124,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             /* Ukrainian storefront sells in hryvnia, the three export ones in
                euro — the same rule lib/currency applies, not a guess. */
             priceCurrency: uk ? "UAH" : "EUR",
-            price: uk ? product.priceUah : product.price,
+            price: uk ? offerPrice.uah : offerPrice.eur,
+            ...(saleToday ? { priceValidUntil: "2026-10-31" } : {}),
             availability: schemaAvailability(availabilityOf(product)),
             seller: { "@type": "Organization", name: SITE_NAME },
             hasMerchantReturnPolicy: merchantReturnPolicy(locale),

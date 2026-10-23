@@ -7,6 +7,7 @@ import { products, addonAvailability, availabilityOf, availabilityText, isPurcha
 import { priceCart } from "@/lib/pricing";
 import { useCart, type CartOptions } from "@/components/CartContext";
 import Price from "@/components/Price";
+import SalePrice from "@/components/halloween/SalePrice";
 import { money, formatMoney, currencyForLocale } from "@/lib/currency";
 import { MATERIAL_PRICE } from "@/lib/hmd-options";
 import { TIMER_PRICE } from "@/lib/windcover-options";
@@ -307,7 +308,7 @@ export default function KitBuilder({ locale }: { locale: string }) {
                           </div>
                           <div className="text-[12px] mt-0.5" style={{ color: "var(--text-muted)" }}>
                             {can ? (
-                              <Price money={money(p.price, p.priceUah)} locale={locale} />
+                              <SalePrice regular={money(p.price, p.priceUah)} category={p.category} locale={locale} />
                             ) : (
                               <span className="tracking-[0.1em] uppercase text-[10.5px]">
                                 {availabilityText(availabilityOf(p), locale)}

@@ -9,6 +9,8 @@ import { useState } from "react";
 import { Product, availabilityOf, availabilityText, isPurchasable } from "@/lib/products";
 import HeartButton from "./HeartButton";
 import Price from "./Price";
+import SalePrice from "@/components/halloween/SalePrice";
+import SaleStamp from "@/components/halloween/SaleStamp";
 import { money } from "@/lib/currency";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
@@ -56,6 +58,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
       {/* Image */}
       <Link href={href} className="block group">
         <div className="relative aspect-square overflow-hidden rounded-[20px]" style={{ background: "#f5f5f5" }}>
+          <SaleStamp category={product.category} size="card" />
           {image ? (
             <Image
               src={image}
@@ -133,7 +136,7 @@ export default function NikeProductCard({ product, locale }: { product: Product;
               of the three always renders. */}
           <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
             {status === "available" ? (
-              <Price money={price} locale={locale} />
+              <SalePrice regular={price} category={product.category} locale={locale} wasClassName="text-[13px]" />
             ) : product.price > 0 ? (
               <span className="flex items-baseline gap-2 flex-wrap">
                 <Price money={price} locale={locale} />

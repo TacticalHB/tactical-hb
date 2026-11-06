@@ -24,15 +24,12 @@ import CompleteTheSet from "./CompleteTheSet";
 import BackInStockForm from "./BackInStockForm";
 import { materialUpcharge, type HmdMaterial } from "@/lib/hmd-options";
 import { timerUpcharge, type WindcoverOptions } from "@/lib/windcover-options";
+import Price from "./Price";
 import { addMoney, money } from "@/lib/currency";
 import { buildFieldCard } from "@/lib/field-card";
 import MaterialsTable from "@/components/hookah/MaterialsTable";
 import CaseContents from "@/components/hookah/CaseContents";
 import View3DButton from "@/components/hmd/View3DButton";
-import SalePrice from "@/components/halloween/SalePrice";
-import SaleStamp from "@/components/halloween/SaleStamp";
-import SaleEnds from "@/components/halloween/SaleEnds";
-import { useHalloween } from "@/components/halloween/useHalloween";
 import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /* Brand slogan — shown as the statement band on every product page */
@@ -168,12 +165,6 @@ function Banner({ locale }: { locale: string }) {
     }, BANNER_OUT_MS);
     return () => clearTimeout(t);
   }, [onStage, reduced, lines.length, paused]);
-
-  /* HALLOWEEN (31 Oct 2026): the countdown strip under the menu takes this
-     banner's place for the day — two dark strips stacked read as clutter.
-     Delete with lib/halloween. */
-  const saleOn = useHalloween();
-  if (saleOn) return null;
 
   return (
     <div
@@ -507,7 +498,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
   const toggleFav = () => toggleFavourite(product.slug);
 
   return (
-    <div className="pt-[calc(4rem+var(--sale-strip,0px))] min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
+    <div className="pt-16 min-h-screen" style={{ background: "#ffffff", color: "#111111" }}>
       <Banner locale={locale} />
 
       {/* ---- Main PDP grid ---- */}
@@ -565,8 +556,6 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
                   <span className="text-sm tracking-wide">{t(locale, { uk: "Фото незабаром", en: "Photos coming soon", ja: "写真は準備中です", ar: "الصور قريبًا" })}</span>
                 </div>
               )}
-              {/* Halloween stamp + pumpkin, corners only (31 Oct 2026). */}
-              <SaleStamp category={product.category} />
               {/* prev / next */}
               {photos.length > 1 && (
                 <div className="absolute bottom-4 right-4 flex gap-2">
@@ -636,11 +625,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             ) : (
               <>
                 <p className="text-lg font-medium mt-4">
-                  {/* Halloween-aware (31 Oct 2026): sale price + struck regular
-                      on the day, the plain price every other day. */}
-                  <SalePrice regular={price} category={product.category} locale={locale} wasClassName="text-[15px]" />
+                  <Price money={price} locale={locale} />
                 </p>
-                <SaleEnds category={product.category} locale={locale} />
                 {/* The ship date of a pre-order, under its price (Mario, 4 Oct
                     2026). UTC so server and browser print the same day; Arabic
                     pinned to Latin digits like every number on the site. */}

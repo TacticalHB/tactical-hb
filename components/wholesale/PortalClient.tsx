@@ -271,11 +271,14 @@ export default function PortalClient({
 
   const L = {
     title: t(locale, { en: "Wholesale ordering", uk: "Оптове замовлення", ja: "卸売のご注文", ar: "الطلب بالجملة" }),
+    /* A RECOMMENDATION, NOT A RULE (Mario, 8 Nov 2026). Nothing enforces
+       €1,500 — the portal accepts any request — so the line says so politely
+       instead of stating a hard minimum the site never applies. */
     termsMinimum: t(locale, {
-      en: "Minimum order value: €1,500.",
-      uk: "Мінімальна сума замовлення: €1 500.",
-      ja: "最低ご注文金額：€1,500。",
-      ar: "الحد الأدنى لقيمة الطلب: €1,500.",
+      en: "Recommended minimum order: €1,500. Each request is discussed individually.",
+      uk: "Рекомендована мінімальна сума замовлення: €1 500. Кожен запит розглядається індивідуально.",
+      ja: "推奨最低ご注文金額：€1,500。ご依頼はそれぞれ個別にご相談いたします。",
+      ar: "الحد الأدنى الموصى به للطلب: €1,500. تُناقَش كل طلبية على حدة.",
     }),
     /* WHY IT IS WORDED THIS WAY. The business does not sell a delivery
        service — it sells goods delivered to a destination, which is the same

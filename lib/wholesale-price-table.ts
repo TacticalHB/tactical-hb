@@ -1,5 +1,5 @@
 import { products, availabilityOf, availabilityText, type Availability, type Product } from "@/lib/products";
-import { PARTNER_TYPES, bookPrice, addonPrice, type PartnerType } from "@/lib/wholesale-prices";
+import { OFFERED_PARTNER_TYPES, bookPrice, addonPrice, type PartnerType } from "@/lib/wholesale-prices";
 import { money, type Money } from "@/lib/currency";
 import { TIMER_PRICE } from "@/lib/windcover-options";
 
@@ -29,18 +29,8 @@ export type PriceRow = {
   label: string;
   /** What kind of thing it is, for grouping. */
   group: "hmd" | "bowl" | "windcover" | "accessory" | "addon";
-  /** One entry per book, in PARTNER_TYPES order. Null = no trade price set. */
+  /** One entry per offered book, in OFFERED_PARTNER_TYPES order. Null = no trade price set. */
   prices: (Money | null)[];
-  /**
-   * True when SHOP AND DISTRIBUTION differ on this line.
-   *
-   * NOT "the books are not all equal" — that was the first version and it
-   * marked every row in the table, because the lounge book differs on all of
-   * them by design. A flag that is always on is a flag nobody reads. The one
-   * fact worth catching at a glance is where distribution has been repriced
-   * away from shop, which today is nowhere and tomorrow is the point.
-   */
-  distributionDiffers: boolean;
   /**
    * Whether it can be sold right now.
    *
@@ -90,11 +80,6 @@ export function bookLabel(t: PartnerType, locale: string): string {
   return uk ? "Кальянна / Бар" : "Lounge / Bar";
 }
 
-function eq(a: Money | null, b: Money | null): boolean {
-  if (a === null || b === null) return a === b;
-  return a.eur === b.eur && a.uah === b.uah;
-}
-
 function row(
   key: string,
   label: string,
@@ -104,14 +89,11 @@ function row(
   locale: string,
   retail: Money | null
 ): PriceRow {
-  const shopIdx = PARTNER_TYPES.indexOf("shop");
-  const distIdx = PARTNER_TYPES.indexOf("distribution");
   return {
     key,
     label,
     group,
     prices,
-    distributionDiffers: !eq(prices[shopIdx] ?? null, prices[distIdx] ?? null),
     availability,
     availabilityLabel: availabilityText(availability, locale),
     retail,
@@ -121,7 +103,8 @@ function row(
 /** Every sellable line, priced across every book. */
 export function priceTable(locale: string): PriceRow[] {
   const uk = locale === "uk";
-  const books = PARTNER_TYPES;
+  /* Only the books on offer — distribution is hidden since 8 Nov 2026. */
+  const books = OFFERED_PARTNER_TYPES;
   const out: PriceRow[] = [];
 
   /* EVERYTHING WITH A TRADE PRICE, whether or not the shelf is empty today.
@@ -188,5 +171,5 @@ export function priceTable(locale: string): PriceRow[] {
 
 /** The books, in the order the table's columns run. */
 export function tableBooks(): readonly PartnerType[] {
-  return PARTNER_TYPES;
+  return OFFERED_PARTNER_TYPES;
 }

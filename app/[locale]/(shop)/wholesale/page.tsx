@@ -69,7 +69,9 @@ function Check() {
 function WholesaleContent({ locale }: { locale: string }) {
   const t = useTranslations("wholesale");
 
-  const collaborators = [t("collab_1"), t("collab_2"), t("collab_3")];
+  /* collab_2 (distributors) left the list on 8 Nov 2026 — distribution is not
+     offered for now. The key stays in messages so it can come straight back. */
+  const collaborators = [t("collab_1"), t("collab_3")];
   const reasons = [t("why_1"), t("why_2"), t("why_3"), t("why_4"), t("why_5"), t("why_6")];
 
   return (
@@ -92,7 +94,7 @@ function WholesaleContent({ locale }: { locale: string }) {
         <Reveal>
           <span className="text-xs tracking-[0.35em] uppercase block mb-10" style={{ color: "var(--accent-ink)" }}>{t("collab_title")}</span>
         </Reveal>
-        <div className="grid sm:grid-cols-3 gap-8 mb-20">
+        <div className="grid sm:grid-cols-2 gap-8 mb-20">
           {collaborators.map((c, i) => (
             <Reveal key={c} delay={i * 90}>
               <div className="border-t-2 pt-6 h-full" style={{ borderColor: "var(--accent-ink)" }}>

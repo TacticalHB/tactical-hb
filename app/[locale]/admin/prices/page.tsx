@@ -11,14 +11,12 @@ import { formatMoney } from "@/lib/currency";
    is a number nobody can review. This page exists so that looking one up does
    not mean opening the repository or the partner-facing PDF.
 
-   THREE BOOKS, AND TWO OF THEM ARE THE SAME TODAY. Shop and distribution carry
-   identical figures until distributors are repriced; the table says so in as
-   many words rather than leaving a reader to compare twelve pairs by eye, and
-   marks the rows that genuinely differ.
+   TWO BOOKS: shop and lounge. Distribution is no longer offered (8 Nov 2026,
+   see OFFERED_PARTNER_TYPES) and has no column.
 
-   THE FOURTH COLUMN IS RETAIL, AND IT IS NOT A BOOK. It is what a customer
+   THE LAST COLUMN IS RETAIL, AND IT IS NOT A BOOK. It is what a customer
    pays on the website, sitting beside the trade figures so the gap is visible
-   without opening a second page. It is ruled off from the three books and
+   without opening a second page. It is ruled off from the books and
    labelled, because a column that looks like a book is one somebody will
    eventually quote from.
 --------------------------------------------------------------------------- */
@@ -45,10 +43,6 @@ export default async function AdminPricesPage({
     source: uk
       ? "Джерело: lib/wholesale-prices.ts. Портал рахує з того самого файлу, тож ця таблиця не може з ним розійтися."
       : "Source: lib/wholesale-prices.ts. The portal charges from that same file, so this table cannot disagree with it.",
-    identical: uk
-      ? "Дистрибуція має ті самі цифри, що й магазин, доки її не переоцінять окремо."
-      : "Distribution carries the same figures as shop until it is repriced separately.",
-    varies: uk ? "дистрибуція окремо" : "distribution repriced",
     retail: uk ? "Роздріб (сайт)" : "Retail (site)",
     retailNote: uk
       ? "Останній стовпець — роздрібна ціна на сайті, а не прайс. Для порівняння, не для котирування партнерам."
@@ -74,19 +68,6 @@ export default async function AdminPricesPage({
           </p>
         </header>
 
-        {/* Said once, at the top. Two identical columns with no explanation is
-            the kind of thing a reader assumes is a rendering bug. */}
-        <div
-          className="rounded-lg px-4 py-3 mb-6 text-[13px]"
-          style={{
-            border: "1px solid var(--console-border)",
-            background: "var(--console-panel-2)",
-            color: "var(--console-muted)",
-          }}
-        >
-          {L.identical}
-        </div>
-
         <div
           className="rounded-lg overflow-hidden"
           style={{ border: "1px solid var(--console-border)", background: "var(--console-panel)" }}
@@ -110,7 +91,7 @@ export default async function AdminPricesPage({
                       {bookLabel(b, locale)}
                     </th>
                   ))}
-                  {/* Ruled off from the books with a left border — three trade
+                  {/* Ruled off from the books with a left border — the trade
                       columns, then a different kind of number. */}
                   <th
                     className="text-right px-4 py-3 text-[11px] tracking-[0.12em] uppercase font-normal whitespace-nowrap"
@@ -135,7 +116,6 @@ export default async function AdminPricesPage({
                       label={groupLabel(g, locale)}
                       rows={inGroup}
                       cols={books.length + 1}
-                      variesLabel={L.varies}
                       none={L.none}
                     />
                   );
@@ -166,13 +146,11 @@ function GroupBlock({
   label,
   rows,
   cols,
-  variesLabel,
   none,
 }: {
   label: string;
   rows: PriceRow[];
   cols: number;
-  variesLabel: string;
   none: string;
 }) {
   return (
@@ -198,11 +176,6 @@ function GroupBlock({
             {r.availability !== "available" && (
               <span className="ml-2 text-[10.5px] tracking-[0.1em] uppercase" style={{ color: "var(--console-faint)" }}>
                 {r.availabilityLabel}
-              </span>
-            )}
-            {r.distributionDiffers && (
-              <span className="ml-2 text-[10.5px] tracking-[0.1em] uppercase" style={{ color: "var(--console-warn)" }}>
-                {variesLabel}
               </span>
             )}
           </td>

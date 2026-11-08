@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { products, availabilityOf, availabilityText } from "@/lib/products";
-import { unitPrice, PARTNER_TYPES, type PartnerType } from "@/lib/wholesale-prices";
+import { unitPrice, OFFERED_PARTNER_TYPES, type PartnerType } from "@/lib/wholesale-prices";
 import { NO_ADDONS, addonsFor, type AddonKey, type LineAddons, type RequestItem } from "@/lib/wholesale-display";
 import { formatMoney, money } from "@/lib/currency";
 import { saveRequestLines } from "@/app/actions/wholesale-admin";
@@ -339,7 +339,10 @@ export default function RequestLineEditor({
               color: "var(--console-text)",
             }}
           >
-            {PARTNER_TYPES.map((b) => (
+            {/* The books on offer, plus the request's own book if it is one
+                no longer offered (distribution, since 8 Nov 2026) — so an
+                older request still shows what it was priced on. */}
+            {(OFFERED_PARTNER_TYPES.includes(book) ? OFFERED_PARTNER_TYPES : [...OFFERED_PARTNER_TYPES, book]).map((b) => (
               <option key={b} value={b}>{b}</option>
             ))}
           </select>

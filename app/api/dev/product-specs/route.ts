@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { products } from "@/lib/products";
-import { bookPrice, PARTNER_TYPES } from "@/lib/wholesale-prices";
+import { bookPrice, OFFERED_PARTNER_TYPES } from "@/lib/wholesale-prices";
 import { LID_WEIGHT_G } from "@/lib/hmd-options";
 
 export const runtime = "nodejs";
@@ -46,9 +46,9 @@ export async function GET() {
     /* EVERY BOOK, DERIVED FROM THE LIST OF BOOKS. This used to name shop and
        lounge by hand, and the day a third book existed the sheet silently
        under-reported by one — the numbers it printed were right and the
-       document was still wrong. Iterating PARTNER_TYPES means a fourth book
+       document was still wrong. Iterating the offered books (distribution hidden since 8 Nov 2026) means a fourth book
        appears here and in the PDF without either file being touched. */
-    trade: PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug) ?? null })),
+    trade: OFFERED_PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug) ?? null })),
 
     weightG: p.weightG,
     dims: p.dims,
@@ -66,7 +66,7 @@ export async function GET() {
       name: v.name,
       priceEur: v.price ?? p.price,
       priceUah: v.priceUah ?? p.priceUah,
-      trade: PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug, v.name) ?? null })),
+      trade: OFFERED_PARTNER_TYPES.map((book) => ({ book, price: bookPrice(book, p.slug, v.name) ?? null })),
     })),
     colourShown: p.pdp?.colourShownEn ?? null,
 

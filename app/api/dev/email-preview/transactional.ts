@@ -313,8 +313,8 @@ export function renderTransactional(
           phone: "+380 66 707 33 07",
           country: "United Kingdom",
           city: "London",
-          businessType: "Distribution",
-          note: "Distributing across the UK and Ireland. Happy to send shop photos and our registration.",
+          businessType: "Shop / Online Retailer",
+          note: "Two shops in Manchester and an online store. Happy to send shop photos and our registration.",
           locale,
         },
         SITE

@@ -457,10 +457,10 @@ export default function WholesaleRegisterForm({ locale }: { locale: string }) {
               onChange={(e) => setBusinessType(e.target.value)}
             >
               <option value="">{L.choose}</option>
-              {/* Distribution, then shops and online retailers, then lounges
-                  and bars — the same order as the enquiry form on /wholesale,
-                  which asks the same question earlier in the same funnel. */}
-              {[w("biz_distribution"), w("biz_shop"), w("biz_lounge")].map((o) => (
+              {/* Shops and online retailers, then lounges and bars.
+                  Distribution was taken off on 8 Nov 2026 ("for now"); its
+                  label stays in messages because older applications carry it. */}
+              {[w("biz_shop"), w("biz_lounge")].map((o) => (
                 <option key={o} value={o}>
                   {o}
                 </option>

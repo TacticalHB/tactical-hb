@@ -414,9 +414,12 @@ export default function PartnerCard({
                 }}
               >
                 <option value="">{L.bookNone}</option>
-                {/* Same order as both customer-facing forms: distribution,
-                    shop, lounge. */}
-                <option value="distribution">{L.bookDistribution}</option>
+                {/* Distribution is no longer offered (8 Nov 2026). It is listed
+                    only for a partner still on it, so their card reads true and
+                    the book can be switched to Shop — same prices — from here. */}
+                {p.partnerType === "distribution" && (
+                  <option value="distribution">{L.bookDistribution}</option>
+                )}
                 <option value="shop">{L.bookShop}</option>
                 <option value="lounge">{L.bookLounge}</option>
               </select>

@@ -33,7 +33,7 @@ OUT = os.environ.get(
     "SPEC_OUT",
     os.path.expanduser(
         "~/Library/CloudStorage/OneDrive-LiverpoolJohnMooresUniversity/"
-        "tct project/Tactical_HB_Product_Specifications.pdf"
+        "tct project/Wholesale/Product specifications.pdf"
     ),
 )
 

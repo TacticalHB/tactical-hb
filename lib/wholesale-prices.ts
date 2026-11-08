@@ -73,6 +73,15 @@ import type { LineAddons } from "@/lib/wholesale-display";
 export const PARTNER_TYPES = ["shop", "distribution", "lounge"] as const;
 export type PartnerType = (typeof PARTNER_TYPES)[number];
 
+/* THE BOOKS ON OFFER (Mario, 8 Nov 2026: "remove distribution option for now").
+   Distribution is no longer offered anywhere — not on the registration form,
+   the /wholesale page, the admin picker or the price list. It STAYS in
+   PARTNER_TYPES because that union mirrors the 0040 check constraint and a
+   partner already on it (aladin-kyiv.com) must keep being priced; its figures
+   equal shop's, so moving them to shop changes nothing they pay. To bring it
+   back, add it here again. */
+export const OFFERED_PARTNER_TYPES: readonly PartnerType[] = ["shop", "lounge"];
+
 export function isPartnerType(v: unknown): v is PartnerType {
   return typeof v === "string" && (PARTNER_TYPES as readonly string[]).includes(v);
 }
@@ -90,7 +99,7 @@ type Book = {
 const m = (eur: number, uah: number): Money => ({ eur, uah });
 
 const BOOKS: Record<PartnerType, Book> = {
-  /* SHOP / DISTRIBUTION — specialty shops, online retailers and distributors. */
+  /* SHOP — specialty shops and online retailers. */
   shop: {
     products: {
       "hmd-tct-classic": m(12.0, 550),
@@ -118,7 +127,8 @@ const BOOKS: Record<PartnerType, Book> = {
     },
   },
 
-  /* DISTRIBUTION — distributors buying to resell on.
+  /* DISTRIBUTION — distributors buying to resell on. NOT OFFERED since
+     8 Nov 2026 (see OFFERED_PARTNER_TYPES); kept so existing partners price.
 
      IDENTICAL TO `shop` TODAY, ON PURPOSE. Every figure below is the one a
      shop pays, because that is what the printed list says a distributor pays.

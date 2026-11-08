@@ -77,11 +77,11 @@ COPY = {
     "eur": {
         "rail": "Price list · EUR",
         "title": "Wholesale price list",
-        "sub": "Export · EUR  ·  Two partner books: Shop / Distribution and Lounge",
+        "sub": "Export · EUR  ·  Two partner books: Shop and Lounge",
         "unit": "EUR",
         "product": "PRODUCT",
         "books": [
-            ("SHOP / DISTRIBUTION", "Wholesale book for specialty shops, online retailers and distributors"),
+            ("SHOP", "Wholesale book for specialty shops and online retailers"),
             ("LOUNGE / BAR", "Partner book for shisha lounges and bars"),
         ],
         "note": "Unit prices in euro. Add-ons (Lid 9E418, FEAR Stabiliser 9E418) are listed separately.",
@@ -100,12 +100,12 @@ COPY = {
     "uah": {
         "rail": "Price list · UAH",
         "title": "Оптовий прайс-лист",
-        "sub": "Україна · UAH  ·  Два прайси: Магазин / Дистрибуція та Кальянна",
+        "sub": "Україна · UAH  ·  Два прайси: Магазин та Кальянна",
         "unit": "UAH",
         "product": "ТОВАР",
         "books": [
-            ("SHOP / DISTRIBUTION · МАГАЗИН",
-             "Прайс для спеціалізованих магазинів, онлайн-рітейлу та дистриб'юторів"),
+            ("SHOP · МАГАЗИН",
+             "Прайс для спеціалізованих магазинів та онлайн-рітейлу"),
             ("LOUNGE / BAR · КАЛЬЯННА",
              "Прайс для кальянних та барів"),
         ],

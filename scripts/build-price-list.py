@@ -89,7 +89,8 @@ COPY = {
         "terms": [
             "Prices apply only to approved wholesale partners. Access is granted after application review.",
             "Orders are submitted as quantity requests in the trade portal — nothing is charged on the website.",
-            "Minimum order value: €1,500 per order.",
+            # A recommendation, not a rule (Mario, 8 Nov 2026) — same words as the portal.
+            "Recommended minimum order: €1,500. Each request is discussed individually.",
             "Delivery is not sold separately: once confirmed, carriage is spread across the unit prices — one total.",
             "Payment details are confirmed by email.",
             "Tactical HB reserves the right to update this list. Confidential — do not redistribute.",
@@ -113,7 +114,7 @@ COPY = {
         "terms": [
             "Ціни діють лише для схвалених оптових партнерів. Доступ — після розгляду заявки.",
             "Замовлення надсилаються як запити на кількість у порталі — на сайті нічого не списується.",
-            "Мінімальна сума замовлення: €1 500.",
+            # No minimum for Ukraine (Mario, 8 Nov 2026).
             "Доставка не продається окремо: після підтвердження вартість перевезення розподіляється в цінах за одиницю.",
             "Реквізити для оплати підтверджуємо листом.",
             "Tactical HB має право оновлювати цей прайс. Конфіденційно — не розповсюджувати.",

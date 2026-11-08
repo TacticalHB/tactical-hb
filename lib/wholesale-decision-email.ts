@@ -138,6 +138,28 @@ const APPROVED: Record<string, Copy> = {
   },
 };
 
+/* THE €1,500 LINE (Mario, 8 Nov 2026). The same sentence the portal shows
+   above the order list, and to the same people: shop partners buying in euro.
+   A recommendation, not a rule — nothing enforces it — and never shown to
+   Ukrainian (hryvnia) partners, who have no minimum at all. Distributors and
+   lounges buy on other terms and do not see it either. */
+const MINIMUM: Record<string, string> = {
+  en: "Recommended minimum order: €1,500. Each request is discussed individually.",
+  uk: "Рекомендована мінімальна сума замовлення: €1\u00a0500. Кожен запит розглядається індивідуально.",
+  ja: "推奨最低ご注文金額：€1,500。ご依頼はそれぞれ個別にご相談いたします。",
+  ar: "الحد الأدنى الموصى به للطلب: €1,500. تُناقَش كل طلبية على حدة.",
+};
+
+/** Whether this partner is shown the €1,500 line — mirrors the portal's test. */
+export function showsMinimum(terms: { currency?: string; partnerType?: string | null; businessType?: string | null }): boolean {
+  if (terms.currency !== "EUR") return false;
+  /* The book decides, as in the portal. Before a book is assigned, what they
+     applied as stands in for it, so approving first and pricing second still
+     tells a shop the terms. */
+  if (terms.partnerType) return terms.partnerType === "shop";
+  return resolveBizCategory(terms.businessType) === "shop";
+}
+
 const DECLINED: Record<string, DeclineCopy> = {
   en: {
     subject: "About your wholesale application | Tactical HB",
@@ -261,7 +283,9 @@ export function buildDecisionMail(
   locale: string,
   siteUrl: string,
   /** What they applied as — decides which evidence the decline asks for. */
-  businessType?: string | null
+  businessType?: string | null,
+  /** Their currency and price book — decide whether the approval states the €1,500 line. */
+  terms?: { currency?: string; partnerType?: string | null }
 ): DecisionMail {
   if (status !== "approved" && status !== "rejected") return null;
 
@@ -270,7 +294,11 @@ export function buildDecisionMail(
      never has to carry an empty "reason" it does not have. */
   const t: Copy =
     status === "approved"
-      ? APPROVED[locale] ?? APPROVED.en
+      ? (() => {
+          const a = APPROVED[locale] ?? APPROVED.en;
+          if (!showsMinimum({ ...terms, businessType })) return a;
+          return { ...a, paragraphs: [...a.paragraphs, MINIMUM[locale] ?? MINIMUM.en] };
+        })()
       : (() => {
           const d = DECLINED[locale] ?? DECLINED.en;
           const cat = resolveBizCategory(businessType) ?? "unknown";

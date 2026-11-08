@@ -666,12 +666,15 @@ export async function setAccountStatus(
   locale?: string;
   /** Carried out so the decline letter can ask for the right evidence. */
   businessType?: string | null;
+  /** Carried out so the approval letter states the terms that apply to them. */
+  currency?: "EUR" | "UAH";
+  partnerType?: PartnerType | null;
 }> {
   const db = createAdminClient();
 
   const { data: before } = await db
     .from("wholesale_partners")
-    .select("account_status, email, locale, approved_at, business_type")
+    .select("account_status, email, locale, approved_at, business_type, currency, country, partner_type")
     .eq("id", partnerId)
     .maybeSingle();
 
@@ -706,6 +709,8 @@ export async function setAccountStatus(
     email: text(before?.email),
     locale: String(before?.locale ?? "en"),
     businessType: text(before?.business_type),
+    currency: partnerCurrency({ currency: before?.currency, country: before?.country, locale: before?.locale }),
+    partnerType: isPartnerType(before?.partner_type) ? before.partner_type : null,
   };
 }
 

@@ -595,7 +595,9 @@ export default function PortalClient({
             className="mt-6 max-w-2xl rounded-[6px] px-5 py-4 flex flex-col gap-2.5"
             style={{ background: "var(--bg-soft)", border: "1px solid var(--border)" }}
           >
-            {[L.termsMinimum, L.termsShipping].map((line) => (
+            {/* No minimum for Ukraine (Mario, 8 Nov 2026): hryvnia partners
+                see the delivery line only. */}
+            {(currency === "UAH" ? [L.termsShipping] : [L.termsMinimum, L.termsShipping]).map((line) => (
               <li key={line} className="flex gap-3 text-[14.5px] leading-relaxed">
                 <span aria-hidden="true" style={{ color: "var(--accent-ink)" }}>—</span>
                 <span style={{ color: "var(--text)" }}>{line}</span>

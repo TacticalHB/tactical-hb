@@ -283,8 +283,13 @@ export function renderTransactional(
       return { subject: r.subject, html: r.html, text: r.text };
     }
 
+    /* A euro shop partner, so the preview shows the €1,500 line; a hryvnia
+       partner (uk) gets the letter without it, which is what the uk preview shows. */
     case "wholesale-approved":
-      return buildDecisionMail("approved", locale, SITE)!;
+      return buildDecisionMail("approved", locale, SITE, null, {
+        currency: locale === "uk" ? "UAH" : "EUR",
+        partnerType: "shop",
+      })!;
 
     /* Declined against a lounge, because that is the variant whose evidence
        list differs most from the generic one — see wholesale-decision-email. */

@@ -37,6 +37,45 @@ const STEP_COLUMNS = ", packed_at, shipped_at, delivered_at";
  * "no orders yet" apart from "the database didn't answer" — reporting a broken
  * connection as an empty shop would be the worse lie.
  */
+/* ---------------------------------------------------------------------------
+   Which items were sold inside a set (lib/sets, 13 Nov 2026).
+
+   order_items has no set column, and none is needed: the payment row the
+   order came from keeps every line with its set_slug / set_name. Each set
+   line claims ONE matching item — same product, colour, add-ons, quantity
+   and hryvnia price — so the same OP bought both in the set and on its own
+   is tagged once, not twice. Never throws: an untagged list is still a list.
+--------------------------------------------------------------------------- */
+async function tagSetItems(admin: ReturnType<typeof createAdminClient>, orders: AdminOrder[]): Promise<void> {
+  try {
+    const refs = [...new Set(orders.map((o) => o.reference))];
+    if (!refs.length) return;
+    const { data, error } = await admin.from("payments").select("reference, lines").in("reference", refs);
+    if (error || !data) return;
+    const byRef = new Map(data.map((p) => [String(p.reference), (Array.isArray(p.lines) ? p.lines : []) as Record<string, unknown>[]]));
+    for (const o of orders) {
+      const lines = byRef.get(o.reference)?.filter((l) => l.set_name) ?? [];
+      const free = [...o.items];
+      for (const l of lines) {
+        const i = free.findIndex(
+          (it) =>
+            it.productId === String(l.slug) &&
+            (it.variant ?? null) === ((l.variant as string | null) ?? null) &&
+            it.lid === !!l.lid &&
+            it.rubber === !!l.rubber &&
+            it.qty === Number(l.qty) &&
+            Math.round(it.priceUah ?? -1) === Math.round(Number(l.unit_uah))
+        );
+        if (i < 0) continue;
+        free[i].set = String(l.set_name);
+        free.splice(i, 1);
+      }
+    }
+  } catch (e) {
+    console.error("[admin/orders] set tags skipped:", e);
+  }
+}
+
 export async function fetchAdminOrders(limit = 200): Promise<AdminOrder[] | null> {
   try {
     const admin = createAdminClient();
@@ -50,7 +89,9 @@ export async function fetchAdminOrders(limit = 200): Promise<AdminOrder[] | null
       console.error("[admin/orders] read failed:", error.code, error.message);
       return null;
     }
-    return (data ?? []).map((r) => toOrder(r as unknown as Record<string, unknown>));
+    const orders = (data ?? []).map((r) => toOrder(r as unknown as Record<string, unknown>));
+    await tagSetItems(admin, orders);
+    return orders;
   } catch (e) {
     console.error("[admin/orders] read threw:", e);
     return null;

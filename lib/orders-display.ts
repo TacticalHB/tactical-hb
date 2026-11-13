@@ -25,6 +25,9 @@ export type AdminOrderItem = {
   /** HMD add-ons ticked on this line (19 Oct 2026 — the list used to drop them). */
   lid: boolean;
   rubber: boolean;
+  /** The set this item was sold in ("Black On Black"), or null. Read from the
+      payment's stored lines by lib/orders-admin — orders hold no set column. */
+  set: string | null;
 };
 
 export type DeliveryKind = "warehouse" | "courier" | "international" | "unknown";
@@ -147,6 +150,7 @@ export function toOrder(row: Record<string, unknown>): AdminOrder {
       variant: text(i.variant),
       lid: i.addon_lid === true,
       rubber: i.addon_rubber === true,
+      set: null as string | null,
     };
   });
 

@@ -222,6 +222,15 @@ function OrderCard({ order, locale, uk }: { order: AdminOrder; locale: string; u
                   <span>
                     {it.name}
                     {it.variant && <span style={{ color: "var(--console-muted)" }}> · {it.variant}</span>}
+                    {/* Sold inside a set (lib/sets) — packed as these parts. */}
+                    {it.set && (
+                      <span
+                        className="ml-2 inline-block align-middle text-[10.5px] font-medium tracking-[0.12em] uppercase rounded px-1.5 py-[1px]"
+                        style={{ color: "var(--console-accent-ink)", background: "var(--console-accent-soft)", border: "1px solid var(--console-accent-line)" }}
+                      >
+                        {it.set}
+                      </span>
+                    )}
                     {(it.lid || it.rubber) && (
                       <span className="block text-[12px]" style={{ color: "var(--console-muted)" }}>
                         + {[it.lid && "LID 9E418", it.rubber && "FEAR Stabiliser 9E418"].filter(Boolean).join(" + ")}

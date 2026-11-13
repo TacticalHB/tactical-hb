@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import RequestLineEditor from "@/components/admin/RequestLineEditor";
 import { useState } from "react";
-import { updateRequestStatus } from "@/app/actions/wholesale-admin";
+import { updateRequestStatus, deleteWholesaleRequest } from "@/app/actions/wholesale-admin";
 import {
   ADMIN_REQUEST_STATUS,
   REQUEST_STATUSES,
@@ -61,6 +61,30 @@ export default function WholesaleRequestCard({
   };
 
   const [note, setNote] = useState<string | null>(null);
+  /* THE BIN ASKS ONCE (Mario, 13 Nov 2026). First tap arms it, second tap
+     deletes; anything else — or four seconds — disarms it. A paid request
+     cannot be deleted (lib/wholesale-portal deleteRequest). */
+  const [armed, setArmed] = useState(false);
+  const D = {
+    bin: uk ? "Видалити запит" : "Delete request",
+    confirm: uk ? "Видалити назавжди?" : "Delete for good?",
+    paid: uk ? "Оплачений запит не можна видалити — спершу змініть статус." : "A paid request can't be deleted — change its status first.",
+    failed: uk ? "Не вдалося видалити." : "Couldn't delete.",
+  };
+  async function onDelete() {
+    if (!armed) {
+      setArmed(true);
+      setTimeout(() => setArmed(false), 4000);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const res = await deleteWholesaleRequest(r.id);
+    setBusy(false);
+    setArmed(false);
+    if (!res.ok) return setError(res.error === "paid" ? D.paid : D.failed);
+    router.refresh();
+  }
 
   async function onStatus(next: RequestStatus) {
     setBusy(true);
@@ -140,12 +164,36 @@ export default function WholesaleRequestCard({
             className="h-9 px-3 text-[13px] rounded outline-none transition-colors focus:border-[color:var(--console-accent-line)]"
             style={inputStyle}
           >
-            {REQUEST_STATUSES.map((s) => (
+            {/* "Contacted" is no longer offered (Mario, 13 Nov 2026). A request
+                already sitting on it still shows it, so the select reads true
+                until it is moved on. */}
+            {REQUEST_STATUSES.filter((s) => s !== "contacted" || r.status === "contacted").map((s) => (
               <option key={s} value={s}>
                 {ADMIN_REQUEST_STATUS[s][uk ? "uk" : "en"]}
               </option>
             ))}
           </select>
+          {r.status !== "paid" && (
+            <button
+              type="button"
+              onClick={onDelete}
+              onBlur={() => setArmed(false)}
+              disabled={busy}
+              aria-label={`${armed ? D.confirm : D.bin} — ${r.reference}`}
+              title={armed ? D.confirm : D.bin}
+              className="h-9 flex items-center gap-1.5 rounded px-2 text-[12.5px] transition-colors"
+              style={
+                armed
+                  ? { color: "#fff", background: "var(--console-alert)", border: "1px solid var(--console-alert)" }
+                  : { color: "var(--console-muted)", border: "1px solid var(--console-border)", background: "var(--console-panel-2)" }
+              }
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6" />
+              </svg>
+              {armed && <span>{D.confirm}</span>}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setOpen(!open)}

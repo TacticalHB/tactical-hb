@@ -789,6 +789,38 @@ export type StatusChange = {
  * the unmatched list is how the caller surfaces the gap instead of pretending
  * the money did not arrive.
  */
+/**
+ * Delete a request for good (Mario, 13 Nov 2026: "add a bin so we can delete
+ * the requests and not just press cancelled").
+ *
+ * NEVER A PAID ONE. A paid request is a sale: stock has come off the shelf
+ * against it and the money is real. Deleting it would leave that stock
+ * movement pointing at nothing and the sale unaccounted for, so it is refused
+ * — move it off Paid first (which puts the stock back), then delete. The
+ * status is re-checked IN the delete, so a request marked paid in another tab
+ * a second ago is not removed.
+ *
+ * Its lines go with it (on delete cascade, 0030); stock movements keep their
+ * history with the request link set to null (0036).
+ */
+export async function deleteRequest(requestId: string): Promise<"ok" | "paid" | "not_found" | "failed"> {
+  const db = createAdminClient();
+  const { data: before } = await db.from("wholesale_requests").select("status").eq("id", requestId).maybeSingle();
+  if (!before) return "not_found";
+  if (before.status === "paid") return "paid";
+  const { data, error } = await db
+    .from("wholesale_requests")
+    .delete()
+    .eq("id", requestId)
+    .neq("status", "paid")
+    .select("id");
+  if (error) {
+    console.error("[wholesale] request delete failed:", error.code, error.message);
+    return "failed";
+  }
+  return data && data.length ? "ok" : "paid";
+}
+
 export async function setRequestStatus(
   requestId: string,
   status: RequestStatus

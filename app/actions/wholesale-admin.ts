@@ -7,6 +7,7 @@ import {
   setPartnerType,
   setPartnerCurrencyRow,
   setRequestStatus,
+  deleteRequest,
   replaceRequestLines,
 } from "@/lib/wholesale-portal";
 import type { LineAddons } from "@/lib/wholesale-display";
@@ -154,6 +155,8 @@ export async function updateRequestStatus(
   if (!actor) return { ok: false, error: "forbidden" };
 
   if (!isRequestStatus(status)) return { ok: false, error: "bad_status" };
+  // "Contacted" was taken off the menu on 13 Nov 2026 (Mario); nothing new goes onto it.
+  if (status === "contacted") return { ok: false, error: "bad_status" };
   const id = String(requestId ?? "").trim();
   if (!id) return { ok: false, error: "not_found" };
 
@@ -168,6 +171,20 @@ export async function updateRequestStatus(
      rather than a cached one. */
   revalidatePath("/[locale]/admin/stock", "page");
   return { ok: true, applied: res.applied, restored: res.restored, unmatched: res.unmatched };
+}
+
+/** Delete a request for good — the bin on the request card. Never a paid one. */
+export async function deleteWholesaleRequest(requestId: string): Promise<AdminResult> {
+  const actor = await requireAdminActor();
+  if (!actor) return { ok: false, error: "forbidden" };
+  const id = String(requestId ?? "").trim();
+  if (!id) return { ok: false, error: "not_found" };
+  const res = await deleteRequest(id);
+  if (res !== "ok") return { ok: false, error: res };
+  console.info(`[wholesale] ${actor} deleted request ${id}`);
+  revalidatePath("/[locale]/admin/wholesale", "page");
+  revalidatePath("/[locale]/admin/partners", "page");
+  return { ok: true };
 }
 
 /* ---------------------------------------------------------------------------

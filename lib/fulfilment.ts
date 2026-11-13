@@ -73,6 +73,11 @@ export type PaymentRow = {
         Absent on orders placed before it was recorded — the email falls back
         to the product's default image. */
     image?: string | null;
+    /** Sold inside a set (lib/sets): the set's slug and its name in the
+        order's language. The unit prices above are the part's share of the
+        set price. Absent on every line not sold in a set. */
+    set_slug?: string | null;
+    set_name?: string | null;
   }[];
 };
 

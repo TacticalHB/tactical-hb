@@ -1,4 +1,4 @@
-import { products, type Product } from "@/lib/products";
+import { products, ADDON_PRODUCT, type Product } from "@/lib/products";
 import { t } from "@/lib/i18n-text";
 import type { CartLine } from "@/components/CartContext";
 
@@ -110,7 +110,21 @@ export function describeLine(line: CartLine, locale: string): LineDisplay | null
     ? t(locale, { uk: materialSpec.valueUk, en: materialSpec.valueEn, ja: materialSpec.valueJa, ar: materialSpec.valueAr })
     : null;
 
-  const addons = describeAddons(line.options, locale);
+  /* A SET says what is in it where a product would list its add-ons, so the
+     bag, the checkout summary and the slide-over all read e.g.
+     "Project KI 06 · HMD TCT OP · Tactical Killer" (lib/sets). */
+  const addons = product.setItems?.length
+    ? product.setItems
+        .flatMap((it) => [
+          products.find((x) => x.slug === it.slug),
+          // Lid and FEAR are named too, as on the set page (Mario, 13 Nov 2026).
+          ...(it.lid ? [products.find((x) => x.slug === ADDON_PRODUCT.lid)] : []),
+          ...(it.rubber ? [products.find((x) => x.slug === ADDON_PRODUCT.rubber)] : []),
+        ])
+        .filter((x): x is Product => !!x)
+        .map((x) => (uk ? x.nameUk : x.nameEn))
+        .join(" · ")
+    : describeAddons(line.options, locale);
 
   return {
     product,

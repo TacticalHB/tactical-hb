@@ -49,6 +49,9 @@ type CartCtx = {
   subtotalFull: Money;
   /** Null unless the bag holds a bowl, a heat device and a wind cover. */
   bundle: Bundle | null;
+  /** The part of `subtotal` a voucher, gift code or rank discount may come
+      off — everything but sets (lib/sets). Mirrors priceCart. */
+  discountable: Money;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
   /** `showPanel` opens the "Added to Shopping Bag" slide-over instead of the
@@ -176,6 +179,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     })
   );
   const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
+  const setTotal = lines.reduce<Money>((s, l) => {
+    const p = products.find((x) => x.slug === l.slug);
+    return p?.category === "set" ? addMoney(s, scaleMoney(linePrice(l), l.qty)) : s;
+  }, money(0, 0));
+  const discountable = subtractMoney(subtotal, setTotal);
 
   const addToCart = useCallback((
     product: Product,
@@ -306,7 +314,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider
       value={{
-        lines, count, subtotal, subtotalFull, bundle, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
+        lines, count, subtotal, subtotalFull, bundle, discountable, cartOpen, setCartOpen, addToCart, removeLine, changeQty, setLineOptions,
         clearCart, registerCartIcon, bump, lastAdded, addedOpen, setAddedOpen, hydrated,
       }}
     >

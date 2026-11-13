@@ -127,7 +127,8 @@ export async function POST(request: NextRequest) {
        have been spent since it was applied; spent for real only on payment. */
     const gift = await findGiftCode(requestedCode);
     if (gift && !gift.usedAt) {
-      discount = permanentDiscount(gift.percent / 100, priced.subtotal);
+      /* Never off a set's share (lib/sets): `discountable` leaves sets out. */
+      discount = permanentDiscount(gift.percent / 100, priced.discountable);
       voucherCode = gift.code;
     } else {
       console.warn("[invoice] gift code missing or already used, ignored:", requestedCode);
@@ -151,10 +152,13 @@ export async function POST(request: NextRequest) {
         !v.used_at &&
         v.status === "active" &&
         new Date(String(v.expires_at)).getTime() >= Date.now() &&
-        priced.subtotal.eur >= (Number(v.min_order_eur) || 0);
+        priced.discountable.eur >= (Number(v.min_order_eur) || 0);
 
       if (usable) {
-        discount = money(Number(v.amount_eur));
+        /* Capped at the part a voucher may come off — a set's share is never
+           discounted (lib/sets). */
+        const amt = money(Number(v.amount_eur));
+        discount = money(Math.min(amt.eur, priced.discountable.eur), Math.min(amt.uah, priced.discountable.uah));
         voucherCode = String(v.code);
       } else {
         // Not an error: the basket may have changed since it was applied. The
@@ -177,7 +181,7 @@ export async function POST(request: NextRequest) {
   let discountSource: "voucher" | "rank" | "none" = voucherCode ? "voucher" : "none";
   if (user && supabase && !wholesale) {
     const { rank, lifetime } = await rankForUser(supabase, user.id);
-    const perk = permanentDiscount(rank.discountRate, priced.subtotal);
+    const perk = permanentDiscount(rank.discountRate, priced.discountable);
 
     const chosen = chooseDiscount(voucherCode ? discount : null, perk);
     discount = chosen.amount;
@@ -528,6 +532,9 @@ export async function POST(request: NextRequest) {
         // Frozen here so the confirmation email shows the exact variant the
         // customer bought, not whatever the catalogue default is later.
         image: d?.image ?? null,
+        // Sold inside a set (lib/sets) — lets the email show the set by name.
+        set_slug: l.set?.slug ?? null,
+        set_name: l.set?.name ?? null,
       };
     }),
   });

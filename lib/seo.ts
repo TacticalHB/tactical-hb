@@ -122,6 +122,12 @@ const PRODUCT_KIND: Record<string, Record<string, string>> = {
     ja: "シーシャ用マウスピース",
     ar: "مبسم للشيشة",
   },
+  set: {
+    en: "hookah set",
+    uk: "набір для кальяну",
+    ja: "シーシャセット",
+    ar: "مجموعة شيشة",
+  },
   accessory: {
     en: "accessory for Tactical HB heat devices",
     uk: "аксесуар для пристроїв Tactical HB",

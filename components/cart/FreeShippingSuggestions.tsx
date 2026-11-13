@@ -41,7 +41,12 @@ function basketGoods(lines: CartLine[], rankDiscountRate: number): Money {
     })
   );
   const subtotal = bundle ? subtractMoney(full, bundle.saved) : full;
-  return subtractMoney(subtotal, permanentDiscount(rankDiscountRate, subtotal));
+  /* The perk never comes off a set's share (lib/sets). */
+  const setTotal = lines.reduce<Money>((s, l) => {
+    const p = products.find((x) => x.slug === l.slug);
+    return p?.category === "set" ? addMoney(s, scaleMoney(linePrice(l), l.qty)) : s;
+  }, money(0, 0));
+  return subtractMoney(subtotal, permanentDiscount(rankDiscountRate, subtractMoney(subtotal, setTotal)));
 }
 
 export default function FreeShippingSuggestions({

@@ -35,11 +35,12 @@ export default function CartPageClient({
   /** Colonel's permanent share off the products, 0 for every other rank. */
   rankDiscountRate?: number;
 }) {
-  const { lines, subtotal, subtotalFull, bundle, changeQty, removeLine, count, hydrated } = useCart();
+  const { lines, subtotal, subtotalFull, bundle, discountable, changeQty, removeLine, count, hydrated } = useCart();
   /* A voucher is not applied in the basket — it is entered at checkout — so
      there is nothing to weigh the rank perk against here and it always shows.
      Checkout is where the two are compared and only one survives. */
-  const rankPerk = permanentDiscount(rankDiscountRate, subtotal);
+  /* Never off a set's share (lib/sets). */
+  const rankPerk = permanentDiscount(rankDiscountRate, discountable);
   const goods = subtractMoney(subtotal, rankPerk);
   /* Free delivery inside Ukraine from ₴5 000 on /uk (lib/free-shipping). The
      basket shows it so the customer knows before checkout; create-invoice is

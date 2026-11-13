@@ -92,7 +92,8 @@ export function wholesaleCatalogue(): Product[] {
      not exist yet. Retail refuses it in lib/pricing; this is the same refusal
      on the trade side. */
   // Pre-orders are orderable by partners too once priced (KI 06, 4 Oct 2026).
-  return products.filter(isPurchasable);
+  // Sets are retail-only (Mario, 13 Nov 2026): never listed to a partner.
+  return products.filter((p) => isPurchasable(p) && p.category !== "set");
 }
 
 /* ---- Add-ons ---------------------------------------------------------------

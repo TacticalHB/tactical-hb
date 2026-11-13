@@ -242,14 +242,52 @@ export function buildOrderEmail(
     shipping: fmt(shipEur, shipUah),
     total: fmt(p.amount_eur + shipEur, totalUah),
   };
-  const line = (l: PaymentRow["lines"][number]) => fmt(l.unit_eur * l.qty, l.unit_uah * l.qty);
   const date = new Date().toLocaleDateString(t.dateLocale, { day: "numeric", month: "long", year: "numeric" });
 
-  /* ---- Items ---- */
-  const itemRows = p.lines
+  /* ---- Items ----
+     A SET IS ONE ROW (lib/sets). Its parts are stored as separate lines so
+     stock and the fiscal receipt see real products, but the customer bought
+     "Black On Black" and the receipt says so: one row, the set's picture, the
+     parts named underneath, the set price. The parts' shares add up to it. */
+  type Row = { name: string; spec: string; qty: number; eur: number; uah: number; img: ReturnType<typeof lineImage> };
+  const rows: Row[] = [];
+  const setRows = new Map<string, Row>();
+  for (const l of p.lines) {
+    if (l.set_slug) {
+      let r = setRows.get(l.set_slug);
+      const setProduct = products.find((x) => x.slug === l.set_slug);
+      if (!r) {
+        const first = setProduct?.setItems?.[0];
+        const sets = first && first.slug === l.slug ? Math.max(1, Math.round(l.qty / first.qty)) : l.qty;
+        r = {
+          name: l.set_name ?? setProduct?.nameEn ?? l.name,
+          spec: "",
+          qty: sets,
+          eur: 0,
+          uah: 0,
+          img: lineImage(l.set_slug, null, null, siteUrl),
+        };
+        setRows.set(l.set_slug, r);
+        rows.push(r);
+      }
+      r.spec = [r.spec, [l.name, l.colour, l.addons].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+      r.eur += l.unit_eur * l.qty;
+      r.uah += l.unit_uah * l.qty;
+      continue;
+    }
+    rows.push({
+      name: l.name,
+      spec: [l.colour, l.material, l.addons].filter(Boolean).join(" · "),
+      qty: l.qty,
+      eur: l.unit_eur * l.qty,
+      uah: l.unit_uah * l.qty,
+      img: lineImage(l.slug, l.image, l.variant, siteUrl),
+    });
+  }
+  const itemRows = rows
     .map((l) => {
-      const img = lineImage(l.slug, l.image, l.variant, siteUrl);
-      const spec = [l.colour, l.material, l.addons].filter(Boolean).join(" · ");
+      const img = l.img;
+      const spec = l.spec;
       return `
       <tr>
         <td style="padding:16px 0;border-top:1px solid ${LINE}">
@@ -281,7 +319,7 @@ export function buildOrderEmail(
                 <div style="font-size:13px;color:${MUTED};margin-top:4px">${esc(t.qty)} ${l.qty}</div>
               </td>
               <td valign="top" align="right" style="font-family:${FONT};font-size:15px;color:${INK};white-space:nowrap">
-                ${line(l)}
+                ${fmt(Math.round(l.eur * 100) / 100, Math.round(l.uah))}
               </td>
             </tr>
           </table>
@@ -396,7 +434,7 @@ export function buildOrderEmail(
     `${t.orderNo}: ${p.reference}`,
     `${t.orderDate}: ${date}`,
     "",
-    ...p.lines.map((l) => `  ${l.qty} × ${l.name} — ${line(l)}`), // same list as the HTML rows (19 Oct 2026)
+    ...rows.map((l) => `  ${l.qty} × ${l.name} — ${fmt(Math.round(l.eur * 100) / 100, Math.round(l.uah))}`), // same list as the HTML rows (19 Oct 2026)
     "",
     `${t.subtotal}: ${amounts.subtotal}`,
     ...(hasSetup ? [`${t.setup}: −${amounts.setup}`] : []),

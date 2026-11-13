@@ -111,7 +111,8 @@ export function priceTable(locale: string): PriceRow[] {
      The withheld listing is the one exclusion and it excludes itself: it has
      no trade price on any book, so it would be a row of dashes naming a
      product nobody is allowed to know about. */
-  const priced = products.filter((p: Product) => p.incoming !== true);
+  /* Sets are retail-only (13 Nov 2026) and have no trade price on any book. */
+  const priced = products.filter((p: Product) => p.incoming !== true && p.category !== "set");
 
   for (const p of priced) {
     const availability = availabilityOf(p);

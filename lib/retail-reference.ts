@@ -44,6 +44,8 @@ export function retailRows(): RetailRow[] {
   const rows: RetailRow[] = [];
   const sorted = products
     .filter(isPurchasable)
+    /* Sets are retail-only (Mario, 13 Nov 2026) — not on the partners' sheet. */
+    .filter((p) => p.category !== "set")
     .slice()
     .sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category));
   for (const p of sorted) {

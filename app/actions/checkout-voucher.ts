@@ -64,7 +64,8 @@ export async function checkVoucher(rawCode: string, cart: unknown): Promise<Vouc
   if (new Date(String(data.expires_at)).getTime() < Date.now()) return { ok: false, reason: "expired" };
 
   const minOrderEur = Number(data.min_order_eur) || 0;
-  const { subtotal } = priceCart(cart);
+  /* Measured on what a voucher may come off — sets are excluded (lib/sets). */
+  const { discountable: subtotal } = priceCart(cart);
   if (subtotal.eur < minOrderEur) return { ok: false, reason: "min_order", minOrderEur };
 
   return { ok: true, code: String(data.code), amountEur: Number(data.amount_eur) };

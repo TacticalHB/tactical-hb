@@ -4,6 +4,7 @@ import { timerUpcharge, timerWeightG } from "@/lib/windcover-options";
 import { addMoney, money, scaleMoney, subtractMoney, type Money } from "@/lib/currency";
 import { bundleFor, type Bundle, type BundleItem } from "@/lib/bundle";
 import type { Dims } from "@/lib/parcel";
+import { isSet, setAvailable, splitSetPrice, componentWeightG } from "@/lib/sets";
 
 /* ---------------------------------------------------------------------------
    Authoritative cart pricing, computed on the server from the catalogue.
@@ -40,6 +41,9 @@ export type PricedLine = {
       from it. Trusting the raw request here instead would let a caller name a
       variant it never paid for. */
   options: { variant: string | null; lid: boolean; rubber: boolean; timer: boolean };
+  /** Set only: the set this part was sold in (lib/sets). Its unit is the part's
+      share of the set price, not its catalogue price. */
+  set?: { slug: string; name: string };
 };
 
 export type PricedCart = {
@@ -59,6 +63,12 @@ export type PricedCart = {
   subtotalFull: Money;
   /** Null unless a bowl, a device and a cover are all present. */
   bundle: Bundle | null;
+  /**
+   * The part of `subtotal` a gift code, voucher or rank discount may be taken
+   * from — everything except sets, whose price already is the reduction
+   * (Mario, 13 Nov 2026). Equal to `subtotal` when the basket holds no set.
+   */
+  discountable: Money;
 };
 
 /** Quantities a real order can contain. Anything else is a mistake or an attack. */
@@ -91,6 +101,38 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
     const qty = Math.floor(Number(l.qty));
     if (!Number.isFinite(qty) || qty < 1) continue;
     const safeQty = Math.min(qty, MAX_QTY);
+
+    /* A SET BECOMES ITS PARTS HERE (lib/sets). Each part is a normal line —
+       stock, receipt, parcel and basket need nothing new — priced at its
+       share of the set price and tagged with the set. Sold only when every
+       part can be; never part of the full-setup saving below. */
+    if (isSet(product)) {
+      if (!setAvailable(product)) continue;
+      const setName = uk ? product.nameUk : product.nameEn;
+      for (const share of splitSetPrice(product)) {
+        const it = share.item;
+        const isHmd = share.product.category === "hmd";
+        const isCover = share.product.category === "windcover";
+        const partQty = safeQty * it.qty;
+        lines.push({
+          slug: share.product.slug,
+          qty: partQty,
+          name: uk ? share.product.nameUk : share.product.nameEn,
+          unit: share.unit,
+          total: scaleMoney(share.unit, partQty),
+          weightG: componentWeightG(it),
+          dims: share.product.dims,
+          options: {
+            variant: it.variant ?? null,
+            lid: isHmd && !!it.lid,
+            rubber: isHmd && !!it.rubber,
+            timer: isCover && !!it.timer,
+          },
+          set: { slug: product.slug, name: setName },
+        });
+      }
+      continue;
+    }
 
     const variant = l.options?.variant
       ? product.variants?.find((v) => v.name === l.options!.variant)
@@ -148,6 +190,8 @@ export function priceCart(input: unknown, locale = "en"): PricedCart {
      bundle it does not have gets priced as if it had not. */
   const bundle = bundleFor(bundleItems);
   const subtotal = bundle ? subtractMoney(subtotalFull, bundle.saved) : subtotalFull;
+  const setTotal = lines.filter((l) => l.set).reduce<Money>((s, l) => addMoney(s, l.total), money(0, 0));
+  const discountable = subtractMoney(subtotal, setTotal);
 
-  return { lines, subtotal, subtotalFull, bundle };
+  return { lines, subtotal, subtotalFull, bundle, discountable };
 }

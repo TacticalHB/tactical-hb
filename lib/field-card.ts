@@ -77,6 +77,8 @@ const PAIRS: Record<Product["category"], Product["category"][]> = {
      file, and a compatibility note would be the first invented fact. */
   hookah: [],
   mouthpiece: [],
+  /* A set is already complete; it pairs with nothing further. */
+  set: [],
 };
 
 const CATEGORY_NAME: Record<Product["category"], Text> = {
@@ -86,6 +88,7 @@ const CATEGORY_NAME: Record<Product["category"], Text> = {
   accessory: { en: "accessories", uk: "аксесуари", ja: "アクセサリー", ar: "الإكسسوارات" },
   hookah: { en: "hookahs", uk: "кальяни", ja: "シーシャ", ar: "الشيشة" },
   mouthpiece: { en: "mouthpieces", uk: "мундштуки", ja: "マウスピース", ar: "المباسم" },
+  set: { en: "sets", uk: "набори", ja: "セット", ar: "المجموعات" },
 };
 
 export function buildFieldCard({ product, locale, material, windcover }: FieldCardInput): FieldRow[] {

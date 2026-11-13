@@ -471,16 +471,29 @@ export async function recordCartSnapshot(input: {
   // an add-on flag on a product that cannot take one is gone before it is
   // stored. Only what survives is persisted, and only its shape — no prices.
   const priced = priceCart(input.lines, input.locale);
-  const clean = priced.lines.map((l) => ({
-    slug: l.slug,
-    qty: l.qty,
-    options: {
-      ...(l.options.variant ? { variant: l.options.variant } : {}),
-      ...(l.options.lid ? { lid: true } : {}),
-      ...(l.options.rubber ? { rubber: true } : {}),
-      ...(l.options.timer ? { timer: true } : {}),
-    },
-  }));
+  /* A SET COMES BACK AS THE SET (lib/sets). priceCart hands it over as its
+     parts; saved like that, the restored bag would hold three products at
+     their full prices instead of the set. Its first part's quantity says how
+     many sets there were. */
+  const seenSets = new Set<string>();
+  const clean = priced.lines.flatMap((l) => {
+    if (l.set) {
+      if (seenSets.has(l.set.slug)) return [];
+      seenSets.add(l.set.slug);
+      const first = products.find((x) => x.slug === l.set!.slug)?.setItems?.[0];
+      return [{ slug: l.set.slug, qty: Math.max(1, Math.round(l.qty / (first?.qty || 1))), options: {} }];
+    }
+    return [{
+      slug: l.slug,
+      qty: l.qty,
+      options: {
+        ...(l.options.variant ? { variant: l.options.variant } : {}),
+        ...(l.options.lid ? { lid: true } : {}),
+        ...(l.options.rubber ? { rubber: true } : {}),
+        ...(l.options.timer ? { timer: true } : {}),
+      },
+    }];
+  });
 
   if (!clean.length) {
     await cancelFlow(admin, cartJobKey(email), "cart_emptied");
@@ -1093,7 +1106,36 @@ export function productRowsFor(lines: CartSnapshotLine[], locale: Locale): Email
   const priced = priceCart(lines, locale);
   const currency = currencyForLocale(locale);
 
-  return priced.lines.slice(0, MAX_PRODUCT_ROWS).map((l) => {
+  /* A set is one row — its own name, picture and price — not its parts. */
+  type Item = { set: EmailProductRow } | { line: (typeof priced.lines)[number] };
+  const seen = new Set<string>();
+  const items: Item[] = [];
+  for (const l of priced.lines) {
+    if (!l.set) {
+      items.push({ line: l });
+      continue;
+    }
+    if (seen.has(l.set.slug)) continue;
+    seen.add(l.set.slug);
+    const setSlug = l.set.slug;
+    const sp = products.find((x) => x.slug === setSlug);
+    const parts = priced.lines.filter((x) => x.set?.slug === setSlug);
+    const total = parts.reduce((m, x) => ({ eur: m.eur + x.total.eur, uah: m.uah + x.total.uah }), { eur: 0, uah: 0 });
+    const n = Math.max(1, Math.round(l.qty / (sp?.setItems?.[0]?.qty || 1)));
+    const image = emailProductImage(setSlug, null);
+    items.push({
+      set: {
+        imageUrl: image ? `${SITE}${image}` : undefined,
+        name: l.set.name,
+        variant: n > 1 ? `×${n}` : undefined,
+        priceLabel: formatMoney({ eur: Math.round(total.eur * 100) / 100, uah: Math.round(total.uah) }, currency),
+      },
+    });
+  }
+
+  return items.slice(0, MAX_PRODUCT_ROWS).map((item) => {
+    if ("set" in item) return item.set;
+    const l = item.line;
     const described = describeLine(
       {
         slug: l.slug,

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import SetContents from "./SetContents";
+import { setFullPrice } from "@/lib/sets";
 import { colourName } from "@/lib/colour-names";
 import Link from "next/link";
 import { t, pickList } from "@/lib/i18n-text";
@@ -464,6 +466,8 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
           ? t(locale, { uk: "Кальян", en: "Hookah", ja: "シーシャ", ar: "شيشة" })
           : product.category === "mouthpiece"
             ? t(locale, { uk: "Мундштук", en: "Mouthpiece", ja: "マウスピース", ar: "مبسم" })
+            : product.category === "set"
+              ? t(locale, { uk: "Набір", en: "Set", ja: "セット", ar: "مجموعة" })
             : t(locale, { uk: "Аксесуар", en: "Accessory", ja: "アクセサリー", ar: "إكسسوار" });
 
   const L = {
@@ -625,7 +629,16 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
             ) : (
               <>
                 <p className="text-lg font-medium mt-4">
-                  <Price money={price} locale={locale} />
+                  {/* A set: its parts' price crossed out, then its own — never
+                      a percentage (lib/sets). */}
+                  {product.setItems?.length ? (
+                    <span className="flex items-baseline gap-3 flex-wrap">
+                      <Price money={setFullPrice(product)} locale={locale} className="line-through font-normal text-[16px] text-[#707072]" />
+                      <Price money={price} locale={locale} />
+                    </span>
+                  ) : (
+                    <Price money={price} locale={locale} />
+                  )}
                 </p>
                 {/* The ship date of a pre-order, under its price (Mario, 4 Oct
                     2026). UTC so server and browser print the same day; Arabic
@@ -805,6 +818,7 @@ export default function ProductPDP({ product, locale }: { product: Product; loca
               {pdp?.styleCode && <li className="list-disc ml-5">{L.style}: {pdp.styleCode}</li>}
             </ul>
             {product.slug === "incoming-hookah" && <CaseContents locale={locale} />}
+            {product.setItems?.length ? <SetContents product={product} locale={locale} /> : null}
 
             {/* ---- Accessories for this device ----------------------------
                 THE LID AND THE RING ARE PRODUCTS AND NOTHING LINKED TO THEM.

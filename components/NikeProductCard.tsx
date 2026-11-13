@@ -10,6 +10,7 @@ import { Product, availabilityOf, availabilityText, isPurchasable } from "@/lib/
 import HeartButton from "./HeartButton";
 import Price from "./Price";
 import { money } from "@/lib/currency";
+import { setFullPrice } from "@/lib/sets";
 
 export default function NikeProductCard({ product, locale }: { product: Product; locale: string }) {
   const status = availabilityOf(product);
@@ -32,6 +33,9 @@ export default function NikeProductCard({ product, locale }: { product: Product;
     ? money(variants[idx].price ?? product.price, variants[idx].priceUah ?? product.priceUah)
     : money(product.price, product.priceUah);
   const href = `/${locale}/products/${product.slug}`;
+  /* A SET shows what its parts cost on their own, crossed out, before its
+     own price — never a percentage (lib/sets). */
+  const fullPrice = product.setItems?.length ? setFullPrice(product) : null;
 
   return (
     <div onMouseLeave={() => setIdx(0)} className="relative">
@@ -133,7 +137,14 @@ export default function NikeProductCard({ product, locale }: { product: Product;
               of the three always renders. */}
           <div className="text-[15px] font-medium mt-1.5" style={{ color: "#111111" }}>
             {status === "available" ? (
-              <Price money={price} locale={locale} />
+              fullPrice ? (
+                <span className="flex items-baseline gap-2 flex-wrap">
+                  <Price money={fullPrice} locale={locale} className="line-through font-normal text-[14px] text-[#707072]" />
+                  <Price money={price} locale={locale} />
+                </span>
+              ) : (
+                <Price money={price} locale={locale} />
+              )
             ) : product.price > 0 ? (
               <span className="flex items-baseline gap-2 flex-wrap">
                 <Price money={price} locale={locale} />

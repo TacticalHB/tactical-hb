@@ -11,8 +11,9 @@ import NikeProductCard from "./NikeProductCard";
 
 /* "hookah" and "mouthpiece" got their own tabs on 17 Oct 2026 (Mario):
    Project KI 06 under Hubble-bubble, the Tactical Mouthpiece under Mouthpieces. */
-type CatKey = "all" | "hookah" | "hmd" | "bowl" | "windcover" | "mouthpiece" | "accessory";
-const CAT_KEYS: CatKey[] = ["all", "hookah", "hmd", "bowl", "windcover", "mouthpiece", "accessory"];
+/* "set" added 13 Nov 2026 (Mario) — Black On Black, the first fixed set. */
+type CatKey = "all" | "set" | "hookah" | "hmd" | "bowl" | "windcover" | "mouthpiece" | "accessory";
+const CAT_KEYS: CatKey[] = ["all", "set", "hookah", "hmd", "bowl", "windcover", "mouthpiece", "accessory"];
 
 /* ---------------------------------------------------------------------------
    ?category=hmd opens the catalogue on that filter.
@@ -102,6 +103,7 @@ export default function ProductsBrowser({ locale }: { locale: string }) {
       hmd: t(locale, { uk: "Пристрої для нагріву", en: "Heat Devices", ja: "ヒートデバイス", ar: "أجهزة الحرارة" }),
       bowl: t(locale, { uk: "Чаші", en: "Bowls", ja: "ボウル", ar: "الرؤوس" }),
       windcover: t(locale, { uk: "Ковпаки", en: "Windcovers", ja: "ウインドカバー", ar: "أغطية الرياح" }),
+      set: t(locale, { uk: "Набори", en: "Sets", ja: "セット", ar: "المجموعات" }),
       hookah: t(locale, { uk: "Кальяни", en: "Hubble-bubble", ja: "シーシャ", ar: "الشيشة" }),
       mouthpiece: t(locale, { uk: "Мундштуки", en: "Mouthpieces", ja: "マウスピース", ar: "المباسم" }),
       accessory: t(locale, { uk: "Аксесуари", en: "Accessories", ja: "アクセサリー", ar: "الإكسسوارات" }),

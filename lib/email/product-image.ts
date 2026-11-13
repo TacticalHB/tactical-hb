@@ -52,6 +52,7 @@ const PREBUILT = new Set([
   "/images/ftp-hero-v2.png",
   "/images/windcover-detonator-1.jpg",
   "/images/windcover-kh-1.jpg",
+  "/images/sets/black-on-black-1.jpg",
 ]);
 
 const thumbPath = (source: string) =>

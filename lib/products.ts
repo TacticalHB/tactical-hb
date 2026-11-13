@@ -86,7 +86,13 @@ export type Product = {
       under the description (Tactical Mouthpiece, Mario 17 Oct 2026: "finish
       has to be in tech specs as usual"). */
   specsOffCard?: boolean;
-  category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah" | "mouthpiece";
+  category: "hmd" | "bowl" | "accessory" | "windcover" | "hookah" | "mouthpiece" | "set";
+  /**
+   * What a set is made of (category "set" only) — see lib/sets. The set's own
+   * price/priceUah is what it sells for; lib/pricing turns it into these
+   * products, each carrying a share of that price.
+   */
+  setItems?: { slug: string; qty: number; variant?: string; lid?: boolean; rubber?: boolean; timer?: boolean }[];
   featured: boolean;
   image: string;
   photos?: string[];
@@ -212,7 +218,21 @@ export type AddonKey = keyof typeof ADDON_PRODUCT;
  */
 export function isPurchasable(p: Product): boolean {
   if (p.preorder && !(p.weightG > 0 && p.dims.l > 0 && p.dims.w > 0 && p.dims.h > 0)) return false;
-  return !p.incoming && !p.comingSoon && !p.soldOut;
+  if (p.incoming || p.comingSoon || p.soldOut) return false;
+  /* A SET IS ONLY AS BUYABLE AS ITS PARTS (lib/sets). One sold-out bowl and
+     the set cannot ship, so every surface that asks this — card, page,
+     search, priceCart — treats it as unavailable without knowing why. */
+  if (p.setItems?.length) {
+    return p.setItems.every((it) => {
+      const c = products.find((x) => x.slug === it.slug);
+      if (!c || c.setItems?.length || !isPurchasable(c)) return false;
+      if (it.variant && !c.variants?.some((v) => v.name === it.variant)) return false;
+      if (it.lid && !addonAvailable("lid")) return false;
+      if (it.rubber && !addonAvailable("rubber")) return false;
+      return true;
+    });
+  }
+  return true;
 }
 
 /**
@@ -229,6 +249,8 @@ export function availabilityOf(p: Product): Availability {
   if (p.incoming) return "withheld";
   if (p.comingSoon) return "coming_soon";
   if (p.soldOut) return "sold_out";
+  // A set whose parts cannot all be sold reads as sold out (see isPurchasable).
+  if (p.setItems?.length && !isPurchasable(p)) return "sold_out";
   if (p.preorder) return "preorder";
   return "available";
 }
@@ -1536,6 +1558,66 @@ export const products: Product[] = [
       ],
     },
   },
+  /* ---- Black On Black — the first set (Mario, 13 Nov 2026) ------------------
+     Project KI 06, HMD TCT OP Black with Lid 9E418 and FEAR 9E418 fitted, and
+     the Tactical Killer bowl. The parts add up to €319.40 / ₴13 290; the set
+     sells for €287.50 / ₴11 961 (Mario: hryvnia exact, euro rounded to
+     287.50). The page crosses out the parts' price and never states a
+     percentage. lib/sets explains how it is priced, stocked and receipted.
+     Retail only. The weight and carton are the parts' own, taken from their
+     lines at checkout; the figures here are never shown. */
+  {
+    id: "black-on-black",
+    slug: "black-on-black",
+    nameUk: "Black On Black",
+    nameEn: "Black On Black",
+    taglineUk: "Повний чорний сет.",
+    taglineEn: "The full black setup.",
+    taglineJa: "オールブラックのフルセット。",
+    taglineAr: "الطقم الأسود الكامل.",
+    descriptionUk:
+      "Project KI 06 разом із HMD TCT OP у чорному кольорі — з Lid 9E418 і FEAR Stabiliser 9E418 — та чашею Tactical Killer. Усе чорне, одним замовленням.",
+    descriptionEn:
+      "Project KI 06 together with the HMD TCT OP in Black — fitted with Lid 9E418 and FEAR Stabiliser 9E418 — and the Tactical Killer bowl. All black, in one order.",
+    descriptionJa:
+      "Project KI 06 に、Lid 9E418 と FEAR Stabiliser 9E418 を装着したブラックの HMD TCT OP、そして Tactical Killer ボウルを組み合わせたセット。オールブラックをひとつのご注文で。",
+    descriptionAr:
+      "Project KI 06 مع HMD TCT OP باللون الأسود — مزوّد بـ Lid 9E418 وFEAR Stabiliser 9E418 — ورأس Tactical Killer. كل شيء بالأسود، في طلب واحد.",
+    price: 287.5,
+    priceUah: 11961,
+    currency: "EUR",
+    weightG: 2980,
+    dims: { l: 300, w: 300, h: 150 },
+    hideDimensions: true,
+    hideWeight: true,
+    specsOffCard: true,
+    category: "set",
+    featured: false,
+    image: "/images/sets/black-on-black-1.jpg",
+    gridImage: "/images/sets/black-on-black-1.jpg",
+    setItems: [
+      { slug: "incoming-hookah", qty: 1 },
+      { slug: "hmd-tct-op", qty: 1, variant: "Black", lid: true, rubber: true },
+      { slug: "bowl-killer", qty: 1 },
+    ],
+    tags: ["set", "bundle", "black on black", "kit", "набір", "сет"],
+    pdp: {
+      photos: [
+        "/images/sets/black-on-black-1.jpg",
+        "/images/sets/black-on-black-2.jpg",
+        "/images/hookah/hookah-studio.jpg",
+      ],
+      shortEn:
+        "Project KI 06 together with the HMD TCT OP in Black — fitted with Lid 9E418 and FEAR Stabiliser 9E418 — and the Tactical Killer bowl. All black, in one order.",
+      shortUk:
+        "Project KI 06 разом із HMD TCT OP у чорному кольорі — з Lid 9E418 і FEAR Stabiliser 9E418 — та чашею Tactical Killer. Усе чорне, одним замовленням.",
+      shortJa:
+        "Project KI 06 に、Lid 9E418 と FEAR Stabiliser 9E418 を装着したブラックの HMD TCT OP、そして Tactical Killer ボウルを組み合わせたセット。オールブラックをひとつのご注文で。",
+      shortAr:
+        "Project KI 06 مع HMD TCT OP باللون الأسود — مزوّد بـ Lid 9E418 وFEAR Stabiliser 9E418 — ورأس Tactical Killer. كل شيء بالأسود، في طلب واحد.",
+    },
+  },
+
   /* ---- The hookah, withheld ------------------------------------------------
 
      A LISTING WITH NO PRODUCT IN IT, and that is the point. Packaging, a QR on

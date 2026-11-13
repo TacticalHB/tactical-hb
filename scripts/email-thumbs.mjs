@@ -45,6 +45,7 @@ const SOURCES = [
   "/images/ftp-hero-v2.png",
   "/images/windcover-detonator-1.jpg",
   "/images/windcover-kh-1.jpg",
+  "/images/sets/black-on-black-1.jpg",
 ];
 
 mkdirSync(outDir, { recursive: true });

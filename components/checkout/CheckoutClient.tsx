@@ -107,7 +107,7 @@ export default function CheckoutClient({
 }) {
   const uk = locale === "uk";
   const router = useRouter();
-  const { lines, subtotal, clearCart, hydrated } = useCart();
+  const { lines, subtotal, discountable, clearCart, hydrated } = useCart();
   const { user, profile } = useAuth();
 
   const [step, setStep] = useState<Step>("identification");
@@ -181,13 +181,15 @@ export default function CheckoutClient({
      through the SAME chooseDiscount the invoice route uses — so the figure on
      screen is arrived at by the same rule that will charge the card, rather
      than by a second implementation that could drift from it. */
-  const perk = permanentDiscount(rankDiscountRate, subtotal);
+  /* Sets are outside every discount (lib/sets): the perk, a gift code and a
+     voucher all come off `discountable`, never off the set's share. */
+  const perk = permanentDiscount(rankDiscountRate, discountable);
   /* A gift code is a percentage of the goods (before delivery), worked out with
      the same helper the invoice uses; a loyalty voucher is its euro amount. */
   const voucherMoney = voucher
     ? voucher.percent
-      ? permanentDiscount(voucher.percent / 100, subtotal)
-      : money(voucher.amountEur)
+      ? permanentDiscount(voucher.percent / 100, discountable)
+      : money(Math.min(voucher.amountEur, discountable.eur), Math.min(money(voucher.amountEur).uah, discountable.uah))
     : null;
   const chosen = chooseDiscount(voucherMoney, perk);
   const discount = chosen.amount;
